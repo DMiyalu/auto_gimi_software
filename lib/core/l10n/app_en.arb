@@ -1,0 +1,23 @@
+{
+  "@@locale": "en",
+  "appTitle": "Garage Manager",
+  "login": "Sign in",
+  "email": "Email",
+  "password": "Password",
+  "logout": "Sign out",
+  "dashboard": "Dashboard",
+  "clients": "Clients",
+  "vehicles": "Vehicles",
+  "catalog": "Catalog",
+  "prestations": "Services",
+  "scanClient": "Scan client",
+  "scanToken": "Scan drink token",
+  "alerts": "Maintenance alerts",
+  "settings": "Settings",
+  "language": "Language",
+  "french": "French",
+  "english": "English",
+  "todayPrestations": "Today's services",
+  "todayRevenue": "Today's revenue",
+  "comingSoon": "Coming soon"
+}

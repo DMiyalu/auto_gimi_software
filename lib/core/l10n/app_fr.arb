@@ -1,0 +1,23 @@
+{
+  "@@locale": "fr",
+  "appTitle": "Gestion Garage",
+  "login": "Connexion",
+  "email": "E-mail",
+  "password": "Mot de passe",
+  "logout": "Déconnexion",
+  "dashboard": "Tableau de bord",
+  "clients": "Clients",
+  "vehicles": "Véhicules",
+  "catalog": "Catalogue",
+  "prestations": "Prestations",
+  "scanClient": "Scanner client",
+  "scanToken": "Scanner jeton boisson",
+  "alerts": "Alertes entretien",
+  "settings": "Paramètres",
+  "language": "Langue",
+  "french": "Français",
+  "english": "Anglais",
+  "todayPrestations": "Prestations du jour",
+  "todayRevenue": "Chiffre d'affaires du jour",
+  "comingSoon": "Bientôt disponible"
+}
