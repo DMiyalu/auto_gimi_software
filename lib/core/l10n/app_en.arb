@@ -61,5 +61,12 @@
         "type": "int"
       }
     }
-  }
+  },
+  "clientName": "Client name",
+  "whatsappNumber": "WhatsApp number",
+  "addClient": "Add client",
+  "saveClient": "Save",
+  "noClients": "No clients yet",
+  "noClientsHint": "Add your first client with their name and WhatsApp number.",
+  "clientCreated": "Client saved"
 }

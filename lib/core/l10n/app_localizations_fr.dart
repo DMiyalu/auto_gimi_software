@@ -157,4 +157,26 @@ class AppLocalizationsFr extends AppLocalizations {
   String resendCodeIn(int seconds) {
     return 'Renvoyer dans ${seconds}s';
   }
+
+  @override
+  String get clientName => 'Nom du client';
+
+  @override
+  String get whatsappNumber => 'Numéro WhatsApp';
+
+  @override
+  String get addClient => 'Ajouter un client';
+
+  @override
+  String get saveClient => 'Enregistrer';
+
+  @override
+  String get noClients => 'Aucun client';
+
+  @override
+  String get noClientsHint =>
+      'Ajoutez votre premier client avec son nom et son numéro WhatsApp.';
+
+  @override
+  String get clientCreated => 'Client enregistré';
 }

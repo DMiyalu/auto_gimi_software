@@ -8,6 +8,8 @@ import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/phone_verification_screen.dart';
 import '../../features/auth/presentation/screens/signup_screen.dart';
 import '../../features/establishment/presentation/providers/establishment_providers.dart';
+import '../../features/clients/presentation/screens/client_form_screen.dart';
+import '../../features/clients/presentation/screens/clients_list_screen.dart';
 import '../../features/reporting/presentation/screens/dashboard_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
 import '../../features/shell/presentation/screens/app_shell_screen.dart';
@@ -77,10 +79,11 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: Routes.clients,
-            builder: (context, __) => PlaceholderScreen(
-              title: AppLocalizations.of(context).clients,
-              icon: Icons.people_outline,
-            ),
+            builder: (_, __) => const ClientsListScreen(),
+          ),
+          GoRoute(
+            path: Routes.clientNew,
+            builder: (_, __) => const ClientFormScreen(),
           ),
           GoRoute(
             path: Routes.catalogue,

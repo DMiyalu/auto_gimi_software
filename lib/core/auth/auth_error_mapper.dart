@@ -6,6 +6,12 @@ abstract final class AuthErrorMapper {
     if (error is FirebaseAuthException) {
       return _firebaseMessage(error);
     }
+    if (error is StateError) {
+      return error.message;
+    }
+    if (error is ArgumentError) {
+      return error.message?.toString() ?? error.toString();
+    }
     return error.toString();
   }
 

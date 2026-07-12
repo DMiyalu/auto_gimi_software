@@ -385,6 +385,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Resend in {seconds}s'**
   String resendCodeIn(int seconds);
+
+  /// No description provided for @clientName.
+  ///
+  /// In en, this message translates to:
+  /// **'Client name'**
+  String get clientName;
+
+  /// No description provided for @whatsappNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'WhatsApp number'**
+  String get whatsappNumber;
+
+  /// No description provided for @addClient.
+  ///
+  /// In en, this message translates to:
+  /// **'Add client'**
+  String get addClient;
+
+  /// No description provided for @saveClient.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get saveClient;
+
+  /// No description provided for @noClients.
+  ///
+  /// In en, this message translates to:
+  /// **'No clients yet'**
+  String get noClients;
+
+  /// No description provided for @noClientsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your first client with their name and WhatsApp number.'**
+  String get noClientsHint;
+
+  /// No description provided for @clientCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Client saved'**
+  String get clientCreated;
 }
 
 class _AppLocalizationsDelegate
