@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../../domain/models/sign_up_request.dart';
 import '../../domain/repositories/auth_repository.dart';
 
 /// Auth désactivée tant que Firebase n'est pas configuré (`flutterfire configure`).
@@ -12,9 +13,16 @@ class DisabledAuthRepository implements AuthRepository {
 
   @override
   Future<void> signIn({
-    required String email,
+    required String phone,
     required String password,
   }) async {
+    throw StateError(
+      'Firebase non configuré. Exécutez: flutterfire configure',
+    );
+  }
+
+  @override
+  Future<void> signUp(SignUpRequest request) async {
     throw StateError(
       'Firebase non configuré. Exécutez: flutterfire configure',
     );

@@ -1,7 +1,8 @@
 {
   "@@locale": "en",
-  "appTitle": "Garage Manager",
+  "appTitle": "Konnect One",
   "login": "Sign in",
+  "loginSubtitle": "Manage your sales and services in one place.",
   "email": "Email",
   "password": "Password",
   "logout": "Sign out",
@@ -19,5 +20,46 @@
   "english": "English",
   "todayPrestations": "Today's services",
   "todayRevenue": "Today's revenue",
-  "comingSoon": "Coming soon"
+  "comingSoon": "Coming soon",
+  "signUpTitle": "Create your establishment",
+  "signUpSubtitle": "Sign up and start managing your business.",
+  "businessCategory": "Business category",
+  "establishmentName": "Establishment name",
+  "managerName": "Manager / owner full name",
+  "phoneNumber": "Phone number",
+  "phoneNumberInvalid": "Invalid phone number",
+  "createAccount": "Create my account",
+  "noAccountYet": "Don't have an account? Sign up",
+  "alreadyHaveAccount": "Already have an account? Sign in",
+  "confirmPassword": "Confirm password",
+  "passwordsDoNotMatch": "Passwords do not match",
+  "passwordTooShort": "At least 6 characters",
+  "categoryRestaurant": "Restaurant",
+  "categoryGarageAuto": "Auto repair shop",
+  "categoryPressing": "Dry cleaning",
+  "categorySanitation": "Sanitation service",
+  "categoryGym": "Gym",
+  "categoryPharmacy": "Pharmacy",
+  "verificationTitle": "Phone verification",
+  "verificationSubtitle": "A 6-digit code was sent to {phone}.",
+  "@verificationSubtitle": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "verificationCode": "Verification code",
+  "verificationCodeInvalid": "6-digit code required",
+  "verificationCodeSent": "Code sent via SMS",
+  "verifyCode": "Verify",
+  "resendCode": "Resend code",
+  "resendCodeIn": "Resend in {seconds}s",
+  "@resendCodeIn": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  }
 }

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../core/auth/phone_auth_mapper.dart';
 import '../../../../core/l10n/app_localizations.dart';
+import '../../../../core/routing/routes.dart';
 import '../providers/auth_providers.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -13,13 +16,13 @@ class LoginScreen extends ConsumerStatefulWidget {
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _phoneController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -27,7 +30,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     await ref.read(authControllerProvider.notifier).signIn(
-          _emailController.text,
+          _phoneController.text,
           _passwordController.text,
         );
   }
@@ -59,7 +62,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Icon(
-                      Icons.car_repair,
+                      Icons.storefront_outlined,
                       size: 64,
                       color: Theme.of(context).colorScheme.primary,
                     ),
@@ -69,17 +72,38 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.headlineMedium,
                     ),
+                    const SizedBox(height: 8),
+                    Text(
+                      l10n.loginSubtitle,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                    ),
                     const SizedBox(height: 32),
                     TextFormField(
-                      controller: _emailController,
-                      decoration: InputDecoration(labelText: l10n.email),
-                      keyboardType: TextInputType.emailAddress,
-                      autofillHints: const [AutofillHints.email],
-                      validator: (v) =>
-                          v == null || v.isEmpty ? l10n.email : null,
+                      key: const Key('login_phone_field'),
+                      controller: _phoneController,
+                      decoration: InputDecoration(
+                        labelText: l10n.phoneNumber,
+                        prefixIcon: const Icon(Icons.phone_outlined),
+                      ),
+                      keyboardType: TextInputType.phone,
+                      autofillHints: const [AutofillHints.telephoneNumber],
+                      validator: (v) {
+                        if (v == null || v.trim().isEmpty) {
+                          return l10n.phoneNumber;
+                        }
+                        if (PhoneAuthMapper.normalize(v).length < 8) {
+                          return l10n.phoneNumberInvalid;
+                        }
+                        return null;
+                      },
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
+                      key: const Key('login_password_field'),
                       controller: _passwordController,
                       decoration: InputDecoration(
                         labelText: l10n.password,
@@ -102,6 +126,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     const SizedBox(height: 24),
                     FilledButton(
+                      key: const Key('login_submit_button'),
                       onPressed: authState.isLoading ? null : _submit,
                       child: authState.isLoading
                           ? const SizedBox(
@@ -110,6 +135,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : Text(l10n.login),
+                    ),
+                    const SizedBox(height: 16),
+                    TextButton(
+                      onPressed: authState.isLoading
+                          ? null
+                          : () => context.go(Routes.signUp),
+                      child: Text(l10n.noAccountYet),
                     ),
                   ],
                 ),

@@ -1,6 +1,8 @@
 /// Routes nommées de l'application.
 abstract final class Routes {
   static const login = '/login';
+  static const signUp = '/signup';
+  static const verifyPhone = '/verify-phone';
   static const dashboard = '/';
   static const clients = '/clients';
   static const clientNew = '/clients/new';

@@ -9,10 +9,13 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appTitle => 'Garage Manager';
+  String get appTitle => 'Konnect One';
 
   @override
   String get login => 'Sign in';
+
+  @override
+  String get loginSubtitle => 'Manage your sales and services in one place.';
 
   @override
   String get email => 'Email';
@@ -67,4 +70,89 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get comingSoon => 'Coming soon';
+
+  @override
+  String get signUpTitle => 'Create your establishment';
+
+  @override
+  String get signUpSubtitle => 'Sign up and start managing your business.';
+
+  @override
+  String get businessCategory => 'Business category';
+
+  @override
+  String get establishmentName => 'Establishment name';
+
+  @override
+  String get managerName => 'Manager / owner full name';
+
+  @override
+  String get phoneNumber => 'Phone number';
+
+  @override
+  String get phoneNumberInvalid => 'Invalid phone number';
+
+  @override
+  String get createAccount => 'Create my account';
+
+  @override
+  String get noAccountYet => 'Don\'t have an account? Sign up';
+
+  @override
+  String get alreadyHaveAccount => 'Already have an account? Sign in';
+
+  @override
+  String get confirmPassword => 'Confirm password';
+
+  @override
+  String get passwordsDoNotMatch => 'Passwords do not match';
+
+  @override
+  String get passwordTooShort => 'At least 6 characters';
+
+  @override
+  String get categoryRestaurant => 'Restaurant';
+
+  @override
+  String get categoryGarageAuto => 'Auto repair shop';
+
+  @override
+  String get categoryPressing => 'Dry cleaning';
+
+  @override
+  String get categorySanitation => 'Sanitation service';
+
+  @override
+  String get categoryGym => 'Gym';
+
+  @override
+  String get categoryPharmacy => 'Pharmacy';
+
+  @override
+  String get verificationTitle => 'Phone verification';
+
+  @override
+  String verificationSubtitle(String phone) {
+    return 'A 6-digit code was sent to $phone.';
+  }
+
+  @override
+  String get verificationCode => 'Verification code';
+
+  @override
+  String get verificationCodeInvalid => '6-digit code required';
+
+  @override
+  String get verificationCodeSent => 'Code sent via SMS';
+
+  @override
+  String get verifyCode => 'Verify';
+
+  @override
+  String get resendCode => 'Resend code';
+
+  @override
+  String resendCodeIn(int seconds) {
+    return 'Resend in ${seconds}s';
+  }
 }

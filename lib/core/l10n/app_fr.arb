@@ -1,7 +1,8 @@
 {
   "@@locale": "fr",
-  "appTitle": "Gestion Garage",
+  "appTitle": "Konnect One",
   "login": "Connexion",
+  "loginSubtitle": "Gérez vos ventes et prestations en un seul endroit.",
   "email": "E-mail",
   "password": "Mot de passe",
   "logout": "Déconnexion",
@@ -19,5 +20,46 @@
   "english": "Anglais",
   "todayPrestations": "Prestations du jour",
   "todayRevenue": "Chiffre d'affaires du jour",
-  "comingSoon": "Bientôt disponible"
+  "comingSoon": "Bientôt disponible",
+  "signUpTitle": "Créer votre établissement",
+  "signUpSubtitle": "Inscrivez-vous et commencez à gérer votre activité.",
+  "businessCategory": "Catégorie d'activité",
+  "establishmentName": "Nom de l'établissement",
+  "managerName": "Nom complet du gestionnaire / propriétaire",
+  "phoneNumber": "Numéro de téléphone",
+  "phoneNumberInvalid": "Numéro de téléphone invalide",
+  "createAccount": "Créer mon compte",
+  "noAccountYet": "Pas encore de compte ? S'inscrire",
+  "alreadyHaveAccount": "Déjà un compte ? Se connecter",
+  "confirmPassword": "Confirmer le mot de passe",
+  "passwordsDoNotMatch": "Les mots de passe ne correspondent pas",
+  "passwordTooShort": "6 caractères minimum",
+  "categoryRestaurant": "Restaurant",
+  "categoryGarageAuto": "Garage Auto-Mobile",
+  "categoryPressing": "Pressing",
+  "categorySanitation": "Service Assainissement",
+  "categoryGym": "Salle de sport",
+  "categoryPharmacy": "Pharmacie",
+  "verificationTitle": "Vérification du numéro",
+  "verificationSubtitle": "Un code à 6 chiffres a été envoyé au {phone}.",
+  "@verificationSubtitle": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "verificationCode": "Code de vérification",
+  "verificationCodeInvalid": "Code à 6 chiffres requis",
+  "verificationCodeSent": "Code envoyé par SMS",
+  "verifyCode": "Vérifier",
+  "resendCode": "Renvoyer le code",
+  "resendCodeIn": "Renvoyer dans {seconds}s",
+  "@resendCodeIn": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  }
 }

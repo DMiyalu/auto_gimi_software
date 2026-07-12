@@ -1,12 +1,19 @@
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../../../../core/auth/phone_auth_mapper.dart';
+import '../../../establishment/domain/repositories/establishment_repository.dart';
+import '../../domain/models/sign_up_request.dart';
 import '../../domain/repositories/auth_repository.dart';
 
 class FirebaseAuthRepository implements AuthRepository {
-  FirebaseAuthRepository({FirebaseAuth? auth})
-      : _auth = auth ?? FirebaseAuth.instance;
+  FirebaseAuthRepository({
+    FirebaseAuth? auth,
+    required EstablishmentRepository establishmentRepository,
+  })  : _auth = auth ?? FirebaseAuth.instance,
+        _establishmentRepository = establishmentRepository;
 
   final FirebaseAuth _auth;
+  final EstablishmentRepository _establishmentRepository;
 
   @override
   Stream<User?> authStateChanges() => _auth.authStateChanges();
@@ -16,13 +23,36 @@ class FirebaseAuthRepository implements AuthRepository {
 
   @override
   Future<void> signIn({
-    required String email,
+    required String phone,
     required String password,
   }) async {
     await _auth.signInWithEmailAndPassword(
-      email: email.trim(),
+      email: PhoneAuthMapper.toAuthEmail(phone),
       password: password,
     );
+  }
+
+  @override
+  Future<void> signUp(SignUpRequest request) async {
+    final credential = await _auth.createUserWithEmailAndPassword(
+      email: PhoneAuthMapper.toAuthEmail(request.phone),
+      password: request.password,
+    );
+
+    final user = credential.user;
+    if (user == null) {
+      throw StateError('Compte créé mais utilisateur introuvable.');
+    }
+
+    try {
+      await _establishmentRepository.createEstablishmentForOwner(
+        ownerId: user.uid,
+        request: request,
+      );
+    } catch (error) {
+      await user.delete();
+      rethrow;
+    }
   }
 
   @override

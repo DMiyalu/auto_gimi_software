@@ -1,0 +1,63 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function userEstablishmentId() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.establishmentId;
+    }
+
+    function isEstablishmentMember(establishmentId) {
+      return isSignedIn()
+        && userEstablishmentId() == establishmentId
+        && exists(/databases/$(database)/documents/establishments/$(establishmentId)/members/$(request.auth.uid));
+    }
+
+    function isEstablishmentOwner(establishmentId) {
+      return isEstablishmentMember(establishmentId)
+        && get(/databases/$(database)/documents/establishments/$(establishmentId)/members/$(request.auth.uid)).data.role == 'owner';
+    }
+
+    match /users/{userId} {
+      allow read: if isSignedIn() && request.auth.uid == userId;
+      allow create: if isSignedIn()
+        && request.auth.uid == userId
+        && request.resource.data.establishmentId is string
+        && request.resource.data.role == 'owner'
+        && request.resource.data.phoneVerified == false;
+      allow update: if isSignedIn() && request.auth.uid == userId;
+    }
+
+    match /phone_verifications/{userId} {
+      allow read, write: if false;
+    }
+
+    match /establishments/{establishmentId} {
+      allow read: if isEstablishmentMember(establishmentId);
+      allow create: if isSignedIn()
+        && request.resource.data.ownerId == request.auth.uid
+        && request.resource.data.phoneVerified == false
+        && request.resource.data.category is string;
+      allow update: if isEstablishmentOwner(establishmentId);
+
+      match /members/{memberId} {
+        allow read: if isEstablishmentMember(establishmentId);
+        allow create: if isSignedIn() && request.auth.uid == memberId;
+        allow update, delete: if isEstablishmentOwner(establishmentId);
+      }
+
+      // Données métier — chaque établissement est isolé
+      match /{collection}/{docId} {
+        allow read, write: if isEstablishmentMember(establishmentId)
+          && collection in [
+            'clients', 'vehicules', 'categories', 'services',
+            'prestations', 'ventes', 'produits', 'jetons',
+            'alertes', 'notifications'
+          ];
+      }
+    }
+  }
+}

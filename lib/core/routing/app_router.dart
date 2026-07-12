@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../features/auth/presentation/providers/auth_providers.dart';
+import '../../features/auth/presentation/providers/auth_state_provider.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
+import '../../features/auth/presentation/screens/phone_verification_screen.dart';
+import '../../features/auth/presentation/screens/signup_screen.dart';
+import '../../features/establishment/presentation/providers/establishment_providers.dart';
 import '../../features/reporting/presentation/screens/dashboard_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
 import '../../features/shell/presentation/screens/app_shell_screen.dart';
@@ -14,24 +17,53 @@ import 'routes.dart';
 final routerProvider = Provider<GoRouter>((ref) {
   final refresh = ValueNotifier<int>(0);
   ref.listen(authStateProvider, (_, __) => refresh.value++);
+  ref.listen(userProfileProvider, (_, __) => refresh.value++);
 
   return GoRouter(
     initialLocation: Routes.dashboard,
     refreshListenable: refresh,
     redirect: (context, state) {
       final auth = ref.read(authStateProvider);
-      final isLoggedIn = auth.valueOrNull != null;
-      final loggingIn = state.matchedLocation == Routes.login;
+      final profile = ref.read(userProfileProvider);
+      final location = state.matchedLocation;
 
       if (auth.isLoading) return null;
-      if (!isLoggedIn && !loggingIn) return Routes.login;
-      if (isLoggedIn && loggingIn) return Routes.dashboard;
+
+      final isLoggedIn = auth.valueOrNull != null;
+      final onLogin = location == Routes.login;
+      final onSignUp = location == Routes.signUp;
+      final onVerify = location == Routes.verifyPhone;
+      final onAuthScreen = onLogin || onSignUp || onVerify;
+
+      if (!isLoggedIn) {
+        if (onLogin || onSignUp) return null;
+        return Routes.login;
+      }
+
+      if (profile.isLoading) return null;
+
+      final phoneVerified = profile.valueOrNull?.phoneVerified ?? false;
+
+      if (!phoneVerified) {
+        if (onVerify) return null;
+        return Routes.verifyPhone;
+      }
+
+      if (onAuthScreen) return Routes.dashboard;
       return null;
     },
     routes: [
       GoRoute(
         path: Routes.login,
         builder: (_, __) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: Routes.signUp,
+        builder: (_, __) => const SignUpScreen(),
+      ),
+      GoRoute(
+        path: Routes.verifyPhone,
+        builder: (_, __) => const PhoneVerificationScreen(),
       ),
       ShellRoute(
         builder: (context, state, child) => AppShellScreen(child: child),

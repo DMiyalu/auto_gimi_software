@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/l10n/app_localizations.dart';
 import '../../../../core/routing/routes.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
+import '../../../establishment/presentation/providers/establishment_providers.dart';
 
 class AppShellScreen extends ConsumerWidget {
   const AppShellScreen({super.key, required this.child});
@@ -15,6 +16,7 @@ class AppShellScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final location = GoRouterState.of(context).uri.path;
+    final establishment = ref.watch(currentEstablishmentProvider).valueOrNull;
 
     return Scaffold(
       appBar: AppBar(
@@ -36,12 +38,22 @@ class AppShellScreen extends ConsumerWidget {
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.primaryContainer,
               ),
-              child: Align(
-                alignment: Alignment.bottomLeft,
-                child: Text(
-                  l10n.appTitle,
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text(
+                    establishment?.name ?? l10n.appTitle,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  if (establishment != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      establishment.category.label(l10n),
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
+                ],
               ),
             ),
             _NavTile(

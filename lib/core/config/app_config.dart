@@ -1,8 +1,5 @@
-/// Constantes applicatives et configuration garage (single-tenant MVP).
+/// Constantes applicatives (multi-tenant SaaS).
 abstract final class AppConfig {
-  /// Identifiant Firestore du garage — remplacer après `flutterfire configure`.
-  static const String garageId = 'default-garage';
-
   /// 1 service consommé = 1 point de fidélité.
   static const int pointsPerService = 1;
 

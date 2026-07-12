@@ -16,7 +16,7 @@ class GarageApp extends ConsumerWidget {
     final locale = ref.watch(localeProvider);
 
     return MaterialApp.router(
-      title: 'Garage Manager',
+      title: 'Konnect One',
       theme: AppTheme.light(),
       locale: locale,
       localizationsDelegates: const [

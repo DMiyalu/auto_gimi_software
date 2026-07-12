@@ -101,7 +101,7 @@ abstract class AppLocalizations {
   /// No description provided for @appTitle.
   ///
   /// In en, this message translates to:
-  /// **'Garage Manager'**
+  /// **'Konnect One'**
   String get appTitle;
 
   /// No description provided for @login.
@@ -109,6 +109,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sign in'**
   String get login;
+
+  /// No description provided for @loginSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage your sales and services in one place.'**
+  String get loginSubtitle;
 
   /// No description provided for @email.
   ///
@@ -217,6 +223,168 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Coming soon'**
   String get comingSoon;
+
+  /// No description provided for @signUpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your establishment'**
+  String get signUpTitle;
+
+  /// No description provided for @signUpSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign up and start managing your business.'**
+  String get signUpSubtitle;
+
+  /// No description provided for @businessCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Business category'**
+  String get businessCategory;
+
+  /// No description provided for @establishmentName.
+  ///
+  /// In en, this message translates to:
+  /// **'Establishment name'**
+  String get establishmentName;
+
+  /// No description provided for @managerName.
+  ///
+  /// In en, this message translates to:
+  /// **'Manager / owner full name'**
+  String get managerName;
+
+  /// No description provided for @phoneNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone number'**
+  String get phoneNumber;
+
+  /// No description provided for @phoneNumberInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid phone number'**
+  String get phoneNumberInvalid;
+
+  /// No description provided for @createAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Create my account'**
+  String get createAccount;
+
+  /// No description provided for @noAccountYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t have an account? Sign up'**
+  String get noAccountYet;
+
+  /// No description provided for @alreadyHaveAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Already have an account? Sign in'**
+  String get alreadyHaveAccount;
+
+  /// No description provided for @confirmPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm password'**
+  String get confirmPassword;
+
+  /// No description provided for @passwordsDoNotMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get passwordsDoNotMatch;
+
+  /// No description provided for @passwordTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'At least 6 characters'**
+  String get passwordTooShort;
+
+  /// No description provided for @categoryRestaurant.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurant'**
+  String get categoryRestaurant;
+
+  /// No description provided for @categoryGarageAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto repair shop'**
+  String get categoryGarageAuto;
+
+  /// No description provided for @categoryPressing.
+  ///
+  /// In en, this message translates to:
+  /// **'Dry cleaning'**
+  String get categoryPressing;
+
+  /// No description provided for @categorySanitation.
+  ///
+  /// In en, this message translates to:
+  /// **'Sanitation service'**
+  String get categorySanitation;
+
+  /// No description provided for @categoryGym.
+  ///
+  /// In en, this message translates to:
+  /// **'Gym'**
+  String get categoryGym;
+
+  /// No description provided for @categoryPharmacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Pharmacy'**
+  String get categoryPharmacy;
+
+  /// No description provided for @verificationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone verification'**
+  String get verificationTitle;
+
+  /// No description provided for @verificationSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A 6-digit code was sent to {phone}.'**
+  String verificationSubtitle(String phone);
+
+  /// No description provided for @verificationCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification code'**
+  String get verificationCode;
+
+  /// No description provided for @verificationCodeInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'6-digit code required'**
+  String get verificationCodeInvalid;
+
+  /// No description provided for @verificationCodeSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Code sent via SMS'**
+  String get verificationCodeSent;
+
+  /// No description provided for @verifyCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify'**
+  String get verifyCode;
+
+  /// No description provided for @resendCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend code'**
+  String get resendCode;
+
+  /// No description provided for @resendCodeIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend in {seconds}s'**
+  String resendCodeIn(int seconds);
 }
 
 class _AppLocalizationsDelegate

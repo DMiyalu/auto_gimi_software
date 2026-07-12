@@ -9,10 +9,14 @@ class AppLocalizationsFr extends AppLocalizations {
   AppLocalizationsFr([String locale = 'fr']) : super(locale);
 
   @override
-  String get appTitle => 'Gestion Garage';
+  String get appTitle => 'Konnect One';
 
   @override
   String get login => 'Connexion';
+
+  @override
+  String get loginSubtitle =>
+      'Gérez vos ventes et prestations en un seul endroit.';
 
   @override
   String get email => 'E-mail';
@@ -67,4 +71,90 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get comingSoon => 'Bientôt disponible';
+
+  @override
+  String get signUpTitle => 'Créer votre établissement';
+
+  @override
+  String get signUpSubtitle =>
+      'Inscrivez-vous et commencez à gérer votre activité.';
+
+  @override
+  String get businessCategory => 'Catégorie d\'activité';
+
+  @override
+  String get establishmentName => 'Nom de l\'établissement';
+
+  @override
+  String get managerName => 'Nom complet du gestionnaire / propriétaire';
+
+  @override
+  String get phoneNumber => 'Numéro de téléphone';
+
+  @override
+  String get phoneNumberInvalid => 'Numéro de téléphone invalide';
+
+  @override
+  String get createAccount => 'Créer mon compte';
+
+  @override
+  String get noAccountYet => 'Pas encore de compte ? S\'inscrire';
+
+  @override
+  String get alreadyHaveAccount => 'Déjà un compte ? Se connecter';
+
+  @override
+  String get confirmPassword => 'Confirmer le mot de passe';
+
+  @override
+  String get passwordsDoNotMatch => 'Les mots de passe ne correspondent pas';
+
+  @override
+  String get passwordTooShort => '6 caractères minimum';
+
+  @override
+  String get categoryRestaurant => 'Restaurant';
+
+  @override
+  String get categoryGarageAuto => 'Garage Auto-Mobile';
+
+  @override
+  String get categoryPressing => 'Pressing';
+
+  @override
+  String get categorySanitation => 'Service Assainissement';
+
+  @override
+  String get categoryGym => 'Salle de sport';
+
+  @override
+  String get categoryPharmacy => 'Pharmacie';
+
+  @override
+  String get verificationTitle => 'Vérification du numéro';
+
+  @override
+  String verificationSubtitle(String phone) {
+    return 'Un code à 6 chiffres a été envoyé au $phone.';
+  }
+
+  @override
+  String get verificationCode => 'Code de vérification';
+
+  @override
+  String get verificationCodeInvalid => 'Code à 6 chiffres requis';
+
+  @override
+  String get verificationCodeSent => 'Code envoyé par SMS';
+
+  @override
+  String get verifyCode => 'Vérifier';
+
+  @override
+  String get resendCode => 'Renvoyer le code';
+
+  @override
+  String resendCodeIn(int seconds) {
+    return 'Renvoyer dans ${seconds}s';
+  }
 }
