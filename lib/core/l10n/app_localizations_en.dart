@@ -39,7 +39,120 @@ class AppLocalizationsEn extends AppLocalizations {
   String get catalog => 'Catalog';
 
   @override
-  String get prestations => 'Services';
+  String get products => 'Products';
+
+  @override
+  String get services => 'Services';
+
+  @override
+  String get productCategories => 'Categories';
+
+  @override
+  String get serviceCategories => 'Categories';
+
+  @override
+  String get productCategory => 'Category';
+
+  @override
+  String get serviceCategory => 'Category';
+
+  @override
+  String get categoryName => 'Category name';
+
+  @override
+  String get productName => 'Product name';
+
+  @override
+  String get serviceName => 'Service name';
+
+  @override
+  String get price => 'Price';
+
+  @override
+  String get priceInvalid => 'Invalid price';
+
+  @override
+  String get maintenanceInterval => 'Maintenance interval (days)';
+
+  @override
+  String get maintenanceIntervalHint => '0 = no maintenance alert';
+
+  @override
+  String intervalDays(int days) {
+    return '$days d';
+  }
+
+  @override
+  String get addProduct => 'Add product';
+
+  @override
+  String get addService => 'Add service';
+
+  @override
+  String get addProductCategory => 'Add category';
+
+  @override
+  String get addServiceCategory => 'Add category';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get noProducts => 'No products yet';
+
+  @override
+  String get noProductsHint =>
+      'Create a category first, then add your products.';
+
+  @override
+  String get noServices => 'No services yet';
+
+  @override
+  String get noServicesHint =>
+      'Create a category first, then add your services.';
+
+  @override
+  String get noProductCategories => 'No categories yet';
+
+  @override
+  String get noProductCategoriesHint =>
+      'Create a category to group your products.';
+
+  @override
+  String get noServiceCategories => 'No categories yet';
+
+  @override
+  String get noServiceCategoriesHint =>
+      'Create a category to group your services.';
+
+  @override
+  String productsCount(int count) {
+    return '$count product(s)';
+  }
+
+  @override
+  String servicesCount(int count) {
+    return '$count service(s)';
+  }
+
+  @override
+  String get productCreated => 'Product saved';
+
+  @override
+  String get serviceCreated => 'Service saved';
+
+  @override
+  String get productCategoryCreated => 'Category saved';
+
+  @override
+  String get serviceCategoryCreated => 'Category saved';
+
+  @override
+  String get createCategoryFirst =>
+      'Create a category first before adding an item.';
+
+  @override
+  String get prestations => 'Jobs';
 
   @override
   String get scanClient => 'Scan client';

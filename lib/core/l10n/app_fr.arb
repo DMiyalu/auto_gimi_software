@@ -10,6 +10,61 @@
   "clients": "Clients",
   "vehicles": "Véhicules",
   "catalog": "Catalogue",
+  "products": "Produits",
+  "services": "Services",
+  "productCategories": "Catégories",
+  "serviceCategories": "Catégories",
+  "productCategory": "Catégorie",
+  "serviceCategory": "Catégorie",
+  "categoryName": "Nom de la catégorie",
+  "productName": "Nom du produit",
+  "serviceName": "Nom du service",
+  "price": "Prix",
+  "priceInvalid": "Prix invalide",
+  "maintenanceInterval": "Intervalle d'entretien (jours)",
+  "maintenanceIntervalHint": "0 = pas d'alerte d'entretien",
+  "intervalDays": "{days} j",
+  "@intervalDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "addProduct": "Ajouter un produit",
+  "addService": "Ajouter un service",
+  "addProductCategory": "Ajouter une catégorie",
+  "addServiceCategory": "Ajouter une catégorie",
+  "save": "Enregistrer",
+  "noProducts": "Aucun produit",
+  "noProductsHint": "Ajoutez d'abord une catégorie, puis vos produits.",
+  "noServices": "Aucun service",
+  "noServicesHint": "Ajoutez d'abord une catégorie, puis vos services.",
+  "noProductCategories": "Aucune catégorie",
+  "noProductCategoriesHint": "Créez une catégorie pour regrouper vos produits.",
+  "noServiceCategories": "Aucune catégorie",
+  "noServiceCategoriesHint": "Créez une catégorie pour regrouper vos services.",
+  "productsCount": "{count} produit(s)",
+  "@productsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "servicesCount": "{count} service(s)",
+  "@servicesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productCreated": "Produit enregistré",
+  "serviceCreated": "Service enregistré",
+  "productCategoryCreated": "Catégorie enregistrée",
+  "serviceCategoryCreated": "Catégorie enregistrée",
+  "createCategoryFirst": "Créez d'abord une catégorie avant d'ajouter un élément.",
   "prestations": "Prestations",
   "scanClient": "Scanner client",
   "scanToken": "Scanner jeton boisson",

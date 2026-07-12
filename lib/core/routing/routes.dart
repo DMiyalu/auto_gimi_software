@@ -9,7 +9,12 @@ abstract final class Routes {
   static const clientDetail = '/clients/:id';
   static const clientQr = '/clients/:id/qr';
   static const vehiculeDetail = '/vehicules/:id';
-  static const catalogue = '/catalogue';
+  static const services = '/services';
+  static const serviceNew = '/services/new';
+  static const serviceCategoryNew = '/services/categories/new';
+  static const produits = '/produits';
+  static const produitNew = '/produits/new';
+  static const productCategoryNew = '/produits/categories/new';
   static const prestationScan = '/prestations/scan';
   static const prestationDetail = '/prestations/:id';
   static const prestationJeton = '/prestations/:id/jeton';

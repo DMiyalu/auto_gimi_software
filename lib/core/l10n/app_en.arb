@@ -10,7 +10,62 @@
   "clients": "Clients",
   "vehicles": "Vehicles",
   "catalog": "Catalog",
-  "prestations": "Services",
+  "products": "Products",
+  "services": "Services",
+  "productCategories": "Categories",
+  "serviceCategories": "Categories",
+  "productCategory": "Category",
+  "serviceCategory": "Category",
+  "categoryName": "Category name",
+  "productName": "Product name",
+  "serviceName": "Service name",
+  "price": "Price",
+  "priceInvalid": "Invalid price",
+  "maintenanceInterval": "Maintenance interval (days)",
+  "maintenanceIntervalHint": "0 = no maintenance alert",
+  "intervalDays": "{days} d",
+  "@intervalDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "addProduct": "Add product",
+  "addService": "Add service",
+  "addProductCategory": "Add category",
+  "addServiceCategory": "Add category",
+  "save": "Save",
+  "noProducts": "No products yet",
+  "noProductsHint": "Create a category first, then add your products.",
+  "noServices": "No services yet",
+  "noServicesHint": "Create a category first, then add your services.",
+  "noProductCategories": "No categories yet",
+  "noProductCategoriesHint": "Create a category to group your products.",
+  "noServiceCategories": "No categories yet",
+  "noServiceCategoriesHint": "Create a category to group your services.",
+  "productsCount": "{count} product(s)",
+  "@productsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "servicesCount": "{count} service(s)",
+  "@servicesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productCreated": "Product saved",
+  "serviceCreated": "Service saved",
+  "productCategoryCreated": "Category saved",
+  "serviceCategoryCreated": "Category saved",
+  "createCategoryFirst": "Create a category first before adding an item.",
+  "prestations": "Jobs",
   "scanClient": "Scan client",
   "scanToken": "Scan drink token",
   "alerts": "Maintenance alerts",

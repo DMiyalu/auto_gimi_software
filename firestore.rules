@@ -85,7 +85,8 @@ service cloud.firestore {
         allow read, write: if isEstablishmentMember(establishmentId)
           && collection in [
             'clients', 'vehicules', 'categories', 'services',
-            'prestations', 'ventes', 'produits', 'jetons',
+            'product_categories', 'produits',
+            'prestations', 'ventes', 'jetons',
             'alertes', 'notifications'
           ];
       }

@@ -158,10 +158,214 @@ abstract class AppLocalizations {
   /// **'Catalog'**
   String get catalog;
 
-  /// No description provided for @prestations.
+  /// No description provided for @products.
+  ///
+  /// In en, this message translates to:
+  /// **'Products'**
+  String get products;
+
+  /// No description provided for @services.
   ///
   /// In en, this message translates to:
   /// **'Services'**
+  String get services;
+
+  /// No description provided for @productCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Categories'**
+  String get productCategories;
+
+  /// No description provided for @serviceCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Categories'**
+  String get serviceCategories;
+
+  /// No description provided for @productCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get productCategory;
+
+  /// No description provided for @serviceCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get serviceCategory;
+
+  /// No description provided for @categoryName.
+  ///
+  /// In en, this message translates to:
+  /// **'Category name'**
+  String get categoryName;
+
+  /// No description provided for @productName.
+  ///
+  /// In en, this message translates to:
+  /// **'Product name'**
+  String get productName;
+
+  /// No description provided for @serviceName.
+  ///
+  /// In en, this message translates to:
+  /// **'Service name'**
+  String get serviceName;
+
+  /// No description provided for @price.
+  ///
+  /// In en, this message translates to:
+  /// **'Price'**
+  String get price;
+
+  /// No description provided for @priceInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid price'**
+  String get priceInvalid;
+
+  /// No description provided for @maintenanceInterval.
+  ///
+  /// In en, this message translates to:
+  /// **'Maintenance interval (days)'**
+  String get maintenanceInterval;
+
+  /// No description provided for @maintenanceIntervalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'0 = no maintenance alert'**
+  String get maintenanceIntervalHint;
+
+  /// No description provided for @intervalDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} d'**
+  String intervalDays(int days);
+
+  /// No description provided for @addProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Add product'**
+  String get addProduct;
+
+  /// No description provided for @addService.
+  ///
+  /// In en, this message translates to:
+  /// **'Add service'**
+  String get addService;
+
+  /// No description provided for @addProductCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Add category'**
+  String get addProductCategory;
+
+  /// No description provided for @addServiceCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Add category'**
+  String get addServiceCategory;
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// No description provided for @noProducts.
+  ///
+  /// In en, this message translates to:
+  /// **'No products yet'**
+  String get noProducts;
+
+  /// No description provided for @noProductsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a category first, then add your products.'**
+  String get noProductsHint;
+
+  /// No description provided for @noServices.
+  ///
+  /// In en, this message translates to:
+  /// **'No services yet'**
+  String get noServices;
+
+  /// No description provided for @noServicesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a category first, then add your services.'**
+  String get noServicesHint;
+
+  /// No description provided for @noProductCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'No categories yet'**
+  String get noProductCategories;
+
+  /// No description provided for @noProductCategoriesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a category to group your products.'**
+  String get noProductCategoriesHint;
+
+  /// No description provided for @noServiceCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'No categories yet'**
+  String get noServiceCategories;
+
+  /// No description provided for @noServiceCategoriesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a category to group your services.'**
+  String get noServiceCategoriesHint;
+
+  /// No description provided for @productsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} product(s)'**
+  String productsCount(int count);
+
+  /// No description provided for @servicesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} service(s)'**
+  String servicesCount(int count);
+
+  /// No description provided for @productCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Product saved'**
+  String get productCreated;
+
+  /// No description provided for @serviceCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Service saved'**
+  String get serviceCreated;
+
+  /// No description provided for @productCategoryCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Category saved'**
+  String get productCategoryCreated;
+
+  /// No description provided for @serviceCategoryCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Category saved'**
+  String get serviceCategoryCreated;
+
+  /// No description provided for @createCategoryFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a category first before adding an item.'**
+  String get createCategoryFirst;
+
+  /// No description provided for @prestations.
+  ///
+  /// In en, this message translates to:
+  /// **'Jobs'**
   String get prestations;
 
   /// No description provided for @scanClient.

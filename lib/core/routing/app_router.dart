@@ -10,7 +10,13 @@ import '../../features/auth/presentation/screens/signup_screen.dart';
 import '../../features/establishment/presentation/providers/establishment_providers.dart';
 import '../../features/clients/presentation/screens/client_form_screen.dart';
 import '../../features/clients/presentation/screens/clients_list_screen.dart';
+import '../../features/produits/presentation/screens/product_category_form_screen.dart';
+import '../../features/produits/presentation/screens/produit_form_screen.dart';
+import '../../features/produits/presentation/screens/produits_screen.dart';
 import '../../features/reporting/presentation/screens/dashboard_screen.dart';
+import '../../features/services/presentation/screens/service_category_form_screen.dart';
+import '../../features/services/presentation/screens/service_form_screen.dart';
+import '../../features/services/presentation/screens/services_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
 import '../../features/shell/presentation/screens/app_shell_screen.dart';
 import '../l10n/app_localizations.dart';
@@ -86,11 +92,28 @@ final routerProvider = Provider<GoRouter>((ref) {
             builder: (_, __) => const ClientFormScreen(),
           ),
           GoRoute(
-            path: Routes.catalogue,
-            builder: (context, __) => PlaceholderScreen(
-              title: AppLocalizations.of(context).catalog,
-              icon: Icons.menu_book_outlined,
-            ),
+            path: Routes.services,
+            builder: (_, __) => const ServicesScreen(),
+          ),
+          GoRoute(
+            path: Routes.serviceNew,
+            builder: (_, __) => const ServiceFormScreen(),
+          ),
+          GoRoute(
+            path: Routes.serviceCategoryNew,
+            builder: (_, __) => const ServiceCategoryFormScreen(),
+          ),
+          GoRoute(
+            path: Routes.produits,
+            builder: (_, __) => const ProduitsScreen(),
+          ),
+          GoRoute(
+            path: Routes.produitNew,
+            builder: (_, __) => const ProduitFormScreen(),
+          ),
+          GoRoute(
+            path: Routes.productCategoryNew,
+            builder: (_, __) => const ProductCategoryFormScreen(),
           ),
           GoRoute(
             path: Routes.prestationScan,

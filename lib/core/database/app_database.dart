@@ -12,6 +12,8 @@ import 'tables/jetons_table.dart';
 import 'tables/ligne_prestations_table.dart';
 import 'tables/notification_queue_table.dart';
 import 'tables/prestations_table.dart';
+import 'tables/product_categories_table.dart';
+import 'tables/produits_table.dart';
 import 'tables/sync_state_table.dart';
 import 'tables/vehicules_table.dart';
 
@@ -23,6 +25,8 @@ part 'app_database.g.dart';
     Vehicules,
     Categories,
     CatalogServices,
+    ProductCategories,
+    Produits,
     Prestations,
     LignePrestations,
     Jetons,
@@ -37,12 +41,18 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onCreate: (m) async {
           await m.createAll();
+        },
+        onUpgrade: (m, from, to) async {
+          if (from < 2) {
+            await m.createTable(productCategories);
+            await m.createTable(produits);
+          }
         },
       );
 }

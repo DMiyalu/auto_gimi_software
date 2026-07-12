@@ -69,10 +69,16 @@ class AppShellScreen extends ConsumerWidget {
               onTap: () => _go(context, Routes.clients),
             ),
             _NavTile(
-              icon: Icons.menu_book_outlined,
-              label: l10n.catalog,
-              selected: location == Routes.catalogue,
-              onTap: () => _go(context, Routes.catalogue),
+              icon: Icons.inventory_2_outlined,
+              label: l10n.products,
+              selected: location.startsWith('/produits'),
+              onTap: () => _go(context, Routes.produits),
+            ),
+            _NavTile(
+              icon: Icons.build_outlined,
+              label: l10n.services,
+              selected: location.startsWith('/services'),
+              onTap: () => _go(context, Routes.services),
             ),
             _NavTile(
               icon: Icons.qr_code_scanner,
