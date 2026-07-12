@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/l10n/app_localizations.dart';
 import '../../../establishment/presentation/providers/establishment_providers.dart';
+import '../providers/signup_otp_pending_provider.dart';
 import '../providers/verification_providers.dart';
 
 class PhoneVerificationScreen extends ConsumerStatefulWidget {
@@ -90,6 +91,8 @@ class _PhoneVerificationScreenState
     final profile = ref.watch(userProfileProvider).valueOrNull;
     final phone = profile?.phone ?? '';
 
+    final otpPending = ref.watch(signupOtpPendingProvider);
+
     ref.listen(verificationControllerProvider, (_, next) {
       if (next.hasError && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -98,7 +101,10 @@ class _PhoneVerificationScreenState
       }
     });
 
-    if (profile != null && !profile.phoneVerified && !_initialCodeSent) {
+    if (otpPending &&
+        profile != null &&
+        !profile.phoneVerified &&
+        !_initialCodeSent) {
       _initialCodeSent = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _sendCode(showFeedback: false);

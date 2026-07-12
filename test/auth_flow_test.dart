@@ -7,6 +7,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:auto_mobile_software/core/database/app_database.dart';
 import 'package:auto_mobile_software/features/auth/presentation/providers/auth_state_provider.dart';
 import 'package:auto_mobile_software/features/auth/presentation/providers/phone_verification_repository_provider.dart';
+import 'package:auto_mobile_software/features/auth/presentation/providers/signup_otp_pending_provider.dart';
 import 'package:auto_mobile_software/features/establishment/domain/models/user_profile.dart';
 import 'package:auto_mobile_software/features/establishment/presentation/providers/establishment_repository_provider.dart';
 import 'helpers/fake_phone_verification_repository.dart';
@@ -44,7 +45,7 @@ void main() {
         createdAt: DateTime(2026, 1, 1),
       );
 
-  List<Override> testOverrides() => [
+  List<Override> testOverrides({bool otpPending = false}) => [
         authRepositoryProvider.overrideWithValue(authRepository),
         establishmentRepositoryProvider.overrideWithValue(
           establishmentRepository,
@@ -52,6 +53,7 @@ void main() {
         phoneVerificationRepositoryProvider.overrideWithValue(
           phoneVerificationRepository,
         ),
+        signupOtpPendingProvider.overrideWith((ref) => otpPending),
       ];
 
   setUp(() {
@@ -80,24 +82,43 @@ void main() {
     expect(find.text("Don't have an account? Sign up"), findsOneWidget);
   });
 
-  testWidgets('redirige vers la vérification si le téléphone n’est pas confirmé',
-      (tester) async {
+  testWidgets('login sans OTP : accès direct au tableau de bord', (tester) async {
     authRepository.setUser(user);
     establishmentRepository.setProfile(unverifiedProfile());
 
-    database = await pumpTestApp(tester, overrides: testOverrides());
+    database = await pumpTestApp(
+      tester,
+      overrides: testOverrides(otpPending: false),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Dashboard'), findsOneWidget);
+    expect(find.text('Phone verification'), findsNothing);
+  });
+
+  testWidgets('signup : redirige vers la vérification OTP', (tester) async {
+    authRepository.setUser(user);
+    establishmentRepository.setProfile(unverifiedProfile());
+
+    database = await pumpTestApp(
+      tester,
+      overrides: testOverrides(otpPending: true),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('Phone verification'), findsOneWidget);
     expect(find.byKey(const Key('verify_code_field')), findsOneWidget);
   });
 
-  testWidgets('flux e2e: connexion -> vérification -> tableau de bord',
+  testWidgets('flux e2e: signup -> vérification OTP -> tableau de bord',
       (tester) async {
     authRepository.setUser(user);
     establishmentRepository.setProfile(unverifiedProfile());
 
-    database = await pumpTestApp(tester, overrides: testOverrides());
+    database = await pumpTestApp(
+      tester,
+      overrides: testOverrides(otpPending: true),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('Phone verification'), findsOneWidget);

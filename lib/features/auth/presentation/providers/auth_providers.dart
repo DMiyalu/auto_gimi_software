@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/domain/business_category.dart';
 import '../../domain/models/sign_up_request.dart';
 import 'auth_state_provider.dart';
+import 'signup_otp_pending_provider.dart';
 
 final authControllerProvider =
     AsyncNotifierProvider<AuthController, void>(AuthController.new);
@@ -12,6 +13,7 @@ class AuthController extends AsyncNotifier<void> {
   Future<void> build() async {}
 
   Future<void> signIn(String phone, String password) async {
+    ref.read(signupOtpPendingProvider.notifier).state = false;
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       await ref.read(authRepositoryProvider).signIn(
@@ -39,10 +41,12 @@ class AuthController extends AsyncNotifier<void> {
               password: password,
             ),
           );
+      ref.read(signupOtpPendingProvider.notifier).state = true;
     });
   }
 
   Future<void> signOut() async {
+    ref.read(signupOtpPendingProvider.notifier).state = false;
     await ref.read(authRepositoryProvider).signOut();
   }
 }

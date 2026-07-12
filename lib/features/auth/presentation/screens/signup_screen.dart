@@ -94,7 +94,8 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                     ),
                     const SizedBox(height: 32),
                     DropdownButtonFormField<BusinessCategory>(
-                      initialValue: _category,
+                      value: _category,
+                      isExpanded: true,
                       decoration: InputDecoration(
                         labelText: l10n.businessCategory,
                       ),
@@ -102,16 +103,28 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                           .map(
                             (category) => DropdownMenuItem(
                               value: category,
-                              child: Row(
-                                children: [
-                                  Icon(category.icon, size: 20),
-                                  const SizedBox(width: 12),
-                                  Expanded(child: Text(category.label(l10n))),
-                                ],
-                              ),
+                              child: Text(category.label(l10n)),
                             ),
                           )
                           .toList(),
+                      selectedItemBuilder: (context) {
+                        return BusinessCategory.values
+                            .map(
+                              (category) => Row(
+                                children: [
+                                  Icon(category.icon, size: 20),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      category.label(l10n),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                            .toList();
+                      },
                       onChanged: authState.isLoading
                           ? null
                           : (value) {

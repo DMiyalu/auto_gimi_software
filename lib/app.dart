@@ -17,6 +17,7 @@ class GarageApp extends ConsumerWidget {
 
     return MaterialApp.router(
       title: 'Konnect One',
+      debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
       locale: locale,
       localizationsDelegates: const [

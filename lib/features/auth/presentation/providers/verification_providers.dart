@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../establishment/presentation/providers/establishment_providers.dart';
 import '../../domain/models/send_code_result.dart';
 import 'phone_verification_repository_provider.dart';
+import 'signup_otp_pending_provider.dart';
 
 final verificationControllerProvider =
     AsyncNotifierProvider<VerificationController, void>(
@@ -34,6 +35,7 @@ class VerificationController extends AsyncNotifier<void> {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       await ref.read(phoneVerificationRepositoryProvider).verifyCode(code);
+      ref.read(signupOtpPendingProvider.notifier).state = false;
     });
   }
 }

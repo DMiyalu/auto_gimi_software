@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/auth/presentation/providers/signup_otp_pending_provider.dart';
 import '../../features/auth/presentation/providers/auth_state_provider.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/phone_verification_screen.dart';
@@ -18,6 +19,7 @@ final routerProvider = Provider<GoRouter>((ref) {
   final refresh = ValueNotifier<int>(0);
   ref.listen(authStateProvider, (_, __) => refresh.value++);
   ref.listen(userProfileProvider, (_, __) => refresh.value++);
+  ref.listen(signupOtpPendingProvider, (_, __) => refresh.value++);
 
   return GoRouter(
     initialLocation: Routes.dashboard,
@@ -43,8 +45,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       if (profile.isLoading) return null;
 
       final phoneVerified = profile.valueOrNull?.phoneVerified ?? false;
+      final otpPending = ref.read(signupOtpPendingProvider);
 
-      if (!phoneVerified) {
+      if (otpPending && !phoneVerified) {
         if (onVerify) return null;
         return Routes.verifyPhone;
       }
