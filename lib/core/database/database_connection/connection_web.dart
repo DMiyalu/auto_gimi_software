@@ -1,7 +1,12 @@
 import 'package:drift/drift.dart';
-import 'package:drift/web.dart';
+import 'package:drift/wasm.dart';
 
 Future<QueryExecutor> createDatabaseConnection() async {
-  // WebDatabase persists data in browser storage (IndexedDB/localStorage).
-  return WebDatabase('garage_db');
+  final result = await WasmDatabase.open(
+    databaseName: 'garage_db',
+    sqlite3Uri: Uri.parse('sqlite3.wasm'),
+    driftWorkerUri: Uri.parse('drift_worker.js'),
+  );
+
+  return result.resolvedExecutor;
 }
