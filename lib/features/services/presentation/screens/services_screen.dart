@@ -108,13 +108,16 @@ class _ServicesListTab extends ConsumerWidget {
                 ),
               ),
               title: Text(service.name),
-              subtitle: Text(service.categoryName),
+              subtitle: Text(service.categoryName ?? l10n.noCategory),
               trailing: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    CurrencyFormatter.format(service.price),
+                    CurrencyFormatter.formatWithCode(
+                      service.price,
+                      currency: service.currency,
+                    ),
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
                   if (service.intervalDays > 0)
@@ -124,6 +127,7 @@ class _ServicesListTab extends ConsumerWidget {
                     ),
                 ],
               ),
+              onTap: () => context.push(Routes.serviceEditPath(service.id)),
             );
           },
         );
@@ -156,7 +160,9 @@ class _ServiceCategoriesTab extends ConsumerWidget {
         final services = servicesAsync.valueOrNull ?? [];
         final counts = <String, int>{};
         for (final service in services) {
-          counts[service.categoryId] = (counts[service.categoryId] ?? 0) + 1;
+          final categoryId = service.categoryId;
+          if (categoryId == null) continue;
+          counts[categoryId] = (counts[categoryId] ?? 0) + 1;
         }
 
         return ListView.separated(
@@ -172,6 +178,8 @@ class _ServiceCategoriesTab extends ConsumerWidget {
               ),
               title: Text(category.name),
               subtitle: Text(l10n.servicesCount(count)),
+              onTap: () =>
+                  context.push(Routes.serviceCategoryEditPath(category.id)),
             );
           },
         );

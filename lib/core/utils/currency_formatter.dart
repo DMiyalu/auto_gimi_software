@@ -1,16 +1,22 @@
 import 'package:intl/intl.dart';
 
-import '../config/app_config.dart';
+import '../domain/app_currency.dart';
 
-/// Formate les montants en USD.
+/// Formate les montants selon la devise choisie.
 abstract final class CurrencyFormatter {
-  static final _formatter = NumberFormat.currency(
-    symbol: r'$',
-    decimalDigits: 2,
-    locale: 'en_US',
-  );
+  static String format(double amount, {AppCurrency currency = AppCurrency.usd}) {
+    final formatter = NumberFormat.currency(
+      symbol: '${currency.symbol} ',
+      decimalDigits: 2,
+      locale: 'en_US',
+    );
+    return formatter.format(amount);
+  }
 
-  static String format(double amount) => _formatter.format(amount);
-
-  static String get currencyCode => AppConfig.currencyCode;
+  static String formatWithCode(
+    double amount, {
+    AppCurrency currency = AppCurrency.usd,
+  }) {
+    return '${format(amount, currency: currency)} ${currency.label}';
+  }
 }

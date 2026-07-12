@@ -103,14 +103,14 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get noProductsHint =>
-      'Ajoutez d\'abord une catégorie, puis vos produits.';
+      'Ajoutez votre premier produit (avec ou sans catégorie).';
 
   @override
   String get noServices => 'Aucun service';
 
   @override
   String get noServicesHint =>
-      'Ajoutez d\'abord une catégorie, puis vos services.';
+      'Ajoutez votre premier service (avec ou sans catégorie).';
 
   @override
   String get noProductCategories => 'Aucune catégorie';
@@ -125,6 +125,48 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get noServiceCategoriesHint =>
       'Créez une catégorie pour regrouper vos services.';
+
+  @override
+  String get noCategory => 'Aucune';
+
+  @override
+  String get currency => 'Devise';
+
+  @override
+  String get editProduct => 'Modifier le produit';
+
+  @override
+  String get editService => 'Modifier le service';
+
+  @override
+  String get editCategory => 'Modifier la catégorie';
+
+  @override
+  String get delete => 'Supprimer';
+
+  @override
+  String get cancel => 'Annuler';
+
+  @override
+  String get deleteProduct => 'Supprimer le produit';
+
+  @override
+  String get deleteProductConfirm =>
+      'Voulez-vous vraiment supprimer ce produit ?';
+
+  @override
+  String get deleteService => 'Supprimer le service';
+
+  @override
+  String get deleteServiceConfirm =>
+      'Voulez-vous vraiment supprimer ce service ?';
+
+  @override
+  String get deleteCategory => 'Supprimer la catégorie';
+
+  @override
+  String get deleteCategoryConfirm =>
+      'Les produits/services de cette catégorie resteront sans catégorie. Continuer ?';
 
   @override
   String productsCount(int count) {
@@ -143,14 +185,28 @@ class AppLocalizationsFr extends AppLocalizations {
   String get serviceCreated => 'Service enregistré';
 
   @override
+  String get productUpdated => 'Produit modifié';
+
+  @override
+  String get serviceUpdated => 'Service modifié';
+
+  @override
+  String get productDeleted => 'Produit supprimé';
+
+  @override
+  String get serviceDeleted => 'Service supprimé';
+
+  @override
+  String get categoryUpdated => 'Catégorie modifiée';
+
+  @override
+  String get categoryDeleted => 'Catégorie supprimée';
+
+  @override
   String get productCategoryCreated => 'Catégorie enregistrée';
 
   @override
   String get serviceCategoryCreated => 'Catégorie enregistrée';
-
-  @override
-  String get createCategoryFirst =>
-      'Créez d\'abord une catégorie avant d\'ajouter un élément.';
 
   @override
   String get prestations => 'Prestations';

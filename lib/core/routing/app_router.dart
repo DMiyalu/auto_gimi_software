@@ -100,8 +100,20 @@ final routerProvider = Provider<GoRouter>((ref) {
             builder: (_, __) => const ServiceFormScreen(),
           ),
           GoRoute(
+            path: Routes.serviceEdit,
+            builder: (_, state) => ServiceFormScreen(
+              serviceId: state.pathParameters['id'],
+            ),
+          ),
+          GoRoute(
             path: Routes.serviceCategoryNew,
             builder: (_, __) => const ServiceCategoryFormScreen(),
+          ),
+          GoRoute(
+            path: Routes.serviceCategoryEdit,
+            builder: (_, state) => ServiceCategoryFormScreen(
+              categoryId: state.pathParameters['id'],
+            ),
           ),
           GoRoute(
             path: Routes.produits,
@@ -112,8 +124,20 @@ final routerProvider = Provider<GoRouter>((ref) {
             builder: (_, __) => const ProduitFormScreen(),
           ),
           GoRoute(
+            path: Routes.produitEdit,
+            builder: (_, state) => ProduitFormScreen(
+              produitId: state.pathParameters['id'],
+            ),
+          ),
+          GoRoute(
             path: Routes.productCategoryNew,
             builder: (_, __) => const ProductCategoryFormScreen(),
+          ),
+          GoRoute(
+            path: Routes.productCategoryEdit,
+            builder: (_, state) => ProductCategoryFormScreen(
+              categoryId: state.pathParameters['id'],
+            ),
           ),
           GoRoute(
             path: Routes.prestationScan,

@@ -41,7 +41,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -52,12 +52,14 @@ class AppDatabase extends _$AppDatabase {
           if (from < 3) {
             await _createProductTablesIfMissing(m);
           }
+          if (from < 4) {
+            await _migrateToV4(m);
+          }
         },
         beforeOpen: (details) async {
-          // Web / hot-reload: le user_version peut déjà être à jour
-          // alors que les tables produits n'ont jamais été créées.
           if (!details.wasCreated) {
             await _createProductTablesIfMissing(Migrator(this));
+            await _ensureDeviseColumns();
           }
         },
       );
@@ -74,6 +76,29 @@ class AppDatabase extends _$AppDatabase {
     }
     if (!names.contains('produits')) {
       await m.createTable(produits);
+    }
+  }
+
+  Future<void> _migrateToV4(Migrator m) async {
+    // Recrée les tables pour: categorieId nullable + colonne devise.
+    await m.alterTable(TableMigration(produits));
+    await m.alterTable(TableMigration(catalogServices));
+  }
+
+  Future<void> _ensureDeviseColumns() async {
+    final produitCols = await customSelect('PRAGMA table_info(produits)').get();
+    final produitNames =
+        produitCols.map((row) => row.read<String>('name')).toSet();
+    if (produitNames.isNotEmpty && !produitNames.contains('devise')) {
+      await Migrator(this).addColumn(produits, produits.devise);
+    }
+
+    final serviceCols =
+        await customSelect('PRAGMA table_info(catalog_services)').get();
+    final serviceNames =
+        serviceCols.map((row) => row.read<String>('name')).toSet();
+    if (serviceNames.isNotEmpty && !serviceNames.contains('devise')) {
+      await Migrator(this).addColumn(catalogServices, catalogServices.devise);
     }
   }
 }

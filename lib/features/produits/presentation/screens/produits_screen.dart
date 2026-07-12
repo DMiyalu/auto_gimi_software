@@ -108,11 +108,15 @@ class _ProduitsListTab extends ConsumerWidget {
                 ),
               ),
               title: Text(produit.name),
-              subtitle: Text(produit.categoryName),
+              subtitle: Text(produit.categoryName ?? l10n.noCategory),
               trailing: Text(
-                CurrencyFormatter.format(produit.price),
+                CurrencyFormatter.formatWithCode(
+                  produit.price,
+                  currency: produit.currency,
+                ),
                 style: Theme.of(context).textTheme.titleSmall,
               ),
+              onTap: () => context.push(Routes.produitEditPath(produit.id)),
             );
           },
         );
@@ -145,7 +149,9 @@ class _ProductCategoriesTab extends ConsumerWidget {
         final produits = produitsAsync.valueOrNull ?? [];
         final counts = <String, int>{};
         for (final produit in produits) {
-          counts[produit.categoryId] = (counts[produit.categoryId] ?? 0) + 1;
+          final categoryId = produit.categoryId;
+          if (categoryId == null) continue;
+          counts[categoryId] = (counts[categoryId] ?? 0) + 1;
         }
 
         return ListView.separated(
@@ -161,6 +167,8 @@ class _ProductCategoriesTab extends ConsumerWidget {
               ),
               title: Text(category.name),
               subtitle: Text(l10n.productsCount(count)),
+              onTap: () =>
+                  context.push(Routes.productCategoryEditPath(category.id)),
             );
           },
         );

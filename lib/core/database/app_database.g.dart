@@ -1704,9 +1704,9 @@ class $CatalogServicesTable extends CatalogServices
   late final GeneratedColumn<String> categorieId = GeneratedColumn<String>(
     'categorie_id',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'REFERENCES categories (id)',
     ),
@@ -1728,6 +1728,16 @@ class $CatalogServicesTable extends CatalogServices
     false,
     type: DriftSqlType.double,
     requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deviseMeta = const VerificationMeta('devise');
+  @override
+  late final GeneratedColumn<String> devise = GeneratedColumn<String>(
+    'devise',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('USD'),
   );
   static const VerificationMeta _intervalleJoursMeta = const VerificationMeta(
     'intervalleJours',
@@ -1799,6 +1809,7 @@ class $CatalogServicesTable extends CatalogServices
     categorieId,
     nom,
     prix,
+    devise,
     intervalleJours,
     createdAt,
     updatedAt,
@@ -1830,8 +1841,6 @@ class $CatalogServicesTable extends CatalogServices
           _categorieIdMeta,
         ),
       );
-    } else if (isInserting) {
-      context.missing(_categorieIdMeta);
     }
     if (data.containsKey('nom')) {
       context.handle(
@@ -1848,6 +1857,12 @@ class $CatalogServicesTable extends CatalogServices
       );
     } else if (isInserting) {
       context.missing(_prixMeta);
+    }
+    if (data.containsKey('devise')) {
+      context.handle(
+        _deviseMeta,
+        devise.isAcceptableOrUnknown(data['devise']!, _deviseMeta),
+      );
     }
     if (data.containsKey('intervalle_jours')) {
       context.handle(
@@ -1902,7 +1917,7 @@ class $CatalogServicesTable extends CatalogServices
       categorieId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}categorie_id'],
-      )!,
+      ),
       nom: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}nom'],
@@ -1910,6 +1925,10 @@ class $CatalogServicesTable extends CatalogServices
       prix: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}prix'],
+      )!,
+      devise: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}devise'],
       )!,
       intervalleJours: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
@@ -1942,9 +1961,10 @@ class $CatalogServicesTable extends CatalogServices
 
 class CatalogService extends DataClass implements Insertable<CatalogService> {
   final String id;
-  final String categorieId;
+  final String? categorieId;
   final String nom;
   final double prix;
+  final String devise;
   final int intervalleJours;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -1952,9 +1972,10 @@ class CatalogService extends DataClass implements Insertable<CatalogService> {
   final bool isDirty;
   const CatalogService({
     required this.id,
-    required this.categorieId,
+    this.categorieId,
     required this.nom,
     required this.prix,
+    required this.devise,
     required this.intervalleJours,
     required this.createdAt,
     required this.updatedAt,
@@ -1965,9 +1986,12 @@ class CatalogService extends DataClass implements Insertable<CatalogService> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
-    map['categorie_id'] = Variable<String>(categorieId);
+    if (!nullToAbsent || categorieId != null) {
+      map['categorie_id'] = Variable<String>(categorieId);
+    }
     map['nom'] = Variable<String>(nom);
     map['prix'] = Variable<double>(prix);
+    map['devise'] = Variable<String>(devise);
     map['intervalle_jours'] = Variable<int>(intervalleJours);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
@@ -1979,9 +2003,12 @@ class CatalogService extends DataClass implements Insertable<CatalogService> {
   CatalogServicesCompanion toCompanion(bool nullToAbsent) {
     return CatalogServicesCompanion(
       id: Value(id),
-      categorieId: Value(categorieId),
+      categorieId: categorieId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(categorieId),
       nom: Value(nom),
       prix: Value(prix),
+      devise: Value(devise),
       intervalleJours: Value(intervalleJours),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
@@ -1997,9 +2024,10 @@ class CatalogService extends DataClass implements Insertable<CatalogService> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return CatalogService(
       id: serializer.fromJson<String>(json['id']),
-      categorieId: serializer.fromJson<String>(json['categorieId']),
+      categorieId: serializer.fromJson<String?>(json['categorieId']),
       nom: serializer.fromJson<String>(json['nom']),
       prix: serializer.fromJson<double>(json['prix']),
+      devise: serializer.fromJson<String>(json['devise']),
       intervalleJours: serializer.fromJson<int>(json['intervalleJours']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
@@ -2012,9 +2040,10 @@ class CatalogService extends DataClass implements Insertable<CatalogService> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
-      'categorieId': serializer.toJson<String>(categorieId),
+      'categorieId': serializer.toJson<String?>(categorieId),
       'nom': serializer.toJson<String>(nom),
       'prix': serializer.toJson<double>(prix),
+      'devise': serializer.toJson<String>(devise),
       'intervalleJours': serializer.toJson<int>(intervalleJours),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
@@ -2025,9 +2054,10 @@ class CatalogService extends DataClass implements Insertable<CatalogService> {
 
   CatalogService copyWith({
     String? id,
-    String? categorieId,
+    Value<String?> categorieId = const Value.absent(),
     String? nom,
     double? prix,
+    String? devise,
     int? intervalleJours,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -2035,9 +2065,10 @@ class CatalogService extends DataClass implements Insertable<CatalogService> {
     bool? isDirty,
   }) => CatalogService(
     id: id ?? this.id,
-    categorieId: categorieId ?? this.categorieId,
+    categorieId: categorieId.present ? categorieId.value : this.categorieId,
     nom: nom ?? this.nom,
     prix: prix ?? this.prix,
+    devise: devise ?? this.devise,
     intervalleJours: intervalleJours ?? this.intervalleJours,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
@@ -2052,6 +2083,7 @@ class CatalogService extends DataClass implements Insertable<CatalogService> {
           : this.categorieId,
       nom: data.nom.present ? data.nom.value : this.nom,
       prix: data.prix.present ? data.prix.value : this.prix,
+      devise: data.devise.present ? data.devise.value : this.devise,
       intervalleJours: data.intervalleJours.present
           ? data.intervalleJours.value
           : this.intervalleJours,
@@ -2069,6 +2101,7 @@ class CatalogService extends DataClass implements Insertable<CatalogService> {
           ..write('categorieId: $categorieId, ')
           ..write('nom: $nom, ')
           ..write('prix: $prix, ')
+          ..write('devise: $devise, ')
           ..write('intervalleJours: $intervalleJours, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
@@ -2084,6 +2117,7 @@ class CatalogService extends DataClass implements Insertable<CatalogService> {
     categorieId,
     nom,
     prix,
+    devise,
     intervalleJours,
     createdAt,
     updatedAt,
@@ -2098,6 +2132,7 @@ class CatalogService extends DataClass implements Insertable<CatalogService> {
           other.categorieId == this.categorieId &&
           other.nom == this.nom &&
           other.prix == this.prix &&
+          other.devise == this.devise &&
           other.intervalleJours == this.intervalleJours &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
@@ -2107,9 +2142,10 @@ class CatalogService extends DataClass implements Insertable<CatalogService> {
 
 class CatalogServicesCompanion extends UpdateCompanion<CatalogService> {
   final Value<String> id;
-  final Value<String> categorieId;
+  final Value<String?> categorieId;
   final Value<String> nom;
   final Value<double> prix;
+  final Value<String> devise;
   final Value<int> intervalleJours;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
@@ -2121,6 +2157,7 @@ class CatalogServicesCompanion extends UpdateCompanion<CatalogService> {
     this.categorieId = const Value.absent(),
     this.nom = const Value.absent(),
     this.prix = const Value.absent(),
+    this.devise = const Value.absent(),
     this.intervalleJours = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -2130,9 +2167,10 @@ class CatalogServicesCompanion extends UpdateCompanion<CatalogService> {
   });
   CatalogServicesCompanion.insert({
     required String id,
-    required String categorieId,
+    this.categorieId = const Value.absent(),
     required String nom,
     required double prix,
+    this.devise = const Value.absent(),
     this.intervalleJours = const Value.absent(),
     required DateTime createdAt,
     required DateTime updatedAt,
@@ -2140,7 +2178,6 @@ class CatalogServicesCompanion extends UpdateCompanion<CatalogService> {
     this.isDirty = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
-       categorieId = Value(categorieId),
        nom = Value(nom),
        prix = Value(prix),
        createdAt = Value(createdAt),
@@ -2150,6 +2187,7 @@ class CatalogServicesCompanion extends UpdateCompanion<CatalogService> {
     Expression<String>? categorieId,
     Expression<String>? nom,
     Expression<double>? prix,
+    Expression<String>? devise,
     Expression<int>? intervalleJours,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
@@ -2162,6 +2200,7 @@ class CatalogServicesCompanion extends UpdateCompanion<CatalogService> {
       if (categorieId != null) 'categorie_id': categorieId,
       if (nom != null) 'nom': nom,
       if (prix != null) 'prix': prix,
+      if (devise != null) 'devise': devise,
       if (intervalleJours != null) 'intervalle_jours': intervalleJours,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
@@ -2173,9 +2212,10 @@ class CatalogServicesCompanion extends UpdateCompanion<CatalogService> {
 
   CatalogServicesCompanion copyWith({
     Value<String>? id,
-    Value<String>? categorieId,
+    Value<String?>? categorieId,
     Value<String>? nom,
     Value<double>? prix,
+    Value<String>? devise,
     Value<int>? intervalleJours,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
@@ -2188,6 +2228,7 @@ class CatalogServicesCompanion extends UpdateCompanion<CatalogService> {
       categorieId: categorieId ?? this.categorieId,
       nom: nom ?? this.nom,
       prix: prix ?? this.prix,
+      devise: devise ?? this.devise,
       intervalleJours: intervalleJours ?? this.intervalleJours,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -2211,6 +2252,9 @@ class CatalogServicesCompanion extends UpdateCompanion<CatalogService> {
     }
     if (prix.present) {
       map['prix'] = Variable<double>(prix.value);
+    }
+    if (devise.present) {
+      map['devise'] = Variable<String>(devise.value);
     }
     if (intervalleJours.present) {
       map['intervalle_jours'] = Variable<int>(intervalleJours.value);
@@ -2240,6 +2284,7 @@ class CatalogServicesCompanion extends UpdateCompanion<CatalogService> {
           ..write('categorieId: $categorieId, ')
           ..write('nom: $nom, ')
           ..write('prix: $prix, ')
+          ..write('devise: $devise, ')
           ..write('intervalleJours: $intervalleJours, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
@@ -2725,9 +2770,9 @@ class $ProduitsTable extends Produits with TableInfo<$ProduitsTable, Produit> {
   late final GeneratedColumn<String> categorieId = GeneratedColumn<String>(
     'categorie_id',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'REFERENCES product_categories (id)',
     ),
@@ -2749,6 +2794,16 @@ class $ProduitsTable extends Produits with TableInfo<$ProduitsTable, Produit> {
     false,
     type: DriftSqlType.double,
     requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deviseMeta = const VerificationMeta('devise');
+  @override
+  late final GeneratedColumn<String> devise = GeneratedColumn<String>(
+    'devise',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('USD'),
   );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
@@ -2808,6 +2863,7 @@ class $ProduitsTable extends Produits with TableInfo<$ProduitsTable, Produit> {
     categorieId,
     nom,
     prix,
+    devise,
     createdAt,
     updatedAt,
     isDeleted,
@@ -2838,8 +2894,6 @@ class $ProduitsTable extends Produits with TableInfo<$ProduitsTable, Produit> {
           _categorieIdMeta,
         ),
       );
-    } else if (isInserting) {
-      context.missing(_categorieIdMeta);
     }
     if (data.containsKey('nom')) {
       context.handle(
@@ -2856,6 +2910,12 @@ class $ProduitsTable extends Produits with TableInfo<$ProduitsTable, Produit> {
       );
     } else if (isInserting) {
       context.missing(_prixMeta);
+    }
+    if (data.containsKey('devise')) {
+      context.handle(
+        _deviseMeta,
+        devise.isAcceptableOrUnknown(data['devise']!, _deviseMeta),
+      );
     }
     if (data.containsKey('created_at')) {
       context.handle(
@@ -2901,7 +2961,7 @@ class $ProduitsTable extends Produits with TableInfo<$ProduitsTable, Produit> {
       categorieId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}categorie_id'],
-      )!,
+      ),
       nom: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}nom'],
@@ -2909,6 +2969,10 @@ class $ProduitsTable extends Produits with TableInfo<$ProduitsTable, Produit> {
       prix: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}prix'],
+      )!,
+      devise: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}devise'],
       )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
@@ -2937,18 +3001,20 @@ class $ProduitsTable extends Produits with TableInfo<$ProduitsTable, Produit> {
 
 class Produit extends DataClass implements Insertable<Produit> {
   final String id;
-  final String categorieId;
+  final String? categorieId;
   final String nom;
   final double prix;
+  final String devise;
   final DateTime createdAt;
   final DateTime updatedAt;
   final bool isDeleted;
   final bool isDirty;
   const Produit({
     required this.id,
-    required this.categorieId,
+    this.categorieId,
     required this.nom,
     required this.prix,
+    required this.devise,
     required this.createdAt,
     required this.updatedAt,
     required this.isDeleted,
@@ -2958,9 +3024,12 @@ class Produit extends DataClass implements Insertable<Produit> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
-    map['categorie_id'] = Variable<String>(categorieId);
+    if (!nullToAbsent || categorieId != null) {
+      map['categorie_id'] = Variable<String>(categorieId);
+    }
     map['nom'] = Variable<String>(nom);
     map['prix'] = Variable<double>(prix);
+    map['devise'] = Variable<String>(devise);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     map['is_deleted'] = Variable<bool>(isDeleted);
@@ -2971,9 +3040,12 @@ class Produit extends DataClass implements Insertable<Produit> {
   ProduitsCompanion toCompanion(bool nullToAbsent) {
     return ProduitsCompanion(
       id: Value(id),
-      categorieId: Value(categorieId),
+      categorieId: categorieId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(categorieId),
       nom: Value(nom),
       prix: Value(prix),
+      devise: Value(devise),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
       isDeleted: Value(isDeleted),
@@ -2988,9 +3060,10 @@ class Produit extends DataClass implements Insertable<Produit> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Produit(
       id: serializer.fromJson<String>(json['id']),
-      categorieId: serializer.fromJson<String>(json['categorieId']),
+      categorieId: serializer.fromJson<String?>(json['categorieId']),
       nom: serializer.fromJson<String>(json['nom']),
       prix: serializer.fromJson<double>(json['prix']),
+      devise: serializer.fromJson<String>(json['devise']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       isDeleted: serializer.fromJson<bool>(json['isDeleted']),
@@ -3002,9 +3075,10 @@ class Produit extends DataClass implements Insertable<Produit> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
-      'categorieId': serializer.toJson<String>(categorieId),
+      'categorieId': serializer.toJson<String?>(categorieId),
       'nom': serializer.toJson<String>(nom),
       'prix': serializer.toJson<double>(prix),
+      'devise': serializer.toJson<String>(devise),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'isDeleted': serializer.toJson<bool>(isDeleted),
@@ -3014,18 +3088,20 @@ class Produit extends DataClass implements Insertable<Produit> {
 
   Produit copyWith({
     String? id,
-    String? categorieId,
+    Value<String?> categorieId = const Value.absent(),
     String? nom,
     double? prix,
+    String? devise,
     DateTime? createdAt,
     DateTime? updatedAt,
     bool? isDeleted,
     bool? isDirty,
   }) => Produit(
     id: id ?? this.id,
-    categorieId: categorieId ?? this.categorieId,
+    categorieId: categorieId.present ? categorieId.value : this.categorieId,
     nom: nom ?? this.nom,
     prix: prix ?? this.prix,
+    devise: devise ?? this.devise,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     isDeleted: isDeleted ?? this.isDeleted,
@@ -3039,6 +3115,7 @@ class Produit extends DataClass implements Insertable<Produit> {
           : this.categorieId,
       nom: data.nom.present ? data.nom.value : this.nom,
       prix: data.prix.present ? data.prix.value : this.prix,
+      devise: data.devise.present ? data.devise.value : this.devise,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       isDeleted: data.isDeleted.present ? data.isDeleted.value : this.isDeleted,
@@ -3053,6 +3130,7 @@ class Produit extends DataClass implements Insertable<Produit> {
           ..write('categorieId: $categorieId, ')
           ..write('nom: $nom, ')
           ..write('prix: $prix, ')
+          ..write('devise: $devise, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('isDeleted: $isDeleted, ')
@@ -3067,6 +3145,7 @@ class Produit extends DataClass implements Insertable<Produit> {
     categorieId,
     nom,
     prix,
+    devise,
     createdAt,
     updatedAt,
     isDeleted,
@@ -3080,6 +3159,7 @@ class Produit extends DataClass implements Insertable<Produit> {
           other.categorieId == this.categorieId &&
           other.nom == this.nom &&
           other.prix == this.prix &&
+          other.devise == this.devise &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.isDeleted == this.isDeleted &&
@@ -3088,9 +3168,10 @@ class Produit extends DataClass implements Insertable<Produit> {
 
 class ProduitsCompanion extends UpdateCompanion<Produit> {
   final Value<String> id;
-  final Value<String> categorieId;
+  final Value<String?> categorieId;
   final Value<String> nom;
   final Value<double> prix;
+  final Value<String> devise;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<bool> isDeleted;
@@ -3101,6 +3182,7 @@ class ProduitsCompanion extends UpdateCompanion<Produit> {
     this.categorieId = const Value.absent(),
     this.nom = const Value.absent(),
     this.prix = const Value.absent(),
+    this.devise = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.isDeleted = const Value.absent(),
@@ -3109,16 +3191,16 @@ class ProduitsCompanion extends UpdateCompanion<Produit> {
   });
   ProduitsCompanion.insert({
     required String id,
-    required String categorieId,
+    this.categorieId = const Value.absent(),
     required String nom,
     required double prix,
+    this.devise = const Value.absent(),
     required DateTime createdAt,
     required DateTime updatedAt,
     this.isDeleted = const Value.absent(),
     this.isDirty = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
-       categorieId = Value(categorieId),
        nom = Value(nom),
        prix = Value(prix),
        createdAt = Value(createdAt),
@@ -3128,6 +3210,7 @@ class ProduitsCompanion extends UpdateCompanion<Produit> {
     Expression<String>? categorieId,
     Expression<String>? nom,
     Expression<double>? prix,
+    Expression<String>? devise,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<bool>? isDeleted,
@@ -3139,6 +3222,7 @@ class ProduitsCompanion extends UpdateCompanion<Produit> {
       if (categorieId != null) 'categorie_id': categorieId,
       if (nom != null) 'nom': nom,
       if (prix != null) 'prix': prix,
+      if (devise != null) 'devise': devise,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (isDeleted != null) 'is_deleted': isDeleted,
@@ -3149,9 +3233,10 @@ class ProduitsCompanion extends UpdateCompanion<Produit> {
 
   ProduitsCompanion copyWith({
     Value<String>? id,
-    Value<String>? categorieId,
+    Value<String?>? categorieId,
     Value<String>? nom,
     Value<double>? prix,
+    Value<String>? devise,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<bool>? isDeleted,
@@ -3163,6 +3248,7 @@ class ProduitsCompanion extends UpdateCompanion<Produit> {
       categorieId: categorieId ?? this.categorieId,
       nom: nom ?? this.nom,
       prix: prix ?? this.prix,
+      devise: devise ?? this.devise,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       isDeleted: isDeleted ?? this.isDeleted,
@@ -3185,6 +3271,9 @@ class ProduitsCompanion extends UpdateCompanion<Produit> {
     }
     if (prix.present) {
       map['prix'] = Variable<double>(prix.value);
+    }
+    if (devise.present) {
+      map['devise'] = Variable<String>(devise.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
@@ -3211,6 +3300,7 @@ class ProduitsCompanion extends UpdateCompanion<Produit> {
           ..write('categorieId: $categorieId, ')
           ..write('nom: $nom, ')
           ..write('prix: $prix, ')
+          ..write('devise: $devise, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('isDeleted: $isDeleted, ')
@@ -8561,9 +8651,10 @@ typedef $$CategoriesTableProcessedTableManager =
 typedef $$CatalogServicesTableCreateCompanionBuilder =
     CatalogServicesCompanion Function({
       required String id,
-      required String categorieId,
+      Value<String?> categorieId,
       required String nom,
       required double prix,
+      Value<String> devise,
       Value<int> intervalleJours,
       required DateTime createdAt,
       required DateTime updatedAt,
@@ -8574,9 +8665,10 @@ typedef $$CatalogServicesTableCreateCompanionBuilder =
 typedef $$CatalogServicesTableUpdateCompanionBuilder =
     CatalogServicesCompanion Function({
       Value<String> id,
-      Value<String> categorieId,
+      Value<String?> categorieId,
       Value<String> nom,
       Value<double> prix,
+      Value<String> devise,
       Value<int> intervalleJours,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
@@ -8599,9 +8691,9 @@ final class $$CatalogServicesTableReferences
         $_aliasNameGenerator(db.catalogServices.categorieId, db.categories.id),
       );
 
-  $$CategoriesTableProcessedTableManager get categorieId {
-    final $_column = $_itemColumn<String>('categorie_id')!;
-
+  $$CategoriesTableProcessedTableManager? get categorieId {
+    final $_column = $_itemColumn<String>('categorie_id');
+    if ($_column == null) return null;
     final manager = $$CategoriesTableTableManager(
       $_db,
       $_db.categories,
@@ -8681,6 +8773,11 @@ class $$CatalogServicesTableFilterComposer
 
   ColumnFilters<double> get prix => $composableBuilder(
     column: $table.prix,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get devise => $composableBuilder(
+    column: $table.devise,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -8807,6 +8904,11 @@ class $$CatalogServicesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get devise => $composableBuilder(
+    column: $table.devise,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get intervalleJours => $composableBuilder(
     column: $table.intervalleJours,
     builder: (column) => ColumnOrderings(column),
@@ -8873,6 +8975,9 @@ class $$CatalogServicesTableAnnotationComposer
 
   GeneratedColumn<double> get prix =>
       $composableBuilder(column: $table.prix, builder: (column) => column);
+
+  GeneratedColumn<String> get devise =>
+      $composableBuilder(column: $table.devise, builder: (column) => column);
 
   GeneratedColumn<int> get intervalleJours => $composableBuilder(
     column: $table.intervalleJours,
@@ -9000,9 +9105,10 @@ class $$CatalogServicesTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
-                Value<String> categorieId = const Value.absent(),
+                Value<String?> categorieId = const Value.absent(),
                 Value<String> nom = const Value.absent(),
                 Value<double> prix = const Value.absent(),
+                Value<String> devise = const Value.absent(),
                 Value<int> intervalleJours = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
@@ -9014,6 +9120,7 @@ class $$CatalogServicesTableTableManager
                 categorieId: categorieId,
                 nom: nom,
                 prix: prix,
+                devise: devise,
                 intervalleJours: intervalleJours,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
@@ -9024,9 +9131,10 @@ class $$CatalogServicesTableTableManager
           createCompanionCallback:
               ({
                 required String id,
-                required String categorieId,
+                Value<String?> categorieId = const Value.absent(),
                 required String nom,
                 required double prix,
+                Value<String> devise = const Value.absent(),
                 Value<int> intervalleJours = const Value.absent(),
                 required DateTime createdAt,
                 required DateTime updatedAt,
@@ -9038,6 +9146,7 @@ class $$CatalogServicesTableTableManager
                 categorieId: categorieId,
                 nom: nom,
                 prix: prix,
+                devise: devise,
                 intervalleJours: intervalleJours,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
@@ -9531,9 +9640,10 @@ typedef $$ProductCategoriesTableProcessedTableManager =
 typedef $$ProduitsTableCreateCompanionBuilder =
     ProduitsCompanion Function({
       required String id,
-      required String categorieId,
+      Value<String?> categorieId,
       required String nom,
       required double prix,
+      Value<String> devise,
       required DateTime createdAt,
       required DateTime updatedAt,
       Value<bool> isDeleted,
@@ -9543,9 +9653,10 @@ typedef $$ProduitsTableCreateCompanionBuilder =
 typedef $$ProduitsTableUpdateCompanionBuilder =
     ProduitsCompanion Function({
       Value<String> id,
-      Value<String> categorieId,
+      Value<String?> categorieId,
       Value<String> nom,
       Value<double> prix,
+      Value<String> devise,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<bool> isDeleted,
@@ -9562,9 +9673,9 @@ final class $$ProduitsTableReferences
         $_aliasNameGenerator(db.produits.categorieId, db.productCategories.id),
       );
 
-  $$ProductCategoriesTableProcessedTableManager get categorieId {
-    final $_column = $_itemColumn<String>('categorie_id')!;
-
+  $$ProductCategoriesTableProcessedTableManager? get categorieId {
+    final $_column = $_itemColumn<String>('categorie_id');
+    if ($_column == null) return null;
     final manager = $$ProductCategoriesTableTableManager(
       $_db,
       $_db.productCategories,
@@ -9598,6 +9709,11 @@ class $$ProduitsTableFilterComposer
 
   ColumnFilters<double> get prix => $composableBuilder(
     column: $table.prix,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get devise => $composableBuilder(
+    column: $table.devise,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -9669,6 +9785,11 @@ class $$ProduitsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get devise => $composableBuilder(
+    column: $table.devise,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -9730,6 +9851,9 @@ class $$ProduitsTableAnnotationComposer
 
   GeneratedColumn<double> get prix =>
       $composableBuilder(column: $table.prix, builder: (column) => column);
+
+  GeneratedColumn<String> get devise =>
+      $composableBuilder(column: $table.devise, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -9797,9 +9921,10 @@ class $$ProduitsTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
-                Value<String> categorieId = const Value.absent(),
+                Value<String?> categorieId = const Value.absent(),
                 Value<String> nom = const Value.absent(),
                 Value<double> prix = const Value.absent(),
+                Value<String> devise = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<bool> isDeleted = const Value.absent(),
@@ -9810,6 +9935,7 @@ class $$ProduitsTableTableManager
                 categorieId: categorieId,
                 nom: nom,
                 prix: prix,
+                devise: devise,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 isDeleted: isDeleted,
@@ -9819,9 +9945,10 @@ class $$ProduitsTableTableManager
           createCompanionCallback:
               ({
                 required String id,
-                required String categorieId,
+                Value<String?> categorieId = const Value.absent(),
                 required String nom,
                 required double prix,
+                Value<String> devise = const Value.absent(),
                 required DateTime createdAt,
                 required DateTime updatedAt,
                 Value<bool> isDeleted = const Value.absent(),
@@ -9832,6 +9959,7 @@ class $$ProduitsTableTableManager
                 categorieId: categorieId,
                 nom: nom,
                 prix: prix,
+                devise: devise,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 isDeleted: isDeleted,

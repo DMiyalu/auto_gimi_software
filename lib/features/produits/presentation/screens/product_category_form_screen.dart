@@ -7,7 +7,9 @@ import '../../../../core/l10n/app_localizations.dart';
 import '../providers/produit_providers.dart';
 
 class ProductCategoryFormScreen extends ConsumerStatefulWidget {
-  const ProductCategoryFormScreen({super.key});
+  const ProductCategoryFormScreen({super.key, this.categoryId});
+
+  final String? categoryId;
 
   @override
   ConsumerState<ProductCategoryFormScreen> createState() =>
@@ -18,6 +20,9 @@ class _ProductCategoryFormScreenState
     extends ConsumerState<ProductCategoryFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
+  var _initialized = false;
+
+  bool get _isEditing => widget.categoryId != null;
 
   @override
   void dispose() {
@@ -25,12 +30,29 @@ class _ProductCategoryFormScreenState
     super.dispose();
   }
 
+  void _loadIfNeeded() {
+    if (_initialized || !_isEditing) return;
+    final async = ref.read(productCategoryByIdProvider(widget.categoryId!));
+    async.whenData((category) {
+      if (category == null || _initialized) return;
+      _nameController.text = category.name;
+      _initialized = true;
+      setState(() {});
+    });
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    await ref.read(produitControllerProvider.notifier).createCategory(
-          name: _nameController.text,
-        );
+    final controller = ref.read(produitControllerProvider.notifier);
+    if (_isEditing) {
+      await controller.updateCategory(
+        id: widget.categoryId!,
+        name: _nameController.text,
+      );
+    } else {
+      await controller.createCategory(name: _nameController.text);
+    }
 
     if (!mounted) return;
 
@@ -42,10 +64,52 @@ class _ProductCategoryFormScreenState
       return;
     }
 
+    final l10n = AppLocalizations.of(context);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(AppLocalizations.of(context).productCategoryCreated),
+        content: Text(
+          _isEditing ? l10n.categoryUpdated : l10n.productCategoryCreated,
+        ),
       ),
+    );
+    context.pop();
+  }
+
+  Future<void> _delete() async {
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.deleteCategory),
+        content: Text(l10n.deleteCategoryConfirm),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(l10n.delete),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    await ref
+        .read(produitControllerProvider.notifier)
+        .deleteCategory(id: widget.categoryId!);
+
+    if (!mounted) return;
+    final state = ref.read(produitControllerProvider);
+    if (state.hasError) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AuthErrorMapper.message(state.error!))),
+      );
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.categoryDeleted)),
     );
     context.pop();
   }
@@ -55,8 +119,25 @@ class _ProductCategoryFormScreenState
     final l10n = AppLocalizations.of(context);
     final formState = ref.watch(produitControllerProvider);
 
+    if (_isEditing) {
+      ref.watch(productCategoryByIdProvider(widget.categoryId!));
+      _loadIfNeeded();
+    }
+
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.addProductCategory)),
+      appBar: AppBar(
+        title: Text(
+          _isEditing ? l10n.editCategory : l10n.addProductCategory,
+        ),
+        actions: [
+          if (_isEditing)
+            IconButton(
+              tooltip: l10n.delete,
+              onPressed: formState.isLoading ? null : _delete,
+              icon: const Icon(Icons.delete_outline),
+            ),
+        ],
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -67,9 +148,7 @@ class _ProductCategoryFormScreenState
               children: [
                 TextFormField(
                   controller: _nameController,
-                  decoration: InputDecoration(
-                    labelText: l10n.categoryName,
-                  ),
+                  decoration: InputDecoration(labelText: l10n.categoryName),
                   textCapitalization: TextCapitalization.sentences,
                   enabled: !formState.isLoading,
                   validator: (value) =>

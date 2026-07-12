@@ -281,7 +281,7 @@ abstract class AppLocalizations {
   /// No description provided for @noProductsHint.
   ///
   /// In en, this message translates to:
-  /// **'Create a category first, then add your products.'**
+  /// **'Add your first product (with or without a category).'**
   String get noProductsHint;
 
   /// No description provided for @noServices.
@@ -293,7 +293,7 @@ abstract class AppLocalizations {
   /// No description provided for @noServicesHint.
   ///
   /// In en, this message translates to:
-  /// **'Create a category first, then add your services.'**
+  /// **'Add your first service (with or without a category).'**
   String get noServicesHint;
 
   /// No description provided for @noProductCategories.
@@ -320,6 +320,84 @@ abstract class AppLocalizations {
   /// **'Create a category to group your services.'**
   String get noServiceCategoriesHint;
 
+  /// No description provided for @noCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get noCategory;
+
+  /// No description provided for @currency.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency'**
+  String get currency;
+
+  /// No description provided for @editProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit product'**
+  String get editProduct;
+
+  /// No description provided for @editService.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit service'**
+  String get editService;
+
+  /// No description provided for @editCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit category'**
+  String get editCategory;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @deleteProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete product'**
+  String get deleteProduct;
+
+  /// No description provided for @deleteProductConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you really want to delete this product?'**
+  String get deleteProductConfirm;
+
+  /// No description provided for @deleteService.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete service'**
+  String get deleteService;
+
+  /// No description provided for @deleteServiceConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you really want to delete this service?'**
+  String get deleteServiceConfirm;
+
+  /// No description provided for @deleteCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete category'**
+  String get deleteCategory;
+
+  /// No description provided for @deleteCategoryConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Products/services in this category will become uncategorized. Continue?'**
+  String get deleteCategoryConfirm;
+
   /// No description provided for @productsCount.
   ///
   /// In en, this message translates to:
@@ -344,6 +422,42 @@ abstract class AppLocalizations {
   /// **'Service saved'**
   String get serviceCreated;
 
+  /// No description provided for @productUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Product updated'**
+  String get productUpdated;
+
+  /// No description provided for @serviceUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Service updated'**
+  String get serviceUpdated;
+
+  /// No description provided for @productDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Product deleted'**
+  String get productDeleted;
+
+  /// No description provided for @serviceDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Service deleted'**
+  String get serviceDeleted;
+
+  /// No description provided for @categoryUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Category updated'**
+  String get categoryUpdated;
+
+  /// No description provided for @categoryDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Category deleted'**
+  String get categoryDeleted;
+
   /// No description provided for @productCategoryCreated.
   ///
   /// In en, this message translates to:
@@ -355,12 +469,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Category saved'**
   String get serviceCategoryCreated;
-
-  /// No description provided for @createCategoryFirst.
-  ///
-  /// In en, this message translates to:
-  /// **'Create a category first before adding an item.'**
-  String get createCategoryFirst;
 
   /// No description provided for @prestations.
   ///

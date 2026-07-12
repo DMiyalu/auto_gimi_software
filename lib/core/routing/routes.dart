@@ -11,10 +11,21 @@ abstract final class Routes {
   static const vehiculeDetail = '/vehicules/:id';
   static const services = '/services';
   static const serviceNew = '/services/new';
+  static const serviceEdit = '/services/edit/:id';
   static const serviceCategoryNew = '/services/categories/new';
+  static const serviceCategoryEdit = '/services/categories/edit/:id';
   static const produits = '/produits';
   static const produitNew = '/produits/new';
+  static const produitEdit = '/produits/edit/:id';
   static const productCategoryNew = '/produits/categories/new';
+  static const productCategoryEdit = '/produits/categories/edit/:id';
+
+  static String serviceEditPath(String id) => '/services/edit/$id';
+  static String serviceCategoryEditPath(String id) =>
+      '/services/categories/edit/$id';
+  static String produitEditPath(String id) => '/produits/edit/$id';
+  static String productCategoryEditPath(String id) =>
+      '/produits/categories/edit/$id';
   static const prestationScan = '/prestations/scan';
   static const prestationDetail = '/prestations/:id';
   static const prestationJeton = '/prestations/:id/jeton';
