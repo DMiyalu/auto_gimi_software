@@ -1,7 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 
-import 'firebase_options.dart';
+import '../../firebase_options.dart';
 
 /// Initialise Firebase. Exécuter `flutterfire configure` avant le premier lancement.
 Future<void> initializeFirebase() async {
@@ -27,7 +27,7 @@ void logFirebaseSetupHint() {
   if (kDebugMode && !isFirebaseConfigured) {
     debugPrint(
       '[Firebase] Exécutez `flutterfire configure` pour générer '
-      'lib/core/firebase/firebase_options.dart',
+      'lib/firebase_options.dart',
     );
   }
 }

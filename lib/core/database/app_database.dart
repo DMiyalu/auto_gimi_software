@@ -1,9 +1,6 @@
-import 'dart:io';
-
 import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
+
+import 'database_connection/connection.dart';
 
 import '../domain/enums.dart';
 import 'converters/enum_converters.dart';
@@ -51,7 +48,6 @@ class AppDatabase extends _$AppDatabase {
 }
 
 Future<AppDatabase> openAppDatabase() async {
-  final dir = await getApplicationDocumentsDirectory();
-  final file = File(p.join(dir.path, 'garage_db.sqlite'));
-  return AppDatabase(NativeDatabase.createInBackground(file));
+  final executor = await createDatabaseConnection();
+  return AppDatabase(executor);
 }
