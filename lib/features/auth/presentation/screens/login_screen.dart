@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/auth/phone_auth_mapper.dart';
 import '../../../../core/l10n/app_localizations.dart';
+import '../../../../core/presentation/widgets/phone_number_field.dart';
 import '../../../../core/routing/routes.dart';
 import '../providers/auth_providers.dart';
 
@@ -16,13 +17,12 @@ class LoginScreen extends ConsumerStatefulWidget {
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _phoneController = TextEditingController();
+  String _phone = '';
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
   @override
   void dispose() {
-    _phoneController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -30,7 +30,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     await ref.read(authControllerProvider.notifier).signIn(
-          _phoneController.text,
+          _phone,
           _passwordController.text,
         );
   }
@@ -82,20 +82,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ),
                     ),
                     const SizedBox(height: 32),
-                    TextFormField(
+                    PhoneNumberField(
                       key: const Key('login_phone_field'),
-                      controller: _phoneController,
-                      decoration: InputDecoration(
-                        labelText: l10n.phoneNumber,
-                        prefixIcon: const Icon(Icons.phone_outlined),
-                      ),
-                      keyboardType: TextInputType.phone,
-                      autofillHints: const [AutofillHints.telephoneNumber],
-                      validator: (v) {
-                        if (v == null || v.trim().isEmpty) {
+                      labelText: l10n.phoneNumber,
+                      enabled: !authState.isLoading,
+                      localNumberKey: const Key('login_phone_local_field'),
+                      onFullNumberChanged: (value) => _phone = value,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
                           return l10n.phoneNumber;
                         }
-                        if (PhoneAuthMapper.normalize(v).length < 8) {
+                        if (!PhoneAuthMapper.isValidFullNumber(value)) {
                           return l10n.phoneNumberInvalid;
                         }
                         return null;
