@@ -41,7 +41,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -52,14 +52,14 @@ class AppDatabase extends _$AppDatabase {
           if (from < 3) {
             await _createProductTablesIfMissing(m);
           }
-          if (from < 4) {
-            await _migrateToV4(m);
+          if (from < 5) {
+            await _ensureCatalogItemSchema(m);
           }
         },
         beforeOpen: (details) async {
           if (!details.wasCreated) {
             await _createProductTablesIfMissing(Migrator(this));
-            await _ensureDeviseColumns();
+            await _ensureCatalogItemSchema(Migrator(this));
           }
         },
       );
@@ -79,27 +79,65 @@ class AppDatabase extends _$AppDatabase {
     }
   }
 
-  Future<void> _migrateToV4(Migrator m) async {
-    // Recrée les tables pour: categorieId nullable + colonne devise.
-    await m.alterTable(TableMigration(produits));
-    await m.alterTable(TableMigration(catalogServices));
+  /// Ajoute `devise` et rend `categorie_id` nullable (produits + services).
+  Future<void> _ensureCatalogItemSchema(Migrator m) async {
+    // Nettoie d'éventuelles tables temporaires d'une migration interrompue.
+    await customStatement('DROP TABLE IF EXISTS tmp_for_copy_produits');
+    await customStatement(
+      'DROP TABLE IF EXISTS tmp_for_copy_catalog_services',
+    );
+
+    await _migrateCatalogTable(
+      m: m,
+      tableName: 'produits',
+      table: produits,
+      deviseColumn: produits.devise,
+    );
+    await _migrateCatalogTable(
+      m: m,
+      tableName: 'catalog_services',
+      table: catalogServices,
+      deviseColumn: catalogServices.devise,
+    );
   }
 
-  Future<void> _ensureDeviseColumns() async {
-    final produitCols = await customSelect('PRAGMA table_info(produits)').get();
-    final produitNames =
-        produitCols.map((row) => row.read<String>('name')).toSet();
-    if (produitNames.isNotEmpty && !produitNames.contains('devise')) {
-      await Migrator(this).addColumn(produits, produits.devise);
+  Future<void> _migrateCatalogTable({
+    required Migrator m,
+    required String tableName,
+    required TableInfo table,
+    required GeneratedColumn<String> deviseColumn,
+  }) async {
+    final info = await customSelect('PRAGMA table_info($tableName)').get();
+    if (info.isEmpty) return;
+
+    final columns = {
+      for (final row in info) row.read<String>('name'): row,
+    };
+    final hasDevise = columns.containsKey('devise');
+    final categorieNotNull =
+        columns['categorie_id']?.read<int>('notnull') == 1;
+
+    if (hasDevise && !categorieNotNull) return;
+
+    // Simple ADD COLUMN si seule la devise manque.
+    if (!hasDevise && !categorieNotNull) {
+      await m.addColumn(table, deviseColumn);
+      return;
     }
 
-    final serviceCols =
-        await customSelect('PRAGMA table_info(catalog_services)').get();
-    final serviceNames =
-        serviceCols.map((row) => row.read<String>('name')).toSet();
-    if (serviceNames.isNotEmpty && !serviceNames.contains('devise')) {
-      await Migrator(this).addColumn(catalogServices, catalogServices.devise);
-    }
+    // Recréation nécessaire pour rendre categorie_id nullable
+    // et/ou injecter devise (absente de l'ancienne table).
+    await m.alterTable(
+      TableMigration(
+        table,
+        newColumns: [
+          if (!hasDevise) deviseColumn,
+        ],
+        columnTransformer: {
+          if (!hasDevise) deviseColumn: const Constant('USD'),
+        },
+      ),
+    );
   }
 }
 
