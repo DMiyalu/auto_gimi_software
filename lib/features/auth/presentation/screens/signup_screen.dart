@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/auth/auth_error_mapper.dart';
 import '../../../../core/auth/phone_auth_mapper.dart';
 import '../../../../core/domain/business_category.dart';
 import '../../../../core/l10n/app_localizations.dart';
@@ -55,7 +56,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     ref.listen(authControllerProvider, (_, next) {
       if (next.hasError && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(next.error.toString())),
+          SnackBar(content: Text(AuthErrorMapper.message(next.error!))),
         );
       }
     });

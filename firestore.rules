@@ -6,28 +6,59 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function userDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
     function userEstablishmentId() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.establishmentId;
+      return userDoc().data.establishmentId;
     }
 
     function isEstablishmentMember(establishmentId) {
       return isSignedIn()
         && userEstablishmentId() == establishmentId
-        && exists(/databases/$(database)/documents/establishments/$(establishmentId)/members/$(request.auth.uid));
+        && exists(
+          /databases/$(database)/documents/establishments/$(establishmentId)/members/$(request.auth.uid)
+        );
     }
 
     function isEstablishmentOwner(establishmentId) {
       return isEstablishmentMember(establishmentId)
-        && get(/databases/$(database)/documents/establishments/$(establishmentId)/members/$(request.auth.uid)).data.role == 'owner';
+        && get(
+          /databases/$(database)/documents/establishments/$(establishmentId)/members/$(request.auth.uid)
+        ).data.role == 'owner';
+    }
+
+    // --- Inscription SaaS : tout utilisateur authentifié peut créer son tenant ---
+    function isValidOwnerSignup() {
+      return isSignedIn()
+        && request.resource.data.role == 'owner'
+        && request.resource.data.phoneVerified == false
+        && request.resource.data.establishmentId is string
+        && request.resource.data.fullName is string
+        && request.resource.data.phone is string;
+    }
+
+    function isValidEstablishmentSignup() {
+      return isSignedIn()
+        && request.resource.data.ownerId == request.auth.uid
+        && request.resource.data.phoneVerified == false
+        && request.resource.data.category is string
+        && request.resource.data.name is string
+        && request.resource.data.managerName is string
+        && request.resource.data.phone is string;
+    }
+
+    function isValidMemberSignup(memberId) {
+      return isSignedIn()
+        && request.auth.uid == memberId
+        && request.resource.data.role == 'owner'
+        && request.resource.data.phoneVerified == false;
     }
 
     match /users/{userId} {
       allow read: if isSignedIn() && request.auth.uid == userId;
-      allow create: if isSignedIn()
-        && request.auth.uid == userId
-        && request.resource.data.establishmentId is string
-        && request.resource.data.role == 'owner'
-        && request.resource.data.phoneVerified == false;
+      allow create: if request.auth.uid == userId && isValidOwnerSignup();
       allow update: if isSignedIn() && request.auth.uid == userId;
     }
 
@@ -36,20 +67,20 @@ service cloud.firestore {
     }
 
     match /establishments/{establishmentId} {
+      // Lecture : propriétaire juste après inscription (profil pas encore lu)
+      allow read: if isSignedIn() && resource.data.ownerId == request.auth.uid;
       allow read: if isEstablishmentMember(establishmentId);
-      allow create: if isSignedIn()
-        && request.resource.data.ownerId == request.auth.uid
-        && request.resource.data.phoneVerified == false
-        && request.resource.data.category is string;
+      allow create: if isValidEstablishmentSignup();
       allow update: if isEstablishmentOwner(establishmentId);
 
       match /members/{memberId} {
         allow read: if isEstablishmentMember(establishmentId);
-        allow create: if isSignedIn() && request.auth.uid == memberId;
+        allow read: if isSignedIn() && request.auth.uid == memberId;
+        allow create: if isValidMemberSignup(memberId);
         allow update, delete: if isEstablishmentOwner(establishmentId);
       }
 
-      // Données métier — chaque établissement est isolé
+      // Données métier — isolation stricte par établissement (tenant SaaS)
       match /{collection}/{docId} {
         allow read, write: if isEstablishmentMember(establishmentId)
           && collection in [
