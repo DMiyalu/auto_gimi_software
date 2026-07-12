@@ -41,7 +41,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -49,12 +49,33 @@ class AppDatabase extends _$AppDatabase {
           await m.createAll();
         },
         onUpgrade: (m, from, to) async {
-          if (from < 2) {
-            await m.createTable(productCategories);
-            await m.createTable(produits);
+          if (from < 3) {
+            await _createProductTablesIfMissing(m);
+          }
+        },
+        beforeOpen: (details) async {
+          // Web / hot-reload: le user_version peut déjà être à jour
+          // alors que les tables produits n'ont jamais été créées.
+          if (!details.wasCreated) {
+            await _createProductTablesIfMissing(Migrator(this));
           }
         },
       );
+
+  Future<void> _createProductTablesIfMissing(Migrator m) async {
+    final existing = await customSelect(
+      "SELECT name FROM sqlite_master WHERE type = 'table' "
+      "AND name IN ('product_categories', 'produits')",
+    ).get();
+    final names = existing.map((row) => row.read<String>('name')).toSet();
+
+    if (!names.contains('product_categories')) {
+      await m.createTable(productCategories);
+    }
+    if (!names.contains('produits')) {
+      await m.createTable(produits);
+    }
+  }
 }
 
 Future<AppDatabase> openAppDatabase() async {
