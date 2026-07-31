@@ -1,9 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/domain/app_currency.dart';
-import '../../../../core/firebase/firebase_bootstrap.dart';
 import '../../../../core/providers/database_provider.dart';
+import '../../../../core/sync/auto_sync_coordinator.dart';
 import '../../../establishment/presentation/providers/establishment_providers.dart';
 import '../../data/repositories/service_repository_impl.dart';
 import '../../domain/entities/catalog_service_entity.dart';
@@ -11,10 +10,7 @@ import '../../domain/entities/service_category_entity.dart';
 import '../../domain/repositories/service_repository.dart';
 
 final serviceRepositoryProvider = Provider<ServiceRepository>((ref) {
-  return ServiceRepositoryImpl(
-    database: ref.watch(databaseProvider),
-    firestore: isFirebaseConfigured ? FirebaseFirestore.instance : null,
-  );
+  return ServiceRepositoryImpl(database: ref.watch(databaseProvider));
 });
 
 final serviceCategoriesProvider =
@@ -56,6 +52,10 @@ class ServiceController extends AsyncNotifier<void> {
     return establishment.id;
   }
 
+  void _schedulePush() {
+    ref.read(autoSyncCoordinatorProvider).schedulePush();
+  }
+
   Future<void> createCategory({required String name}) async {
     final establishmentId = _establishmentId;
     state = const AsyncLoading();
@@ -64,6 +64,7 @@ class ServiceController extends AsyncNotifier<void> {
             establishmentId: establishmentId,
             name: name,
           );
+      _schedulePush();
     });
   }
 
@@ -79,6 +80,7 @@ class ServiceController extends AsyncNotifier<void> {
             id: id,
             name: name,
           );
+      _schedulePush();
     });
   }
 
@@ -90,6 +92,7 @@ class ServiceController extends AsyncNotifier<void> {
             establishmentId: establishmentId,
             id: id,
           );
+      _schedulePush();
     });
   }
 
@@ -111,6 +114,7 @@ class ServiceController extends AsyncNotifier<void> {
             currency: currency,
             intervalDays: intervalDays,
           );
+      _schedulePush();
     });
   }
 
@@ -134,6 +138,7 @@ class ServiceController extends AsyncNotifier<void> {
             currency: currency,
             intervalDays: intervalDays,
           );
+      _schedulePush();
     });
   }
 
@@ -145,6 +150,7 @@ class ServiceController extends AsyncNotifier<void> {
             establishmentId: establishmentId,
             id: id,
           );
+      _schedulePush();
     });
   }
 }

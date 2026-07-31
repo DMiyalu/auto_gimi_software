@@ -1,34 +1,18 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../core/database/app_database.dart';
 import '../../../../core/domain/app_currency.dart';
-import '../../../../core/firebase/firebase_bootstrap.dart';
 import '../../domain/entities/product_category_entity.dart';
 import '../../domain/entities/produit_entity.dart';
 import '../../domain/repositories/produit_repository.dart';
 
 class ProduitRepositoryImpl implements ProduitRepository {
-  ProduitRepositoryImpl({
-    required AppDatabase database,
-    FirebaseFirestore? firestore,
-  })  : _database = database,
-        _firestore = firestore;
+  ProduitRepositoryImpl({required AppDatabase database})
+      : _database = database;
 
   final AppDatabase _database;
-  final FirebaseFirestore? _firestore;
   final _uuid = const Uuid();
-
-  CollectionReference<Map<String, dynamic>> _collection(
-    String establishmentId,
-    String name,
-  ) {
-    return _firestore!
-        .collection('establishments')
-        .doc(establishmentId)
-        .collection(name);
-  }
 
   @override
   Stream<List<ProductCategoryEntity>> watchCategories() {
@@ -117,19 +101,6 @@ class ProduitRepositoryImpl implements ProduitRepository {
           ),
         );
 
-    await _firestoreSet(
-      establishmentId,
-      'product_categories',
-      id,
-      {
-        'name': trimmedName,
-        'order': order,
-        'createdAt': FieldValue.serverTimestamp(),
-        'updatedAt': FieldValue.serverTimestamp(),
-        'isDeleted': false,
-      },
-    );
-
     return ProductCategoryEntity(
       id: id,
       name: trimmedName,
@@ -160,16 +131,6 @@ class ProduitRepositoryImpl implements ProduitRepository {
       ),
     );
 
-    await _firestoreUpdate(
-      establishmentId,
-      'product_categories',
-      id,
-      {
-        'name': trimmedName,
-        'updatedAt': FieldValue.serverTimestamp(),
-      },
-    );
-
     return ProductCategoryEntity(
       id: id,
       name: trimmedName,
@@ -185,13 +146,6 @@ class ProduitRepositoryImpl implements ProduitRepository {
     required String id,
   }) async {
     final now = DateTime.now();
-
-    final affected = await (_database.select(_database.produits)
-          ..where(
-            (p) => p.categorieId.equals(id) & p.isDeleted.equals(false),
-          ))
-        .get();
-    final affectedIds = affected.map((p) => p.id).toList();
 
     await _database.transaction(() async {
       await (_database.update(_database.produits)
@@ -214,36 +168,6 @@ class ProduitRepositoryImpl implements ProduitRepository {
         ),
       );
     });
-
-    final firestore = _firestore;
-    if (isFirebaseConfigured && firestore != null) {
-      final batch = firestore.batch();
-      for (final produitId in affectedIds) {
-        batch.update(
-          firestore
-              .collection('establishments')
-              .doc(establishmentId)
-              .collection('produits')
-              .doc(produitId),
-          {
-            'categoryId': null,
-            'updatedAt': FieldValue.serverTimestamp(),
-          },
-        );
-      }
-      batch.update(
-        firestore
-            .collection('establishments')
-            .doc(establishmentId)
-            .collection('product_categories')
-            .doc(id),
-        {
-          'isDeleted': true,
-          'updatedAt': FieldValue.serverTimestamp(),
-        },
-      );
-      await batch.commit();
-    }
   }
 
   @override
@@ -272,21 +196,6 @@ class ProduitRepositoryImpl implements ProduitRepository {
             updatedAt: now,
           ),
         );
-
-    await _firestoreSet(
-      establishmentId,
-      'produits',
-      id,
-      {
-        'categoryId': categoryId,
-        'name': trimmedName,
-        'price': price,
-        'currency': currency.code,
-        'createdAt': FieldValue.serverTimestamp(),
-        'updatedAt': FieldValue.serverTimestamp(),
-        'isDeleted': false,
-      },
-    );
 
     return ProduitEntity(
       id: id,
@@ -328,19 +237,6 @@ class ProduitRepositoryImpl implements ProduitRepository {
       ),
     );
 
-    await _firestoreUpdate(
-      establishmentId,
-      'produits',
-      id,
-      {
-        'categoryId': categoryId,
-        'name': trimmedName,
-        'price': price,
-        'currency': currency.code,
-        'updatedAt': FieldValue.serverTimestamp(),
-      },
-    );
-
     return ProduitEntity(
       id: id,
       categoryId: categoryId,
@@ -366,16 +262,6 @@ class ProduitRepositoryImpl implements ProduitRepository {
         updatedAt: Value(now),
         isDirty: const Value(true),
       ),
-    );
-
-    await _firestoreUpdate(
-      establishmentId,
-      'produits',
-      id,
-      {
-        'isDeleted': true,
-        'updatedAt': FieldValue.serverTimestamp(),
-      },
     );
   }
 
@@ -406,28 +292,6 @@ class ProduitRepositoryImpl implements ProduitRepository {
     if (price < 0) {
       throw ArgumentError('Le prix ne peut pas être négatif.');
     }
-  }
-
-  Future<void> _firestoreSet(
-    String establishmentId,
-    String collection,
-    String id,
-    Map<String, dynamic> data,
-  ) async {
-    final firestore = _firestore;
-    if (!isFirebaseConfigured || firestore == null) return;
-    await _collection(establishmentId, collection).doc(id).set(data);
-  }
-
-  Future<void> _firestoreUpdate(
-    String establishmentId,
-    String collection,
-    String id,
-    Map<String, dynamic> data,
-  ) async {
-    final firestore = _firestore;
-    if (!isFirebaseConfigured || firestore == null) return;
-    await _collection(establishmentId, collection).doc(id).update(data);
   }
 
   ProductCategoryEntity _categoryFromDrift(ProductCategory row) {

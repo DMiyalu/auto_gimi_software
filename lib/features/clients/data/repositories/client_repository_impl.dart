@@ -1,22 +1,16 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../core/auth/phone_auth_mapper.dart';
-import '../../../../core/firebase/firebase_bootstrap.dart';
 import '../../../../core/database/app_database.dart';
 import '../../domain/entities/client_entity.dart';
 import '../../domain/repositories/client_repository.dart';
 
 class ClientRepositoryImpl implements ClientRepository {
-  ClientRepositoryImpl({
-    required AppDatabase database,
-    FirebaseFirestore? firestore,
-  })  : _database = database,
-        _firestore = firestore;
+  ClientRepositoryImpl({required AppDatabase database})
+      : _database = database;
 
   final AppDatabase _database;
-  final FirebaseFirestore? _firestore;
   final _uuid = const Uuid();
 
   @override
@@ -66,22 +60,6 @@ class ClientRepositoryImpl implements ClientRepository {
             updatedAt: now,
           ),
         );
-
-    if (isFirebaseConfigured && _firestore != null) {
-      await _firestore!
-          .collection('establishments')
-          .doc(establishmentId)
-          .collection('clients')
-          .doc(id)
-          .set({
-        'name': trimmedName,
-        'phone': phone,
-        'loyaltyPoints': 0,
-        'createdAt': FieldValue.serverTimestamp(),
-        'updatedAt': FieldValue.serverTimestamp(),
-        'isDeleted': false,
-      });
-    }
 
     return ClientEntity(
       id: id,

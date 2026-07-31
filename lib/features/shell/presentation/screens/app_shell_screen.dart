@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/l10n/app_localizations.dart';
 import '../../../../core/routing/routes.dart';
+import '../../../../core/sync/auto_sync_coordinator.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../../establishment/presentation/providers/establishment_providers.dart';
 
@@ -14,6 +15,11 @@ class AppShellScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Garde le coordinateur de synchro automatique vivant tant que
+    // l'utilisateur est sur une route authentifiée ; il se nettoie tout seul
+    // (timers/écouteurs annulés) quand l'utilisateur se déconnecte.
+    ref.watch(autoSyncCoordinatorProvider);
+
     final l10n = AppLocalizations.of(context);
     final location = GoRouterState.of(context).uri.path;
     final establishment = ref.watch(currentEstablishmentProvider).valueOrNull;

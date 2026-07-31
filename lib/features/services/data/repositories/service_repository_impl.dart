@@ -1,34 +1,18 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../core/database/app_database.dart';
 import '../../../../core/domain/app_currency.dart';
-import '../../../../core/firebase/firebase_bootstrap.dart';
 import '../../domain/entities/catalog_service_entity.dart';
 import '../../domain/entities/service_category_entity.dart';
 import '../../domain/repositories/service_repository.dart';
 
 class ServiceRepositoryImpl implements ServiceRepository {
-  ServiceRepositoryImpl({
-    required AppDatabase database,
-    FirebaseFirestore? firestore,
-  })  : _database = database,
-        _firestore = firestore;
+  ServiceRepositoryImpl({required AppDatabase database})
+      : _database = database;
 
   final AppDatabase _database;
-  final FirebaseFirestore? _firestore;
   final _uuid = const Uuid();
-
-  CollectionReference<Map<String, dynamic>> _collection(
-    String establishmentId,
-    String name,
-  ) {
-    return _firestore!
-        .collection('establishments')
-        .doc(establishmentId)
-        .collection(name);
-  }
 
   @override
   Stream<List<ServiceCategoryEntity>> watchCategories() {
@@ -117,19 +101,6 @@ class ServiceRepositoryImpl implements ServiceRepository {
           ),
         );
 
-    await _firestoreSet(
-      establishmentId,
-      'categories',
-      id,
-      {
-        'name': trimmedName,
-        'order': order,
-        'createdAt': FieldValue.serverTimestamp(),
-        'updatedAt': FieldValue.serverTimestamp(),
-        'isDeleted': false,
-      },
-    );
-
     return ServiceCategoryEntity(
       id: id,
       name: trimmedName,
@@ -159,16 +130,6 @@ class ServiceRepositoryImpl implements ServiceRepository {
       ),
     );
 
-    await _firestoreUpdate(
-      establishmentId,
-      'categories',
-      id,
-      {
-        'name': trimmedName,
-        'updatedAt': FieldValue.serverTimestamp(),
-      },
-    );
-
     return ServiceCategoryEntity(
       id: id,
       name: trimmedName,
@@ -184,13 +145,6 @@ class ServiceRepositoryImpl implements ServiceRepository {
     required String id,
   }) async {
     final now = DateTime.now();
-
-    final affected = await (_database.select(_database.catalogServices)
-          ..where(
-            (s) => s.categorieId.equals(id) & s.isDeleted.equals(false),
-          ))
-        .get();
-    final affectedIds = affected.map((s) => s.id).toList();
 
     await _database.transaction(() async {
       await (_database.update(_database.catalogServices)
@@ -213,36 +167,6 @@ class ServiceRepositoryImpl implements ServiceRepository {
         ),
       );
     });
-
-    final firestore = _firestore;
-    if (isFirebaseConfigured && firestore != null) {
-      final batch = firestore.batch();
-      for (final serviceId in affectedIds) {
-        batch.update(
-          firestore
-              .collection('establishments')
-              .doc(establishmentId)
-              .collection('services')
-              .doc(serviceId),
-          {
-            'categoryId': null,
-            'updatedAt': FieldValue.serverTimestamp(),
-          },
-        );
-      }
-      batch.update(
-        firestore
-            .collection('establishments')
-            .doc(establishmentId)
-            .collection('categories')
-            .doc(id),
-        {
-          'isDeleted': true,
-          'updatedAt': FieldValue.serverTimestamp(),
-        },
-      );
-      await batch.commit();
-    }
   }
 
   @override
@@ -274,22 +198,6 @@ class ServiceRepositoryImpl implements ServiceRepository {
             updatedAt: now,
           ),
         );
-
-    await _firestoreSet(
-      establishmentId,
-      'services',
-      id,
-      {
-        'categoryId': categoryId,
-        'name': trimmedName,
-        'price': price,
-        'currency': currency.code,
-        'intervalDays': intervalDays,
-        'createdAt': FieldValue.serverTimestamp(),
-        'updatedAt': FieldValue.serverTimestamp(),
-        'isDeleted': false,
-      },
-    );
 
     return CatalogServiceEntity(
       id: id,
@@ -336,20 +244,6 @@ class ServiceRepositoryImpl implements ServiceRepository {
       ),
     );
 
-    await _firestoreUpdate(
-      establishmentId,
-      'services',
-      id,
-      {
-        'categoryId': categoryId,
-        'name': trimmedName,
-        'price': price,
-        'currency': currency.code,
-        'intervalDays': intervalDays,
-        'updatedAt': FieldValue.serverTimestamp(),
-      },
-    );
-
     return CatalogServiceEntity(
       id: id,
       categoryId: categoryId,
@@ -377,16 +271,6 @@ class ServiceRepositoryImpl implements ServiceRepository {
         updatedAt: Value(now),
         isDirty: const Value(true),
       ),
-    );
-
-    await _firestoreUpdate(
-      establishmentId,
-      'services',
-      id,
-      {
-        'isDeleted': true,
-        'updatedAt': FieldValue.serverTimestamp(),
-      },
     );
   }
 
@@ -423,28 +307,6 @@ class ServiceRepositoryImpl implements ServiceRepository {
     if (intervalDays < 0) {
       throw ArgumentError("L'intervalle d'entretien ne peut pas être négatif.");
     }
-  }
-
-  Future<void> _firestoreSet(
-    String establishmentId,
-    String collection,
-    String id,
-    Map<String, dynamic> data,
-  ) async {
-    final firestore = _firestore;
-    if (!isFirebaseConfigured || firestore == null) return;
-    await _collection(establishmentId, collection).doc(id).set(data);
-  }
-
-  Future<void> _firestoreUpdate(
-    String establishmentId,
-    String collection,
-    String id,
-    Map<String, dynamic> data,
-  ) async {
-    final firestore = _firestore;
-    if (!isFirebaseConfigured || firestore == null) return;
-    await _collection(establishmentId, collection).doc(id).update(data);
   }
 
   ServiceCategoryEntity _categoryFromDrift(Category row) {

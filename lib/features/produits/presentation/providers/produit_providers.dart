@@ -1,9 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/domain/app_currency.dart';
-import '../../../../core/firebase/firebase_bootstrap.dart';
 import '../../../../core/providers/database_provider.dart';
+import '../../../../core/sync/auto_sync_coordinator.dart';
 import '../../../establishment/presentation/providers/establishment_providers.dart';
 import '../../data/repositories/produit_repository_impl.dart';
 import '../../domain/entities/product_category_entity.dart';
@@ -11,10 +10,7 @@ import '../../domain/entities/produit_entity.dart';
 import '../../domain/repositories/produit_repository.dart';
 
 final produitRepositoryProvider = Provider<ProduitRepository>((ref) {
-  return ProduitRepositoryImpl(
-    database: ref.watch(databaseProvider),
-    firestore: isFirebaseConfigured ? FirebaseFirestore.instance : null,
-  );
+  return ProduitRepositoryImpl(database: ref.watch(databaseProvider));
 });
 
 final productCategoriesProvider =
@@ -55,6 +51,10 @@ class ProduitController extends AsyncNotifier<void> {
     return establishment.id;
   }
 
+  void _schedulePush() {
+    ref.read(autoSyncCoordinatorProvider).schedulePush();
+  }
+
   Future<void> createCategory({required String name}) async {
     final establishmentId = _establishmentId;
     state = const AsyncLoading();
@@ -63,6 +63,7 @@ class ProduitController extends AsyncNotifier<void> {
             establishmentId: establishmentId,
             name: name,
           );
+      _schedulePush();
     });
   }
 
@@ -78,6 +79,7 @@ class ProduitController extends AsyncNotifier<void> {
             id: id,
             name: name,
           );
+      _schedulePush();
     });
   }
 
@@ -89,6 +91,7 @@ class ProduitController extends AsyncNotifier<void> {
             establishmentId: establishmentId,
             id: id,
           );
+      _schedulePush();
     });
   }
 
@@ -108,6 +111,7 @@ class ProduitController extends AsyncNotifier<void> {
             price: price,
             currency: currency,
           );
+      _schedulePush();
     });
   }
 
@@ -129,6 +133,7 @@ class ProduitController extends AsyncNotifier<void> {
             price: price,
             currency: currency,
           );
+      _schedulePush();
     });
   }
 
@@ -140,6 +145,7 @@ class ProduitController extends AsyncNotifier<void> {
             establishmentId: establishmentId,
             id: id,
           );
+      _schedulePush();
     });
   }
 }

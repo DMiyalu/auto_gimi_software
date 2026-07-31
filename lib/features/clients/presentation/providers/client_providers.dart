@@ -1,18 +1,14 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/firebase/firebase_bootstrap.dart';
 import '../../../../core/providers/database_provider.dart';
+import '../../../../core/sync/auto_sync_coordinator.dart';
 import '../../../establishment/presentation/providers/establishment_providers.dart';
 import '../../data/repositories/client_repository_impl.dart';
 import '../../domain/entities/client_entity.dart';
 import '../../domain/repositories/client_repository.dart';
 
 final clientRepositoryProvider = Provider<ClientRepository>((ref) {
-  return ClientRepositoryImpl(
-    database: ref.watch(databaseProvider),
-    firestore: isFirebaseConfigured ? FirebaseFirestore.instance : null,
-  );
+  return ClientRepositoryImpl(database: ref.watch(databaseProvider));
 });
 
 final clientsProvider = StreamProvider<List<ClientEntity>>((ref) {
@@ -44,6 +40,7 @@ class ClientController extends AsyncNotifier<void> {
             name: name,
             whatsappPhone: whatsappPhone,
           );
+      ref.read(autoSyncCoordinatorProvider).schedulePush();
     });
   }
 }
