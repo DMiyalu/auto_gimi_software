@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/domain/business_category.dart';
 import '../../../core/routing/routes.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../controllers/primary_module_providers.dart';
@@ -46,10 +47,12 @@ class ActivityList extends ConsumerWidget {
                 endActionPane: _printActionPane(context, item, config.primaryColor),
                 child: ActivityCard(
                   item: item,
-                  onTap: () => context.push(
-                    Routes.activityDetailPath(item.id),
-                    extra: item,
-                  ),
+                  onTap: () => config.category == BusinessCategory.garageAuto
+                      ? context.push(Routes.prestationDetailPath(item.id))
+                      : context.push(
+                          Routes.activityDetailPath(item.id),
+                          extra: item,
+                        ),
                   onLongPress: () => showActivityCardActions(context, ref, item),
                 ),
               ),

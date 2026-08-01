@@ -584,9 +584,9 @@ class $VehiculesTable extends Vehicules
   late final GeneratedColumn<String> clientId = GeneratedColumn<String>(
     'client_id',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'REFERENCES clients (id)',
     ),
@@ -607,18 +607,18 @@ class $VehiculesTable extends Vehicules
   late final GeneratedColumn<String> marque = GeneratedColumn<String>(
     'marque',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _modeleMeta = const VerificationMeta('modele');
   @override
   late final GeneratedColumn<String> modele = GeneratedColumn<String>(
     'modele',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _anneeMeta = const VerificationMeta('annee');
   @override
@@ -728,8 +728,6 @@ class $VehiculesTable extends Vehicules
         _clientIdMeta,
         clientId.isAcceptableOrUnknown(data['client_id']!, _clientIdMeta),
       );
-    } else if (isInserting) {
-      context.missing(_clientIdMeta);
     }
     if (data.containsKey('immatriculation')) {
       context.handle(
@@ -747,16 +745,12 @@ class $VehiculesTable extends Vehicules
         _marqueMeta,
         marque.isAcceptableOrUnknown(data['marque']!, _marqueMeta),
       );
-    } else if (isInserting) {
-      context.missing(_marqueMeta);
     }
     if (data.containsKey('modele')) {
       context.handle(
         _modeleMeta,
         modele.isAcceptableOrUnknown(data['modele']!, _modeleMeta),
       );
-    } else if (isInserting) {
-      context.missing(_modeleMeta);
     }
     if (data.containsKey('annee')) {
       context.handle(
@@ -817,7 +811,7 @@ class $VehiculesTable extends Vehicules
       clientId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}client_id'],
-      )!,
+      ),
       immatriculation: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}immatriculation'],
@@ -825,11 +819,11 @@ class $VehiculesTable extends Vehicules
       marque: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}marque'],
-      )!,
+      ),
       modele: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}modele'],
-      )!,
+      ),
       annee: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}annee'],
@@ -865,10 +859,10 @@ class $VehiculesTable extends Vehicules
 
 class Vehicule extends DataClass implements Insertable<Vehicule> {
   final String id;
-  final String clientId;
+  final String? clientId;
   final String immatriculation;
-  final String marque;
-  final String modele;
+  final String? marque;
+  final String? modele;
   final int? annee;
   final int? kilometrage;
   final DateTime createdAt;
@@ -877,10 +871,10 @@ class Vehicule extends DataClass implements Insertable<Vehicule> {
   final bool isDirty;
   const Vehicule({
     required this.id,
-    required this.clientId,
+    this.clientId,
     required this.immatriculation,
-    required this.marque,
-    required this.modele,
+    this.marque,
+    this.modele,
     this.annee,
     this.kilometrage,
     required this.createdAt,
@@ -892,10 +886,16 @@ class Vehicule extends DataClass implements Insertable<Vehicule> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
-    map['client_id'] = Variable<String>(clientId);
+    if (!nullToAbsent || clientId != null) {
+      map['client_id'] = Variable<String>(clientId);
+    }
     map['immatriculation'] = Variable<String>(immatriculation);
-    map['marque'] = Variable<String>(marque);
-    map['modele'] = Variable<String>(modele);
+    if (!nullToAbsent || marque != null) {
+      map['marque'] = Variable<String>(marque);
+    }
+    if (!nullToAbsent || modele != null) {
+      map['modele'] = Variable<String>(modele);
+    }
     if (!nullToAbsent || annee != null) {
       map['annee'] = Variable<int>(annee);
     }
@@ -912,10 +912,16 @@ class Vehicule extends DataClass implements Insertable<Vehicule> {
   VehiculesCompanion toCompanion(bool nullToAbsent) {
     return VehiculesCompanion(
       id: Value(id),
-      clientId: Value(clientId),
+      clientId: clientId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(clientId),
       immatriculation: Value(immatriculation),
-      marque: Value(marque),
-      modele: Value(modele),
+      marque: marque == null && nullToAbsent
+          ? const Value.absent()
+          : Value(marque),
+      modele: modele == null && nullToAbsent
+          ? const Value.absent()
+          : Value(modele),
       annee: annee == null && nullToAbsent
           ? const Value.absent()
           : Value(annee),
@@ -936,10 +942,10 @@ class Vehicule extends DataClass implements Insertable<Vehicule> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Vehicule(
       id: serializer.fromJson<String>(json['id']),
-      clientId: serializer.fromJson<String>(json['clientId']),
+      clientId: serializer.fromJson<String?>(json['clientId']),
       immatriculation: serializer.fromJson<String>(json['immatriculation']),
-      marque: serializer.fromJson<String>(json['marque']),
-      modele: serializer.fromJson<String>(json['modele']),
+      marque: serializer.fromJson<String?>(json['marque']),
+      modele: serializer.fromJson<String?>(json['modele']),
       annee: serializer.fromJson<int?>(json['annee']),
       kilometrage: serializer.fromJson<int?>(json['kilometrage']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
@@ -953,10 +959,10 @@ class Vehicule extends DataClass implements Insertable<Vehicule> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
-      'clientId': serializer.toJson<String>(clientId),
+      'clientId': serializer.toJson<String?>(clientId),
       'immatriculation': serializer.toJson<String>(immatriculation),
-      'marque': serializer.toJson<String>(marque),
-      'modele': serializer.toJson<String>(modele),
+      'marque': serializer.toJson<String?>(marque),
+      'modele': serializer.toJson<String?>(modele),
       'annee': serializer.toJson<int?>(annee),
       'kilometrage': serializer.toJson<int?>(kilometrage),
       'createdAt': serializer.toJson<DateTime>(createdAt),
@@ -968,10 +974,10 @@ class Vehicule extends DataClass implements Insertable<Vehicule> {
 
   Vehicule copyWith({
     String? id,
-    String? clientId,
+    Value<String?> clientId = const Value.absent(),
     String? immatriculation,
-    String? marque,
-    String? modele,
+    Value<String?> marque = const Value.absent(),
+    Value<String?> modele = const Value.absent(),
     Value<int?> annee = const Value.absent(),
     Value<int?> kilometrage = const Value.absent(),
     DateTime? createdAt,
@@ -980,10 +986,10 @@ class Vehicule extends DataClass implements Insertable<Vehicule> {
     bool? isDirty,
   }) => Vehicule(
     id: id ?? this.id,
-    clientId: clientId ?? this.clientId,
+    clientId: clientId.present ? clientId.value : this.clientId,
     immatriculation: immatriculation ?? this.immatriculation,
-    marque: marque ?? this.marque,
-    modele: modele ?? this.modele,
+    marque: marque.present ? marque.value : this.marque,
+    modele: modele.present ? modele.value : this.modele,
     annee: annee.present ? annee.value : this.annee,
     kilometrage: kilometrage.present ? kilometrage.value : this.kilometrage,
     createdAt: createdAt ?? this.createdAt,
@@ -1062,10 +1068,10 @@ class Vehicule extends DataClass implements Insertable<Vehicule> {
 
 class VehiculesCompanion extends UpdateCompanion<Vehicule> {
   final Value<String> id;
-  final Value<String> clientId;
+  final Value<String?> clientId;
   final Value<String> immatriculation;
-  final Value<String> marque;
-  final Value<String> modele;
+  final Value<String?> marque;
+  final Value<String?> modele;
   final Value<int?> annee;
   final Value<int?> kilometrage;
   final Value<DateTime> createdAt;
@@ -1089,10 +1095,10 @@ class VehiculesCompanion extends UpdateCompanion<Vehicule> {
   });
   VehiculesCompanion.insert({
     required String id,
-    required String clientId,
+    this.clientId = const Value.absent(),
     required String immatriculation,
-    required String marque,
-    required String modele,
+    this.marque = const Value.absent(),
+    this.modele = const Value.absent(),
     this.annee = const Value.absent(),
     this.kilometrage = const Value.absent(),
     required DateTime createdAt,
@@ -1101,10 +1107,7 @@ class VehiculesCompanion extends UpdateCompanion<Vehicule> {
     this.isDirty = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
-       clientId = Value(clientId),
        immatriculation = Value(immatriculation),
-       marque = Value(marque),
-       modele = Value(modele),
        createdAt = Value(createdAt),
        updatedAt = Value(updatedAt);
   static Insertable<Vehicule> custom({
@@ -1139,10 +1142,10 @@ class VehiculesCompanion extends UpdateCompanion<Vehicule> {
 
   VehiculesCompanion copyWith({
     Value<String>? id,
-    Value<String>? clientId,
+    Value<String?>? clientId,
     Value<String>? immatriculation,
-    Value<String>? marque,
-    Value<String>? modele,
+    Value<String?>? marque,
+    Value<String?>? modele,
     Value<int?>? annee,
     Value<int?>? kilometrage,
     Value<DateTime>? createdAt,
@@ -3333,9 +3336,9 @@ class $PrestationsTable extends Prestations
   late final GeneratedColumn<String> clientId = GeneratedColumn<String>(
     'client_id',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'REFERENCES clients (id)',
     ),
@@ -3537,8 +3540,6 @@ class $PrestationsTable extends Prestations
         _clientIdMeta,
         clientId.isAcceptableOrUnknown(data['client_id']!, _clientIdMeta),
       );
-    } else if (isInserting) {
-      context.missing(_clientIdMeta);
     }
     if (data.containsKey('vehicule_id')) {
       context.handle(
@@ -3657,7 +3658,7 @@ class $PrestationsTable extends Prestations
       clientId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}client_id'],
-      )!,
+      ),
       vehiculeId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}vehicule_id'],
@@ -3726,7 +3727,7 @@ class $PrestationsTable extends Prestations
 
 class Prestation extends DataClass implements Insertable<Prestation> {
   final String id;
-  final String clientId;
+  final String? clientId;
   final String vehiculeId;
   final PrestationStatut statut;
   final DateTime dateOuverture;
@@ -3742,7 +3743,7 @@ class Prestation extends DataClass implements Insertable<Prestation> {
   final bool isDirty;
   const Prestation({
     required this.id,
-    required this.clientId,
+    this.clientId,
     required this.vehiculeId,
     required this.statut,
     required this.dateOuverture,
@@ -3761,7 +3762,9 @@ class Prestation extends DataClass implements Insertable<Prestation> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
-    map['client_id'] = Variable<String>(clientId);
+    if (!nullToAbsent || clientId != null) {
+      map['client_id'] = Variable<String>(clientId);
+    }
     map['vehicule_id'] = Variable<String>(vehiculeId);
     {
       map['statut'] = Variable<String>(
@@ -3789,7 +3792,9 @@ class Prestation extends DataClass implements Insertable<Prestation> {
   PrestationsCompanion toCompanion(bool nullToAbsent) {
     return PrestationsCompanion(
       id: Value(id),
-      clientId: Value(clientId),
+      clientId: clientId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(clientId),
       vehiculeId: Value(vehiculeId),
       statut: Value(statut),
       dateOuverture: Value(dateOuverture),
@@ -3817,7 +3822,7 @@ class Prestation extends DataClass implements Insertable<Prestation> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Prestation(
       id: serializer.fromJson<String>(json['id']),
-      clientId: serializer.fromJson<String>(json['clientId']),
+      clientId: serializer.fromJson<String?>(json['clientId']),
       vehiculeId: serializer.fromJson<String>(json['vehiculeId']),
       statut: serializer.fromJson<PrestationStatut>(json['statut']),
       dateOuverture: serializer.fromJson<DateTime>(json['dateOuverture']),
@@ -3840,7 +3845,7 @@ class Prestation extends DataClass implements Insertable<Prestation> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
-      'clientId': serializer.toJson<String>(clientId),
+      'clientId': serializer.toJson<String?>(clientId),
       'vehiculeId': serializer.toJson<String>(vehiculeId),
       'statut': serializer.toJson<PrestationStatut>(statut),
       'dateOuverture': serializer.toJson<DateTime>(dateOuverture),
@@ -3859,7 +3864,7 @@ class Prestation extends DataClass implements Insertable<Prestation> {
 
   Prestation copyWith({
     String? id,
-    String? clientId,
+    Value<String?> clientId = const Value.absent(),
     String? vehiculeId,
     PrestationStatut? statut,
     DateTime? dateOuverture,
@@ -3875,7 +3880,7 @@ class Prestation extends DataClass implements Insertable<Prestation> {
     bool? isDirty,
   }) => Prestation(
     id: id ?? this.id,
-    clientId: clientId ?? this.clientId,
+    clientId: clientId.present ? clientId.value : this.clientId,
     vehiculeId: vehiculeId ?? this.vehiculeId,
     statut: statut ?? this.statut,
     dateOuverture: dateOuverture ?? this.dateOuverture,
@@ -3989,7 +3994,7 @@ class Prestation extends DataClass implements Insertable<Prestation> {
 
 class PrestationsCompanion extends UpdateCompanion<Prestation> {
   final Value<String> id;
-  final Value<String> clientId;
+  final Value<String?> clientId;
   final Value<String> vehiculeId;
   final Value<PrestationStatut> statut;
   final Value<DateTime> dateOuverture;
@@ -4024,7 +4029,7 @@ class PrestationsCompanion extends UpdateCompanion<Prestation> {
   });
   PrestationsCompanion.insert({
     required String id,
-    required String clientId,
+    this.clientId = const Value.absent(),
     required String vehiculeId,
     required PrestationStatut statut,
     required DateTime dateOuverture,
@@ -4040,7 +4045,6 @@ class PrestationsCompanion extends UpdateCompanion<Prestation> {
     this.isDirty = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
-       clientId = Value(clientId),
        vehiculeId = Value(vehiculeId),
        statut = Value(statut),
        dateOuverture = Value(dateOuverture),
@@ -4087,7 +4091,7 @@ class PrestationsCompanion extends UpdateCompanion<Prestation> {
 
   PrestationsCompanion copyWith({
     Value<String>? id,
-    Value<String>? clientId,
+    Value<String?>? clientId,
     Value<String>? vehiculeId,
     Value<PrestationStatut>? statut,
     Value<DateTime>? dateOuverture,
@@ -4234,6 +4238,15 @@ class $LignePrestationsTable extends LignePrestations
       'REFERENCES prestations (id)',
     ),
   );
+  @override
+  late final GeneratedColumnWithTypeConverter<LigneType, String> type =
+      GeneratedColumn<String>(
+        'type',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<LigneType>($LignePrestationsTable.$convertertype);
   static const VerificationMeta _serviceIdMeta = const VerificationMeta(
     'serviceId',
   );
@@ -4241,12 +4254,37 @@ class $LignePrestationsTable extends LignePrestations
   late final GeneratedColumn<String> serviceId = GeneratedColumn<String>(
     'service_id',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'REFERENCES catalog_services (id)',
     ),
+  );
+  static const VerificationMeta _produitIdMeta = const VerificationMeta(
+    'produitId',
+  );
+  @override
+  late final GeneratedColumn<String> produitId = GeneratedColumn<String>(
+    'produit_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES produits (id)',
+    ),
+  );
+  static const VerificationMeta _libelleMeta = const VerificationMeta(
+    'libelle',
+  );
+  @override
+  late final GeneratedColumn<String> libelle = GeneratedColumn<String>(
+    'libelle',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
   );
   static const VerificationMeta _quantiteMeta = const VerificationMeta(
     'quantite',
@@ -4338,7 +4376,10 @@ class $LignePrestationsTable extends LignePrestations
   List<GeneratedColumn> get $columns => [
     id,
     prestationId,
+    type,
     serviceId,
+    produitId,
+    libelle,
     quantite,
     prixUnitaire,
     montantLigne,
@@ -4380,8 +4421,20 @@ class $LignePrestationsTable extends LignePrestations
         _serviceIdMeta,
         serviceId.isAcceptableOrUnknown(data['service_id']!, _serviceIdMeta),
       );
+    }
+    if (data.containsKey('produit_id')) {
+      context.handle(
+        _produitIdMeta,
+        produitId.isAcceptableOrUnknown(data['produit_id']!, _produitIdMeta),
+      );
+    }
+    if (data.containsKey('libelle')) {
+      context.handle(
+        _libelleMeta,
+        libelle.isAcceptableOrUnknown(data['libelle']!, _libelleMeta),
+      );
     } else if (isInserting) {
-      context.missing(_serviceIdMeta);
+      context.missing(_libelleMeta);
     }
     if (data.containsKey('quantite')) {
       context.handle(
@@ -4456,9 +4509,23 @@ class $LignePrestationsTable extends LignePrestations
         DriftSqlType.string,
         data['${effectivePrefix}prestation_id'],
       )!,
+      type: $LignePrestationsTable.$convertertype.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}type'],
+        )!,
+      ),
       serviceId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}service_id'],
+      ),
+      produitId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}produit_id'],
+      ),
+      libelle: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}libelle'],
       )!,
       quantite: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
@@ -4495,12 +4562,18 @@ class $LignePrestationsTable extends LignePrestations
   $LignePrestationsTable createAlias(String alias) {
     return $LignePrestationsTable(attachedDatabase, alias);
   }
+
+  static TypeConverter<LigneType, String> $convertertype =
+      const LigneTypeConverter();
 }
 
 class LignePrestation extends DataClass implements Insertable<LignePrestation> {
   final String id;
   final String prestationId;
-  final String serviceId;
+  final LigneType type;
+  final String? serviceId;
+  final String? produitId;
+  final String libelle;
   final int quantite;
   final double prixUnitaire;
   final double montantLigne;
@@ -4511,7 +4584,10 @@ class LignePrestation extends DataClass implements Insertable<LignePrestation> {
   const LignePrestation({
     required this.id,
     required this.prestationId,
-    required this.serviceId,
+    required this.type,
+    this.serviceId,
+    this.produitId,
+    required this.libelle,
     required this.quantite,
     required this.prixUnitaire,
     required this.montantLigne,
@@ -4525,7 +4601,18 @@ class LignePrestation extends DataClass implements Insertable<LignePrestation> {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     map['prestation_id'] = Variable<String>(prestationId);
-    map['service_id'] = Variable<String>(serviceId);
+    {
+      map['type'] = Variable<String>(
+        $LignePrestationsTable.$convertertype.toSql(type),
+      );
+    }
+    if (!nullToAbsent || serviceId != null) {
+      map['service_id'] = Variable<String>(serviceId);
+    }
+    if (!nullToAbsent || produitId != null) {
+      map['produit_id'] = Variable<String>(produitId);
+    }
+    map['libelle'] = Variable<String>(libelle);
     map['quantite'] = Variable<int>(quantite);
     map['prix_unitaire'] = Variable<double>(prixUnitaire);
     map['montant_ligne'] = Variable<double>(montantLigne);
@@ -4540,7 +4627,14 @@ class LignePrestation extends DataClass implements Insertable<LignePrestation> {
     return LignePrestationsCompanion(
       id: Value(id),
       prestationId: Value(prestationId),
-      serviceId: Value(serviceId),
+      type: Value(type),
+      serviceId: serviceId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(serviceId),
+      produitId: produitId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(produitId),
+      libelle: Value(libelle),
       quantite: Value(quantite),
       prixUnitaire: Value(prixUnitaire),
       montantLigne: Value(montantLigne),
@@ -4559,7 +4653,10 @@ class LignePrestation extends DataClass implements Insertable<LignePrestation> {
     return LignePrestation(
       id: serializer.fromJson<String>(json['id']),
       prestationId: serializer.fromJson<String>(json['prestationId']),
-      serviceId: serializer.fromJson<String>(json['serviceId']),
+      type: serializer.fromJson<LigneType>(json['type']),
+      serviceId: serializer.fromJson<String?>(json['serviceId']),
+      produitId: serializer.fromJson<String?>(json['produitId']),
+      libelle: serializer.fromJson<String>(json['libelle']),
       quantite: serializer.fromJson<int>(json['quantite']),
       prixUnitaire: serializer.fromJson<double>(json['prixUnitaire']),
       montantLigne: serializer.fromJson<double>(json['montantLigne']),
@@ -4575,7 +4672,10 @@ class LignePrestation extends DataClass implements Insertable<LignePrestation> {
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'prestationId': serializer.toJson<String>(prestationId),
-      'serviceId': serializer.toJson<String>(serviceId),
+      'type': serializer.toJson<LigneType>(type),
+      'serviceId': serializer.toJson<String?>(serviceId),
+      'produitId': serializer.toJson<String?>(produitId),
+      'libelle': serializer.toJson<String>(libelle),
       'quantite': serializer.toJson<int>(quantite),
       'prixUnitaire': serializer.toJson<double>(prixUnitaire),
       'montantLigne': serializer.toJson<double>(montantLigne),
@@ -4589,7 +4689,10 @@ class LignePrestation extends DataClass implements Insertable<LignePrestation> {
   LignePrestation copyWith({
     String? id,
     String? prestationId,
-    String? serviceId,
+    LigneType? type,
+    Value<String?> serviceId = const Value.absent(),
+    Value<String?> produitId = const Value.absent(),
+    String? libelle,
     int? quantite,
     double? prixUnitaire,
     double? montantLigne,
@@ -4600,7 +4703,10 @@ class LignePrestation extends DataClass implements Insertable<LignePrestation> {
   }) => LignePrestation(
     id: id ?? this.id,
     prestationId: prestationId ?? this.prestationId,
-    serviceId: serviceId ?? this.serviceId,
+    type: type ?? this.type,
+    serviceId: serviceId.present ? serviceId.value : this.serviceId,
+    produitId: produitId.present ? produitId.value : this.produitId,
+    libelle: libelle ?? this.libelle,
     quantite: quantite ?? this.quantite,
     prixUnitaire: prixUnitaire ?? this.prixUnitaire,
     montantLigne: montantLigne ?? this.montantLigne,
@@ -4615,7 +4721,10 @@ class LignePrestation extends DataClass implements Insertable<LignePrestation> {
       prestationId: data.prestationId.present
           ? data.prestationId.value
           : this.prestationId,
+      type: data.type.present ? data.type.value : this.type,
       serviceId: data.serviceId.present ? data.serviceId.value : this.serviceId,
+      produitId: data.produitId.present ? data.produitId.value : this.produitId,
+      libelle: data.libelle.present ? data.libelle.value : this.libelle,
       quantite: data.quantite.present ? data.quantite.value : this.quantite,
       prixUnitaire: data.prixUnitaire.present
           ? data.prixUnitaire.value
@@ -4635,7 +4744,10 @@ class LignePrestation extends DataClass implements Insertable<LignePrestation> {
     return (StringBuffer('LignePrestation(')
           ..write('id: $id, ')
           ..write('prestationId: $prestationId, ')
+          ..write('type: $type, ')
           ..write('serviceId: $serviceId, ')
+          ..write('produitId: $produitId, ')
+          ..write('libelle: $libelle, ')
           ..write('quantite: $quantite, ')
           ..write('prixUnitaire: $prixUnitaire, ')
           ..write('montantLigne: $montantLigne, ')
@@ -4651,7 +4763,10 @@ class LignePrestation extends DataClass implements Insertable<LignePrestation> {
   int get hashCode => Object.hash(
     id,
     prestationId,
+    type,
     serviceId,
+    produitId,
+    libelle,
     quantite,
     prixUnitaire,
     montantLigne,
@@ -4666,7 +4781,10 @@ class LignePrestation extends DataClass implements Insertable<LignePrestation> {
       (other is LignePrestation &&
           other.id == this.id &&
           other.prestationId == this.prestationId &&
+          other.type == this.type &&
           other.serviceId == this.serviceId &&
+          other.produitId == this.produitId &&
+          other.libelle == this.libelle &&
           other.quantite == this.quantite &&
           other.prixUnitaire == this.prixUnitaire &&
           other.montantLigne == this.montantLigne &&
@@ -4679,7 +4797,10 @@ class LignePrestation extends DataClass implements Insertable<LignePrestation> {
 class LignePrestationsCompanion extends UpdateCompanion<LignePrestation> {
   final Value<String> id;
   final Value<String> prestationId;
-  final Value<String> serviceId;
+  final Value<LigneType> type;
+  final Value<String?> serviceId;
+  final Value<String?> produitId;
+  final Value<String> libelle;
   final Value<int> quantite;
   final Value<double> prixUnitaire;
   final Value<double> montantLigne;
@@ -4691,7 +4812,10 @@ class LignePrestationsCompanion extends UpdateCompanion<LignePrestation> {
   const LignePrestationsCompanion({
     this.id = const Value.absent(),
     this.prestationId = const Value.absent(),
+    this.type = const Value.absent(),
     this.serviceId = const Value.absent(),
+    this.produitId = const Value.absent(),
+    this.libelle = const Value.absent(),
     this.quantite = const Value.absent(),
     this.prixUnitaire = const Value.absent(),
     this.montantLigne = const Value.absent(),
@@ -4704,7 +4828,10 @@ class LignePrestationsCompanion extends UpdateCompanion<LignePrestation> {
   LignePrestationsCompanion.insert({
     required String id,
     required String prestationId,
-    required String serviceId,
+    required LigneType type,
+    this.serviceId = const Value.absent(),
+    this.produitId = const Value.absent(),
+    required String libelle,
     this.quantite = const Value.absent(),
     required double prixUnitaire,
     required double montantLigne,
@@ -4715,7 +4842,8 @@ class LignePrestationsCompanion extends UpdateCompanion<LignePrestation> {
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        prestationId = Value(prestationId),
-       serviceId = Value(serviceId),
+       type = Value(type),
+       libelle = Value(libelle),
        prixUnitaire = Value(prixUnitaire),
        montantLigne = Value(montantLigne),
        createdAt = Value(createdAt),
@@ -4723,7 +4851,10 @@ class LignePrestationsCompanion extends UpdateCompanion<LignePrestation> {
   static Insertable<LignePrestation> custom({
     Expression<String>? id,
     Expression<String>? prestationId,
+    Expression<String>? type,
     Expression<String>? serviceId,
+    Expression<String>? produitId,
+    Expression<String>? libelle,
     Expression<int>? quantite,
     Expression<double>? prixUnitaire,
     Expression<double>? montantLigne,
@@ -4736,7 +4867,10 @@ class LignePrestationsCompanion extends UpdateCompanion<LignePrestation> {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (prestationId != null) 'prestation_id': prestationId,
+      if (type != null) 'type': type,
       if (serviceId != null) 'service_id': serviceId,
+      if (produitId != null) 'produit_id': produitId,
+      if (libelle != null) 'libelle': libelle,
       if (quantite != null) 'quantite': quantite,
       if (prixUnitaire != null) 'prix_unitaire': prixUnitaire,
       if (montantLigne != null) 'montant_ligne': montantLigne,
@@ -4751,7 +4885,10 @@ class LignePrestationsCompanion extends UpdateCompanion<LignePrestation> {
   LignePrestationsCompanion copyWith({
     Value<String>? id,
     Value<String>? prestationId,
-    Value<String>? serviceId,
+    Value<LigneType>? type,
+    Value<String?>? serviceId,
+    Value<String?>? produitId,
+    Value<String>? libelle,
     Value<int>? quantite,
     Value<double>? prixUnitaire,
     Value<double>? montantLigne,
@@ -4764,7 +4901,10 @@ class LignePrestationsCompanion extends UpdateCompanion<LignePrestation> {
     return LignePrestationsCompanion(
       id: id ?? this.id,
       prestationId: prestationId ?? this.prestationId,
+      type: type ?? this.type,
       serviceId: serviceId ?? this.serviceId,
+      produitId: produitId ?? this.produitId,
+      libelle: libelle ?? this.libelle,
       quantite: quantite ?? this.quantite,
       prixUnitaire: prixUnitaire ?? this.prixUnitaire,
       montantLigne: montantLigne ?? this.montantLigne,
@@ -4785,8 +4925,19 @@ class LignePrestationsCompanion extends UpdateCompanion<LignePrestation> {
     if (prestationId.present) {
       map['prestation_id'] = Variable<String>(prestationId.value);
     }
+    if (type.present) {
+      map['type'] = Variable<String>(
+        $LignePrestationsTable.$convertertype.toSql(type.value),
+      );
+    }
     if (serviceId.present) {
       map['service_id'] = Variable<String>(serviceId.value);
+    }
+    if (produitId.present) {
+      map['produit_id'] = Variable<String>(produitId.value);
+    }
+    if (libelle.present) {
+      map['libelle'] = Variable<String>(libelle.value);
     }
     if (quantite.present) {
       map['quantite'] = Variable<int>(quantite.value);
@@ -4820,7 +4971,10 @@ class LignePrestationsCompanion extends UpdateCompanion<LignePrestation> {
     return (StringBuffer('LignePrestationsCompanion(')
           ..write('id: $id, ')
           ..write('prestationId: $prestationId, ')
+          ..write('type: $type, ')
           ..write('serviceId: $serviceId, ')
+          ..write('produitId: $produitId, ')
+          ..write('libelle: $libelle, ')
           ..write('quantite: $quantite, ')
           ..write('prixUnitaire: $prixUnitaire, ')
           ..write('montantLigne: $montantLigne, ')
@@ -7668,10 +7822,10 @@ typedef $$ClientsTableProcessedTableManager =
 typedef $$VehiculesTableCreateCompanionBuilder =
     VehiculesCompanion Function({
       required String id,
-      required String clientId,
+      Value<String?> clientId,
       required String immatriculation,
-      required String marque,
-      required String modele,
+      Value<String?> marque,
+      Value<String?> modele,
       Value<int?> annee,
       Value<int?> kilometrage,
       required DateTime createdAt,
@@ -7683,10 +7837,10 @@ typedef $$VehiculesTableCreateCompanionBuilder =
 typedef $$VehiculesTableUpdateCompanionBuilder =
     VehiculesCompanion Function({
       Value<String> id,
-      Value<String> clientId,
+      Value<String?> clientId,
       Value<String> immatriculation,
-      Value<String> marque,
-      Value<String> modele,
+      Value<String?> marque,
+      Value<String?> modele,
       Value<int?> annee,
       Value<int?> kilometrage,
       Value<DateTime> createdAt,
@@ -7703,9 +7857,9 @@ final class $$VehiculesTableReferences
   static $ClientsTable _clientIdTable(_$AppDatabase db) => db.clients
       .createAlias($_aliasNameGenerator(db.vehicules.clientId, db.clients.id));
 
-  $$ClientsTableProcessedTableManager get clientId {
-    final $_column = $_itemColumn<String>('client_id')!;
-
+  $$ClientsTableProcessedTableManager? get clientId {
+    final $_column = $_itemColumn<String>('client_id');
+    if ($_column == null) return null;
     final manager = $$ClientsTableTableManager(
       $_db,
       $_db.clients,
@@ -8125,10 +8279,10 @@ class $$VehiculesTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
-                Value<String> clientId = const Value.absent(),
+                Value<String?> clientId = const Value.absent(),
                 Value<String> immatriculation = const Value.absent(),
-                Value<String> marque = const Value.absent(),
-                Value<String> modele = const Value.absent(),
+                Value<String?> marque = const Value.absent(),
+                Value<String?> modele = const Value.absent(),
                 Value<int?> annee = const Value.absent(),
                 Value<int?> kilometrage = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
@@ -8153,10 +8307,10 @@ class $$VehiculesTableTableManager
           createCompanionCallback:
               ({
                 required String id,
-                required String clientId,
+                Value<String?> clientId = const Value.absent(),
                 required String immatriculation,
-                required String marque,
-                required String modele,
+                Value<String?> marque = const Value.absent(),
+                Value<String?> modele = const Value.absent(),
                 Value<int?> annee = const Value.absent(),
                 Value<int?> kilometrage = const Value.absent(),
                 required DateTime createdAt,
@@ -9686,6 +9840,29 @@ final class $$ProduitsTableReferences
       manager.$state.copyWith(prefetchedData: [item]),
     );
   }
+
+  static MultiTypedResultKey<$LignePrestationsTable, List<LignePrestation>>
+  _lignePrestationsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.lignePrestations,
+    aliasName: $_aliasNameGenerator(
+      db.produits.id,
+      db.lignePrestations.produitId,
+    ),
+  );
+
+  $$LignePrestationsTableProcessedTableManager get lignePrestationsRefs {
+    final manager = $$LignePrestationsTableTableManager(
+      $_db,
+      $_db.lignePrestations,
+    ).filter((f) => f.produitId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _lignePrestationsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$ProduitsTableFilterComposer
@@ -9758,6 +9935,31 @@ class $$ProduitsTableFilterComposer
           ),
     );
     return composer;
+  }
+
+  Expression<bool> lignePrestationsRefs(
+    Expression<bool> Function($$LignePrestationsTableFilterComposer f) f,
+  ) {
+    final $$LignePrestationsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.lignePrestations,
+      getReferencedColumn: (t) => t.produitId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LignePrestationsTableFilterComposer(
+            $db: $db,
+            $table: $db.lignePrestations,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
   }
 }
 
@@ -9890,6 +10092,31 @@ class $$ProduitsTableAnnotationComposer
         );
     return composer;
   }
+
+  Expression<T> lignePrestationsRefs<T extends Object>(
+    Expression<T> Function($$LignePrestationsTableAnnotationComposer a) f,
+  ) {
+    final $$LignePrestationsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.lignePrestations,
+      getReferencedColumn: (t) => t.produitId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LignePrestationsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.lignePrestations,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$ProduitsTableTableManager
@@ -9905,7 +10132,7 @@ class $$ProduitsTableTableManager
           $$ProduitsTableUpdateCompanionBuilder,
           (Produit, $$ProduitsTableReferences),
           Produit,
-          PrefetchHooks Function({bool categorieId})
+          PrefetchHooks Function({bool categorieId, bool lignePrestationsRefs})
         > {
   $$ProduitsTableTableManager(_$AppDatabase db, $ProduitsTable table)
     : super(
@@ -9974,47 +10201,72 @@ class $$ProduitsTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({categorieId = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [],
-              addJoins:
-                  <
-                    T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
-                    if (categorieId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.categorieId,
-                                referencedTable: $$ProduitsTableReferences
-                                    ._categorieIdTable(db),
-                                referencedColumn: $$ProduitsTableReferences
-                                    ._categorieIdTable(db)
-                                    .id,
-                              )
-                              as T;
-                    }
+          prefetchHooksCallback:
+              ({categorieId = false, lignePrestationsRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (lignePrestationsRefs) db.lignePrestations,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (categorieId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.categorieId,
+                                    referencedTable: $$ProduitsTableReferences
+                                        ._categorieIdTable(db),
+                                    referencedColumn: $$ProduitsTableReferences
+                                        ._categorieIdTable(db)
+                                        .id,
+                                  )
+                                  as T;
+                        }
 
-                    return state;
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (lignePrestationsRefs)
+                        await $_getPrefetchedData<
+                          Produit,
+                          $ProduitsTable,
+                          LignePrestation
+                        >(
+                          currentTable: table,
+                          referencedTable: $$ProduitsTableReferences
+                              ._lignePrestationsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ProduitsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).lignePrestationsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.produitId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
                   },
-              getPrefetchedDataCallback: (items) async {
-                return [];
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -10031,12 +10283,12 @@ typedef $$ProduitsTableProcessedTableManager =
       $$ProduitsTableUpdateCompanionBuilder,
       (Produit, $$ProduitsTableReferences),
       Produit,
-      PrefetchHooks Function({bool categorieId})
+      PrefetchHooks Function({bool categorieId, bool lignePrestationsRefs})
     >;
 typedef $$PrestationsTableCreateCompanionBuilder =
     PrestationsCompanion Function({
       required String id,
-      required String clientId,
+      Value<String?> clientId,
       required String vehiculeId,
       required PrestationStatut statut,
       required DateTime dateOuverture,
@@ -10055,7 +10307,7 @@ typedef $$PrestationsTableCreateCompanionBuilder =
 typedef $$PrestationsTableUpdateCompanionBuilder =
     PrestationsCompanion Function({
       Value<String> id,
-      Value<String> clientId,
+      Value<String?> clientId,
       Value<String> vehiculeId,
       Value<PrestationStatut> statut,
       Value<DateTime> dateOuverture,
@@ -10081,9 +10333,9 @@ final class $$PrestationsTableReferences
         $_aliasNameGenerator(db.prestations.clientId, db.clients.id),
       );
 
-  $$ClientsTableProcessedTableManager get clientId {
-    final $_column = $_itemColumn<String>('client_id')!;
-
+  $$ClientsTableProcessedTableManager? get clientId {
+    final $_column = $_itemColumn<String>('client_id');
+    if ($_column == null) return null;
     final manager = $$ClientsTableTableManager(
       $_db,
       $_db.clients,
@@ -10643,7 +10895,7 @@ class $$PrestationsTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
-                Value<String> clientId = const Value.absent(),
+                Value<String?> clientId = const Value.absent(),
                 Value<String> vehiculeId = const Value.absent(),
                 Value<PrestationStatut> statut = const Value.absent(),
                 Value<DateTime> dateOuverture = const Value.absent(),
@@ -10679,7 +10931,7 @@ class $$PrestationsTableTableManager
           createCompanionCallback:
               ({
                 required String id,
-                required String clientId,
+                Value<String?> clientId = const Value.absent(),
                 required String vehiculeId,
                 required PrestationStatut statut,
                 required DateTime dateOuverture,
@@ -10857,7 +11109,10 @@ typedef $$LignePrestationsTableCreateCompanionBuilder =
     LignePrestationsCompanion Function({
       required String id,
       required String prestationId,
-      required String serviceId,
+      required LigneType type,
+      Value<String?> serviceId,
+      Value<String?> produitId,
+      required String libelle,
       Value<int> quantite,
       required double prixUnitaire,
       required double montantLigne,
@@ -10871,7 +11126,10 @@ typedef $$LignePrestationsTableUpdateCompanionBuilder =
     LignePrestationsCompanion Function({
       Value<String> id,
       Value<String> prestationId,
-      Value<String> serviceId,
+      Value<LigneType> type,
+      Value<String?> serviceId,
+      Value<String?> produitId,
+      Value<String> libelle,
       Value<int> quantite,
       Value<double> prixUnitaire,
       Value<double> montantLigne,
@@ -10921,14 +11179,33 @@ final class $$LignePrestationsTableReferences
         ),
       );
 
-  $$CatalogServicesTableProcessedTableManager get serviceId {
-    final $_column = $_itemColumn<String>('service_id')!;
-
+  $$CatalogServicesTableProcessedTableManager? get serviceId {
+    final $_column = $_itemColumn<String>('service_id');
+    if ($_column == null) return null;
     final manager = $$CatalogServicesTableTableManager(
       $_db,
       $_db.catalogServices,
     ).filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_serviceIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $ProduitsTable _produitIdTable(_$AppDatabase db) =>
+      db.produits.createAlias(
+        $_aliasNameGenerator(db.lignePrestations.produitId, db.produits.id),
+      );
+
+  $$ProduitsTableProcessedTableManager? get produitId {
+    final $_column = $_itemColumn<String>('produit_id');
+    if ($_column == null) return null;
+    final manager = $$ProduitsTableTableManager(
+      $_db,
+      $_db.produits,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_produitIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: [item]),
@@ -10947,6 +11224,17 @@ class $$LignePrestationsTableFilterComposer
   });
   ColumnFilters<String> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<LigneType, LigneType, String> get type =>
+      $composableBuilder(
+        column: $table.type,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<String> get libelle => $composableBuilder(
+    column: $table.libelle,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -11030,6 +11318,29 @@ class $$LignePrestationsTableFilterComposer
     );
     return composer;
   }
+
+  $$ProduitsTableFilterComposer get produitId {
+    final $$ProduitsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.produitId,
+      referencedTable: $db.produits,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProduitsTableFilterComposer(
+            $db: $db,
+            $table: $db.produits,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$LignePrestationsTableOrderingComposer
@@ -11043,6 +11354,16 @@ class $$LignePrestationsTableOrderingComposer
   });
   ColumnOrderings<String> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get libelle => $composableBuilder(
+    column: $table.libelle,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -11126,6 +11447,29 @@ class $$LignePrestationsTableOrderingComposer
     );
     return composer;
   }
+
+  $$ProduitsTableOrderingComposer get produitId {
+    final $$ProduitsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.produitId,
+      referencedTable: $db.produits,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProduitsTableOrderingComposer(
+            $db: $db,
+            $table: $db.produits,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$LignePrestationsTableAnnotationComposer
@@ -11139,6 +11483,12 @@ class $$LignePrestationsTableAnnotationComposer
   });
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<LigneType, String> get type =>
+      $composableBuilder(column: $table.type, builder: (column) => column);
+
+  GeneratedColumn<String> get libelle =>
+      $composableBuilder(column: $table.libelle, builder: (column) => column);
 
   GeneratedColumn<int> get quantite =>
       $composableBuilder(column: $table.quantite, builder: (column) => column);
@@ -11210,6 +11560,29 @@ class $$LignePrestationsTableAnnotationComposer
     );
     return composer;
   }
+
+  $$ProduitsTableAnnotationComposer get produitId {
+    final $$ProduitsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.produitId,
+      referencedTable: $db.produits,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProduitsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.produits,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$LignePrestationsTableTableManager
@@ -11225,7 +11598,11 @@ class $$LignePrestationsTableTableManager
           $$LignePrestationsTableUpdateCompanionBuilder,
           (LignePrestation, $$LignePrestationsTableReferences),
           LignePrestation,
-          PrefetchHooks Function({bool prestationId, bool serviceId})
+          PrefetchHooks Function({
+            bool prestationId,
+            bool serviceId,
+            bool produitId,
+          })
         > {
   $$LignePrestationsTableTableManager(
     _$AppDatabase db,
@@ -11244,7 +11621,10 @@ class $$LignePrestationsTableTableManager
               ({
                 Value<String> id = const Value.absent(),
                 Value<String> prestationId = const Value.absent(),
-                Value<String> serviceId = const Value.absent(),
+                Value<LigneType> type = const Value.absent(),
+                Value<String?> serviceId = const Value.absent(),
+                Value<String?> produitId = const Value.absent(),
+                Value<String> libelle = const Value.absent(),
                 Value<int> quantite = const Value.absent(),
                 Value<double> prixUnitaire = const Value.absent(),
                 Value<double> montantLigne = const Value.absent(),
@@ -11256,7 +11636,10 @@ class $$LignePrestationsTableTableManager
               }) => LignePrestationsCompanion(
                 id: id,
                 prestationId: prestationId,
+                type: type,
                 serviceId: serviceId,
+                produitId: produitId,
+                libelle: libelle,
                 quantite: quantite,
                 prixUnitaire: prixUnitaire,
                 montantLigne: montantLigne,
@@ -11270,7 +11653,10 @@ class $$LignePrestationsTableTableManager
               ({
                 required String id,
                 required String prestationId,
-                required String serviceId,
+                required LigneType type,
+                Value<String?> serviceId = const Value.absent(),
+                Value<String?> produitId = const Value.absent(),
+                required String libelle,
                 Value<int> quantite = const Value.absent(),
                 required double prixUnitaire,
                 required double montantLigne,
@@ -11282,7 +11668,10 @@ class $$LignePrestationsTableTableManager
               }) => LignePrestationsCompanion.insert(
                 id: id,
                 prestationId: prestationId,
+                type: type,
                 serviceId: serviceId,
+                produitId: produitId,
+                libelle: libelle,
                 quantite: quantite,
                 prixUnitaire: prixUnitaire,
                 montantLigne: montantLigne,
@@ -11300,64 +11689,80 @@ class $$LignePrestationsTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({prestationId = false, serviceId = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [],
-              addJoins:
-                  <
-                    T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
-                    if (prestationId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.prestationId,
-                                referencedTable:
-                                    $$LignePrestationsTableReferences
-                                        ._prestationIdTable(db),
-                                referencedColumn:
-                                    $$LignePrestationsTableReferences
-                                        ._prestationIdTable(db)
-                                        .id,
-                              )
-                              as T;
-                    }
-                    if (serviceId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.serviceId,
-                                referencedTable:
-                                    $$LignePrestationsTableReferences
-                                        ._serviceIdTable(db),
-                                referencedColumn:
-                                    $$LignePrestationsTableReferences
-                                        ._serviceIdTable(db)
-                                        .id,
-                              )
-                              as T;
-                    }
+          prefetchHooksCallback:
+              ({prestationId = false, serviceId = false, produitId = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (prestationId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.prestationId,
+                                    referencedTable:
+                                        $$LignePrestationsTableReferences
+                                            ._prestationIdTable(db),
+                                    referencedColumn:
+                                        $$LignePrestationsTableReferences
+                                            ._prestationIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
+                        if (serviceId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.serviceId,
+                                    referencedTable:
+                                        $$LignePrestationsTableReferences
+                                            ._serviceIdTable(db),
+                                    referencedColumn:
+                                        $$LignePrestationsTableReferences
+                                            ._serviceIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
+                        if (produitId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.produitId,
+                                    referencedTable:
+                                        $$LignePrestationsTableReferences
+                                            ._produitIdTable(db),
+                                    referencedColumn:
+                                        $$LignePrestationsTableReferences
+                                            ._produitIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
 
-                    return state;
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [];
                   },
-              getPrefetchedDataCallback: (items) async {
-                return [];
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -11374,7 +11779,11 @@ typedef $$LignePrestationsTableProcessedTableManager =
       $$LignePrestationsTableUpdateCompanionBuilder,
       (LignePrestation, $$LignePrestationsTableReferences),
       LignePrestation,
-      PrefetchHooks Function({bool prestationId, bool serviceId})
+      PrefetchHooks Function({
+        bool prestationId,
+        bool serviceId,
+        bool produitId,
+      })
     >;
 typedef $$JetonsTableCreateCompanionBuilder =
     JetonsCompanion Function({

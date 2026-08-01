@@ -4,10 +4,10 @@ import 'clients_table.dart';
 
 class Vehicules extends Table {
   TextColumn get id => text()();
-  TextColumn get clientId => text().references(Clients, #id)();
+  TextColumn get clientId => text().nullable().references(Clients, #id)();
   TextColumn get immatriculation => text()();
-  TextColumn get marque => text()();
-  TextColumn get modele => text()();
+  TextColumn get marque => text().nullable()();
+  TextColumn get modele => text().nullable()();
   IntColumn get annee => integer().nullable()();
   IntColumn get kilometrage => integer().nullable()();
   DateTimeColumn get createdAt => dateTime()();

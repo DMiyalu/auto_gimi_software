@@ -40,7 +40,7 @@ abstract final class BusinessModuleConfigs {
       FabActionConfig(
         label: 'Nouvelle prestation',
         icon: Icons.build_outlined,
-        route: Routes.prestationScan,
+        route: Routes.prestationNew,
       ),
       FabActionConfig(
         label: 'Nouveau rendez-vous',

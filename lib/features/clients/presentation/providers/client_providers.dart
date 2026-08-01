@@ -17,6 +17,10 @@ final clientsProvider = StreamProvider<List<ClientEntity>>((ref) {
   return ref.watch(clientRepositoryProvider).watchClients();
 });
 
+final clientByIdProvider = StreamProvider.family<ClientEntity?, String>(
+  (ref, id) => ref.watch(clientRepositoryProvider).watchClient(id),
+);
+
 final clientControllerProvider =
     AsyncNotifierProvider<ClientController, void>(ClientController.new);
 

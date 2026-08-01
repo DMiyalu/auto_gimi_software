@@ -23,6 +23,27 @@ class ClientRepositoryImpl implements ClientRepository {
   }
 
   @override
+  Stream<ClientEntity?> watchClient(String id) {
+    final query = _database.select(_database.clients)
+      ..where((client) => client.id.equals(id) & client.isDeleted.equals(false));
+    return query.watchSingleOrNull().map(
+          (row) => row == null ? null : _fromDrift(row),
+        );
+  }
+
+  @override
+  Future<ClientEntity?> findByPhone(String phone) async {
+    final normalized = PhoneAuthMapper.normalize(phone);
+    final query = _database.select(_database.clients)
+      ..where(
+        (client) =>
+            client.phone.equals(normalized) & client.isDeleted.equals(false),
+      );
+    final row = await query.getSingleOrNull();
+    return row == null ? null : _fromDrift(row);
+  }
+
+  @override
   Future<ClientEntity> createClient({
     required String establishmentId,
     required String name,

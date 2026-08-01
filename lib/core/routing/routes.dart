@@ -27,6 +27,7 @@ abstract final class Routes {
   static String productCategoryEditPath(String id) =>
       '/produits/categories/edit/$id';
   static const prestationScan = '/prestations/scan';
+  static const prestationNew = '/prestations/new';
   static const prestationDetail = '/prestations/:id';
   static const prestationJeton = '/prestations/:id/jeton';
   static const prestationFacture = '/prestations/:id/facture';
@@ -38,4 +39,5 @@ abstract final class Routes {
   static const activityDetail = '/activity/:id';
 
   static String activityDetailPath(String id) => '/activity/$id';
+  static String prestationDetailPath(String id) => '/prestations/$id';
 }

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:drift/drift.dart';
 
 import '../database/app_database.dart';
+import '../domain/enums.dart';
 import 'sync_adapter.dart';
 
 /// Adaptateurs pour les collections déjà exposées par un repository.
@@ -13,6 +14,9 @@ final List<SyncAdapter> defaultSyncAdapters = [
   ProduitSyncAdapter(),
   CategorySyncAdapter(),
   CatalogServiceSyncAdapter(),
+  VehiculeSyncAdapter(),
+  PrestationSyncAdapter(),
+  LignePrestationSyncAdapter(),
 ];
 
 class ClientSyncAdapter implements SyncAdapter {
@@ -387,6 +391,290 @@ class CatalogServiceSyncAdapter implements SyncAdapter {
                 devise: Value(data['currency'] as String? ?? 'USD'),
                 intervalleJours:
                     Value((data['intervalDays'] as num?)?.toInt() ?? 0),
+                createdAt: Value(
+                  readFirestoreDate(data['createdAt']) ?? remoteUpdatedAt,
+                ),
+                updatedAt: Value(remoteUpdatedAt),
+                isDeleted: Value(data['isDeleted'] as bool? ?? false),
+                isDirty: const Value(false),
+              ),
+            );
+      }
+    });
+    return maxSeen;
+  }
+}
+
+class VehiculeSyncAdapter implements SyncAdapter {
+  @override
+  String get firestoreCollection => 'vehicules';
+
+  @override
+  Future<Map<String, Map<String, dynamic>>> loadDirtyDocs(
+    AppDatabase db, {
+    required int limit,
+  }) async {
+    final rows = await (db.select(db.vehicules)
+          ..where((t) => t.isDirty.equals(true))
+          ..limit(limit))
+        .get();
+    return {
+      for (final row in rows)
+        row.id: {
+          'clientId': row.clientId,
+          'immatriculation': row.immatriculation,
+          'marque': row.marque,
+          'modele': row.modele,
+          'annee': row.annee,
+          'kilometrage': row.kilometrage,
+          'createdAt': Timestamp.fromDate(row.createdAt),
+          'updatedAt': Timestamp.fromDate(row.updatedAt),
+          'isDeleted': row.isDeleted,
+        },
+    };
+  }
+
+  @override
+  Future<void> clearDirty(AppDatabase db, Iterable<String> ids) async {
+    await (db.update(db.vehicules)..where((t) => t.id.isIn(ids.toList())))
+        .write(const VehiculesCompanion(isDirty: Value(false)));
+  }
+
+  @override
+  Future<DateTime?> applyRemoteDocs(
+    AppDatabase db,
+    List<QueryDocumentSnapshot<Map<String, dynamic>>> docs,
+  ) async {
+    DateTime? maxSeen;
+    await db.transaction(() async {
+      for (final doc in docs) {
+        final data = doc.data();
+        final remoteUpdatedAt = readFirestoreDate(data['updatedAt']);
+        if (remoteUpdatedAt == null) continue;
+        if (maxSeen == null || remoteUpdatedAt.isAfter(maxSeen!)) {
+          maxSeen = remoteUpdatedAt;
+        }
+
+        final existing = await (db.select(db.vehicules)
+              ..where((t) => t.id.equals(doc.id)))
+            .getSingleOrNull();
+        if (existing != null &&
+            existing.isDirty &&
+            !existing.updatedAt.isBefore(remoteUpdatedAt)) {
+          continue;
+        }
+
+        await db.into(db.vehicules).insertOnConflictUpdate(
+              VehiculesCompanion(
+                id: Value(doc.id),
+                clientId: Value(data['clientId'] as String?),
+                immatriculation:
+                    Value(data['immatriculation'] as String? ?? ''),
+                marque: Value(data['marque'] as String?),
+                modele: Value(data['modele'] as String?),
+                annee: Value((data['annee'] as num?)?.toInt()),
+                kilometrage: Value((data['kilometrage'] as num?)?.toInt()),
+                createdAt: Value(
+                  readFirestoreDate(data['createdAt']) ?? remoteUpdatedAt,
+                ),
+                updatedAt: Value(remoteUpdatedAt),
+                isDeleted: Value(data['isDeleted'] as bool? ?? false),
+                isDirty: const Value(false),
+              ),
+            );
+      }
+    });
+    return maxSeen;
+  }
+}
+
+class PrestationSyncAdapter implements SyncAdapter {
+  @override
+  String get firestoreCollection => 'prestations';
+
+  @override
+  Future<Map<String, Map<String, dynamic>>> loadDirtyDocs(
+    AppDatabase db, {
+    required int limit,
+  }) async {
+    final rows = await (db.select(db.prestations)
+          ..where((t) => t.isDirty.equals(true))
+          ..limit(limit))
+        .get();
+    return {
+      for (final row in rows)
+        row.id: {
+          'clientId': row.clientId,
+          'vehiculeId': row.vehiculeId,
+          'statut': row.statut.name,
+          'dateOuverture': Timestamp.fromDate(row.dateOuverture),
+          'dateCloture': row.dateCloture == null
+              ? null
+              : Timestamp.fromDate(row.dateCloture!),
+          'montantTotal': row.montantTotal,
+          'montantPointsDeduit': row.montantPointsDeduit,
+          'pointsUtilises': row.pointsUtilises,
+          'pointsGagnes': row.pointsGagnes,
+          'kilometrage': row.kilometrage,
+          'createdAt': Timestamp.fromDate(row.createdAt),
+          'updatedAt': Timestamp.fromDate(row.updatedAt),
+          'isDeleted': row.isDeleted,
+        },
+    };
+  }
+
+  @override
+  Future<void> clearDirty(AppDatabase db, Iterable<String> ids) async {
+    await (db.update(db.prestations)..where((t) => t.id.isIn(ids.toList())))
+        .write(const PrestationsCompanion(isDirty: Value(false)));
+  }
+
+  @override
+  Future<DateTime?> applyRemoteDocs(
+    AppDatabase db,
+    List<QueryDocumentSnapshot<Map<String, dynamic>>> docs,
+  ) async {
+    DateTime? maxSeen;
+    await db.transaction(() async {
+      for (final doc in docs) {
+        final data = doc.data();
+        final remoteUpdatedAt = readFirestoreDate(data['updatedAt']);
+        if (remoteUpdatedAt == null) continue;
+        if (maxSeen == null || remoteUpdatedAt.isAfter(maxSeen!)) {
+          maxSeen = remoteUpdatedAt;
+        }
+
+        final existing = await (db.select(db.prestations)
+              ..where((t) => t.id.equals(doc.id)))
+            .getSingleOrNull();
+        if (existing != null &&
+            existing.isDirty &&
+            !existing.updatedAt.isBefore(remoteUpdatedAt)) {
+          continue;
+        }
+
+        final remoteDateOuverture = readFirestoreDate(data['dateOuverture']);
+
+        await db.into(db.prestations).insertOnConflictUpdate(
+              PrestationsCompanion(
+                id: Value(doc.id),
+                clientId: Value(data['clientId'] as String?),
+                vehiculeId: Value(data['vehiculeId'] as String? ?? ''),
+                statut: Value(
+                  PrestationStatut.values.byName(
+                    data['statut'] as String? ?? 'ouverte',
+                  ),
+                ),
+                dateOuverture: Value(remoteDateOuverture ?? remoteUpdatedAt),
+                dateCloture: Value(readFirestoreDate(data['dateCloture'])),
+                montantTotal: Value(
+                  (data['montantTotal'] as num?)?.toDouble() ?? 0,
+                ),
+                montantPointsDeduit: Value(
+                  (data['montantPointsDeduit'] as num?)?.toDouble() ?? 0,
+                ),
+                pointsUtilises: Value(
+                  (data['pointsUtilises'] as num?)?.toInt() ?? 0,
+                ),
+                pointsGagnes: Value(
+                  (data['pointsGagnes'] as num?)?.toInt() ?? 0,
+                ),
+                kilometrage: Value((data['kilometrage'] as num?)?.toInt()),
+                createdAt: Value(
+                  readFirestoreDate(data['createdAt']) ?? remoteUpdatedAt,
+                ),
+                updatedAt: Value(remoteUpdatedAt),
+                isDeleted: Value(data['isDeleted'] as bool? ?? false),
+                isDirty: const Value(false),
+              ),
+            );
+      }
+    });
+    return maxSeen;
+  }
+}
+
+class LignePrestationSyncAdapter implements SyncAdapter {
+  @override
+  String get firestoreCollection => 'ligne_prestations';
+
+  @override
+  Future<Map<String, Map<String, dynamic>>> loadDirtyDocs(
+    AppDatabase db, {
+    required int limit,
+  }) async {
+    final rows = await (db.select(db.lignePrestations)
+          ..where((t) => t.isDirty.equals(true))
+          ..limit(limit))
+        .get();
+    return {
+      for (final row in rows)
+        row.id: {
+          'prestationId': row.prestationId,
+          'type': row.type.name,
+          'serviceId': row.serviceId,
+          'produitId': row.produitId,
+          'libelle': row.libelle,
+          'quantite': row.quantite,
+          'prixUnitaire': row.prixUnitaire,
+          'montantLigne': row.montantLigne,
+          'createdAt': Timestamp.fromDate(row.createdAt),
+          'updatedAt': Timestamp.fromDate(row.updatedAt),
+          'isDeleted': row.isDeleted,
+        },
+    };
+  }
+
+  @override
+  Future<void> clearDirty(AppDatabase db, Iterable<String> ids) async {
+    await (db.update(db.lignePrestations)
+          ..where((t) => t.id.isIn(ids.toList())))
+        .write(const LignePrestationsCompanion(isDirty: Value(false)));
+  }
+
+  @override
+  Future<DateTime?> applyRemoteDocs(
+    AppDatabase db,
+    List<QueryDocumentSnapshot<Map<String, dynamic>>> docs,
+  ) async {
+    DateTime? maxSeen;
+    await db.transaction(() async {
+      for (final doc in docs) {
+        final data = doc.data();
+        final remoteUpdatedAt = readFirestoreDate(data['updatedAt']);
+        if (remoteUpdatedAt == null) continue;
+        if (maxSeen == null || remoteUpdatedAt.isAfter(maxSeen!)) {
+          maxSeen = remoteUpdatedAt;
+        }
+
+        final existing = await (db.select(db.lignePrestations)
+              ..where((t) => t.id.equals(doc.id)))
+            .getSingleOrNull();
+        if (existing != null &&
+            existing.isDirty &&
+            !existing.updatedAt.isBefore(remoteUpdatedAt)) {
+          continue;
+        }
+
+        await db.into(db.lignePrestations).insertOnConflictUpdate(
+              LignePrestationsCompanion(
+                id: Value(doc.id),
+                prestationId: Value(data['prestationId'] as String? ?? ''),
+                type: Value(
+                  LigneType.values.byName(
+                    data['type'] as String? ?? 'service',
+                  ),
+                ),
+                serviceId: Value(data['serviceId'] as String?),
+                produitId: Value(data['produitId'] as String?),
+                libelle: Value(data['libelle'] as String? ?? ''),
+                quantite: Value((data['quantite'] as num?)?.toInt() ?? 1),
+                prixUnitaire: Value(
+                  (data['prixUnitaire'] as num?)?.toDouble() ?? 0,
+                ),
+                montantLigne: Value(
+                  (data['montantLigne'] as num?)?.toDouble() ?? 0,
+                ),
                 createdAt: Value(
                   readFirestoreDate(data['createdAt']) ?? remoteUpdatedAt,
                 ),

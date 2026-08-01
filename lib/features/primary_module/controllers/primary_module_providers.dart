@@ -1,7 +1,11 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/domain/business_category.dart';
+import '../../../core/domain/enums.dart';
 import '../../establishment/presentation/providers/establishment_providers.dart';
+import '../../garage/domain/entities/prestation_summary.dart';
+import '../../garage/presentation/providers/prestation_providers.dart';
 import '../config/business_module_config.dart';
 import '../config/business_module_configs.dart';
 import '../models/activity_item.dart';
@@ -39,7 +43,36 @@ class ActivityListNotifier extends Notifier<List<ActivityItem>> {
   @override
   List<ActivityItem> build() {
     final category = ref.watch(activeBusinessCategoryProvider);
+    // Le garage est le métier réel de l'app : sa liste vient des vraies
+    // prestations. Les autres métiers restent mockés (démonstration de
+    // l'architecture générique uniquement).
+    if (category == BusinessCategory.garageAuto) {
+      final summaries =
+          ref.watch(prestationsSummaryProvider).valueOrNull ?? [];
+      return summaries.map(_fromPrestationSummary).toList();
+    }
     return MockActivityData.forCategory(category);
+  }
+
+  ActivityItem _fromPrestationSummary(PrestationSummary summary) {
+    final isOuverte = summary.statut == PrestationStatut.ouverte;
+    final statusKey = isOuverte ? 'en_cours' : 'terminees';
+    // Quand marque/modèle sont inconnus, le titre retombe déjà sur
+    // l'immatriculation — éviter de la répéter en sous-titre/meta.
+    final titleIsImmatriculation =
+        summary.vehiculeDisplayName == summary.immatriculation;
+    return ActivityItem(
+      id: summary.id,
+      title: summary.vehiculeDisplayName,
+      subtitle: summary.clientName ?? 'Client non renseigné',
+      time: summary.dateOuverture,
+      statusKey: statusKey,
+      statusLabel: isOuverte ? 'En cours' : 'Terminée',
+      statusColor: MockActivityData.statusColorFor(statusKey),
+      leadingIcon: Icons.build_circle_outlined,
+      amount: summary.montantTotal,
+      metaLabel: titleIsImmatriculation ? null : summary.immatriculation,
+    );
   }
 
   /// Épingle/désépingle une carte — les cartes épinglées remontent en tête

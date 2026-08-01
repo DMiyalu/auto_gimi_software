@@ -41,7 +41,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -54,6 +54,9 @@ class AppDatabase extends _$AppDatabase {
           }
           if (from < 5) {
             await _ensureCatalogItemSchema(m);
+          }
+          if (from < 6) {
+            await _migrateGarageSchema(m);
           }
         },
         beforeOpen: (details) async {
@@ -135,6 +138,34 @@ class AppDatabase extends _$AppDatabase {
         ],
         columnTransformer: {
           if (!hasDevise) deviseColumn: const Constant('USD'),
+        },
+      ),
+    );
+  }
+
+  /// Rend nullable `Vehicules.clientId/marque/modele` et
+  /// `Prestations.clientId`, et étend `LignePrestations` pour supporter des
+  /// lignes "produit" en plus des lignes "service". Ces 3 tables sont
+  /// garanties vides (aucun repository ne les utilisait avant l'ajout de la
+  /// verticale Prestation) — pas de backfill nécessaire, donc pas de
+  /// vérification défensive comme `_migrateCatalogTable` : on ne l'appelle
+  /// qu'une fois depuis `onUpgrade` (jamais depuis `beforeOpen`, pour ne pas
+  /// reconstruire ces tables à chaque lancement une fois de vraies données
+  /// présentes).
+  Future<void> _migrateGarageSchema(Migrator m) async {
+    await m.alterTable(TableMigration(vehicules));
+    await m.alterTable(TableMigration(prestations));
+    await m.alterTable(
+      TableMigration(
+        lignePrestations,
+        newColumns: [
+          lignePrestations.type,
+          lignePrestations.produitId,
+          lignePrestations.libelle,
+        ],
+        columnTransformer: {
+          lignePrestations.type: const Constant('service'),
+          lignePrestations.libelle: const Constant(''),
         },
       ),
     );

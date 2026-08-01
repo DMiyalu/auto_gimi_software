@@ -1,12 +1,16 @@
+import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:auto_mobile_software/core/database/app_database.dart';
 import 'package:auto_mobile_software/core/domain/business_category.dart';
 import 'package:auto_mobile_software/core/l10n/app_localizations.dart';
+import 'package:auto_mobile_software/core/providers/database_provider.dart';
 import 'package:auto_mobile_software/features/establishment/domain/models/establishment.dart';
 import 'package:auto_mobile_software/features/establishment/presentation/providers/establishment_providers.dart';
+import 'package:auto_mobile_software/features/garage/data/repositories/prestation_repository_impl.dart';
 import 'package:auto_mobile_software/features/primary_module/screens/primary_module_screen.dart';
 
 Establishment _establishment(BusinessCategory category) {
@@ -22,13 +26,18 @@ Establishment _establishment(BusinessCategory category) {
   );
 }
 
-Future<void> _pump(WidgetTester tester, BusinessCategory category) async {
+Future<void> _pump(
+  WidgetTester tester,
+  BusinessCategory category, {
+  AppDatabase? database,
+}) async {
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
         currentEstablishmentProvider.overrideWith(
           (ref) => Stream.value(_establishment(category)),
         ),
+        if (database != null) databaseProvider.overrideWithValue(database),
       ],
       child: MaterialApp(
         localizationsDelegates: const [
@@ -48,7 +57,15 @@ Future<void> _pump(WidgetTester tester, BusinessCategory category) async {
 void main() {
   testWidgets('affiche la config garage : établissement, filtres, activité',
       (tester) async {
-    await _pump(tester, BusinessCategory.garageAuto);
+    final database = AppDatabase(NativeDatabase.memory());
+    addTearDown(database.close);
+    await PrestationRepositoryImpl(database: database)
+        .createPrestationForImmatriculation(
+      establishmentId: 'etab-1',
+      immatriculation: 'CD 214 KM',
+    );
+
+    await _pump(tester, BusinessCategory.garageAuto, database: database);
 
     expect(find.text('Garage Zuri'), findsOneWidget);
     expect(
@@ -56,7 +73,15 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Diagnostic'), findsWidgets);
-    expect(find.text('Toyota Corolla — CD 214 KM'), findsOneWidget);
+    expect(find.text('CD 214 KM'), findsOneWidget);
+
+    // Démonte l'arbre avant la fin du test : la fermeture des flux Drift
+    // .watch() actifs programme un timer interne de nettoyage à durée
+    // nulle, qu'il faut laisser s'exécuter pour éviter l'assertion
+    // "Timer still pending" du framework de test (cf. auto_sync_e2e_test).
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump(const Duration(milliseconds: 1));
+    await tester.pump(const Duration(milliseconds: 1));
   });
 
   testWidgets('affiche la config restaurant sans libellé garage codé en dur',

@@ -10,6 +10,8 @@ import '../../features/auth/presentation/screens/signup_screen.dart';
 import '../../features/establishment/presentation/providers/establishment_providers.dart';
 import '../../features/clients/presentation/screens/client_form_screen.dart';
 import '../../features/clients/presentation/screens/clients_list_screen.dart';
+import '../../features/garage/presentation/screens/new_prestation_screen.dart';
+import '../../features/garage/presentation/screens/prestation_detail_screen.dart';
 import '../../features/primary_module/models/activity_item.dart';
 import '../../features/primary_module/screens/activity_detail_screen.dart';
 import '../../features/primary_module/screens/primary_module_screen.dart';
@@ -162,6 +164,16 @@ final routerProvider = Provider<GoRouter>((ref) {
             builder: (context, __) => PlaceholderScreen(
               title: AppLocalizations.of(context).scanClient,
               icon: Icons.qr_code_scanner,
+            ),
+          ),
+          GoRoute(
+            path: Routes.prestationNew,
+            builder: (_, __) => const NewPrestationScreen(),
+          ),
+          GoRoute(
+            path: Routes.prestationDetail,
+            builder: (_, state) => PrestationDetailScreen(
+              prestationId: state.pathParameters['id']!,
             ),
           ),
           GoRoute(

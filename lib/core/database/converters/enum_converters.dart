@@ -13,6 +13,16 @@ class PrestationStatutConverter extends TypeConverter<PrestationStatut, String> 
   String toSql(PrestationStatut value) => value.name;
 }
 
+class LigneTypeConverter extends TypeConverter<LigneType, String> {
+  const LigneTypeConverter();
+
+  @override
+  LigneType fromSql(String fromDb) => LigneType.values.byName(fromDb);
+
+  @override
+  String toSql(LigneType value) => value.name;
+}
+
 class JetonStatutConverter extends TypeConverter<JetonStatut, String> {
   const JetonStatutConverter();
 

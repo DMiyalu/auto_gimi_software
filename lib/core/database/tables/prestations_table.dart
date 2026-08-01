@@ -6,7 +6,7 @@ import 'vehicules_table.dart';
 
 class Prestations extends Table {
   TextColumn get id => text()();
-  TextColumn get clientId => text().references(Clients, #id)();
+  TextColumn get clientId => text().nullable().references(Clients, #id)();
   TextColumn get vehiculeId => text().references(Vehicules, #id)();
   TextColumn get statut =>
       text().map(const PrestationStatutConverter())();
