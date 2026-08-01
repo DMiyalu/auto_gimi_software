@@ -233,6 +233,18 @@ class AppLocalizationsFr extends AppLocalizations {
   String get english => 'Anglais';
 
   @override
+  String get theme => 'Thème';
+
+  @override
+  String get themeLight => 'Clair';
+
+  @override
+  String get themeDark => 'Sombre';
+
+  @override
+  String get systemDefault => 'Système';
+
+  @override
   String get todayPrestations => 'Prestations du jour';
 
   @override
