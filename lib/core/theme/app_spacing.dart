@@ -9,10 +9,15 @@ abstract final class AppSpacing {
 }
 
 abstract final class AppRadius {
+  /// Rayon unique des boutons de l'app, aligné sur le floating action
+  /// button de l'écran d'accueil : toute forme de bouton doit s'y référer.
+  static const double button = 16;
   static const double card = 16;
   static const double chip = 100;
   static const double sheet = 24;
 
+  static const BorderRadius buttonRadius =
+      BorderRadius.all(Radius.circular(button));
   static const BorderRadius cardRadius =
       BorderRadius.all(Radius.circular(card));
   static const BorderRadius sheetRadius = BorderRadius.vertical(

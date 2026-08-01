@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
 
+import 'app_spacing.dart';
+
 abstract final class AppTheme {
   static const _seed = Color(0xFF1565C0);
+
+  static const _buttonShape = RoundedRectangleBorder(
+    borderRadius: BorderRadius.all(Radius.circular(AppRadius.button)),
+  );
 
   static ThemeData light() {
     return ThemeData(
@@ -11,6 +17,18 @@ abstract final class AppTheme {
       appBarTheme: const AppBarTheme(centerTitle: false),
       inputDecorationTheme: const InputDecorationTheme(
         border: OutlineInputBorder(),
+      ),
+      filledButtonTheme: const FilledButtonThemeData(
+        style: ButtonStyle(shape: WidgetStatePropertyAll(_buttonShape)),
+      ),
+      elevatedButtonTheme: const ElevatedButtonThemeData(
+        style: ButtonStyle(shape: WidgetStatePropertyAll(_buttonShape)),
+      ),
+      outlinedButtonTheme: const OutlinedButtonThemeData(
+        style: ButtonStyle(shape: WidgetStatePropertyAll(_buttonShape)),
+      ),
+      textButtonTheme: const TextButtonThemeData(
+        style: ButtonStyle(shape: WidgetStatePropertyAll(_buttonShape)),
       ),
     );
   }
@@ -25,6 +43,18 @@ abstract final class AppTheme {
       appBarTheme: const AppBarTheme(centerTitle: false),
       inputDecorationTheme: const InputDecorationTheme(
         border: OutlineInputBorder(),
+      ),
+      filledButtonTheme: const FilledButtonThemeData(
+        style: ButtonStyle(shape: WidgetStatePropertyAll(_buttonShape)),
+      ),
+      elevatedButtonTheme: const ElevatedButtonThemeData(
+        style: ButtonStyle(shape: WidgetStatePropertyAll(_buttonShape)),
+      ),
+      outlinedButtonTheme: const OutlinedButtonThemeData(
+        style: ButtonStyle(shape: WidgetStatePropertyAll(_buttonShape)),
+      ),
+      textButtonTheme: const TextButtonThemeData(
+        style: ButtonStyle(shape: WidgetStatePropertyAll(_buttonShape)),
       ),
     );
   }

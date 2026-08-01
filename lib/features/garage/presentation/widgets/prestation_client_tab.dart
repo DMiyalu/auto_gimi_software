@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/auth/phone_auth_mapper.dart';
+import '../../../../core/presentation/widgets/phone_number_field.dart';
 import '../../../../core/sync/auto_sync_coordinator.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../clients/domain/entities/client_entity.dart';
@@ -149,22 +151,20 @@ class _ClientSearchSection extends ConsumerStatefulWidget {
 }
 
 class _ClientSearchSectionState extends ConsumerState<_ClientSearchSection> {
-  final _phoneController = TextEditingController();
   final _nameController = TextEditingController();
+  String _phone = '';
   bool _searched = false;
   bool _loading = false;
   ClientEntity? _found;
 
   @override
   void dispose() {
-    _phoneController.dispose();
     _nameController.dispose();
     super.dispose();
   }
 
   Future<void> _search() async {
-    final phone = _phoneController.text.trim();
-    if (phone.isEmpty) return;
+    if (!PhoneAuthMapper.isValidFullNumber(_phone)) return;
 
     setState(() {
       _loading = true;
@@ -173,7 +173,7 @@ class _ClientSearchSectionState extends ConsumerState<_ClientSearchSection> {
     });
 
     final client =
-        await ref.read(clientRepositoryProvider).findByPhone(phone);
+        await ref.read(clientRepositoryProvider).findByPhone(_phone);
 
     if (!mounted) return;
     setState(() {
@@ -202,7 +202,7 @@ class _ClientSearchSectionState extends ConsumerState<_ClientSearchSection> {
       final client = await ref.read(clientRepositoryProvider).createClient(
             establishmentId: establishment.id,
             name: name,
-            whatsappPhone: _phoneController.text,
+            whatsappPhone: _phone,
           );
       ref.read(autoSyncCoordinatorProvider).schedulePush();
       if (!mounted) return;
@@ -224,18 +224,17 @@ class _ClientSearchSectionState extends ConsumerState<_ClientSearchSection> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          TextField(
-            controller: _phoneController,
-            keyboardType: TextInputType.phone,
-            decoration: const InputDecoration(
-              labelText: 'Trouver le client (numéro de téléphone)',
-              prefixIcon: Icon(Icons.search),
-            ),
-            onSubmitted: (_) => _search(),
+          PhoneNumberField(
+            labelText: 'Trouver le client (numéro de téléphone)',
+            enabled: !_loading,
+            onFullNumberChanged: (value) => setState(() => _phone = value),
           ),
           const SizedBox(height: AppSpacing.xs),
           FilledButton(
-            onPressed: _loading ? null : _search,
+            onPressed:
+                _loading || !PhoneAuthMapper.isValidFullNumber(_phone)
+                    ? null
+                    : _search,
             child: const Text('Rechercher'),
           ),
           const SizedBox(height: AppSpacing.md),

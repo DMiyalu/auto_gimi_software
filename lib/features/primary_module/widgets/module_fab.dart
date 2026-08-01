@@ -18,6 +18,9 @@ class ModuleFab extends ConsumerWidget {
 
     return FloatingActionButton(
       backgroundColor: config.primaryColor,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.button),
+      ),
       onPressed: () => _openActionsSheet(context, config),
       child: const Icon(Icons.add, color: Colors.white),
     );
