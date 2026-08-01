@@ -30,6 +30,7 @@ abstract final class BusinessModuleConfigs {
       StatusFilterOption(key: 'en_cours', label: 'En cours'),
       StatusFilterOption(key: 'terminees', label: 'Terminées'),
       StatusFilterOption(key: 'en_attente', label: 'En attente'),
+      StatusFilterOption(key: 'annulees', label: 'Annulées'),
     ],
     catalogTab: const CatalogTabConfig(
       label: 'Services',
@@ -86,6 +87,7 @@ abstract final class BusinessModuleConfigs {
       StatusFilterOption(key: 'en_preparation', label: 'En préparation'),
       StatusFilterOption(key: 'pretes', label: 'Prêtes'),
       StatusFilterOption(key: 'livraison', label: 'Livraison'),
+      StatusFilterOption(key: 'annulees', label: 'Annulées'),
     ],
     catalogTab: const CatalogTabConfig(
       label: 'Produits',
@@ -173,6 +175,7 @@ abstract final class BusinessModuleConfigs {
         StatusFilterOption(key: 'en_attente', label: 'En attente'),
         StatusFilterOption(key: 'en_cours', label: 'En cours'),
         StatusFilterOption(key: 'terminees', label: 'Terminées'),
+        StatusFilterOption(key: 'annulees', label: 'Annulées'),
       ],
       catalogTab: const CatalogTabConfig(
         label: 'Produits',

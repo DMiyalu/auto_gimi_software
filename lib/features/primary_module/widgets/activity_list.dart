@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/routing/routes.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../controllers/primary_module_providers.dart';
+import '../models/activity_item.dart';
 import 'activity_card.dart';
+import 'activity_card_actions_sheet.dart';
 
 /// Liste principale de l'activité métier — recherche + filtre déjà
 /// appliqués en amont par [filteredActivityListProvider].
@@ -38,10 +41,17 @@ class ActivityList extends ConsumerWidget {
             return _AnimatedEntry(
               key: ValueKey(item.id),
               index: index,
-              child: ActivityCard(
-                item: item,
-                onTap: () =>
-                    context.push(Routes.activityDetailPath(item.id), extra: item),
+              child: Slidable(
+                startActionPane: _printActionPane(context, item, config.primaryColor),
+                endActionPane: _printActionPane(context, item, config.primaryColor),
+                child: ActivityCard(
+                  item: item,
+                  onTap: () => context.push(
+                    Routes.activityDetailPath(item.id),
+                    extra: item,
+                  ),
+                  onLongPress: () => showActivityCardActions(context, ref, item),
+                ),
               ),
             );
           },
@@ -55,6 +65,30 @@ class ActivityList extends ConsumerWidget {
           ),
         );
       },
+    );
+  }
+
+  /// Glisser à gauche ou à droite révèle la même action "Imprimer" des deux
+  /// côtés — cohérent avec la demande d'un geste symétrique façon
+  /// messagerie plutôt que deux actions différentes par sens.
+  ActionPane _printActionPane(
+    BuildContext context,
+    ActivityItem item,
+    Color color,
+  ) {
+    return ActionPane(
+      motion: const ScrollMotion(),
+      extentRatio: 0.28,
+      children: [
+        SlidableAction(
+          onPressed: (_) => printInvoiceFeedback(context, item),
+          backgroundColor: color,
+          foregroundColor: Colors.white,
+          icon: Icons.print_outlined,
+          label: 'Imprimer',
+          borderRadius: AppRadius.cardRadius,
+        ),
+      ],
     );
   }
 }

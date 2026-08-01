@@ -27,16 +27,53 @@ final moduleSearchQueryProvider = StateProvider<String>((ref) => '');
 /// Clé du filtre de statut sélectionné ('all' par défaut).
 final moduleSelectedFilterProvider = StateProvider<String>((ref) => 'all');
 
-/// Jeu de données mocké pour le métier actif — à remplacer par un vrai
-/// repository une fois la session UI/UX terminée.
-final mockActivityListProvider = Provider<List<ActivityItem>>((ref) {
-  final category = ref.watch(activeBusinessCategoryProvider);
-  return MockActivityData.forCategory(category);
-});
+/// Jeu de données mocké pour le métier actif — reste mutable en mémoire
+/// (épinglage, changement de statut, annulation) le temps de brancher un
+/// vrai repository.
+final activityListProvider =
+    NotifierProvider<ActivityListNotifier, List<ActivityItem>>(
+  ActivityListNotifier.new,
+);
+
+class ActivityListNotifier extends Notifier<List<ActivityItem>> {
+  @override
+  List<ActivityItem> build() {
+    final category = ref.watch(activeBusinessCategoryProvider);
+    return MockActivityData.forCategory(category);
+  }
+
+  /// Épingle/désépingle une carte — les cartes épinglées remontent en tête
+  /// de liste, comme une conversation épinglée sur WhatsApp.
+  void togglePin(String id) {
+    final updated = [
+      for (final item in state)
+        if (item.id == id) item.copyWith(pinned: !item.pinned) else item,
+    ];
+    final pinned = updated.where((item) => item.pinned).toList();
+    final rest = updated.where((item) => !item.pinned).toList();
+    state = [...pinned, ...rest];
+  }
+
+  void setStatus(String id, String statusKey, String statusLabel) {
+    state = [
+      for (final item in state)
+        if (item.id == id)
+          item.copyWith(
+            statusKey: statusKey,
+            statusLabel: statusLabel,
+            statusColor: MockActivityData.statusColorFor(statusKey),
+          )
+        else
+          item,
+    ];
+  }
+
+  void cancel(String id) => setStatus(id, 'annulees', 'Annulée');
+}
 
 /// Liste affichée après application de la recherche et du filtre de statut.
 final filteredActivityListProvider = Provider<List<ActivityItem>>((ref) {
-  final items = ref.watch(mockActivityListProvider);
+  final items = ref.watch(activityListProvider);
   final query = ref.watch(moduleSearchQueryProvider).trim().toLowerCase();
   final filterKey = ref.watch(moduleSelectedFilterProvider);
 

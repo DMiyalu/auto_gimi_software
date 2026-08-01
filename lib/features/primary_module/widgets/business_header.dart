@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/routing/routes.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../establishment/domain/models/establishment.dart';
 import '../../establishment/presentation/providers/establishment_providers.dart';
 import '../controllers/primary_module_providers.dart';
 
@@ -43,7 +44,7 @@ class BusinessHeader extends ConsumerWidget {
           Expanded(
             child: InkWell(
               borderRadius: BorderRadius.circular(AppRadius.card),
-              onTap: () => _showEstablishmentSwitcher(context),
+              onTap: () => _showEstablishmentSwitcher(context, establishment),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 child: Column(
@@ -92,11 +93,60 @@ class BusinessHeader extends ConsumerWidget {
     );
   }
 
-  void _showEstablishmentSwitcher(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Changement d’établissement — bientôt disponible'),
-      ),
+  void _showEstablishmentSwitcher(
+    BuildContext context,
+    Establishment? establishment,
+  ) {
+    final l10n = AppLocalizations.of(context);
+
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Établissements'),
+          content: SizedBox(
+            width: 320,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (establishment != null)
+                  ListTile(
+                    leading: const CircleAvatar(
+                      child: Icon(Icons.storefront_outlined),
+                    ),
+                    title: Text(establishment.name),
+                    subtitle: Text(establishment.category.label(l10n)),
+                    trailing: Icon(
+                      Icons.check_circle,
+                      color: Theme.of(dialogContext).colorScheme.primary,
+                    ),
+                  ),
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.add_business_outlined),
+                  title: const Text('Ajouter un établissement'),
+                  onTap: () {
+                    Navigator.of(dialogContext).pop();
+                    // Pas encore de flux multi-établissement côté backend
+                    // (un compte = un établissement pour l'instant) — la
+                    // vraie création sera branchée avec le reste de la
+                    // logique métier au retour sur Firebase.
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(l10n.comingSoon)),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: Text(l10n.cancel),
+            ),
+          ],
+        );
+      },
     );
   }
 }

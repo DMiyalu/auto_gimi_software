@@ -20,7 +20,10 @@ abstract final class MockActivityData {
     return DateTime(now.year, now.month, now.day, hour, minute);
   }
 
-  static Color _statusColor(String key) {
+  /// Couleur sémantique associée à une clé de statut — partagée avec le
+  /// notifier de la liste pour que les statuts changés à la main (épinglage
+  /// mis à part) restent visuellement cohérents avec les données mockées.
+  static Color statusColorFor(String key) {
     return switch (key) {
       'en_attente' => Colors.red.shade400,
       'en_preparation' || 'en_cours' || 'diagnostic' || 'planifiees' =>
@@ -33,7 +36,7 @@ abstract final class MockActivityData {
   }
 
   static List<ActivityItem> _restaurant() {
-    Color c(String key) => _statusColor(key);
+    Color c(String key) => statusColorFor(key);
     return [
       ActivityItem(
         id: 'table-12',
@@ -114,7 +117,7 @@ abstract final class MockActivityData {
   }
 
   static List<ActivityItem> _garage() {
-    Color c(String key) => _statusColor(key);
+    Color c(String key) => statusColorFor(key);
     return [
       ActivityItem(
         id: 'prestation-214',
@@ -169,7 +172,7 @@ abstract final class MockActivityData {
   }
 
   static List<ActivityItem> _sanitation() {
-    Color c(String key) => _statusColor(key);
+    Color c(String key) => statusColorFor(key);
     return [
       ActivityItem(
         id: 'collecte-88',

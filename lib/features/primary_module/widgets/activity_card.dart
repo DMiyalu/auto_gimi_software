@@ -8,10 +8,16 @@ import '../models/activity_item.dart';
 /// collecte...). Entièrement pilotée par [item] — ne connaît jamais le
 /// métier actif.
 class ActivityCard extends StatelessWidget {
-  const ActivityCard({super.key, required this.item, this.onTap});
+  const ActivityCard({
+    super.key,
+    required this.item,
+    this.onTap,
+    this.onLongPress,
+  });
 
   final ActivityItem item;
   final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
 
   static final _amountFormat = NumberFormat('#,##0', 'fr');
   static final _timeFormat = DateFormat.Hm();
@@ -26,6 +32,7 @@ class ActivityCard extends StatelessWidget {
       child: InkWell(
         borderRadius: AppRadius.cardRadius,
         onTap: onTap,
+        onLongPress: onLongPress,
         child: Container(
           decoration: BoxDecoration(
             borderRadius: AppRadius.cardRadius,
@@ -99,6 +106,14 @@ class ActivityCard extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
+                        if (item.pinned) ...[
+                          Icon(
+                            Icons.push_pin,
+                            size: 14,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                          const SizedBox(width: 4),
+                        ],
                         Text(
                           _timeFormat.format(item.time),
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(

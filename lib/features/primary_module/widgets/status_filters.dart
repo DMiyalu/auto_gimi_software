@@ -12,7 +12,7 @@ class StatusFilters extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final config = ref.watch(primaryModuleConfigProvider);
-    final items = ref.watch(mockActivityListProvider);
+    final items = ref.watch(activityListProvider);
     final selected = ref.watch(moduleSelectedFilterProvider);
 
     return SizedBox(

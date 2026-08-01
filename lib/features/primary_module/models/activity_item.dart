@@ -16,6 +16,7 @@ class ActivityItem {
     this.amount,
     this.metaLabel,
     this.badgeCount,
+    this.pinned = false,
   });
 
   final String id;
@@ -29,4 +30,27 @@ class ActivityItem {
   final double? amount;
   final String? metaLabel;
   final int? badgeCount;
+  final bool pinned;
+
+  ActivityItem copyWith({
+    String? statusKey,
+    String? statusLabel,
+    Color? statusColor,
+    bool? pinned,
+  }) {
+    return ActivityItem(
+      id: id,
+      title: title,
+      subtitle: subtitle,
+      time: time,
+      statusKey: statusKey ?? this.statusKey,
+      statusLabel: statusLabel ?? this.statusLabel,
+      statusColor: statusColor ?? this.statusColor,
+      leadingIcon: leadingIcon,
+      amount: amount,
+      metaLabel: metaLabel,
+      badgeCount: badgeCount,
+      pinned: pinned ?? this.pinned,
+    );
+  }
 }
