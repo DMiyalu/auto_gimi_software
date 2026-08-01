@@ -97,10 +97,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Dashboard'), findsOneWidget);
+    expect(find.text('Prestations'), findsWidgets);
 
-    await tester.tap(find.byIcon(Icons.menu));
-    await tester.pumpAndSettle();
     await tester.tap(find.text('Clients'));
     await tester.pumpAndSettle();
 

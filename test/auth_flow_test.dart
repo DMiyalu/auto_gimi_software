@@ -92,7 +92,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Dashboard'), findsOneWidget);
+    expect(find.text('Prestations'), findsWidgets);
     expect(find.text('Phone verification'), findsNothing);
   });
 
@@ -130,8 +130,8 @@ void main() {
     await tester.tap(find.byKey(const Key('verify_submit_button')));
     await tester.pumpAndSettle();
 
-    expect(find.text('Dashboard'), findsOneWidget);
-    expect(find.text("Today's services"), findsOneWidget);
+    expect(find.text('Prestations'), findsWidgets);
+    expect(find.text('Rapports'), findsWidgets);
   });
 
   testWidgets('affiche le tableau de bord quand le téléphone est vérifié',
@@ -142,7 +142,7 @@ void main() {
     database = await pumpTestApp(tester, overrides: testOverrides());
     await tester.pumpAndSettle();
 
-    expect(find.text('Dashboard'), findsOneWidget);
+    expect(find.text('Prestations'), findsWidgets);
     expect(find.text('Phone verification'), findsNothing);
   });
 }

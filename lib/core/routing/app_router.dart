@@ -10,6 +10,9 @@ import '../../features/auth/presentation/screens/signup_screen.dart';
 import '../../features/establishment/presentation/providers/establishment_providers.dart';
 import '../../features/clients/presentation/screens/client_form_screen.dart';
 import '../../features/clients/presentation/screens/clients_list_screen.dart';
+import '../../features/primary_module/models/activity_item.dart';
+import '../../features/primary_module/screens/activity_detail_screen.dart';
+import '../../features/primary_module/screens/primary_module_screen.dart';
 import '../../features/produits/presentation/screens/product_category_form_screen.dart';
 import '../../features/produits/presentation/screens/produit_form_screen.dart';
 import '../../features/produits/presentation/screens/produits_screen.dart';
@@ -19,6 +22,7 @@ import '../../features/services/presentation/screens/service_form_screen.dart';
 import '../../features/services/presentation/screens/services_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
 import '../../features/shell/presentation/screens/app_shell_screen.dart';
+import '../../features/shell/presentation/widgets/more_menu_screen.dart';
 import '../l10n/app_localizations.dart';
 import '../presentation/screens/placeholder_screen.dart';
 import 'routes.dart';
@@ -81,7 +85,21 @@ final routerProvider = Provider<GoRouter>((ref) {
         routes: [
           GoRoute(
             path: Routes.dashboard,
+            builder: (_, __) => const PrimaryModuleScreen(),
+          ),
+          GoRoute(
+            path: Routes.reports,
             builder: (_, __) => const DashboardScreen(),
+          ),
+          GoRoute(
+            path: Routes.more,
+            builder: (_, __) => const MoreMenuScreen(),
+          ),
+          GoRoute(
+            path: Routes.activityDetail,
+            builder: (_, state) => ActivityDetailScreen(
+              item: state.extra as ActivityItem?,
+            ),
           ),
           GoRoute(
             path: Routes.clients,

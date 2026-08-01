@@ -19,6 +19,8 @@ class GarageApp extends ConsumerWidget {
       title: 'Konnect One',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
+      darkTheme: AppTheme.dark(),
+      themeMode: ThemeMode.system,
       locale: locale,
       localizationsDelegates: const [
         AppLocalizations.delegate,
