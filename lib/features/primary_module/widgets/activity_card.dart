@@ -32,7 +32,7 @@ class ActivityCard extends StatelessWidget {
       onTap: onTap,
       onLongPress: onLongPress,
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Stack(
             clipBehavior: Clip.none,

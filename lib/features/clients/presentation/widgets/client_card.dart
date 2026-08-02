@@ -33,7 +33,7 @@ class ClientCard extends StatelessWidget {
       accentColor: _accentColor(tier),
       onTap: () => context.push(Routes.clientDetailPath(client.id)),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           ClientAvatar(client: client),
           const SizedBox(width: AppSpacing.xs),

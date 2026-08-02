@@ -13,12 +13,13 @@ class ClientAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final color = AvatarColors.forId(client.id);
     return CircleAvatar(
       radius: radius,
-      backgroundColor: AvatarColors.forId(client.id),
+      backgroundColor: color.withValues(alpha: 0.12),
       child: Text(
         _initials(client.name),
-        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+        style: TextStyle(color: color, fontWeight: FontWeight.w600),
       ),
     );
   }
