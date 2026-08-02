@@ -37,8 +37,12 @@ Future<AppDatabase> _pump(WidgetTester tester) async {
     name: 'Patrick Mbala',
     whatsappPhone: '243812345678',
   );
-  await database.update(database.clients).write(
-        ClientsCompanion(createdAt: Value(now.subtract(const Duration(days: 5)))),
+  await database
+      .update(database.clients)
+      .write(
+        ClientsCompanion(
+          createdAt: Value(now.subtract(const Duration(days: 5))),
+        ),
       );
 
   final router = GoRouter(
@@ -79,9 +83,7 @@ Future<AppDatabase> _pump(WidgetTester tester) async {
 }
 
 void main() {
-  testWidgets('affiche les initiales du client (pas de photo)', (
-    tester,
-  ) async {
+  testWidgets('affiche les initiales du client (pas de photo)', (tester) async {
     final database = await _pump(tester);
 
     expect(find.text('PM'), findsOneWidget);
@@ -97,20 +99,23 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Patrick Mbala'), findsNothing);
-    expect(find.text('Aucun client ne correspond à ce filtre.'), findsOneWidget);
+    expect(
+      find.text('Aucun client ne correspond à ce filtre.'),
+      findsOneWidget,
+    );
 
     await database.close();
     await tester.pump();
   });
 
-  testWidgets('le filtre "Plus d\'une année" exclut un client récent', (
+  testWidgets('le filtre "Fidèles" exclut un client sans points', (
     tester,
   ) async {
     final database = await _pump(tester);
 
     expect(find.text('Patrick Mbala'), findsOneWidget);
 
-    await tester.tap(find.text("Plus d'une année"));
+    await tester.tap(find.text('Fidèles'));
     await tester.pumpAndSettle();
 
     expect(find.text('Patrick Mbala'), findsNothing);
@@ -123,23 +128,37 @@ void main() {
     await tester.pump();
   });
 
-  testWidgets(
-    'le bouton flottant ouvre une feuille avec "Ajouter un client"',
-    (tester) async {
-      final database = await _pump(tester);
+  testWidgets('la carte client affiche les stats de commandes et le chevron', (
+    tester,
+  ) async {
+    final database = await _pump(tester);
 
-      await tester.tap(find.byType(FloatingActionButton));
-      await tester.pumpAndSettle();
+    expect(find.text('Total commandé'), findsOneWidget);
+    expect(find.text('Aucune commande'), findsOneWidget);
+    expect(find.byIcon(Icons.chevron_right), findsOneWidget);
+    expect(find.text('Liste des clients'), findsOneWidget);
+    expect(find.text('1 clients'), findsOneWidget);
 
-      expect(find.text('Ajouter un client'), findsOneWidget);
-      await tester.tap(find.text('Ajouter un client'));
-      await tester.pumpAndSettle();
+    await database.close();
+    await tester.pump();
+  });
 
-      expect(find.text('Ajouter un client'), findsOneWidget);
-      expect(find.byKey(const Key('client_name_field')), findsOneWidget);
+  testWidgets('le bouton flottant ouvre une feuille avec "Ajouter un client"', (
+    tester,
+  ) async {
+    final database = await _pump(tester);
 
-      await database.close();
-      await tester.pump();
-    },
-  );
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Ajouter un client'), findsOneWidget);
+    await tester.tap(find.text('Ajouter un client'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Ajouter un client'), findsOneWidget);
+    expect(find.byKey(const Key('client_name_field')), findsOneWidget);
+
+    await database.close();
+    await tester.pump();
+  });
 }

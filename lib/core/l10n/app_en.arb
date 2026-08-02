@@ -168,7 +168,23 @@
   "searchClientPlaceholder": "Search a client...",
   "clientFilterAll": "All",
   "clientFilterNew": "New",
-  "clientFilterOverSixMonths": "Over 6 months",
-  "clientFilterOverOneYear": "Over a year",
-  "noClientsMatchFilter": "No client matches this filter."
+  "clientFilterLoyal": "Loyal",
+  "clientFilterActiveThisMonth": "Active this month",
+  "clientFilterInactive": "Inactive",
+  "noClientsMatchFilter": "No client matches this filter.",
+  "clientsListTitle": "Client list",
+  "clientsCount": "{count} clients",
+  "@clientsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "filters": "Filters",
+  "clientTierGold": "Gold member",
+  "clientTierLoyal": "Loyal",
+  "totalOrderedAmount": "Total ordered",
+  "lastOrderLabel": "Last order",
+  "noOrdersYet": "No orders yet"
 }

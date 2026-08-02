@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/l10n/app_localizations.dart';
-import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/app_spacing.dart' show AppRadius;
 import '../providers/client_providers.dart';
 
 /// Barre de recherche de l'écran Clients — même comportement que la barre
@@ -33,33 +33,27 @@ class _ClientSearchBarState extends ConsumerState<ClientSearchBar> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-      child: TextField(
-        controller: _controller,
-        onChanged: (value) =>
-            ref.read(clientSearchQueryProvider.notifier).state = value,
-        decoration: InputDecoration(
-          hintText: l10n.searchClientPlaceholder,
-          prefixIcon: const Icon(Icons.search),
-          suffixIcon: ValueListenableBuilder<TextEditingValue>(
-            valueListenable: _controller,
-            builder: (context, value, _) {
-              if (value.text.isEmpty) return const SizedBox.shrink();
-              return IconButton(
-                icon: const Icon(Icons.close),
-                onPressed: _clear,
-              );
-            },
-          ),
-          filled: true,
-          fillColor: Theme.of(context).colorScheme.surfaceContainerLow,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppRadius.button),
-            borderSide: BorderSide.none,
-          ),
-          contentPadding: const EdgeInsets.symmetric(vertical: 0),
+    return TextField(
+      controller: _controller,
+      onChanged: (value) =>
+          ref.read(clientSearchQueryProvider.notifier).state = value,
+      decoration: InputDecoration(
+        hintText: l10n.searchClientPlaceholder,
+        prefixIcon: const Icon(Icons.search),
+        suffixIcon: ValueListenableBuilder<TextEditingValue>(
+          valueListenable: _controller,
+          builder: (context, value, _) {
+            if (value.text.isEmpty) return const SizedBox.shrink();
+            return IconButton(icon: const Icon(Icons.close), onPressed: _clear);
+          },
         ),
+        filled: true,
+        fillColor: Theme.of(context).colorScheme.surfaceContainerLow,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppRadius.button),
+          borderSide: BorderSide.none,
+        ),
+        contentPadding: const EdgeInsets.symmetric(vertical: 0),
       ),
     );
   }

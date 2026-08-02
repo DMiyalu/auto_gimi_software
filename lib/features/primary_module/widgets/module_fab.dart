@@ -29,7 +29,8 @@ class ModuleFab extends ConsumerWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.button),
       ),
-      onPressed: () => _openActionsSheet(context, resolvedActions, resolvedColor),
+      onPressed: () =>
+          _openActionsSheet(context, resolvedActions, resolvedColor),
       child: const Icon(Icons.add, color: Colors.white),
     );
   }

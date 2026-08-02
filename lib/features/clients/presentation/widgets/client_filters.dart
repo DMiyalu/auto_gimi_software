@@ -18,9 +18,10 @@ class ClientFilters extends ConsumerWidget {
 
     final options = <(ClientListFilter, String)>[
       (ClientListFilter.all, l10n.clientFilterAll),
+      (ClientListFilter.fideles, l10n.clientFilterLoyal),
       (ClientListFilter.nouveaux, l10n.clientFilterNew),
-      (ClientListFilter.plusDe6Mois, l10n.clientFilterOverSixMonths),
-      (ClientListFilter.plusDUneAnnee, l10n.clientFilterOverOneYear),
+      (ClientListFilter.actifsCeMois, l10n.clientFilterActiveThisMonth),
+      (ClientListFilter.inactifs, l10n.clientFilterInactive),
     ];
 
     return SizedBox(

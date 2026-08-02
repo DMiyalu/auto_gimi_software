@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../../core/l10n/app_localizations.dart';
 import '../../../../core/routing/routes.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../garage/presentation/providers/prestation_providers.dart';
 import '../../../primary_module/config/business_module_config.dart';
 import '../../../primary_module/widgets/module_fab.dart';
+import '../providers/client_list_view_providers.dart';
 import '../providers/client_providers.dart';
-import '../widgets/client_avatar.dart';
+import '../widgets/client_card.dart';
 import '../widgets/client_filters.dart';
 import '../widgets/client_search_bar.dart';
 
@@ -42,15 +43,44 @@ class ClientsListScreen extends ConsumerWidget {
           return Column(
             children: [
               const SizedBox(height: AppSpacing.xs),
-              const ClientSearchBar(),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const Expanded(child: ClientSearchBar()),
+                    const SizedBox(width: AppSpacing.xs),
+                    const _FiltersButton(),
+                  ],
+                ),
+              ),
               const SizedBox(height: AppSpacing.sm),
               const ClientFilters(),
-              const SizedBox(height: AppSpacing.xs),
+              const SizedBox(height: AppSpacing.sm),
               const Expanded(child: _ClientListView()),
             ],
           );
         },
       ),
+    );
+  }
+}
+
+class _FiltersButton extends StatelessWidget {
+  const _FiltersButton();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
+    return OutlinedButton.icon(
+      onPressed: () {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.comingSoon)));
+      },
+      icon: const Icon(Icons.tune, size: 18),
+      label: Text(l10n.filters),
     );
   }
 }
@@ -84,8 +114,8 @@ class _EmptyClients extends StatelessWidget {
               l10n.noClientsHint,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
           ],
         ),
@@ -101,6 +131,7 @@ class _ClientListView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final clients = ref.watch(filteredClientsProvider);
+    final orderStats = ref.watch(clientOrderStatsProvider).valueOrNull ?? {};
 
     if (clients.isEmpty) {
       return Center(
@@ -108,32 +139,47 @@ class _ClientListView extends ConsumerWidget {
           l10n.noClientsMatchFilter,
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
       );
     }
 
     return ListView.separated(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      itemCount: clients.length,
-      // Indent = padding gauche (16) + diamètre avatar (44) + écart titre
-      // (16) : la ligne ne déborde pas sur la zone des initiales.
-      separatorBuilder: (_, _) => const Divider(height: 1, indent: 76),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.sm,
+        0,
+        AppSpacing.sm,
+        AppSpacing.sm,
+      ),
+      itemCount: clients.length + 1,
+      separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.xs),
       itemBuilder: (context, index) {
-        final client = clients[index];
-        return ListTile(
-          onTap: () => context.push(Routes.clientDetailPath(client.id)),
-          leading: ClientAvatar(client: client),
-          title: Text(client.name),
-          subtitle: Text(client.displayPhone),
-          trailing: client.loyaltyPoints > 0
-              ? Chip(
-                  label: Text('${client.loyaltyPoints} pts'),
-                  visualDensity: VisualDensity.compact,
-                )
-              : null,
-        );
+        if (index == 0) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  l10n.clientsListTitle,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                Text(
+                  l10n.clientsCount(clients.length),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        final client = clients[index - 1];
+        return ClientCard(client: client, stats: orderStats[client.id]);
       },
     );
   }

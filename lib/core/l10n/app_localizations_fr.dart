@@ -428,11 +428,40 @@ class AppLocalizationsFr extends AppLocalizations {
   String get clientFilterNew => 'Nouveaux';
 
   @override
-  String get clientFilterOverSixMonths => 'Plus de 6 mois';
+  String get clientFilterLoyal => 'Fidèles';
 
   @override
-  String get clientFilterOverOneYear => 'Plus d\'une année';
+  String get clientFilterActiveThisMonth => 'Actifs ce mois';
+
+  @override
+  String get clientFilterInactive => 'Inactifs';
 
   @override
   String get noClientsMatchFilter => 'Aucun client ne correspond à ce filtre.';
+
+  @override
+  String get clientsListTitle => 'Liste des clients';
+
+  @override
+  String clientsCount(int count) {
+    return '$count clients';
+  }
+
+  @override
+  String get filters => 'Filtres';
+
+  @override
+  String get clientTierGold => 'Membre Gold';
+
+  @override
+  String get clientTierLoyal => 'Fidèle';
+
+  @override
+  String get totalOrderedAmount => 'Total commandé';
+
+  @override
+  String get lastOrderLabel => 'Dernière commande';
+
+  @override
+  String get noOrdersYet => 'Aucune commande';
 }

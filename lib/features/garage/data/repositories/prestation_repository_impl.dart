@@ -3,6 +3,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../../../core/database/app_database.dart';
 import '../../../../core/domain/enums.dart';
+import '../../domain/entities/client_order_stats.dart';
 import '../../domain/entities/ligne_prestation_entity.dart';
 import '../../domain/entities/prestation_entity.dart';
 import '../../domain/entities/prestation_summary.dart';
@@ -11,7 +12,7 @@ import '../../domain/repositories/prestation_repository.dart';
 
 class PrestationRepositoryImpl implements PrestationRepository {
   PrestationRepositoryImpl({required AppDatabase database})
-      : _database = database;
+    : _database = database;
 
   final AppDatabase _database;
   final _uuid = const Uuid();
@@ -20,26 +21,25 @@ class PrestationRepositoryImpl implements PrestationRepository {
   Stream<PrestationEntity?> watchPrestation(String id) {
     final query = _database.select(_database.prestations)
       ..where((p) => p.id.equals(id) & p.isDeleted.equals(false));
-    return query
-        .watchSingleOrNull()
-        .map((row) => row == null ? null : _prestationFromDrift(row));
+    return query.watchSingleOrNull().map(
+      (row) => row == null ? null : _prestationFromDrift(row),
+    );
   }
 
   @override
   Stream<VehiculeEntity?> watchVehicule(String id) {
     final query = _database.select(_database.vehicules)
       ..where((v) => v.id.equals(id) & v.isDeleted.equals(false));
-    return query
-        .watchSingleOrNull()
-        .map((row) => row == null ? null : _vehiculeFromDrift(row));
+    return query.watchSingleOrNull().map(
+      (row) => row == null ? null : _vehiculeFromDrift(row),
+    );
   }
 
   @override
   Stream<List<LignePrestationEntity>> watchLignes(String prestationId) {
     final query = _database.select(_database.lignePrestations)
       ..where(
-        (l) =>
-            l.prestationId.equals(prestationId) & l.isDeleted.equals(false),
+        (l) => l.prestationId.equals(prestationId) & l.isDeleted.equals(false),
       )
       ..orderBy([(l) => OrderingTerm.asc(l.createdAt)]);
     return query.watch().map((rows) => rows.map(_ligneFromDrift).toList());
@@ -51,42 +51,93 @@ class PrestationRepositoryImpl implements PrestationRepository {
   }
 
   @override
-  Stream<List<PrestationSummary>> watchPrestationsForClient(
-    String clientId,
-  ) {
+  Stream<List<PrestationSummary>> watchPrestationsForClient(String clientId) {
     return _watchPrestationSummaries(
       extraWhere: _database.prestations.clientId.equals(clientId),
     );
   }
 
+  @override
+  Stream<Map<String, ClientOrderStats>> watchClientOrderStats() {
+    final query =
+        _database.select(_database.prestations).join([
+            innerJoin(
+              _database.vehicules,
+              _database.vehicules.id.equalsExp(
+                _database.prestations.vehiculeId,
+              ),
+            ),
+          ])
+          ..where(
+            _database.prestations.isDeleted.equals(false) &
+                _database.prestations.clientId.isNotNull(),
+          )
+          ..orderBy([OrderingTerm.desc(_database.prestations.dateOuverture)]);
+
+    return query.watch().map((rows) {
+      final totals = <String, double>{};
+      final latest = <String, ClientOrderStats>{};
+
+      for (final row in rows) {
+        final prestation = row.readTable(_database.prestations);
+        final vehicule = row.readTable(_database.vehicules);
+        final clientId = prestation.clientId;
+        if (clientId == null) continue;
+
+        totals[clientId] = (totals[clientId] ?? 0) + prestation.montantTotal;
+        // Les lignes sont triées de la plus récente à la plus ancienne : la
+        // première rencontrée par client est donc sa dernière commande.
+        latest.putIfAbsent(
+          clientId,
+          () => ClientOrderStats(
+            totalSpent: 0,
+            lastOrderAt: prestation.dateOuverture,
+            lastOrderContext: vehicule.immatriculation,
+          ),
+        );
+      }
+
+      return {
+        for (final entry in latest.entries)
+          entry.key: ClientOrderStats(
+            totalSpent: totals[entry.key]!,
+            lastOrderAt: entry.value.lastOrderAt,
+            lastOrderContext: entry.value.lastOrderContext,
+          ),
+      };
+    });
+  }
+
   Stream<List<PrestationSummary>> _watchPrestationSummaries({
     Expression<bool>? extraWhere,
   }) {
-    final query = _database.select(_database.prestations).join([
-      innerJoin(
-        _database.vehicules,
-        _database.vehicules.id.equalsExp(_database.prestations.vehiculeId),
-      ),
-      leftOuterJoin(
-        _database.clients,
-        _database.clients.id.equalsExp(_database.prestations.clientId) &
-            _database.clients.isDeleted.equals(false),
-      ),
-    ])
-      ..where(
-        extraWhere == null
-            ? _database.prestations.isDeleted.equals(false)
-            : _database.prestations.isDeleted.equals(false) & extraWhere,
-      )
-      ..orderBy([OrderingTerm.desc(_database.prestations.dateOuverture)]);
+    final query =
+        _database.select(_database.prestations).join([
+            innerJoin(
+              _database.vehicules,
+              _database.vehicules.id.equalsExp(
+                _database.prestations.vehiculeId,
+              ),
+            ),
+            leftOuterJoin(
+              _database.clients,
+              _database.clients.id.equalsExp(_database.prestations.clientId) &
+                  _database.clients.isDeleted.equals(false),
+            ),
+          ])
+          ..where(
+            extraWhere == null
+                ? _database.prestations.isDeleted.equals(false)
+                : _database.prestations.isDeleted.equals(false) & extraWhere,
+          )
+          ..orderBy([OrderingTerm.desc(_database.prestations.dateOuverture)]);
 
     return query.watch().map((rows) {
       return rows.map((row) {
         final prestation = row.readTable(_database.prestations);
         final vehicule = row.readTable(_database.vehicules);
         final client = row.readTableOrNull(_database.clients);
-        final hasFullName =
-            vehicule.marque != null && vehicule.modele != null;
+        final hasFullName = vehicule.marque != null && vehicule.modele != null;
 
         return PrestationSummary(
           id: prestation.id,
@@ -120,7 +171,9 @@ class PrestationRepositoryImpl implements PrestationRepository {
     final clientId = existingVehicule?.clientId;
 
     if (existingVehicule == null) {
-      await _database.into(_database.vehicules).insert(
+      await _database
+          .into(_database.vehicules)
+          .insert(
             VehiculesCompanion.insert(
               id: vehiculeId,
               immatriculation: normalized,
@@ -131,7 +184,9 @@ class PrestationRepositoryImpl implements PrestationRepository {
     }
 
     final prestationId = _uuid.v4();
-    await _database.into(_database.prestations).insert(
+    await _database
+        .into(_database.prestations)
+        .insert(
           PrestationsCompanion.insert(
             id: prestationId,
             vehiculeId: vehiculeId,
@@ -161,9 +216,11 @@ class PrestationRepositoryImpl implements PrestationRepository {
     required String prestationId,
     required String serviceId,
   }) async {
-    final service = await (_database.select(_database.catalogServices)
-          ..where((s) => s.id.equals(serviceId) & s.isDeleted.equals(false)))
-        .getSingleOrNull();
+    final service =
+        await (_database.select(
+              _database.catalogServices,
+            )..where((s) => s.id.equals(serviceId) & s.isDeleted.equals(false)))
+            .getSingleOrNull();
     if (service == null) throw StateError('Service introuvable.');
 
     await _addOrIncrementLine(
@@ -182,9 +239,11 @@ class PrestationRepositoryImpl implements PrestationRepository {
     required String prestationId,
     required String produitId,
   }) async {
-    final produit = await (_database.select(_database.produits)
-          ..where((p) => p.id.equals(produitId) & p.isDeleted.equals(false)))
-        .getSingleOrNull();
+    final produit =
+        await (_database.select(
+              _database.produits,
+            )..where((p) => p.id.equals(produitId) & p.isDeleted.equals(false)))
+            .getSingleOrNull();
     if (produit == null) throw StateError('Produit introuvable.');
 
     await _addOrIncrementLine(
@@ -204,14 +263,14 @@ class PrestationRepositoryImpl implements PrestationRepository {
   }) async {
     final now = DateTime.now();
     await _database.transaction(() async {
-      final ligne = await (_database.select(_database.lignePrestations)
-            ..where((l) => l.id.equals(ligneId)))
-          .getSingleOrNull();
+      final ligne = await (_database.select(
+        _database.lignePrestations,
+      )..where((l) => l.id.equals(ligneId))).getSingleOrNull();
       if (ligne == null) return;
 
-      await (_database.update(_database.lignePrestations)
-            ..where((l) => l.id.equals(ligneId)))
-          .write(
+      await (_database.update(
+        _database.lignePrestations,
+      )..where((l) => l.id.equals(ligneId))).write(
         LignePrestationsCompanion(
           isDeleted: const Value(true),
           updatedAt: Value(now),
@@ -231,14 +290,14 @@ class PrestationRepositoryImpl implements PrestationRepository {
   }) async {
     final now = DateTime.now();
     await _database.transaction(() async {
-      final prestation = await (_database.select(_database.prestations)
-            ..where((p) => p.id.equals(prestationId)))
-          .getSingleOrNull();
+      final prestation = await (_database.select(
+        _database.prestations,
+      )..where((p) => p.id.equals(prestationId))).getSingleOrNull();
       if (prestation == null) throw StateError('Prestation introuvable.');
 
-      await (_database.update(_database.prestations)
-            ..where((p) => p.id.equals(prestationId)))
-          .write(
+      await (_database.update(
+        _database.prestations,
+      )..where((p) => p.id.equals(prestationId))).write(
         PrestationsCompanion(
           clientId: Value(clientId),
           updatedAt: Value(now),
@@ -246,9 +305,9 @@ class PrestationRepositoryImpl implements PrestationRepository {
         ),
       );
 
-      await (_database.update(_database.vehicules)
-            ..where((v) => v.id.equals(prestation.vehiculeId)))
-          .write(
+      await (_database.update(
+        _database.vehicules,
+      )..where((v) => v.id.equals(prestation.vehiculeId))).write(
         VehiculesCompanion(
           clientId: Value(clientId),
           updatedAt: Value(now),
@@ -264,9 +323,9 @@ class PrestationRepositoryImpl implements PrestationRepository {
     required String prestationId,
   }) async {
     final now = DateTime.now();
-    await (_database.update(_database.prestations)
-          ..where((p) => p.id.equals(prestationId)))
-        .write(
+    await (_database.update(
+      _database.prestations,
+    )..where((p) => p.id.equals(prestationId))).write(
       PrestationsCompanion(
         clientId: const Value(null),
         updatedAt: Value(now),
@@ -299,9 +358,9 @@ class PrestationRepositoryImpl implements PrestationRepository {
 
       if (existing != null) {
         final newQuantite = existing.quantite + 1;
-        await (_database.update(_database.lignePrestations)
-              ..where((l) => l.id.equals(existing.id)))
-            .write(
+        await (_database.update(
+          _database.lignePrestations,
+        )..where((l) => l.id.equals(existing.id))).write(
           LignePrestationsCompanion(
             quantite: Value(newQuantite),
             montantLigne: Value(newQuantite * existing.prixUnitaire),
@@ -310,7 +369,9 @@ class PrestationRepositoryImpl implements PrestationRepository {
           ),
         );
       } else {
-        await _database.into(_database.lignePrestations).insert(
+        await _database
+            .into(_database.lignePrestations)
+            .insert(
               LignePrestationsCompanion.insert(
                 id: _uuid.v4(),
                 prestationId: prestationId,
@@ -331,19 +392,20 @@ class PrestationRepositoryImpl implements PrestationRepository {
   }
 
   Future<void> _recomputeTotal(String prestationId, DateTime now) async {
-    final sumRow = await (_database.selectOnly(_database.lignePrestations)
-          ..addColumns([_database.lignePrestations.montantLigne.sum()])
-          ..where(
-            _database.lignePrestations.prestationId.equals(prestationId) &
-                _database.lignePrestations.isDeleted.equals(false),
-          ))
-        .getSingleOrNull();
+    final sumRow =
+        await (_database.selectOnly(_database.lignePrestations)
+              ..addColumns([_database.lignePrestations.montantLigne.sum()])
+              ..where(
+                _database.lignePrestations.prestationId.equals(prestationId) &
+                    _database.lignePrestations.isDeleted.equals(false),
+              ))
+            .getSingleOrNull();
     final total =
         sumRow?.read(_database.lignePrestations.montantLigne.sum()) ?? 0;
 
-    await (_database.update(_database.prestations)
-          ..where((p) => p.id.equals(prestationId)))
-        .write(
+    await (_database.update(
+      _database.prestations,
+    )..where((p) => p.id.equals(prestationId))).write(
       PrestationsCompanion(
         montantTotal: Value(total),
         updatedAt: Value(now),
@@ -355,8 +417,7 @@ class PrestationRepositoryImpl implements PrestationRepository {
   Future<Vehicule?> _findVehiculeByImmatriculation(String normalized) {
     final query = _database.select(_database.vehicules)
       ..where(
-        (v) =>
-            v.immatriculation.equals(normalized) & v.isDeleted.equals(false),
+        (v) => v.immatriculation.equals(normalized) & v.isDeleted.equals(false),
       );
     return query.getSingleOrNull();
   }

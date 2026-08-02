@@ -426,11 +426,40 @@ class AppLocalizationsEn extends AppLocalizations {
   String get clientFilterNew => 'New';
 
   @override
-  String get clientFilterOverSixMonths => 'Over 6 months';
+  String get clientFilterLoyal => 'Loyal';
 
   @override
-  String get clientFilterOverOneYear => 'Over a year';
+  String get clientFilterActiveThisMonth => 'Active this month';
+
+  @override
+  String get clientFilterInactive => 'Inactive';
 
   @override
   String get noClientsMatchFilter => 'No client matches this filter.';
+
+  @override
+  String get clientsListTitle => 'Client list';
+
+  @override
+  String clientsCount(int count) {
+    return '$count clients';
+  }
+
+  @override
+  String get filters => 'Filters';
+
+  @override
+  String get clientTierGold => 'Gold member';
+
+  @override
+  String get clientTierLoyal => 'Loyal';
+
+  @override
+  String get totalOrderedAmount => 'Total ordered';
+
+  @override
+  String get lastOrderLabel => 'Last order';
+
+  @override
+  String get noOrdersYet => 'No orders yet';
 }

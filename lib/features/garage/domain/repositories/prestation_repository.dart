@@ -1,3 +1,4 @@
+import '../entities/client_order_stats.dart';
 import '../entities/ligne_prestation_entity.dart';
 import '../entities/prestation_entity.dart';
 import '../entities/prestation_summary.dart';
@@ -15,6 +16,10 @@ abstract class PrestationRepository {
   /// Même projection que [watchPrestationsSummary], filtrée sur un client —
   /// alimente l'onglet historique de l'écran Détail client.
   Stream<List<PrestationSummary>> watchPrestationsForClient(String clientId);
+
+  /// Total dépensé et dernière commande par client — alimente les cartes et
+  /// filtres d'activité de l'écran liste des clients.
+  Stream<Map<String, ClientOrderStats>> watchClientOrderStats();
 
   /// Point d'entrée unique de création : cherche un véhicule existant par
   /// immatriculation (et réutilise son client s'il en a un), sinon crée un

@@ -23,39 +23,21 @@ final clientByIdProvider = StreamProvider.family<ClientEntity?, String>(
 );
 
 /// Filtres rapides de l'écran Clients — indépendants du métier actif
-/// (contrairement aux filtres de statut de l'écran principal).
-enum ClientListFilter { all, nouveaux, plusDe6Mois, plusDUneAnnee }
+/// (contrairement aux filtres de statut de l'écran principal). Le filtrage
+/// effectif (recherche + application) vit dans
+/// `client_list_view_providers.dart`, qui a besoin des stats de commandes
+/// (garage) pour Actifs ce mois / Inactifs.
+enum ClientListFilter { all, fideles, nouveaux, actifsCeMois, inactifs }
 
 final clientSearchQueryProvider = StateProvider<String>((ref) => '');
 
-final clientListFilterProvider =
-    StateProvider<ClientListFilter>((ref) => ClientListFilter.all);
+final clientListFilterProvider = StateProvider<ClientListFilter>(
+  (ref) => ClientListFilter.all,
+);
 
-/// Clients après application de la recherche et du filtre d'ancienneté.
-final filteredClientsProvider = Provider<List<ClientEntity>>((ref) {
-  final clients = ref.watch(clientsProvider).valueOrNull ?? [];
-  final query = ref.watch(clientSearchQueryProvider).trim().toLowerCase();
-  final filter = ref.watch(clientListFilterProvider);
-  final now = DateTime.now();
-
-  return clients.where((client) {
-    if (query.isNotEmpty &&
-        !client.name.toLowerCase().contains(query) &&
-        !client.displayPhone.toLowerCase().contains(query)) {
-      return false;
-    }
-    final age = now.difference(client.createdAt);
-    return switch (filter) {
-      ClientListFilter.all => true,
-      ClientListFilter.nouveaux => age <= const Duration(days: 30),
-      ClientListFilter.plusDe6Mois => age >= const Duration(days: 182),
-      ClientListFilter.plusDUneAnnee => age >= const Duration(days: 365),
-    };
-  }).toList();
-});
-
-final clientControllerProvider =
-    AsyncNotifierProvider<ClientController, void>(ClientController.new);
+final clientControllerProvider = AsyncNotifierProvider<ClientController, void>(
+  ClientController.new,
+);
 
 class ClientController extends AsyncNotifier<void> {
   @override
@@ -76,7 +58,9 @@ class ClientController extends AsyncNotifier<void> {
 
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      await ref.read(clientRepositoryProvider).createClient(
+      await ref
+          .read(clientRepositoryProvider)
+          .createClient(
             establishmentId: establishment.id,
             name: name,
             whatsappPhone: whatsappPhone,
@@ -100,7 +84,9 @@ class ClientController extends AsyncNotifier<void> {
   }) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      await ref.read(clientRepositoryProvider).updateClient(
+      await ref
+          .read(clientRepositoryProvider)
+          .updateClient(
             id: id,
             name: name,
             whatsappPhone: whatsappPhone,

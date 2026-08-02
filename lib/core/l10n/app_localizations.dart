@@ -896,23 +896,77 @@ abstract class AppLocalizations {
   /// **'New'**
   String get clientFilterNew;
 
-  /// No description provided for @clientFilterOverSixMonths.
+  /// No description provided for @clientFilterLoyal.
   ///
   /// In en, this message translates to:
-  /// **'Over 6 months'**
-  String get clientFilterOverSixMonths;
+  /// **'Loyal'**
+  String get clientFilterLoyal;
 
-  /// No description provided for @clientFilterOverOneYear.
+  /// No description provided for @clientFilterActiveThisMonth.
   ///
   /// In en, this message translates to:
-  /// **'Over a year'**
-  String get clientFilterOverOneYear;
+  /// **'Active this month'**
+  String get clientFilterActiveThisMonth;
+
+  /// No description provided for @clientFilterInactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive'**
+  String get clientFilterInactive;
 
   /// No description provided for @noClientsMatchFilter.
   ///
   /// In en, this message translates to:
   /// **'No client matches this filter.'**
   String get noClientsMatchFilter;
+
+  /// No description provided for @clientsListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Client list'**
+  String get clientsListTitle;
+
+  /// No description provided for @clientsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} clients'**
+  String clientsCount(int count);
+
+  /// No description provided for @filters.
+  ///
+  /// In en, this message translates to:
+  /// **'Filters'**
+  String get filters;
+
+  /// No description provided for @clientTierGold.
+  ///
+  /// In en, this message translates to:
+  /// **'Gold member'**
+  String get clientTierGold;
+
+  /// No description provided for @clientTierLoyal.
+  ///
+  /// In en, this message translates to:
+  /// **'Loyal'**
+  String get clientTierLoyal;
+
+  /// No description provided for @totalOrderedAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Total ordered'**
+  String get totalOrderedAmount;
+
+  /// No description provided for @lastOrderLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Last order'**
+  String get lastOrderLabel;
+
+  /// No description provided for @noOrdersYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No orders yet'**
+  String get noOrdersYet;
 }
 
 class _AppLocalizationsDelegate

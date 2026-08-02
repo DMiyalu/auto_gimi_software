@@ -106,26 +106,28 @@ void main() {
     expect(updated.notes, 'Appelé le 1er janvier.');
   });
 
-  test('updateClient refuse un numéro déjà utilisé par un autre client',
-      () async {
-    await repository.createClient(
-      establishmentId: 'est-1',
-      name: 'Client A',
-      whatsappPhone: '221771111111',
-    );
-    final clientB = await repository.createClient(
-      establishmentId: 'est-1',
-      name: 'Client B',
-      whatsappPhone: '221772222222',
-    );
-
-    expect(
-      () => repository.updateClient(
-        id: clientB.id,
-        name: 'Client B',
+  test(
+    'updateClient refuse un numéro déjà utilisé par un autre client',
+    () async {
+      await repository.createClient(
+        establishmentId: 'est-1',
+        name: 'Client A',
         whatsappPhone: '221771111111',
-      ),
-      throwsStateError,
-    );
-  });
+      );
+      final clientB = await repository.createClient(
+        establishmentId: 'est-1',
+        name: 'Client B',
+        whatsappPhone: '221772222222',
+      );
+
+      expect(
+        () => repository.updateClient(
+          id: clientB.id,
+          name: 'Client B',
+          whatsappPhone: '221771111111',
+        ),
+        throwsStateError,
+      );
+    },
+  );
 }
