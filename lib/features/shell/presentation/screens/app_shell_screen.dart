@@ -45,7 +45,6 @@ class AppShellScreen extends ConsumerWidget {
     BusinessModuleConfig config,
     AppLocalizations l10n,
   ) {
-    if (location == Routes.clients) return config.clientsLabel;
     if (location == Routes.produits) return l10n.products;
     if (location == Routes.services) return l10n.services;
     if (location == Routes.reports) return config.reportsLabel;

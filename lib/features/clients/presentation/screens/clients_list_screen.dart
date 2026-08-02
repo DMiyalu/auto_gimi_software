@@ -117,24 +117,16 @@ class _ClientListView extends ConsumerWidget {
     return ListView.separated(
       padding: const EdgeInsets.symmetric(vertical: 8),
       itemCount: clients.length,
-      separatorBuilder: (_, _) => const Divider(height: 1),
+      // Indent = padding gauche (16) + diamètre avatar (44) + écart titre
+      // (16) : la ligne ne déborde pas sur la zone des initiales.
+      separatorBuilder: (_, _) => const Divider(height: 1, indent: 76),
       itemBuilder: (context, index) {
         final client = clients[index];
         return ListTile(
           onTap: () => context.push(Routes.clientDetailPath(client.id)),
           leading: ClientAvatar(client: client),
           title: Text(client.name),
-          subtitle: Row(
-            children: [
-              Icon(
-                Icons.chat_outlined,
-                size: 16,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              const SizedBox(width: 6),
-              Text(client.displayPhone),
-            ],
-          ),
+          subtitle: Text(client.displayPhone),
           trailing: client.loyaltyPoints > 0
               ? Chip(
                   label: Text('${client.loyaltyPoints} pts'),
