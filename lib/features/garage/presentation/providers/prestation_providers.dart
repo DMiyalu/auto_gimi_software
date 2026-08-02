@@ -28,6 +28,13 @@ final prestationsSummaryProvider = StreamProvider<List<PrestationSummary>>((ref)
   return ref.watch(prestationRepositoryProvider).watchPrestationsSummary();
 });
 
+final prestationsForClientProvider =
+    StreamProvider.family<List<PrestationSummary>, String>((ref, clientId) {
+  return ref
+      .watch(prestationRepositoryProvider)
+      .watchPrestationsForClient(clientId);
+});
+
 final prestationLinesProvider =
     StreamProvider.family<List<LignePrestationEntity>, String>(
   (ref, prestationId) {

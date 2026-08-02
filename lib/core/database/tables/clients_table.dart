@@ -5,6 +5,11 @@ class Clients extends Table {
   TextColumn get phone => text()();
   TextColumn get nom => text()();
   TextColumn get prenom => text().nullable()();
+  TextColumn get email => text().nullable()();
+  TextColumn get adresse => text().nullable()();
+  TextColumn get typeClient =>
+      text().withDefault(const Constant('particulier'))();
+  TextColumn get notes => text().nullable()();
   IntColumn get pointsFidelite => integer().withDefault(const Constant(0))();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();

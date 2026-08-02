@@ -41,7 +41,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -57,6 +57,9 @@ class AppDatabase extends _$AppDatabase {
           }
           if (from < 6) {
             await _migrateGarageSchema(m);
+          }
+          if (from < 7) {
+            await _addClientProfileColumns(m);
           }
         },
         beforeOpen: (details) async {
@@ -169,6 +172,16 @@ class AppDatabase extends _$AppDatabase {
         },
       ),
     );
+  }
+
+  /// Ajoute le profil étendu du client (email, adresse, type, notes) requis
+  /// par l'écran de détail — simples colonnes nullables/à défaut, ajout
+  /// additif sans backfill.
+  Future<void> _addClientProfileColumns(Migrator m) async {
+    await m.addColumn(clients, clients.email);
+    await m.addColumn(clients, clients.adresse);
+    await m.addColumn(clients, clients.typeClient);
+    await m.addColumn(clients, clients.notes);
   }
 }
 

@@ -44,6 +44,47 @@ class $ClientsTable extends Clients with TableInfo<$ClientsTable, Client> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _emailMeta = const VerificationMeta('email');
+  @override
+  late final GeneratedColumn<String> email = GeneratedColumn<String>(
+    'email',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _adresseMeta = const VerificationMeta(
+    'adresse',
+  );
+  @override
+  late final GeneratedColumn<String> adresse = GeneratedColumn<String>(
+    'adresse',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _typeClientMeta = const VerificationMeta(
+    'typeClient',
+  );
+  @override
+  late final GeneratedColumn<String> typeClient = GeneratedColumn<String>(
+    'type_client',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('particulier'),
+  );
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+    'notes',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _pointsFideliteMeta = const VerificationMeta(
     'pointsFidelite',
   );
@@ -114,6 +155,10 @@ class $ClientsTable extends Clients with TableInfo<$ClientsTable, Client> {
     phone,
     nom,
     prenom,
+    email,
+    adresse,
+    typeClient,
+    notes,
     pointsFidelite,
     createdAt,
     updatedAt,
@@ -157,6 +202,30 @@ class $ClientsTable extends Clients with TableInfo<$ClientsTable, Client> {
       context.handle(
         _prenomMeta,
         prenom.isAcceptableOrUnknown(data['prenom']!, _prenomMeta),
+      );
+    }
+    if (data.containsKey('email')) {
+      context.handle(
+        _emailMeta,
+        email.isAcceptableOrUnknown(data['email']!, _emailMeta),
+      );
+    }
+    if (data.containsKey('adresse')) {
+      context.handle(
+        _adresseMeta,
+        adresse.isAcceptableOrUnknown(data['adresse']!, _adresseMeta),
+      );
+    }
+    if (data.containsKey('type_client')) {
+      context.handle(
+        _typeClientMeta,
+        typeClient.isAcceptableOrUnknown(data['type_client']!, _typeClientMeta),
+      );
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+        _notesMeta,
+        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
       );
     }
     if (data.containsKey('points_fidelite')) {
@@ -221,6 +290,22 @@ class $ClientsTable extends Clients with TableInfo<$ClientsTable, Client> {
         DriftSqlType.string,
         data['${effectivePrefix}prenom'],
       ),
+      email: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}email'],
+      ),
+      adresse: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}adresse'],
+      ),
+      typeClient: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}type_client'],
+      )!,
+      notes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notes'],
+      ),
       pointsFidelite: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}points_fidelite'],
@@ -255,6 +340,10 @@ class Client extends DataClass implements Insertable<Client> {
   final String phone;
   final String nom;
   final String? prenom;
+  final String? email;
+  final String? adresse;
+  final String typeClient;
+  final String? notes;
   final int pointsFidelite;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -265,6 +354,10 @@ class Client extends DataClass implements Insertable<Client> {
     required this.phone,
     required this.nom,
     this.prenom,
+    this.email,
+    this.adresse,
+    required this.typeClient,
+    this.notes,
     required this.pointsFidelite,
     required this.createdAt,
     required this.updatedAt,
@@ -279,6 +372,16 @@ class Client extends DataClass implements Insertable<Client> {
     map['nom'] = Variable<String>(nom);
     if (!nullToAbsent || prenom != null) {
       map['prenom'] = Variable<String>(prenom);
+    }
+    if (!nullToAbsent || email != null) {
+      map['email'] = Variable<String>(email);
+    }
+    if (!nullToAbsent || adresse != null) {
+      map['adresse'] = Variable<String>(adresse);
+    }
+    map['type_client'] = Variable<String>(typeClient);
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
     }
     map['points_fidelite'] = Variable<int>(pointsFidelite);
     map['created_at'] = Variable<DateTime>(createdAt);
@@ -296,6 +399,16 @@ class Client extends DataClass implements Insertable<Client> {
       prenom: prenom == null && nullToAbsent
           ? const Value.absent()
           : Value(prenom),
+      email: email == null && nullToAbsent
+          ? const Value.absent()
+          : Value(email),
+      adresse: adresse == null && nullToAbsent
+          ? const Value.absent()
+          : Value(adresse),
+      typeClient: Value(typeClient),
+      notes: notes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(notes),
       pointsFidelite: Value(pointsFidelite),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
@@ -314,6 +427,10 @@ class Client extends DataClass implements Insertable<Client> {
       phone: serializer.fromJson<String>(json['phone']),
       nom: serializer.fromJson<String>(json['nom']),
       prenom: serializer.fromJson<String?>(json['prenom']),
+      email: serializer.fromJson<String?>(json['email']),
+      adresse: serializer.fromJson<String?>(json['adresse']),
+      typeClient: serializer.fromJson<String>(json['typeClient']),
+      notes: serializer.fromJson<String?>(json['notes']),
       pointsFidelite: serializer.fromJson<int>(json['pointsFidelite']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
@@ -329,6 +446,10 @@ class Client extends DataClass implements Insertable<Client> {
       'phone': serializer.toJson<String>(phone),
       'nom': serializer.toJson<String>(nom),
       'prenom': serializer.toJson<String?>(prenom),
+      'email': serializer.toJson<String?>(email),
+      'adresse': serializer.toJson<String?>(adresse),
+      'typeClient': serializer.toJson<String>(typeClient),
+      'notes': serializer.toJson<String?>(notes),
       'pointsFidelite': serializer.toJson<int>(pointsFidelite),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
@@ -342,6 +463,10 @@ class Client extends DataClass implements Insertable<Client> {
     String? phone,
     String? nom,
     Value<String?> prenom = const Value.absent(),
+    Value<String?> email = const Value.absent(),
+    Value<String?> adresse = const Value.absent(),
+    String? typeClient,
+    Value<String?> notes = const Value.absent(),
     int? pointsFidelite,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -352,6 +477,10 @@ class Client extends DataClass implements Insertable<Client> {
     phone: phone ?? this.phone,
     nom: nom ?? this.nom,
     prenom: prenom.present ? prenom.value : this.prenom,
+    email: email.present ? email.value : this.email,
+    adresse: adresse.present ? adresse.value : this.adresse,
+    typeClient: typeClient ?? this.typeClient,
+    notes: notes.present ? notes.value : this.notes,
     pointsFidelite: pointsFidelite ?? this.pointsFidelite,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
@@ -364,6 +493,12 @@ class Client extends DataClass implements Insertable<Client> {
       phone: data.phone.present ? data.phone.value : this.phone,
       nom: data.nom.present ? data.nom.value : this.nom,
       prenom: data.prenom.present ? data.prenom.value : this.prenom,
+      email: data.email.present ? data.email.value : this.email,
+      adresse: data.adresse.present ? data.adresse.value : this.adresse,
+      typeClient: data.typeClient.present
+          ? data.typeClient.value
+          : this.typeClient,
+      notes: data.notes.present ? data.notes.value : this.notes,
       pointsFidelite: data.pointsFidelite.present
           ? data.pointsFidelite.value
           : this.pointsFidelite,
@@ -381,6 +516,10 @@ class Client extends DataClass implements Insertable<Client> {
           ..write('phone: $phone, ')
           ..write('nom: $nom, ')
           ..write('prenom: $prenom, ')
+          ..write('email: $email, ')
+          ..write('adresse: $adresse, ')
+          ..write('typeClient: $typeClient, ')
+          ..write('notes: $notes, ')
           ..write('pointsFidelite: $pointsFidelite, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
@@ -396,6 +535,10 @@ class Client extends DataClass implements Insertable<Client> {
     phone,
     nom,
     prenom,
+    email,
+    adresse,
+    typeClient,
+    notes,
     pointsFidelite,
     createdAt,
     updatedAt,
@@ -410,6 +553,10 @@ class Client extends DataClass implements Insertable<Client> {
           other.phone == this.phone &&
           other.nom == this.nom &&
           other.prenom == this.prenom &&
+          other.email == this.email &&
+          other.adresse == this.adresse &&
+          other.typeClient == this.typeClient &&
+          other.notes == this.notes &&
           other.pointsFidelite == this.pointsFidelite &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
@@ -422,6 +569,10 @@ class ClientsCompanion extends UpdateCompanion<Client> {
   final Value<String> phone;
   final Value<String> nom;
   final Value<String?> prenom;
+  final Value<String?> email;
+  final Value<String?> adresse;
+  final Value<String> typeClient;
+  final Value<String?> notes;
   final Value<int> pointsFidelite;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
@@ -433,6 +584,10 @@ class ClientsCompanion extends UpdateCompanion<Client> {
     this.phone = const Value.absent(),
     this.nom = const Value.absent(),
     this.prenom = const Value.absent(),
+    this.email = const Value.absent(),
+    this.adresse = const Value.absent(),
+    this.typeClient = const Value.absent(),
+    this.notes = const Value.absent(),
     this.pointsFidelite = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -445,6 +600,10 @@ class ClientsCompanion extends UpdateCompanion<Client> {
     required String phone,
     required String nom,
     this.prenom = const Value.absent(),
+    this.email = const Value.absent(),
+    this.adresse = const Value.absent(),
+    this.typeClient = const Value.absent(),
+    this.notes = const Value.absent(),
     this.pointsFidelite = const Value.absent(),
     required DateTime createdAt,
     required DateTime updatedAt,
@@ -461,6 +620,10 @@ class ClientsCompanion extends UpdateCompanion<Client> {
     Expression<String>? phone,
     Expression<String>? nom,
     Expression<String>? prenom,
+    Expression<String>? email,
+    Expression<String>? adresse,
+    Expression<String>? typeClient,
+    Expression<String>? notes,
     Expression<int>? pointsFidelite,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
@@ -473,6 +636,10 @@ class ClientsCompanion extends UpdateCompanion<Client> {
       if (phone != null) 'phone': phone,
       if (nom != null) 'nom': nom,
       if (prenom != null) 'prenom': prenom,
+      if (email != null) 'email': email,
+      if (adresse != null) 'adresse': adresse,
+      if (typeClient != null) 'type_client': typeClient,
+      if (notes != null) 'notes': notes,
       if (pointsFidelite != null) 'points_fidelite': pointsFidelite,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
@@ -487,6 +654,10 @@ class ClientsCompanion extends UpdateCompanion<Client> {
     Value<String>? phone,
     Value<String>? nom,
     Value<String?>? prenom,
+    Value<String?>? email,
+    Value<String?>? adresse,
+    Value<String>? typeClient,
+    Value<String?>? notes,
     Value<int>? pointsFidelite,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
@@ -499,6 +670,10 @@ class ClientsCompanion extends UpdateCompanion<Client> {
       phone: phone ?? this.phone,
       nom: nom ?? this.nom,
       prenom: prenom ?? this.prenom,
+      email: email ?? this.email,
+      adresse: adresse ?? this.adresse,
+      typeClient: typeClient ?? this.typeClient,
+      notes: notes ?? this.notes,
       pointsFidelite: pointsFidelite ?? this.pointsFidelite,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -522,6 +697,18 @@ class ClientsCompanion extends UpdateCompanion<Client> {
     }
     if (prenom.present) {
       map['prenom'] = Variable<String>(prenom.value);
+    }
+    if (email.present) {
+      map['email'] = Variable<String>(email.value);
+    }
+    if (adresse.present) {
+      map['adresse'] = Variable<String>(adresse.value);
+    }
+    if (typeClient.present) {
+      map['type_client'] = Variable<String>(typeClient.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
     }
     if (pointsFidelite.present) {
       map['points_fidelite'] = Variable<int>(pointsFidelite.value);
@@ -551,6 +738,10 @@ class ClientsCompanion extends UpdateCompanion<Client> {
           ..write('phone: $phone, ')
           ..write('nom: $nom, ')
           ..write('prenom: $prenom, ')
+          ..write('email: $email, ')
+          ..write('adresse: $adresse, ')
+          ..write('typeClient: $typeClient, ')
+          ..write('notes: $notes, ')
           ..write('pointsFidelite: $pointsFidelite, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
@@ -7149,6 +7340,10 @@ typedef $$ClientsTableCreateCompanionBuilder =
       required String phone,
       required String nom,
       Value<String?> prenom,
+      Value<String?> email,
+      Value<String?> adresse,
+      Value<String> typeClient,
+      Value<String?> notes,
       Value<int> pointsFidelite,
       required DateTime createdAt,
       required DateTime updatedAt,
@@ -7162,6 +7357,10 @@ typedef $$ClientsTableUpdateCompanionBuilder =
       Value<String> phone,
       Value<String> nom,
       Value<String?> prenom,
+      Value<String?> email,
+      Value<String?> adresse,
+      Value<String> typeClient,
+      Value<String?> notes,
       Value<int> pointsFidelite,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
@@ -7283,6 +7482,26 @@ class $$ClientsTableFilterComposer
 
   ColumnFilters<String> get prenom => $composableBuilder(
     column: $table.prenom,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get email => $composableBuilder(
+    column: $table.email,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get adresse => $composableBuilder(
+    column: $table.adresse,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get typeClient => $composableBuilder(
+    column: $table.typeClient,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get notes => $composableBuilder(
+    column: $table.notes,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -7441,6 +7660,26 @@ class $$ClientsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get email => $composableBuilder(
+    column: $table.email,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get adresse => $composableBuilder(
+    column: $table.adresse,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get typeClient => $composableBuilder(
+    column: $table.typeClient,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get pointsFidelite => $composableBuilder(
     column: $table.pointsFidelite,
     builder: (column) => ColumnOrderings(column),
@@ -7487,6 +7726,20 @@ class $$ClientsTableAnnotationComposer
 
   GeneratedColumn<String> get prenom =>
       $composableBuilder(column: $table.prenom, builder: (column) => column);
+
+  GeneratedColumn<String> get email =>
+      $composableBuilder(column: $table.email, builder: (column) => column);
+
+  GeneratedColumn<String> get adresse =>
+      $composableBuilder(column: $table.adresse, builder: (column) => column);
+
+  GeneratedColumn<String> get typeClient => $composableBuilder(
+    column: $table.typeClient,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
 
   GeneratedColumn<int> get pointsFidelite => $composableBuilder(
     column: $table.pointsFidelite,
@@ -7644,6 +7897,10 @@ class $$ClientsTableTableManager
                 Value<String> phone = const Value.absent(),
                 Value<String> nom = const Value.absent(),
                 Value<String?> prenom = const Value.absent(),
+                Value<String?> email = const Value.absent(),
+                Value<String?> adresse = const Value.absent(),
+                Value<String> typeClient = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
                 Value<int> pointsFidelite = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
@@ -7655,6 +7912,10 @@ class $$ClientsTableTableManager
                 phone: phone,
                 nom: nom,
                 prenom: prenom,
+                email: email,
+                adresse: adresse,
+                typeClient: typeClient,
+                notes: notes,
                 pointsFidelite: pointsFidelite,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
@@ -7668,6 +7929,10 @@ class $$ClientsTableTableManager
                 required String phone,
                 required String nom,
                 Value<String?> prenom = const Value.absent(),
+                Value<String?> email = const Value.absent(),
+                Value<String?> adresse = const Value.absent(),
+                Value<String> typeClient = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
                 Value<int> pointsFidelite = const Value.absent(),
                 required DateTime createdAt,
                 required DateTime updatedAt,
@@ -7679,6 +7944,10 @@ class $$ClientsTableTableManager
                 phone: phone,
                 nom: nom,
                 prenom: prenom,
+                email: email,
+                adresse: adresse,
+                typeClient: typeClient,
+                notes: notes,
                 pointsFidelite: pointsFidelite,
                 createdAt: createdAt,
                 updatedAt: updatedAt,

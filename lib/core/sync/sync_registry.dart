@@ -37,6 +37,10 @@ class ClientSyncAdapter implements SyncAdapter {
         row.id: {
           'name': row.nom,
           'phone': row.phone,
+          'email': row.email,
+          'address': row.adresse,
+          'clientType': row.typeClient,
+          'notes': row.notes,
           'loyaltyPoints': row.pointsFidelite,
           'createdAt': Timestamp.fromDate(row.createdAt),
           'updatedAt': Timestamp.fromDate(row.updatedAt),
@@ -80,6 +84,11 @@ class ClientSyncAdapter implements SyncAdapter {
                 id: Value(doc.id),
                 nom: Value(data['name'] as String? ?? ''),
                 phone: Value(data['phone'] as String? ?? ''),
+                email: Value(data['email'] as String?),
+                adresse: Value(data['address'] as String?),
+                typeClient:
+                    Value(data['clientType'] as String? ?? 'particulier'),
+                notes: Value(data['notes'] as String?),
                 pointsFidelite:
                     Value((data['loyaltyPoints'] as num?)?.toInt() ?? 0),
                 createdAt: Value(

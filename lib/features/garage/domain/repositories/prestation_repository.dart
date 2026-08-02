@@ -12,6 +12,10 @@ abstract class PrestationRepository {
   /// la plus récente à la plus ancienne — alimente la liste d'accueil.
   Stream<List<PrestationSummary>> watchPrestationsSummary();
 
+  /// Même projection que [watchPrestationsSummary], filtrée sur un client —
+  /// alimente l'onglet historique de l'écran Détail client.
+  Stream<List<PrestationSummary>> watchPrestationsForClient(String clientId);
+
   /// Point d'entrée unique de création : cherche un véhicule existant par
   /// immatriculation (et réutilise son client s'il en a un), sinon crée un
   /// véhicule minimal (immatriculation seule). Crée ensuite une nouvelle

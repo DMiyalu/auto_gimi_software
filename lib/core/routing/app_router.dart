@@ -8,6 +8,7 @@ import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/phone_verification_screen.dart';
 import '../../features/auth/presentation/screens/signup_screen.dart';
 import '../../features/establishment/presentation/providers/establishment_providers.dart';
+import '../../features/clients/presentation/screens/client_detail_screen.dart';
 import '../../features/clients/presentation/screens/client_form_screen.dart';
 import '../../features/clients/presentation/screens/clients_list_screen.dart';
 import '../../features/garage/presentation/screens/new_prestation_screen.dart';
@@ -110,6 +111,18 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: Routes.clientNew,
             builder: (_, __) => const ClientFormScreen(),
+          ),
+          GoRoute(
+            path: Routes.clientDetail,
+            builder: (_, state) => ClientDetailScreen(
+              clientId: state.pathParameters['id']!,
+            ),
+          ),
+          GoRoute(
+            path: Routes.clientEdit,
+            builder: (_, state) => ClientFormScreen(
+              clientId: state.pathParameters['id'],
+            ),
           ),
           GoRoute(
             path: Routes.services,

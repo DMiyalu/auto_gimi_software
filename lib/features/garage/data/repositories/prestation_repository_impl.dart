@@ -47,6 +47,21 @@ class PrestationRepositoryImpl implements PrestationRepository {
 
   @override
   Stream<List<PrestationSummary>> watchPrestationsSummary() {
+    return _watchPrestationSummaries();
+  }
+
+  @override
+  Stream<List<PrestationSummary>> watchPrestationsForClient(
+    String clientId,
+  ) {
+    return _watchPrestationSummaries(
+      extraWhere: _database.prestations.clientId.equals(clientId),
+    );
+  }
+
+  Stream<List<PrestationSummary>> _watchPrestationSummaries({
+    Expression<bool>? extraWhere,
+  }) {
     final query = _database.select(_database.prestations).join([
       innerJoin(
         _database.vehicules,
@@ -58,7 +73,11 @@ class PrestationRepositoryImpl implements PrestationRepository {
             _database.clients.isDeleted.equals(false),
       ),
     ])
-      ..where(_database.prestations.isDeleted.equals(false))
+      ..where(
+        extraWhere == null
+            ? _database.prestations.isDeleted.equals(false)
+            : _database.prestations.isDeleted.equals(false) & extraWhere,
+      )
       ..orderBy([OrderingTerm.desc(_database.prestations.dateOuverture)]);
 
     return query.watch().map((rows) {

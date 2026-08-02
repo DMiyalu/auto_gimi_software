@@ -102,6 +102,8 @@ void main() {
     await tester.tap(find.text('Clients'));
     await tester.pumpAndSettle();
 
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Add client'));
     await tester.pumpAndSettle();
 
@@ -113,6 +115,8 @@ void main() {
       find.byKey(const Key('client_whatsapp_local_field')),
       '771234567',
     );
+    await tester.ensureVisible(find.byKey(const Key('client_submit_button')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('client_submit_button')));
     await tester.pumpAndSettle();
 

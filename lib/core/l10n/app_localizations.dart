@@ -763,6 +763,156 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Client saved'**
   String get clientCreated;
+
+  /// No description provided for @clientEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email (optional)'**
+  String get clientEmail;
+
+  /// No description provided for @clientAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Address (optional)'**
+  String get clientAddress;
+
+  /// No description provided for @clientTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Client type'**
+  String get clientTypeLabel;
+
+  /// No description provided for @clientTypeIndividual.
+  ///
+  /// In en, this message translates to:
+  /// **'Individual'**
+  String get clientTypeIndividual;
+
+  /// No description provided for @clientTypeBusiness.
+  ///
+  /// In en, this message translates to:
+  /// **'Business'**
+  String get clientTypeBusiness;
+
+  /// No description provided for @clientNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes (optional)'**
+  String get clientNotes;
+
+  /// No description provided for @editClient.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit client'**
+  String get editClient;
+
+  /// No description provided for @clientUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Client updated'**
+  String get clientUpdated;
+
+  /// No description provided for @clientDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Client details'**
+  String get clientDetailTitle;
+
+  /// No description provided for @tabInformations.
+  ///
+  /// In en, this message translates to:
+  /// **'Information'**
+  String get tabInformations;
+
+  /// No description provided for @tabHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get tabHistory;
+
+  /// No description provided for @tabNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get tabNotes;
+
+  /// No description provided for @registeredOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Registered on'**
+  String get registeredOn;
+
+  /// No description provided for @totalOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'Total orders'**
+  String get totalOrders;
+
+  /// No description provided for @totalSpent.
+  ///
+  /// In en, this message translates to:
+  /// **'Total spent'**
+  String get totalSpent;
+
+  /// No description provided for @modify.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get modify;
+
+  /// No description provided for @seeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'See all'**
+  String get seeAll;
+
+  /// No description provided for @noNotesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No notes for this client yet.'**
+  String get noNotesYet;
+
+  /// No description provided for @noHistoryYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No history for this client yet.'**
+  String get noHistoryYet;
+
+  /// No description provided for @searchClientPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Search a client...'**
+  String get searchClientPlaceholder;
+
+  /// No description provided for @clientFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get clientFilterAll;
+
+  /// No description provided for @clientFilterNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get clientFilterNew;
+
+  /// No description provided for @clientFilterOverSixMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'Over 6 months'**
+  String get clientFilterOverSixMonths;
+
+  /// No description provided for @clientFilterOverOneYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Over a year'**
+  String get clientFilterOverOneYear;
+
+  /// No description provided for @noClientsMatchFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'No client matches this filter.'**
+  String get noClientsMatchFilter;
 }
 
 class _AppLocalizationsDelegate

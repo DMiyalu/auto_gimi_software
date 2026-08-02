@@ -3,6 +3,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../../../core/auth/phone_auth_mapper.dart';
 import '../../../../core/database/app_database.dart';
+import '../../../../core/domain/client_type.dart';
 import '../../domain/entities/client_entity.dart';
 import '../../domain/repositories/client_repository.dart';
 
@@ -48,6 +49,10 @@ class ClientRepositoryImpl implements ClientRepository {
     required String establishmentId,
     required String name,
     required String whatsappPhone,
+    String? email,
+    String? address,
+    ClientType clientType = ClientType.individual,
+    String? notes,
   }) async {
     final trimmedName = name.trim();
     final phone = PhoneAuthMapper.normalize(whatsappPhone);
@@ -77,6 +82,10 @@ class ClientRepositoryImpl implements ClientRepository {
             id: id,
             phone: phone,
             nom: trimmedName,
+            email: Value(_blankToNull(email)),
+            adresse: Value(_blankToNull(address)),
+            typeClient: Value(clientType.code),
+            notes: Value(_blankToNull(notes)),
             createdAt: now,
             updatedAt: now,
           ),
@@ -89,7 +98,71 @@ class ClientRepositoryImpl implements ClientRepository {
       loyaltyPoints: 0,
       createdAt: now,
       updatedAt: now,
+      email: _blankToNull(email),
+      address: _blankToNull(address),
+      clientType: clientType,
+      notes: _blankToNull(notes),
     );
+  }
+
+  @override
+  Future<ClientEntity> updateClient({
+    required String id,
+    required String name,
+    required String whatsappPhone,
+    String? email,
+    String? address,
+    ClientType clientType = ClientType.individual,
+    String? notes,
+  }) async {
+    final trimmedName = name.trim();
+    final phone = PhoneAuthMapper.normalize(whatsappPhone);
+
+    if (trimmedName.isEmpty) {
+      throw ArgumentError('Le nom du client est requis.');
+    }
+    if (!PhoneAuthMapper.isValidFullNumber(phone)) {
+      throw ArgumentError('Numéro WhatsApp invalide.');
+    }
+
+    final duplicateQuery = _database.select(_database.clients)
+      ..where(
+        (client) =>
+            client.phone.equals(phone) &
+            client.isDeleted.equals(false) &
+            client.id.equals(id).not(),
+      );
+    final duplicate = await duplicateQuery.getSingleOrNull();
+    if (duplicate != null) {
+      throw StateError('Un client avec ce numéro WhatsApp existe déjà.');
+    }
+
+    final now = DateTime.now();
+
+    await (_database.update(_database.clients)
+          ..where((client) => client.id.equals(id)))
+        .write(
+      ClientsCompanion(
+        phone: Value(phone),
+        nom: Value(trimmedName),
+        email: Value(_blankToNull(email)),
+        adresse: Value(_blankToNull(address)),
+        typeClient: Value(clientType.code),
+        notes: Value(_blankToNull(notes)),
+        updatedAt: Value(now),
+        isDirty: const Value(true),
+      ),
+    );
+
+    final row = await (_database.select(_database.clients)
+          ..where((client) => client.id.equals(id)))
+        .getSingle();
+    return _fromDrift(row);
+  }
+
+  String? _blankToNull(String? value) {
+    final trimmed = value?.trim();
+    return trimmed == null || trimmed.isEmpty ? null : trimmed;
   }
 
   ClientEntity _fromDrift(Client row) {
@@ -100,6 +173,10 @@ class ClientRepositoryImpl implements ClientRepository {
       loyaltyPoints: row.pointsFidelite,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
+      email: row.email,
+      address: row.adresse,
+      clientType: ClientType.fromCode(row.typeClient),
+      notes: row.notes,
     );
   }
 }

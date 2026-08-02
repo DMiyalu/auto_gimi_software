@@ -360,4 +360,79 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get clientCreated => 'Client enregistré';
+
+  @override
+  String get clientEmail => 'Email (optionnel)';
+
+  @override
+  String get clientAddress => 'Adresse (optionnel)';
+
+  @override
+  String get clientTypeLabel => 'Type de client';
+
+  @override
+  String get clientTypeIndividual => 'Particulier';
+
+  @override
+  String get clientTypeBusiness => 'Entreprise';
+
+  @override
+  String get clientNotes => 'Notes (optionnel)';
+
+  @override
+  String get editClient => 'Modifier le client';
+
+  @override
+  String get clientUpdated => 'Client mis à jour';
+
+  @override
+  String get clientDetailTitle => 'Détails client';
+
+  @override
+  String get tabInformations => 'Informations';
+
+  @override
+  String get tabHistory => 'Historique';
+
+  @override
+  String get tabNotes => 'Notes';
+
+  @override
+  String get registeredOn => 'Date d\'inscription';
+
+  @override
+  String get totalOrders => 'Total commandes';
+
+  @override
+  String get totalSpent => 'Total dépensé';
+
+  @override
+  String get modify => 'Modifier';
+
+  @override
+  String get seeAll => 'Voir tout';
+
+  @override
+  String get noNotesYet => 'Aucune note pour ce client.';
+
+  @override
+  String get noHistoryYet => 'Aucun historique pour ce client.';
+
+  @override
+  String get searchClientPlaceholder => 'Rechercher un client...';
+
+  @override
+  String get clientFilterAll => 'Tous';
+
+  @override
+  String get clientFilterNew => 'Nouveaux';
+
+  @override
+  String get clientFilterOverSixMonths => 'Plus de 6 mois';
+
+  @override
+  String get clientFilterOverOneYear => 'Plus d\'une année';
+
+  @override
+  String get noClientsMatchFilter => 'Aucun client ne correspond à ce filtre.';
 }

@@ -1,3 +1,4 @@
+import '../../../../core/domain/client_type.dart';
 import '../entities/client_entity.dart';
 
 abstract class ClientRepository {
@@ -13,5 +14,19 @@ abstract class ClientRepository {
     required String establishmentId,
     required String name,
     required String whatsappPhone,
+    String? email,
+    String? address,
+    ClientType clientType,
+    String? notes,
+  });
+
+  Future<ClientEntity> updateClient({
+    required String id,
+    required String name,
+    required String whatsappPhone,
+    String? email,
+    String? address,
+    ClientType clientType,
+    String? notes,
   });
 }

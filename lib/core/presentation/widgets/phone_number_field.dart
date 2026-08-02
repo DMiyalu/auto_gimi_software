@@ -12,13 +12,15 @@ class PhoneNumberField extends FormField<String> {
     bool enabled = true,
     Key? localNumberKey,
     CountryDialCode initialCountry = SupportedCountries.senegal,
+    String? initialValue,
     String? Function(String? fullNumber)? validator,
     ValueChanged<String>? onFullNumberChanged,
   }) : super(
-          initialValue: PhoneAuthMapper.combine(
-            dialCode: initialCountry.dialCode,
-            localNumber: '',
-          ),
+          initialValue: initialValue ??
+              PhoneAuthMapper.combine(
+                dialCode: initialCountry.dialCode,
+                localNumber: '',
+              ),
           validator: validator,
           builder: (field) {
             return _PhoneNumberFieldBody(
@@ -27,6 +29,7 @@ class PhoneNumberField extends FormField<String> {
               enabled: enabled,
               localNumberKey: localNumberKey,
               initialCountry: initialCountry,
+              initialFullNumber: initialValue,
               onFullNumberChanged: onFullNumberChanged,
             );
           },
@@ -39,6 +42,7 @@ class _PhoneNumberFieldBody extends StatefulWidget {
     required this.labelText,
     required this.enabled,
     required this.initialCountry,
+    this.initialFullNumber,
     this.localNumberKey,
     this.onFullNumberChanged,
   });
@@ -47,6 +51,7 @@ class _PhoneNumberFieldBody extends StatefulWidget {
   final String labelText;
   final bool enabled;
   final CountryDialCode initialCountry;
+  final String? initialFullNumber;
   final Key? localNumberKey;
   final ValueChanged<String>? onFullNumberChanged;
 
@@ -57,6 +62,25 @@ class _PhoneNumberFieldBody extends StatefulWidget {
 class _PhoneNumberFieldBodyState extends State<_PhoneNumberFieldBody> {
   late CountryDialCode _country = widget.initialCountry;
   final _localController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    final fullNumber = widget.initialFullNumber;
+    if (fullNumber != null && fullNumber.isNotEmpty) {
+      final digits = PhoneAuthMapper.normalize(fullNumber);
+      final matches = SupportedCountries.all
+          .where((country) => digits.startsWith(country.dialCode))
+          .toList()
+        ..sort((a, b) => b.dialCode.length.compareTo(a.dialCode.length));
+      if (matches.isNotEmpty) {
+        _country = matches.first;
+        _localController.text = digits.substring(_country.dialCode.length);
+      } else {
+        _localController.text = digits;
+      }
+    }
+  }
 
   @override
   void dispose() {

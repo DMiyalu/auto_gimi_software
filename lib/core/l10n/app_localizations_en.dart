@@ -358,4 +358,79 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get clientCreated => 'Client saved';
+
+  @override
+  String get clientEmail => 'Email (optional)';
+
+  @override
+  String get clientAddress => 'Address (optional)';
+
+  @override
+  String get clientTypeLabel => 'Client type';
+
+  @override
+  String get clientTypeIndividual => 'Individual';
+
+  @override
+  String get clientTypeBusiness => 'Business';
+
+  @override
+  String get clientNotes => 'Notes (optional)';
+
+  @override
+  String get editClient => 'Edit client';
+
+  @override
+  String get clientUpdated => 'Client updated';
+
+  @override
+  String get clientDetailTitle => 'Client details';
+
+  @override
+  String get tabInformations => 'Information';
+
+  @override
+  String get tabHistory => 'History';
+
+  @override
+  String get tabNotes => 'Notes';
+
+  @override
+  String get registeredOn => 'Registered on';
+
+  @override
+  String get totalOrders => 'Total orders';
+
+  @override
+  String get totalSpent => 'Total spent';
+
+  @override
+  String get modify => 'Edit';
+
+  @override
+  String get seeAll => 'See all';
+
+  @override
+  String get noNotesYet => 'No notes for this client yet.';
+
+  @override
+  String get noHistoryYet => 'No history for this client yet.';
+
+  @override
+  String get searchClientPlaceholder => 'Search a client...';
+
+  @override
+  String get clientFilterAll => 'All';
+
+  @override
+  String get clientFilterNew => 'New';
+
+  @override
+  String get clientFilterOverSixMonths => 'Over 6 months';
+
+  @override
+  String get clientFilterOverOneYear => 'Over a year';
+
+  @override
+  String get noClientsMatchFilter => 'No client matches this filter.';
 }

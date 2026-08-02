@@ -7,6 +7,7 @@ abstract final class Routes {
   static const clients = '/clients';
   static const clientNew = '/clients/new';
   static const clientDetail = '/clients/:id';
+  static const clientEdit = '/clients/edit/:id';
   static const clientQr = '/clients/:id/qr';
   static const vehiculeDetail = '/vehicules/:id';
   static const services = '/services';
@@ -26,6 +27,8 @@ abstract final class Routes {
   static String produitEditPath(String id) => '/produits/edit/$id';
   static String productCategoryEditPath(String id) =>
       '/produits/categories/edit/$id';
+  static String clientDetailPath(String id) => '/clients/$id';
+  static String clientEditPath(String id) => '/clients/edit/$id';
   static const prestationScan = '/prestations/scan';
   static const prestationNew = '/prestations/new';
   static const prestationDetail = '/prestations/:id';
