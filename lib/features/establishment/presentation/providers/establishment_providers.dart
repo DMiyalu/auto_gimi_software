@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/domain/business_category.dart';
 import '../../../auth/presentation/providers/auth_state_provider.dart';
 import '../../domain/models/establishment.dart';
+import '../../domain/models/establishment_invitation.dart';
 import '../../domain/models/establishment_member.dart';
 import '../../domain/models/establishment_role.dart';
 import '../../domain/models/user_profile.dart';
@@ -84,6 +85,17 @@ final establishmentMembersProvider = StreamProvider<List<EstablishmentMember>>((
       .watchEstablishmentMembers(establishmentId);
 });
 
+final pendingInvitationsProvider =
+    StreamProvider<List<EstablishmentInvitation>>((ref) {
+      final profile = ref.watch(userProfileProvider).valueOrNull;
+      if (profile == null || profile.phone.isEmpty) {
+        return Stream.value(const []);
+      }
+      return ref
+          .watch(establishmentRepositoryProvider)
+          .watchPendingInvitationsForPhone(profile.phone);
+    });
+
 final establishmentControllerProvider =
     AsyncNotifierProvider<EstablishmentController, void>(
       EstablishmentController.new,
@@ -127,6 +139,48 @@ class EstablishmentController extends AsyncNotifier<void> {
             establishmentName: establishmentName,
             managerName: managerName,
             phone: phone,
+          );
+    });
+  }
+
+  Future<void> createInvitation({
+    required EstablishmentRole role,
+    required String invitedPhone,
+  }) async {
+    final user = ref.read(authStateProvider).valueOrNull;
+    final profile = ref.read(userProfileProvider).valueOrNull;
+    final establishment = ref.read(currentEstablishmentProvider).valueOrNull;
+    if (user == null || profile == null || establishment == null) return;
+
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      await ref
+          .read(establishmentRepositoryProvider)
+          .createInvitation(
+            establishmentId: establishment.id,
+            establishmentName: establishment.name,
+            invitedPhone: invitedPhone,
+            role: role,
+            invitedBy: user.uid,
+            invitedByName: profile.fullName,
+          );
+    });
+  }
+
+  Future<void> acceptInvitation(EstablishmentInvitation invitation) async {
+    final user = ref.read(authStateProvider).valueOrNull;
+    final profile = ref.read(userProfileProvider).valueOrNull;
+    if (user == null || profile == null) return;
+
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      await ref
+          .read(establishmentRepositoryProvider)
+          .acceptInvitation(
+            uid: user.uid,
+            fullName: profile.fullName,
+            phone: profile.phone,
+            invitation: invitation,
           );
     });
   }

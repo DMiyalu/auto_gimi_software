@@ -1,7 +1,9 @@
 import '../../../auth/domain/models/sign_up_request.dart';
 import '../../../../core/domain/business_category.dart';
 import '../models/establishment.dart';
+import '../models/establishment_invitation.dart';
 import '../models/establishment_member.dart';
+import '../models/establishment_role.dart';
 import '../models/user_profile.dart';
 
 abstract class EstablishmentRepository {
@@ -29,6 +31,26 @@ abstract class EstablishmentRepository {
   Stream<List<EstablishmentMember>> watchEstablishmentMembers(
     String establishmentId,
   );
+
+  Stream<List<EstablishmentInvitation>> watchPendingInvitationsForPhone(
+    String phone,
+  );
+
+  Future<void> createInvitation({
+    required String establishmentId,
+    required String establishmentName,
+    required String invitedPhone,
+    required EstablishmentRole role,
+    required String invitedBy,
+    required String invitedByName,
+  });
+
+  Future<void> acceptInvitation({
+    required String uid,
+    required String fullName,
+    required String phone,
+    required EstablishmentInvitation invitation,
+  });
 
   Future<void> setActiveEstablishment({
     required String uid,

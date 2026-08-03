@@ -14,6 +14,10 @@ service cloud.firestore {
       return userDoc().data.establishmentId;
     }
 
+    function userPhone() {
+      return userDoc().data.phone;
+    }
+
     function userEstablishmentIds() {
       return userDoc().data.establishmentIds;
     }
@@ -83,6 +87,51 @@ service cloud.firestore {
         && request.resource.data.phoneVerified == false;
     }
 
+    function invitationDoc(establishmentId, invitationId) {
+      return get(
+        /databases/$(database)/documents/establishments/$(establishmentId)/invitations/$(invitationId)
+      );
+    }
+
+    function isValidInvitedMemberCreate(establishmentId, memberId) {
+      let invitation = invitationDoc(
+        establishmentId,
+        request.resource.data.sourceInvitationId
+      );
+      return isSignedIn()
+        && request.auth.uid == memberId
+        && request.resource.data.uid == memberId
+        && request.resource.data.establishmentId == establishmentId
+        && request.resource.data.phone == userPhone()
+        && request.resource.data.role in ['manager', 'agent']
+        && invitation.data.status == 'pending'
+        && invitation.data.invitedPhone == userPhone()
+        && invitation.data.role == request.resource.data.role;
+    }
+
+    function isValidInvitationCreate(establishmentId) {
+      return canManageEstablishment(establishmentId)
+        && request.resource.data.establishmentId == establishmentId
+        && request.resource.data.invitedPhone is string
+        && request.resource.data.role in ['manager', 'agent']
+        && request.resource.data.status == 'pending'
+        && request.resource.data.invitedBy == request.auth.uid;
+    }
+
+    function isInvitationForCurrentUser() {
+      return isSignedIn() && resource.data.invitedPhone == userPhone();
+    }
+
+    function isValidInvitationAccept() {
+      return isInvitationForCurrentUser()
+        && resource.data.status == 'pending'
+        && request.resource.data.status == 'accepted'
+        && request.resource.data.acceptedBy == request.auth.uid
+        && request.resource.data.invitedPhone == resource.data.invitedPhone
+        && request.resource.data.role == resource.data.role
+        && request.resource.data.establishmentId == resource.data.establishmentId;
+    }
+
     match /users/{userId} {
       allow read: if isSignedIn() && request.auth.uid == userId;
       allow create: if request.auth.uid == userId && isValidOwnerSignup();
@@ -103,8 +152,18 @@ service cloud.firestore {
       match /members/{memberId} {
         allow read: if isEstablishmentMember(establishmentId);
         allow read: if isSignedIn() && request.auth.uid == memberId;
-        allow create: if isValidMemberSignup(memberId);
+        allow create: if isValidMemberSignup(memberId)
+          || isValidInvitedMemberCreate(establishmentId, memberId);
         allow update, delete: if canManageEstablishment(establishmentId);
+      }
+
+      match /invitations/{invitationId} {
+        allow read: if canManageEstablishment(establishmentId);
+        allow read: if isInvitationForCurrentUser();
+        allow create: if isValidInvitationCreate(establishmentId);
+        allow update: if canManageEstablishment(establishmentId)
+          || isValidInvitationAccept();
+        allow delete: if canManageEstablishment(establishmentId);
       }
 
       // Données métier — isolation stricte par établissement (tenant SaaS)

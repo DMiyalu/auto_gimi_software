@@ -6,7 +6,9 @@ import 'package:auto_mobile_software/core/domain/business_category.dart';
 import 'package:auto_mobile_software/features/auth/domain/models/sign_up_request.dart';
 import 'package:auto_mobile_software/features/auth/domain/repositories/auth_repository.dart';
 import 'package:auto_mobile_software/features/establishment/domain/models/establishment.dart';
+import 'package:auto_mobile_software/features/establishment/domain/models/establishment_invitation.dart';
 import 'package:auto_mobile_software/features/establishment/domain/models/establishment_member.dart';
+import 'package:auto_mobile_software/features/establishment/domain/models/establishment_role.dart';
 import 'package:auto_mobile_software/features/establishment/domain/models/user_profile.dart';
 import 'package:auto_mobile_software/features/establishment/domain/repositories/establishment_repository.dart';
 
@@ -55,6 +57,7 @@ class FakeEstablishmentRepository implements EstablishmentRepository {
   Establishment? establishment;
   List<Establishment> establishments = const [];
   List<EstablishmentMember> memberships = const [];
+  List<EstablishmentInvitation> invitations = const [];
 
   final _profileController = StreamController<UserProfile?>.broadcast();
   final _establishmentController = StreamController<Establishment?>.broadcast();
@@ -62,6 +65,8 @@ class FakeEstablishmentRepository implements EstablishmentRepository {
       StreamController<List<Establishment>>.broadcast();
   final _membershipsController =
       StreamController<List<EstablishmentMember>>.broadcast();
+  final _invitationsController =
+      StreamController<List<EstablishmentInvitation>>.broadcast();
 
   void setProfile(UserProfile value) {
     profile = value;
@@ -76,6 +81,11 @@ class FakeEstablishmentRepository implements EstablishmentRepository {
   void setMemberships(List<EstablishmentMember> value) {
     memberships = value;
     _membershipsController.add(value);
+  }
+
+  void setInvitations(List<EstablishmentInvitation> value) {
+    invitations = value;
+    _invitationsController.add(value);
   }
 
   @override
@@ -148,6 +158,100 @@ class FakeEstablishmentRepository implements EstablishmentRepository {
       (items) => items
           .where((member) => member.establishmentId == establishmentId)
           .toList(),
+    );
+  }
+
+  @override
+  Stream<List<EstablishmentInvitation>> watchPendingInvitationsForPhone(
+    String phone,
+  ) async* {
+    List<EstablishmentInvitation> pendingForPhone(
+      List<EstablishmentInvitation> items,
+    ) {
+      return items
+          .where(
+            (invitation) =>
+                invitation.invitedPhone == phone &&
+                invitation.status == EstablishmentInvitationStatus.pending,
+          )
+          .toList();
+    }
+
+    yield pendingForPhone(invitations);
+    yield* _invitationsController.stream.map(pendingForPhone);
+  }
+
+  @override
+  Future<void> createInvitation({
+    required String establishmentId,
+    required String establishmentName,
+    required String invitedPhone,
+    required EstablishmentRole role,
+    required String invitedBy,
+    required String invitedByName,
+  }) async {
+    setInvitations([
+      ...invitations,
+      EstablishmentInvitation(
+        id: 'inv-${invitations.length + 1}',
+        establishmentId: establishmentId,
+        establishmentName: establishmentName,
+        invitedPhone: invitedPhone,
+        role: role,
+        status: EstablishmentInvitationStatus.pending,
+        invitedBy: invitedBy,
+        invitedByName: invitedByName,
+        createdAt: DateTime(2026, 1, 1),
+      ),
+    ]);
+  }
+
+  @override
+  Future<void> acceptInvitation({
+    required String uid,
+    required String fullName,
+    required String phone,
+    required EstablishmentInvitation invitation,
+  }) async {
+    final member = EstablishmentMember(
+      uid: uid,
+      establishmentId: invitation.establishmentId,
+      phone: phone,
+      fullName: fullName,
+      role: invitation.role,
+      phoneVerified: true,
+      joinedAt: DateTime(2026, 1, 1),
+    );
+    setMemberships([
+      ...memberships.where(
+        (item) =>
+            item.uid != uid ||
+            item.establishmentId != invitation.establishmentId,
+      ),
+      member,
+    ]);
+    setInvitations([
+      for (final item in invitations)
+        if (item.id == invitation.id)
+          EstablishmentInvitation(
+            id: item.id,
+            establishmentId: item.establishmentId,
+            establishmentName: item.establishmentName,
+            invitedPhone: item.invitedPhone,
+            role: item.role,
+            status: EstablishmentInvitationStatus.accepted,
+            invitedBy: item.invitedBy,
+            invitedByName: item.invitedByName,
+            createdAt: item.createdAt,
+            acceptedBy: uid,
+            acceptedAt: DateTime(2026, 1, 1),
+          )
+        else
+          item,
+    ]);
+    await setActiveEstablishment(
+      uid: uid,
+      establishmentId: invitation.establishmentId,
     );
   }
 

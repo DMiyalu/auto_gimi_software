@@ -20,6 +20,8 @@ class MoreMenuContent extends ConsumerWidget {
     final config = ref.watch(primaryModuleConfigProvider);
     final establishment = ref.watch(currentEstablishmentProvider).valueOrNull;
     final canInviteMembers = ref.watch(canInviteMembersProvider);
+    final pendingInvitationCount =
+        ref.watch(pendingInvitationsProvider).valueOrNull?.length ?? 0;
 
     return ListView(
       children: [
@@ -42,6 +44,14 @@ class MoreMenuContent extends ConsumerWidget {
             title: const Text('Équipe'),
             onTap: () => context.push(Routes.team),
           ),
+        ListTile(
+          leading: const Icon(Icons.mail_outline),
+          title: const Text('Invitations'),
+          trailing: pendingInvitationCount == 0
+              ? null
+              : Badge(label: Text('$pendingInvitationCount')),
+          onTap: () => context.push(Routes.invitations),
+        ),
         ListTile(
           leading: const Icon(Icons.settings_outlined),
           title: Text(l10n.settings),

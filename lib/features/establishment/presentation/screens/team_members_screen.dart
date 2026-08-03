@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
-import '../../../../core/l10n/app_localizations.dart';
+import '../../../../core/routing/routes.dart';
 import '../../domain/models/establishment_member.dart';
 import '../providers/establishment_providers.dart';
 
@@ -12,17 +13,12 @@ class TeamMembersScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final members = ref.watch(establishmentMembersProvider);
     final canInvite = ref.watch(canInviteMembersProvider);
-    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Équipe')),
       floatingActionButton: canInvite
           ? FloatingActionButton.extended(
-              onPressed: () {
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text(l10n.comingSoon)));
-              },
+              onPressed: () => context.push(Routes.invitationNew),
               icon: const Icon(Icons.person_add_alt_outlined),
               label: const Text('Inviter'),
             )

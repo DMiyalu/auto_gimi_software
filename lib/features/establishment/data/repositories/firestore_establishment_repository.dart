@@ -5,6 +5,7 @@ import '../../../auth/domain/models/sign_up_request.dart';
 import '../../../../core/auth/phone_auth_mapper.dart';
 import '../../../../core/domain/business_category.dart';
 import '../../domain/models/establishment.dart';
+import '../../domain/models/establishment_invitation.dart';
 import '../../domain/models/establishment_member.dart';
 import '../../domain/models/establishment_role.dart';
 import '../../domain/models/user_profile.dart';
@@ -173,6 +174,99 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
   }
 
   @override
+  Stream<List<EstablishmentInvitation>> watchPendingInvitationsForPhone(
+    String phone,
+  ) {
+    final normalizedPhone = PhoneAuthMapper.normalize(phone);
+    return _firestore
+        .collectionGroup('invitations')
+        .where('invitedPhone', isEqualTo: normalizedPhone)
+        .where(
+          'status',
+          isEqualTo: EstablishmentInvitationStatus.pending.firestoreValue,
+        )
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map(_invitationFromSnapshot).toList());
+  }
+
+  @override
+  Future<void> createInvitation({
+    required String establishmentId,
+    required String establishmentName,
+    required String invitedPhone,
+    required EstablishmentRole role,
+    required String invitedBy,
+    required String invitedByName,
+  }) async {
+    final normalizedPhone = PhoneAuthMapper.normalize(invitedPhone);
+    final invitationId = _uuid.v4();
+    await _establishments
+        .doc(establishmentId)
+        .collection('invitations')
+        .doc(invitationId)
+        .set({
+          'establishmentId': establishmentId,
+          'establishmentName': establishmentName,
+          'invitedPhone': normalizedPhone,
+          'role': role.firestoreValue,
+          'status': EstablishmentInvitationStatus.pending.firestoreValue,
+          'invitedBy': invitedBy,
+          'invitedByName': invitedByName.trim(),
+          'createdAt': FieldValue.serverTimestamp(),
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+  }
+
+  @override
+  Future<void> acceptInvitation({
+    required String uid,
+    required String fullName,
+    required String phone,
+    required EstablishmentInvitation invitation,
+  }) async {
+    final normalizedPhone = PhoneAuthMapper.normalize(phone);
+    final now = FieldValue.serverTimestamp();
+    final batch = _firestore.batch();
+    final userRef = _users.doc(uid);
+    final establishmentRef = _establishments.doc(invitation.establishmentId);
+    final invitationRef = establishmentRef
+        .collection('invitations')
+        .doc(invitation.id);
+    final memberRef = establishmentRef.collection('members').doc(uid);
+
+    batch.set(memberRef, {
+      'uid': uid,
+      'establishmentId': invitation.establishmentId,
+      'phone': normalizedPhone,
+      'fullName': fullName.trim(),
+      'role': invitation.role.firestoreValue,
+      'sourceInvitationId': invitation.id,
+      'phoneVerified': true,
+      'joinedAt': now,
+    }, SetOptions(merge: true));
+
+    batch.set(userRef, {
+      'phone': normalizedPhone,
+      'fullName': fullName.trim(),
+      'establishmentIds': FieldValue.arrayUnion([invitation.establishmentId]),
+      'activeEstablishmentId': invitation.establishmentId,
+      'rolesByEstablishment.${invitation.establishmentId}':
+          invitation.role.firestoreValue,
+      'phoneVerified': true,
+      'updatedAt': now,
+    }, SetOptions(merge: true));
+
+    batch.update(invitationRef, {
+      'status': EstablishmentInvitationStatus.accepted.firestoreValue,
+      'acceptedBy': uid,
+      'acceptedAt': now,
+      'updatedAt': now,
+    });
+
+    await batch.commit();
+  }
+
+  @override
   Future<void> setActiveEstablishment({
     required String uid,
     required String establishmentId,
@@ -241,6 +335,33 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
       role: EstablishmentRole.fromFirestore(data['role'] as String?),
       phoneVerified: data['phoneVerified'] as bool? ?? false,
       joinedAt: _timestampToDateTime(data['joinedAt']),
+    );
+  }
+
+  EstablishmentInvitation _invitationFromSnapshot(
+    QueryDocumentSnapshot<Map<String, dynamic>> snapshot,
+  ) {
+    final data = snapshot.data();
+    final establishmentId =
+        data['establishmentId'] as String? ??
+        snapshot.reference.parent.parent?.id ??
+        '';
+    return EstablishmentInvitation(
+      id: snapshot.id,
+      establishmentId: establishmentId,
+      establishmentName: data['establishmentName'] as String? ?? '',
+      invitedPhone: data['invitedPhone'] as String? ?? '',
+      role: EstablishmentRole.fromFirestore(data['role'] as String?),
+      status: EstablishmentInvitationStatus.fromFirestore(
+        data['status'] as String?,
+      ),
+      invitedBy: data['invitedBy'] as String? ?? '',
+      invitedByName: data['invitedByName'] as String? ?? '',
+      createdAt: _timestampToDateTime(data['createdAt']),
+      acceptedBy: data['acceptedBy'] as String?,
+      acceptedAt: data['acceptedAt'] == null
+          ? null
+          : _timestampToDateTime(data['acceptedAt']),
     );
   }
 

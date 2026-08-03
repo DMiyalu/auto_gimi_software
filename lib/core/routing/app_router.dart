@@ -9,6 +9,8 @@ import '../../features/auth/presentation/screens/phone_verification_screen.dart'
 import '../../features/auth/presentation/screens/signup_screen.dart';
 import '../../features/establishment/presentation/screens/establishment_form_screen.dart';
 import '../../features/establishment/presentation/providers/establishment_providers.dart';
+import '../../features/establishment/presentation/screens/invitations_screen.dart';
+import '../../features/establishment/presentation/screens/invite_member_screen.dart';
 import '../../features/establishment/presentation/screens/team_members_screen.dart';
 import '../../features/clients/presentation/screens/client_detail_screen.dart';
 import '../../features/clients/presentation/screens/client_form_screen.dart';
@@ -89,6 +91,14 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: Routes.establishmentNew,
             builder: (_, __) => const EstablishmentFormScreen(),
+          ),
+          GoRoute(
+            path: Routes.invitationNew,
+            builder: (_, __) => const InviteMemberScreen(),
+          ),
+          GoRoute(
+            path: Routes.invitations,
+            builder: (_, __) => const InvitationsScreen(),
           ),
           GoRoute(
             path: Routes.team,

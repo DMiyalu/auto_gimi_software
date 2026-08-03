@@ -1,7 +1,9 @@
 import '../../../auth/domain/models/sign_up_request.dart';
 import '../../../../core/domain/business_category.dart';
 import '../../domain/models/establishment.dart';
+import '../../domain/models/establishment_invitation.dart';
 import '../../domain/models/establishment_member.dart';
+import '../../domain/models/establishment_role.dart';
 import '../../domain/models/user_profile.dart';
 import '../../domain/repositories/establishment_repository.dart';
 
@@ -44,6 +46,33 @@ class DisabledEstablishmentRepository implements EstablishmentRepository {
   Stream<List<EstablishmentMember>> watchEstablishmentMembers(
     String establishmentId,
   ) => Stream.value(const []);
+
+  @override
+  Stream<List<EstablishmentInvitation>> watchPendingInvitationsForPhone(
+    String phone,
+  ) => Stream.value(const []);
+
+  @override
+  Future<void> createInvitation({
+    required String establishmentId,
+    required String establishmentName,
+    required String invitedPhone,
+    required EstablishmentRole role,
+    required String invitedBy,
+    required String invitedByName,
+  }) async {
+    throw StateError('Firebase non configuré. Exécutez: flutterfire configure');
+  }
+
+  @override
+  Future<void> acceptInvitation({
+    required String uid,
+    required String fullName,
+    required String phone,
+    required EstablishmentInvitation invitation,
+  }) async {
+    throw StateError('Firebase non configuré. Exécutez: flutterfire configure');
+  }
 
   @override
   Future<void> setActiveEstablishment({
