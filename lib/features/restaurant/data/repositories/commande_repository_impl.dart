@@ -125,22 +125,50 @@ class CommandeRepositoryImpl implements CommandeRepository {
     final lineAmount = produit.prix * quantity;
 
     await _database.transaction(() async {
-      await _database
-          .into(_database.ligneCommandes)
-          .insert(
-            LigneCommandesCompanion.insert(
-              id: _uuid.v4(),
-              establishmentId: Value(establishmentId),
-              commandeId: commandeId,
-              produitId: produitId,
-              libelle: produit.nom,
-              quantite: Value(quantity),
-              prixUnitaire: produit.prix,
-              montantLigne: lineAmount,
-              createdAt: now,
-              updatedAt: now,
-            ),
-          );
+      final existingLine =
+          await (_database.select(_database.ligneCommandes)..where(
+                (l) =>
+                    l.establishmentId.equals(establishmentId) &
+                    l.commandeId.equals(commandeId) &
+                    l.produitId.equals(produitId) &
+                    l.isDeleted.equals(false),
+              ))
+              .getSingleOrNull();
+
+      if (existingLine == null) {
+        await _database
+            .into(_database.ligneCommandes)
+            .insert(
+              LigneCommandesCompanion.insert(
+                id: _uuid.v4(),
+                establishmentId: Value(establishmentId),
+                commandeId: commandeId,
+                produitId: produitId,
+                libelle: produit.nom,
+                quantite: Value(quantity),
+                prixUnitaire: produit.prix,
+                montantLigne: lineAmount,
+                createdAt: now,
+                updatedAt: now,
+              ),
+            );
+      } else {
+        final newQuantity = existingLine.quantite + quantity;
+        await (_database.update(_database.ligneCommandes)..where(
+              (l) =>
+                  l.establishmentId.equals(establishmentId) &
+                  l.id.equals(existingLine.id),
+            ))
+            .write(
+              LigneCommandesCompanion(
+                quantite: Value(newQuantity),
+                prixUnitaire: Value(produit.prix),
+                montantLigne: Value(produit.prix * newQuantity),
+                updatedAt: Value(now),
+                isDirty: const Value(true),
+              ),
+            );
+      }
 
       await (_database.update(_database.produits)..where(
             (p) =>
@@ -156,6 +184,62 @@ class CommandeRepositoryImpl implements CommandeRepository {
           );
 
       await _recalculateTotal(establishmentId, commandeId, now);
+    });
+  }
+
+  @override
+  Future<void> removeLine({
+    required String establishmentId,
+    required String lineId,
+  }) async {
+    final line =
+        await (_database.select(_database.ligneCommandes)..where(
+              (l) =>
+                  l.establishmentId.equals(establishmentId) &
+                  l.id.equals(lineId) &
+                  l.isDeleted.equals(false),
+            ))
+            .getSingleOrNull();
+    if (line == null) throw StateError('Ligne de commande introuvable.');
+
+    final produit =
+        await (_database.select(_database.produits)..where(
+              (p) =>
+                  p.establishmentId.equals(establishmentId) &
+                  p.id.equals(line.produitId) &
+                  p.isDeleted.equals(false),
+            ))
+            .getSingleOrNull();
+    if (produit == null) throw StateError('Produit introuvable.');
+
+    final now = DateTime.now();
+    await _database.transaction(() async {
+      await (_database.update(_database.ligneCommandes)..where(
+            (l) =>
+                l.establishmentId.equals(establishmentId) & l.id.equals(lineId),
+          ))
+          .write(
+            LigneCommandesCompanion(
+              isDeleted: const Value(true),
+              updatedAt: Value(now),
+              isDirty: const Value(true),
+            ),
+          );
+
+      await (_database.update(_database.produits)..where(
+            (p) =>
+                p.establishmentId.equals(establishmentId) &
+                p.id.equals(line.produitId),
+          ))
+          .write(
+            ProduitsCompanion(
+              stock: Value(produit.stock + line.quantite),
+              updatedAt: Value(now),
+              isDirty: const Value(true),
+            ),
+          );
+
+      await _recalculateTotal(establishmentId, line.commandeId, now);
     });
   }
 

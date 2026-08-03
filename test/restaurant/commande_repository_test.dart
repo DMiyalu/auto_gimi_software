@@ -84,4 +84,89 @@ void main() {
     expect(updated!.statusKey, 'en_preparation');
     expect(updated.statusLabel, 'En préparation');
   });
+
+  test('fusionne deux ajouts du meme produit sur une commande', () async {
+    final produit = await produitRepository.createProduit(
+      establishmentId: 'est-1',
+      name: 'Burger',
+      price: 8,
+      currency: AppCurrency.usd,
+      stock: 5,
+    );
+    final commande = await commandeRepository.createCommande(
+      establishmentId: 'est-1',
+    );
+
+    await commandeRepository.addProduitLine(
+      establishmentId: 'est-1',
+      commandeId: commande.id,
+      produitId: produit.id,
+      quantity: 1,
+    );
+    await commandeRepository.addProduitLine(
+      establishmentId: 'est-1',
+      commandeId: commande.id,
+      produitId: produit.id,
+      quantity: 2,
+    );
+
+    final lignes = await commandeRepository
+        .watchLignes(establishmentId: 'est-1', commandeId: commande.id)
+        .first;
+    expect(lignes, hasLength(1));
+    expect(lignes.single.quantity, 3);
+    expect(lignes.single.lineAmount, 24);
+
+    final updatedProduit = await produitRepository.getProduit(
+      establishmentId: 'est-1',
+      id: produit.id,
+    );
+    expect(updatedProduit!.stock, 2);
+  });
+
+  test('retire une ligne et restaure le stock produit', () async {
+    final produit = await produitRepository.createProduit(
+      establishmentId: 'est-1',
+      name: 'Jus naturel',
+      price: 3,
+      currency: AppCurrency.usd,
+      stock: 4,
+    );
+    final commande = await commandeRepository.createCommande(
+      establishmentId: 'est-1',
+    );
+    await commandeRepository.addProduitLine(
+      establishmentId: 'est-1',
+      commandeId: commande.id,
+      produitId: produit.id,
+      quantity: 2,
+    );
+
+    final line =
+        (await commandeRepository
+                .watchLignes(establishmentId: 'est-1', commandeId: commande.id)
+                .first)
+            .single;
+
+    await commandeRepository.removeLine(
+      establishmentId: 'est-1',
+      lineId: line.id,
+    );
+
+    final lignes = await commandeRepository
+        .watchLignes(establishmentId: 'est-1', commandeId: commande.id)
+        .first;
+    expect(lignes, isEmpty);
+
+    final commandes = await commandeRepository
+        .watchCommandes(establishmentId: 'est-1')
+        .first;
+    expect(commandes.single.totalAmount, 0);
+
+    final updatedProduit = await produitRepository.getProduit(
+      establishmentId: 'est-1',
+      id: produit.id,
+    );
+    expect(updatedProduit!.stock, 4);
+  });
 }

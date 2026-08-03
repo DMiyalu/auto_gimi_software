@@ -110,6 +110,19 @@ class CommandeController extends AsyncNotifier<void> {
     });
   }
 
+  Future<void> removeLine({required String lineId}) async {
+    final establishmentId = _requireEstablishmentId();
+
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      _ensureCanCreateActivities();
+      await ref
+          .read(commandeRepositoryProvider)
+          .removeLine(establishmentId: establishmentId, lineId: lineId);
+      ref.read(autoSyncCoordinatorProvider).schedulePush();
+    });
+  }
+
   Future<void> setStatus({
     required String commandeId,
     required String statusKey,

@@ -29,6 +29,11 @@ abstract class CommandeRepository {
     int quantity = 1,
   });
 
+  Future<void> removeLine({
+    required String establishmentId,
+    required String lineId,
+  });
+
   Future<void> setStatus({
     required String establishmentId,
     required String commandeId,

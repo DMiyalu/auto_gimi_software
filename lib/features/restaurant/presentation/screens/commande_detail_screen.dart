@@ -102,7 +102,21 @@ class CommandeDetailScreen extends ConsumerWidget {
                     subtitle: Text(
                       '${line.quantity} x ${line.unitPrice.toStringAsFixed(2)}',
                     ),
-                    trailing: Text(line.lineAmount.toStringAsFixed(2)),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(line.lineAmount.toStringAsFixed(2)),
+                        IconButton(
+                          tooltip: 'Retirer',
+                          onPressed: state.isLoading
+                              ? null
+                              : () => ref
+                                    .read(commandeControllerProvider.notifier)
+                                    .removeLine(lineId: line.id),
+                          icon: const Icon(Icons.delete_outline),
+                        ),
+                      ],
+                    ),
                   ),
             ],
           ),
