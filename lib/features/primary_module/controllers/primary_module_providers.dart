@@ -6,6 +6,8 @@ import '../../../core/domain/enums.dart';
 import '../../establishment/presentation/providers/establishment_providers.dart';
 import '../../garage/domain/entities/prestation_summary.dart';
 import '../../garage/presentation/providers/prestation_providers.dart';
+import '../../restaurant/domain/entities/commande_entity.dart';
+import '../../restaurant/presentation/providers/commande_providers.dart';
 import '../config/business_module_config.dart';
 import '../config/business_module_configs.dart';
 import '../models/activity_item.dart';
@@ -36,8 +38,8 @@ final moduleSelectedFilterProvider = StateProvider<String>((ref) => 'all');
 /// vrai repository.
 final activityListProvider =
     NotifierProvider<ActivityListNotifier, List<ActivityItem>>(
-  ActivityListNotifier.new,
-);
+      ActivityListNotifier.new,
+    );
 
 class ActivityListNotifier extends Notifier<List<ActivityItem>> {
   @override
@@ -47,9 +49,14 @@ class ActivityListNotifier extends Notifier<List<ActivityItem>> {
     // prestations. Les autres métiers restent mockés (démonstration de
     // l'architecture générique uniquement).
     if (category == BusinessCategory.garageAuto) {
-      final summaries =
-          ref.watch(prestationsSummaryProvider).valueOrNull ?? [];
+      final summaries = ref.watch(prestationsSummaryProvider).valueOrNull ?? [];
       return summaries.map(_fromPrestationSummary).toList();
+    }
+    if (category == BusinessCategory.restaurant) {
+      final commandes = ref.watch(commandesProvider).valueOrNull ?? [];
+      if (commandes.isNotEmpty) {
+        return commandes.map(_fromCommande).toList();
+      }
     }
     return MockActivityData.forCategory(category);
   }
@@ -72,6 +79,21 @@ class ActivityListNotifier extends Notifier<List<ActivityItem>> {
       leadingIcon: Icons.build_circle_outlined,
       amount: summary.montantTotal,
       metaLabel: titleIsImmatriculation ? null : summary.immatriculation,
+    );
+  }
+
+  ActivityItem _fromCommande(CommandeEntity commande) {
+    return ActivityItem(
+      id: commande.id,
+      title: commande.reference,
+      subtitle: commande.context ?? 'Commande restaurant',
+      time: commande.createdAt,
+      statusKey: commande.statusKey,
+      statusLabel: commande.statusLabel,
+      statusColor: commandeStatusColor(commande.statusKey),
+      leadingIcon: Icons.restaurant_outlined,
+      amount: commande.totalAmount,
+      metaLabel: commande.clientId == null ? null : 'Client lié',
     );
   }
 

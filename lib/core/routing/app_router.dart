@@ -25,6 +25,7 @@ import '../../features/produits/presentation/screens/product_category_form_scree
 import '../../features/produits/presentation/screens/produit_form_screen.dart';
 import '../../features/produits/presentation/screens/produits_screen.dart';
 import '../../features/reporting/presentation/screens/dashboard_screen.dart';
+import '../../features/restaurant/presentation/screens/new_commande_screen.dart';
 import '../../features/services/presentation/screens/service_category_form_screen.dart';
 import '../../features/services/presentation/screens/service_form_screen.dart';
 import '../../features/services/presentation/screens/services_screen.dart';
@@ -217,6 +218,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: Routes.prestationNew,
             builder: (_, __) => const NewPrestationScreen(),
+          ),
+          GoRoute(
+            path: Routes.commandeNew,
+            builder: (context, state) => const NewCommandeScreen(),
           ),
           GoRoute(
             path: Routes.prestationDetail,

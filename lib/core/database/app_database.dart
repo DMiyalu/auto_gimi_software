@@ -8,7 +8,9 @@ import 'tables/alertes_entretien_table.dart';
 import 'tables/catalog_services_table.dart';
 import 'tables/categories_table.dart';
 import 'tables/clients_table.dart';
+import 'tables/commandes_table.dart';
 import 'tables/jetons_table.dart';
+import 'tables/ligne_commandes_table.dart';
 import 'tables/ligne_prestations_table.dart';
 import 'tables/notification_queue_table.dart';
 import 'tables/prestations_table.dart';
@@ -27,6 +29,8 @@ part 'app_database.g.dart';
     CatalogServices,
     ProductCategories,
     Produits,
+    Commandes,
+    LigneCommandes,
     Prestations,
     LignePrestations,
     Jetons,
@@ -41,7 +45,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -66,6 +70,9 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 9) {
         await _addEstablishmentScopeColumns(m);
+      }
+      if (from < 10) {
+        await _createRestaurantOrderTables(m);
       }
     },
     beforeOpen: (details) async {
@@ -204,6 +211,11 @@ class AppDatabase extends _$AppDatabase {
     await m.addColumn(jetons, jetons.establishmentId);
     await m.addColumn(alertesEntretien, alertesEntretien.establishmentId);
     await m.addColumn(notificationQueue, notificationQueue.establishmentId);
+  }
+
+  Future<void> _createRestaurantOrderTables(Migrator m) async {
+    await m.createTable(commandes);
+    await m.createTable(ligneCommandes);
   }
 }
 

@@ -98,6 +98,7 @@ abstract final class BusinessModuleConfigs {
       FabActionConfig(
         label: 'Nouvelle commande',
         icon: Icons.add_shopping_cart_outlined,
+        route: Routes.commandeNew,
       ),
       FabActionConfig(label: 'Réservation', icon: Icons.event_seat_outlined),
       FabActionConfig(label: 'À emporter', icon: Icons.shopping_bag_outlined),

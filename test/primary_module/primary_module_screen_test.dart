@@ -13,6 +13,7 @@ import 'package:auto_mobile_software/features/establishment/domain/models/establ
 import 'package:auto_mobile_software/features/establishment/presentation/providers/establishment_providers.dart';
 import 'package:auto_mobile_software/features/garage/data/repositories/prestation_repository_impl.dart';
 import 'package:auto_mobile_software/features/primary_module/screens/primary_module_screen.dart';
+import 'package:auto_mobile_software/features/restaurant/data/repositories/commande_repository_impl.dart';
 
 Establishment _establishment(BusinessCategory category) {
   return Establishment(
@@ -61,12 +62,14 @@ Future<void> _pump(
 }
 
 void main() {
-  testWidgets('affiche la config garage : établissement, filtres, activité',
-      (tester) async {
+  testWidgets('affiche la config garage : établissement, filtres, activité', (
+    tester,
+  ) async {
     final database = AppDatabase(NativeDatabase.memory());
     addTearDown(database.close);
-    await PrestationRepositoryImpl(database: database)
-        .createPrestationForImmatriculation(
+    await PrestationRepositoryImpl(
+      database: database,
+    ).createPrestationForImmatriculation(
       establishmentId: 'etab-1',
       immatriculation: 'CD 214 KM',
     );
@@ -90,13 +93,33 @@ void main() {
     await tester.pump(const Duration(milliseconds: 1));
   });
 
-  testWidgets('affiche la config restaurant sans libellé garage codé en dur',
-      (tester) async {
+  testWidgets('affiche la config restaurant sans libellé garage codé en dur', (
+    tester,
+  ) async {
     await _pump(tester, BusinessCategory.restaurant);
 
     expect(find.text('Table 12'), findsOneWidget);
     expect(find.text('Livraison'), findsOneWidget);
     expect(find.text('Toyota Corolla — CD 214 KM'), findsNothing);
+  });
+
+  testWidgets('affiche les vraies commandes pour un restaurant', (
+    tester,
+  ) async {
+    final database = AppDatabase(NativeDatabase.memory());
+    addTearDown(database.close);
+    await CommandeRepositoryImpl(
+      database: database,
+    ).createCommande(establishmentId: 'etab-1', context: 'Table VIP');
+
+    await _pump(tester, BusinessCategory.restaurant, database: database);
+
+    expect(find.textContaining('CMD-'), findsOneWidget);
+    expect(find.text('Table VIP'), findsOneWidget);
+    expect(find.text('Table 12'), findsNothing);
+
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump(const Duration(milliseconds: 1));
   });
 
   testWidgets('la recherche filtre instantanément la liste', (tester) async {

@@ -36,6 +36,7 @@ abstract final class Routes {
   static String clientEditPath(String id) => '/clients/edit/$id';
   static const prestationScan = '/prestations/scan';
   static const prestationNew = '/prestations/new';
+  static const commandeNew = '/commandes/new';
   static const prestationDetail = '/prestations/:id';
   static const prestationJeton = '/prestations/:id/jeton';
   static const prestationFacture = '/prestations/:id/facture';
