@@ -46,6 +46,28 @@ void main() {
     expect(factures.single.totalAmount, 42);
   });
 
+  test('emet une facture pour une prestation garage', () async {
+    final facture = await repository.issueFactureForActivity(
+      establishmentId: 'garage-1',
+      activityType: BillingActivityType.prestation,
+      activityId: 'prest-1',
+      totalAmount: 75,
+      currency: AppCurrency.usd,
+    );
+
+    final updated = await repository
+        .watchFactureForActivity(
+          establishmentId: 'garage-1',
+          activityType: BillingActivityType.prestation,
+          activityId: 'prest-1',
+        )
+        .first;
+
+    expect(updated!.id, facture.id);
+    expect(updated.activityType, BillingActivityType.prestation.value);
+    expect(updated.totalAmount, 75);
+  });
+
   test('enregistre un paiement partiel puis solde la facture', () async {
     final facture = await repository.issueFactureForActivity(
       establishmentId: 'est-1',

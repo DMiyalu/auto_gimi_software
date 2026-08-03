@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/auth/auth_error_mapper.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../billing/domain/entities/facture_entity.dart';
-import '../../../billing/domain/entities/paiement_entity.dart';
 import '../../../billing/presentation/providers/billing_providers.dart';
+import '../../../billing/presentation/widgets/activity_billing_panel.dart';
 import '../../../produits/domain/entities/produit_entity.dart';
 import '../../../produits/presentation/providers/produit_providers.dart';
 import '../providers/commande_providers.dart';
@@ -21,26 +21,8 @@ class CommandeDetailScreen extends ConsumerWidget {
     final lines =
         ref.watch(commandeLinesProvider(commandeId)).valueOrNull ?? [];
     final state = ref.watch(commandeControllerProvider);
-    final billingState = ref.watch(billingControllerProvider);
-    final facture = ref
-        .watch(
-          factureForActivityProvider(
-            BillingActivityRef(
-              type: BillingActivityType.commande,
-              id: commandeId,
-            ),
-          ),
-        )
-        .valueOrNull;
 
     ref.listen(commandeControllerProvider, (_, next) {
-      if (next.hasError) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AuthErrorMapper.message(next.error!))),
-        );
-      }
-    });
-    ref.listen(billingControllerProvider, (_, next) {
       if (next.hasError) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(AuthErrorMapper.message(next.error!))),
@@ -129,21 +111,13 @@ class CommandeDetailScreen extends ConsumerWidget {
                 ),
               ],
               const SizedBox(height: 24),
-              _FactureSection(
-                facture: facture,
+              ActivityBillingPanel(
+                activity: BillingActivityRef(
+                  type: BillingActivityType.commande,
+                  id: commandeId,
+                ),
                 totalAmount: item.totalAmount,
-                isCanceled: isCanceled,
-                isLoading: billingState.isLoading,
-                onIssue: () => ref
-                    .read(billingControllerProvider.notifier)
-                    .issueFactureForActivity(
-                      activityType: BillingActivityType.commande,
-                      activityId: commandeId,
-                      totalAmount: item.totalAmount,
-                    ),
-                onPay: facture == null
-                    ? null
-                    : () => _showPaymentSheet(context, facture),
+                disabled: isCanceled,
               ),
               const SizedBox(height: 24),
               Text('Lignes', style: Theme.of(context).textTheme.titleMedium),
@@ -201,185 +175,6 @@ class CommandeDetailScreen extends ConsumerWidget {
       builder: (sheetContext) {
         return _AddProductSheet(commandeId: commandeId);
       },
-    );
-  }
-
-  void _showPaymentSheet(BuildContext context, FactureEntity facture) {
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(borderRadius: AppRadius.sheetRadius),
-      builder: (sheetContext) {
-        return _PaymentSheet(facture: facture);
-      },
-    );
-  }
-}
-
-class _FactureSection extends StatelessWidget {
-  const _FactureSection({
-    required this.facture,
-    required this.totalAmount,
-    required this.isCanceled,
-    required this.isLoading,
-    required this.onIssue,
-    required this.onPay,
-  });
-
-  final FactureEntity? facture;
-  final double totalAmount;
-  final bool isCanceled;
-  final bool isLoading;
-  final Future<void> Function() onIssue;
-  final VoidCallback? onPay;
-
-  @override
-  Widget build(BuildContext context) {
-    final current = facture;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        border: Border.all(color: Theme.of(context).dividerColor),
-        borderRadius: AppRadius.cardRadius,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text('Facture', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 12),
-            if (current == null) ...[
-              Text('Montant à facturer : ${totalAmount.toStringAsFixed(2)}'),
-              const SizedBox(height: 12),
-              FilledButton.icon(
-                onPressed: isLoading || isCanceled || totalAmount <= 0
-                    ? null
-                    : onIssue,
-                icon: const Icon(Icons.receipt_long_outlined),
-                label: const Text('Émettre la facture'),
-              ),
-            ] else ...[
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text(current.reference),
-                subtitle: Text(current.status.label),
-                trailing: Text(current.totalAmount.toStringAsFixed(2)),
-              ),
-              Text('Payé : ${current.paidAmount.toStringAsFixed(2)}'),
-              Text('Solde : ${current.balanceDue.toStringAsFixed(2)}'),
-              const SizedBox(height: 12),
-              FilledButton.icon(
-                onPressed: isLoading || current.status == FactureStatus.paid
-                    ? null
-                    : onPay,
-                icon: const Icon(Icons.payments_outlined),
-                label: const Text('Encaisser'),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _PaymentSheet extends ConsumerStatefulWidget {
-  const _PaymentSheet({required this.facture});
-
-  final FactureEntity facture;
-
-  @override
-  ConsumerState<_PaymentSheet> createState() => _PaymentSheetState();
-}
-
-class _PaymentSheetState extends ConsumerState<_PaymentSheet> {
-  late final TextEditingController _amountController;
-  PaymentMethod _method = PaymentMethod.cash;
-
-  @override
-  void initState() {
-    super.initState();
-    _amountController = TextEditingController(
-      text: widget.facture.balanceDue.toStringAsFixed(2),
-    );
-  }
-
-  @override
-  void dispose() {
-    _amountController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _submit() async {
-    final amount = double.tryParse(_amountController.text.replaceAll(',', '.'));
-    if (amount == null) return;
-
-    await ref
-        .read(billingControllerProvider.notifier)
-        .recordPayment(
-          factureId: widget.facture.id,
-          method: _method,
-          amount: amount,
-          currency: widget.facture.currency,
-        );
-
-    if (!mounted) return;
-    final state = ref.read(billingControllerProvider);
-    if (!state.hasError) Navigator.of(context).pop();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final state = ref.watch(billingControllerProvider);
-    return SafeArea(
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(
-          16,
-          16,
-          16,
-          16 + MediaQuery.viewInsetsOf(context).bottom,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text('Encaisser', style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 16),
-            DropdownButtonFormField<PaymentMethod>(
-              initialValue: _method,
-              decoration: const InputDecoration(labelText: 'Méthode'),
-              items: [
-                for (final method in PaymentMethod.values)
-                  DropdownMenuItem(value: method, child: Text(method.label)),
-              ],
-              onChanged: state.isLoading
-                  ? null
-                  : (value) {
-                      if (value != null) setState(() => _method = value);
-                    },
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _amountController,
-              enabled: !state.isLoading,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: 'Montant'),
-            ),
-            const SizedBox(height: 24),
-            FilledButton.icon(
-              onPressed: state.isLoading ? null : _submit,
-              icon: state.isLoading
-                  ? const SizedBox(
-                      height: 18,
-                      width: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.payments_outlined),
-              label: const Text('Valider le paiement'),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
