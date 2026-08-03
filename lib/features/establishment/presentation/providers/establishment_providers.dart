@@ -77,6 +77,11 @@ final canManageCatalogProvider = Provider<bool>((ref) {
   return ref.watch(activeEstablishmentRoleProvider)?.canManageCatalog ?? false;
 });
 
+final canCreateActivitiesProvider = Provider<bool>((ref) {
+  return ref.watch(activeEstablishmentRoleProvider)?.canCreateActivities ??
+      false;
+});
+
 final establishmentMembersProvider = StreamProvider<List<EstablishmentMember>>((
   ref,
 ) {

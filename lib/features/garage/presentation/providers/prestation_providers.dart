@@ -99,6 +99,14 @@ class PrestationController extends AsyncNotifier<void> {
     return establishment.id;
   }
 
+  void _ensureCanCreateActivities() {
+    if (!ref.read(canCreateActivitiesProvider)) {
+      throw StateError(
+        'Vous n’avez pas le droit de gérer les activités de cet établissement.',
+      );
+    }
+  }
+
   Future<String> createPrestationForImmatriculation(
     String immatriculation,
   ) async {
@@ -107,6 +115,7 @@ class PrestationController extends AsyncNotifier<void> {
 
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
+      _ensureCanCreateActivities();
       final prestation = await ref
           .read(prestationRepositoryProvider)
           .createPrestationForImmatriculation(
@@ -130,6 +139,7 @@ class PrestationController extends AsyncNotifier<void> {
     final establishmentId = _requireEstablishmentId();
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
+      _ensureCanCreateActivities();
       await ref
           .read(prestationRepositoryProvider)
           .addServiceLine(
@@ -148,6 +158,7 @@ class PrestationController extends AsyncNotifier<void> {
     final establishmentId = _requireEstablishmentId();
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
+      _ensureCanCreateActivities();
       await ref
           .read(prestationRepositoryProvider)
           .addProduitLine(
@@ -163,6 +174,7 @@ class PrestationController extends AsyncNotifier<void> {
     final establishmentId = _requireEstablishmentId();
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
+      _ensureCanCreateActivities();
       await ref
           .read(prestationRepositoryProvider)
           .removeLine(establishmentId: establishmentId, ligneId: ligneId);
@@ -177,6 +189,7 @@ class PrestationController extends AsyncNotifier<void> {
     final establishmentId = _requireEstablishmentId();
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
+      _ensureCanCreateActivities();
       await ref
           .read(prestationRepositoryProvider)
           .attachClient(
@@ -192,6 +205,7 @@ class PrestationController extends AsyncNotifier<void> {
     final establishmentId = _requireEstablishmentId();
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
+      _ensureCanCreateActivities();
       await ref
           .read(prestationRepositoryProvider)
           .detachClient(
