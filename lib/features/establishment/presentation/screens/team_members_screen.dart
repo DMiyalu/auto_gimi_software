@@ -5,24 +5,28 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/routing/routes.dart';
 import '../../domain/models/establishment_member.dart';
 import '../providers/establishment_providers.dart';
+import '../widgets/member_management_permission_gate.dart';
 
 class TeamMembersScreen extends ConsumerWidget {
   const TeamMembersScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    return MemberManagementPermissionGate(
+      builder: (context) => _buildMembers(context, ref),
+    );
+  }
+
+  Widget _buildMembers(BuildContext context, WidgetRef ref) {
     final members = ref.watch(establishmentMembersProvider);
-    final canInvite = ref.watch(canInviteMembersProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Équipe')),
-      floatingActionButton: canInvite
-          ? FloatingActionButton.extended(
-              onPressed: () => context.push(Routes.invitationNew),
-              icon: const Icon(Icons.person_add_alt_outlined),
-              label: const Text('Inviter'),
-            )
-          : null,
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => context.push(Routes.invitationNew),
+        icon: const Icon(Icons.person_add_alt_outlined),
+        label: const Text('Inviter'),
+      ),
       body: members.when(
         data: (items) {
           if (items.isEmpty) {

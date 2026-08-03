@@ -8,6 +8,7 @@ import '../../../../core/l10n/app_localizations.dart';
 import '../../../../core/presentation/widgets/phone_number_field.dart';
 import '../../domain/models/establishment_role.dart';
 import '../providers/establishment_providers.dart';
+import '../widgets/member_management_permission_gate.dart';
 
 class InviteMemberScreen extends ConsumerStatefulWidget {
   const InviteMemberScreen({super.key});
@@ -35,6 +36,10 @@ class _InviteMemberScreenState extends ConsumerState<InviteMemberScreen> {
 
   @override
   Widget build(BuildContext context) {
+    return MemberManagementPermissionGate(builder: _buildForm);
+  }
+
+  Widget _buildForm(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final state = ref.watch(establishmentControllerProvider);
 

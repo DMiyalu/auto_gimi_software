@@ -158,6 +158,11 @@ class EstablishmentController extends AsyncNotifier<void> {
 
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
+      if (!ref.read(canInviteMembersProvider)) {
+        throw StateError(
+          'Seuls le propriétaire et les gérants peuvent inviter des membres.',
+        );
+      }
       await ref
           .read(establishmentRepositoryProvider)
           .createInvitation(
