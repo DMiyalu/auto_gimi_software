@@ -152,13 +152,7 @@ class BusinessHeader extends ConsumerWidget {
                   title: const Text('Ajouter un établissement'),
                   onTap: () {
                     Navigator.of(dialogContext).pop();
-                    // Pas encore de flux multi-établissement côté backend
-                    // (un compte = un établissement pour l'instant) — la
-                    // vraie création sera branchée avec le reste de la
-                    // logique métier au retour sur Firebase.
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text(l10n.comingSoon)));
+                    context.push(Routes.establishmentNew);
                   },
                 ),
               ],

@@ -28,8 +28,25 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
     required String ownerId,
     required SignUpRequest request,
   }) async {
+    return createOwnedEstablishment(
+      ownerId: ownerId,
+      category: request.category,
+      establishmentName: request.establishmentName,
+      managerName: request.managerName,
+      phone: request.phone,
+    );
+  }
+
+  @override
+  Future<Establishment> createOwnedEstablishment({
+    required String ownerId,
+    required BusinessCategory category,
+    required String establishmentName,
+    required String managerName,
+    required String phone,
+  }) async {
     final establishmentId = _uuid.v4();
-    final phone = PhoneAuthMapper.normalize(request.phone);
+    final normalizedPhone = PhoneAuthMapper.normalize(phone);
     final now = FieldValue.serverTimestamp();
     final batch = _firestore.batch();
 
@@ -38,11 +55,11 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
     final userSnapshot = await userRef.get();
 
     batch.set(establishmentRef, {
-      'name': request.establishmentName.trim(),
-      'category': request.category.firestoreValue,
+      'name': establishmentName.trim(),
+      'category': category.firestoreValue,
       'ownerId': ownerId,
-      'managerName': request.managerName.trim(),
-      'phone': phone,
+      'managerName': managerName.trim(),
+      'phone': normalizedPhone,
       'phoneVerified': false,
       'createdAt': now,
       'updatedAt': now,
@@ -57,8 +74,8 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
       });
     } else {
       batch.set(userRef, {
-        'phone': phone,
-        'fullName': request.managerName.trim(),
+        'phone': normalizedPhone,
+        'fullName': managerName.trim(),
         'establishmentId': establishmentId,
         'establishmentIds': [establishmentId],
         'activeEstablishmentId': establishmentId,
@@ -73,8 +90,8 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
     batch.set(establishmentRef.collection('members').doc(ownerId), {
       'uid': ownerId,
       'establishmentId': establishmentId,
-      'phone': phone,
-      'fullName': request.managerName.trim(),
+      'phone': normalizedPhone,
+      'fullName': managerName.trim(),
       'role': 'owner',
       'phoneVerified': false,
       'joinedAt': now,

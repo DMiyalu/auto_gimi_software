@@ -4,6 +4,7 @@ abstract final class Routes {
   static const signUp = '/signup';
   static const verifyPhone = '/verify-phone';
   static const dashboard = '/';
+  static const establishmentNew = '/establishments/new';
   static const clients = '/clients';
   static const clientNew = '/clients/new';
   static const clientDetail = '/clients/:id';

@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/domain/business_category.dart';
 import '../../../auth/presentation/providers/auth_state_provider.dart';
 import '../../domain/models/establishment.dart';
 import '../../domain/models/establishment_member.dart';
@@ -87,6 +88,29 @@ class EstablishmentController extends AsyncNotifier<void> {
           .setActiveEstablishment(
             uid: user.uid,
             establishmentId: establishmentId,
+          );
+    });
+  }
+
+  Future<void> createOwnedEstablishment({
+    required BusinessCategory category,
+    required String establishmentName,
+    required String managerName,
+    required String phone,
+  }) async {
+    final user = ref.read(authStateProvider).valueOrNull;
+    if (user == null) return;
+
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      await ref
+          .read(establishmentRepositoryProvider)
+          .createOwnedEstablishment(
+            ownerId: user.uid,
+            category: category,
+            establishmentName: establishmentName,
+            managerName: managerName,
+            phone: phone,
           );
     });
   }

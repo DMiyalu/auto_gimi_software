@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 
+import 'package:auto_mobile_software/core/domain/business_category.dart';
 import 'package:auto_mobile_software/features/auth/domain/models/sign_up_request.dart';
 import 'package:auto_mobile_software/features/auth/domain/repositories/auth_repository.dart';
 import 'package:auto_mobile_software/features/establishment/domain/models/establishment.dart';
@@ -83,6 +84,31 @@ class FakeEstablishmentRepository implements EstablishmentRepository {
     required SignUpRequest request,
   }) async {
     throw UnimplementedError();
+  }
+
+  @override
+  Future<Establishment> createOwnedEstablishment({
+    required String ownerId,
+    required BusinessCategory category,
+    required String establishmentName,
+    required String managerName,
+    required String phone,
+  }) async {
+    final value = Establishment(
+      id: 'est-${establishments.length + 1}',
+      name: establishmentName,
+      category: category,
+      ownerId: ownerId,
+      managerName: managerName,
+      phone: phone,
+      phoneVerified: false,
+      createdAt: DateTime(2026, 1, 1),
+    );
+    setEstablishments([...establishments, value]);
+    establishment = value;
+    _establishmentController.add(value);
+    await setActiveEstablishment(uid: ownerId, establishmentId: value.id);
+    return value;
   }
 
   @override

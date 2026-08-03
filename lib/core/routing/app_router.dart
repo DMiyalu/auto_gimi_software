@@ -7,6 +7,7 @@ import '../../features/auth/presentation/providers/auth_state_provider.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/phone_verification_screen.dart';
 import '../../features/auth/presentation/screens/signup_screen.dart';
+import '../../features/establishment/presentation/screens/establishment_form_screen.dart';
 import '../../features/establishment/presentation/providers/establishment_providers.dart';
 import '../../features/clients/presentation/screens/client_detail_screen.dart';
 import '../../features/clients/presentation/screens/client_form_screen.dart';
@@ -71,14 +72,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
-      GoRoute(
-        path: Routes.login,
-        builder: (_, __) => const LoginScreen(),
-      ),
-      GoRoute(
-        path: Routes.signUp,
-        builder: (_, __) => const SignUpScreen(),
-      ),
+      GoRoute(path: Routes.login, builder: (_, __) => const LoginScreen()),
+      GoRoute(path: Routes.signUp, builder: (_, __) => const SignUpScreen()),
       GoRoute(
         path: Routes.verifyPhone,
         builder: (_, __) => const PhoneVerificationScreen(),
@@ -91,6 +86,10 @@ final routerProvider = Provider<GoRouter>((ref) {
             builder: (_, __) => const PrimaryModuleScreen(),
           ),
           GoRoute(
+            path: Routes.establishmentNew,
+            builder: (_, __) => const EstablishmentFormScreen(),
+          ),
+          GoRoute(
             path: Routes.reports,
             builder: (_, __) => const DashboardScreen(),
           ),
@@ -100,9 +99,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: Routes.activityDetail,
-            builder: (_, state) => ActivityDetailScreen(
-              item: state.extra as ActivityItem?,
-            ),
+            builder: (_, state) =>
+                ActivityDetailScreen(item: state.extra as ActivityItem?),
           ),
           GoRoute(
             path: Routes.clients,
@@ -114,15 +112,13 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: Routes.clientDetail,
-            builder: (_, state) => ClientDetailScreen(
-              clientId: state.pathParameters['id']!,
-            ),
+            builder: (_, state) =>
+                ClientDetailScreen(clientId: state.pathParameters['id']!),
           ),
           GoRoute(
             path: Routes.clientEdit,
-            builder: (_, state) => ClientFormScreen(
-              clientId: state.pathParameters['id'],
-            ),
+            builder: (_, state) =>
+                ClientFormScreen(clientId: state.pathParameters['id']),
           ),
           GoRoute(
             path: Routes.services,
@@ -134,9 +130,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: Routes.serviceEdit,
-            builder: (_, state) => ServiceFormScreen(
-              serviceId: state.pathParameters['id'],
-            ),
+            builder: (_, state) =>
+                ServiceFormScreen(serviceId: state.pathParameters['id']),
           ),
           GoRoute(
             path: Routes.serviceCategoryNew,
@@ -158,9 +153,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: Routes.produitEdit,
-            builder: (_, state) => ProduitFormScreen(
-              produitId: state.pathParameters['id'],
-            ),
+            builder: (_, state) =>
+                ProduitFormScreen(produitId: state.pathParameters['id']),
           ),
           GoRoute(
             path: Routes.productCategoryNew,

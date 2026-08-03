@@ -1,4 +1,5 @@
 import '../../../auth/domain/models/sign_up_request.dart';
+import '../../../../core/domain/business_category.dart';
 import '../../domain/models/establishment.dart';
 import '../../domain/models/establishment_member.dart';
 import '../../domain/models/user_profile.dart';
@@ -9,6 +10,17 @@ class DisabledEstablishmentRepository implements EstablishmentRepository {
   Future<Establishment> createEstablishmentForOwner({
     required String ownerId,
     required SignUpRequest request,
+  }) async {
+    throw StateError('Firebase non configuré. Exécutez: flutterfire configure');
+  }
+
+  @override
+  Future<Establishment> createOwnedEstablishment({
+    required String ownerId,
+    required BusinessCategory category,
+    required String establishmentName,
+    required String managerName,
+    required String phone,
   }) async {
     throw StateError('Firebase non configuré. Exécutez: flutterfire configure');
   }
