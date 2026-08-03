@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/l10n/app_localizations.dart';
 import '../../../../core/routing/routes.dart';
 import '../../../../core/utils/currency_formatter.dart';
+import '../../../establishment/presentation/providers/establishment_providers.dart';
 import '../../../primary_module/controllers/primary_module_providers.dart';
 import '../../../shell/presentation/widgets/primary_scaffold.dart';
 import '../providers/produit_providers.dart';
@@ -41,6 +42,7 @@ class _ProduitsScreenState extends ConsumerState<ProduitsScreen>
     final isCategories = _tabController.index == 1;
     final config = ref.watch(primaryModuleConfigProvider);
     final isPrimary = config.catalogTab.route == Routes.produits;
+    final canManageCatalog = ref.watch(canManageCatalogProvider);
 
     final body = Column(
       children: [
@@ -54,25 +56,24 @@ class _ProduitsScreenState extends ConsumerState<ProduitsScreen>
         Expanded(
           child: TabBarView(
             controller: _tabController,
-            children: const [
-              _ProduitsListTab(),
-              _ProductCategoriesTab(),
-            ],
+            children: const [_ProduitsListTab(), _ProductCategoriesTab()],
           ),
         ),
       ],
     );
-    final fab = FloatingActionButton.extended(
-      onPressed: () => context.push(
-        isCategories ? Routes.productCategoryNew : Routes.produitNew,
-      ),
-      icon: Icon(
-        isCategories ? Icons.create_new_folder_outlined : Icons.add,
-      ),
-      label: Text(
-        isCategories ? l10n.addProductCategory : l10n.addProduct,
-      ),
-    );
+    final fab = canManageCatalog
+        ? FloatingActionButton.extended(
+            onPressed: () => context.push(
+              isCategories ? Routes.productCategoryNew : Routes.produitNew,
+            ),
+            icon: Icon(
+              isCategories ? Icons.create_new_folder_outlined : Icons.add,
+            ),
+            label: Text(
+              isCategories ? l10n.addProductCategory : l10n.addProduct,
+            ),
+          )
+        : null;
 
     if (isPrimary) {
       return PrimaryScaffold(floatingActionButton: fab, body: body);
@@ -92,6 +93,7 @@ class _ProduitsListTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final produitsAsync = ref.watch(produitsProvider);
+    final canManageCatalog = ref.watch(canManageCatalogProvider);
 
     return produitsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -127,7 +129,9 @@ class _ProduitsListTab extends ConsumerWidget {
                 ),
                 style: Theme.of(context).textTheme.titleSmall,
               ),
-              onTap: () => context.push(Routes.produitEditPath(produit.id)),
+              onTap: canManageCatalog
+                  ? () => context.push(Routes.produitEditPath(produit.id))
+                  : null,
             );
           },
         );
@@ -144,6 +148,7 @@ class _ProductCategoriesTab extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final categoriesAsync = ref.watch(productCategoriesProvider);
     final produitsAsync = ref.watch(produitsProvider);
+    final canManageCatalog = ref.watch(canManageCatalogProvider);
 
     return categoriesAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -173,13 +178,14 @@ class _ProductCategoriesTab extends ConsumerWidget {
             final category = categories[index];
             final count = counts[category.id] ?? 0;
             return ListTile(
-              leading: const CircleAvatar(
-                child: Icon(Icons.folder_outlined),
-              ),
+              leading: const CircleAvatar(child: Icon(Icons.folder_outlined)),
               title: Text(category.name),
               subtitle: Text(l10n.productsCount(count)),
-              onTap: () =>
-                  context.push(Routes.productCategoryEditPath(category.id)),
+              onTap: canManageCatalog
+                  ? () => context.push(
+                      Routes.productCategoryEditPath(category.id),
+                    )
+                  : null,
             );
           },
         );
@@ -207,11 +213,7 @@ class _EmptyState extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              size: 64,
-              color: Theme.of(context).colorScheme.outline,
-            ),
+            Icon(icon, size: 64, color: Theme.of(context).colorScheme.outline),
             const SizedBox(height: 16),
             Text(
               title,
@@ -223,8 +225,8 @@ class _EmptyState extends StatelessWidget {
               hint,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
           ],
         ),

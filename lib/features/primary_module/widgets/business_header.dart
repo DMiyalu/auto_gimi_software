@@ -6,12 +6,15 @@ import '../../../core/l10n/app_localizations.dart';
 import '../../../core/routing/routes.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../establishment/domain/models/establishment.dart';
+import '../../establishment/domain/models/establishment_member.dart';
+import '../../establishment/domain/models/establishment_role.dart';
+import '../../establishment/domain/models/user_profile.dart';
 import '../../establishment/presentation/providers/establishment_providers.dart';
 import '../controllers/primary_module_providers.dart';
 
 /// En-tête réutilisable pour tous les métiers : menu hamburger (ouvre le
 /// Drawer de navigation globale), identité de l'établissement, sélecteur
-/// d'établissement (préparé, inerte pour l'instant), notifications et avatar
+/// d'établissement, notifications et avatar
 /// utilisateur. Doit être monté à l'intérieur d'un [Scaffold] qui définit
 /// `drawer:` (ex. [PrimaryScaffold]).
 class BusinessHeader extends ConsumerWidget {
@@ -22,6 +25,19 @@ class BusinessHeader extends ConsumerWidget {
     final establishment = ref.watch(currentEstablishmentProvider).valueOrNull;
     final config = ref.watch(primaryModuleConfigProvider);
     final l10n = AppLocalizations.of(context);
+    final role = ref.watch(activeEstablishmentRoleProvider);
+    final establishments = ref.watch(userEstablishmentsProvider).valueOrNull;
+    final memberships =
+        ref.watch(userMembershipsProvider).valueOrNull ?? const [];
+    final profile = ref.watch(userProfileProvider).valueOrNull;
+
+    ref.listen(establishmentControllerProvider, (_, next) {
+      if (next.hasError) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('${next.error}')));
+      }
+    });
 
     final name = establishment?.name ?? '…';
     final initials = (establishment?.managerName.isNotEmpty ?? false)
@@ -50,8 +66,14 @@ class BusinessHeader extends ConsumerWidget {
           Expanded(
             child: InkWell(
               borderRadius: BorderRadius.circular(AppRadius.card),
-              onTap: () =>
-                  _showEstablishmentSwitcher(context, ref, establishment),
+              onTap: () => _showEstablishmentSwitcher(
+                context,
+                ref,
+                establishment: establishment,
+                establishments: establishments,
+                memberships: memberships,
+                profile: profile,
+              ),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 child: Column(
@@ -78,6 +100,13 @@ class BusinessHeader extends ConsumerWidget {
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
+                    if (role != null)
+                      Text(
+                        role.label,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -96,13 +125,20 @@ class BusinessHeader extends ConsumerWidget {
 
   void _showEstablishmentSwitcher(
     BuildContext context,
-    WidgetRef ref,
-    Establishment? establishment,
-  ) {
+    WidgetRef ref, {
+    required Establishment? establishment,
+    required List<Establishment>? establishments,
+    required List<EstablishmentMember> memberships,
+    required UserProfile? profile,
+  }) {
     final l10n = AppLocalizations.of(context);
-    final establishments =
-        ref.read(userEstablishmentsProvider).valueOrNull ?? const [];
+    final controllerState = ref.read(establishmentControllerProvider);
     final activeId = establishment?.id;
+    final items =
+        establishments == null ||
+            establishments.isEmpty && establishment != null
+        ? [?establishment]
+        : establishments;
 
     showDialog<void>(
       context: context,
@@ -114,18 +150,21 @@ class BusinessHeader extends ConsumerWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                for (final item in establishments)
+                for (final item in items)
                   ListTile(
                     leading: CircleAvatar(child: Icon(item.category.icon)),
                     title: Text(item.name),
-                    subtitle: Text(item.category.label(l10n)),
+                    subtitle: Text(
+                      '${item.category.label(l10n)} • '
+                      '${_roleFor(item.id, memberships, profile).label}',
+                    ),
                     trailing: item.id == activeId
                         ? Icon(
                             Icons.check_circle,
                             color: Theme.of(dialogContext).colorScheme.primary,
                           )
                         : null,
-                    onTap: item.id == activeId
+                    onTap: item.id == activeId || controllerState.isLoading
                         ? null
                         : () {
                             Navigator.of(dialogContext).pop();
@@ -133,18 +172,6 @@ class BusinessHeader extends ConsumerWidget {
                                 .read(establishmentControllerProvider.notifier)
                                 .switchEstablishment(item.id);
                           },
-                  ),
-                if (establishments.isEmpty && establishment != null)
-                  ListTile(
-                    leading: CircleAvatar(
-                      child: Icon(establishment.category.icon),
-                    ),
-                    title: Text(establishment.name),
-                    subtitle: Text(establishment.category.label(l10n)),
-                    trailing: Icon(
-                      Icons.check_circle,
-                      color: Theme.of(dialogContext).colorScheme.primary,
-                    ),
                   ),
                 const Divider(),
                 ListTile(
@@ -167,6 +194,19 @@ class BusinessHeader extends ConsumerWidget {
         );
       },
     );
+  }
+
+  EstablishmentRole _roleFor(
+    String establishmentId,
+    List<EstablishmentMember> memberships,
+    UserProfile? profile,
+  ) {
+    for (final membership in memberships) {
+      if (membership.establishmentId == establishmentId) {
+        return membership.role;
+      }
+    }
+    return EstablishmentRole.fromFirestore(profile?.roleFor(establishmentId));
   }
 }
 

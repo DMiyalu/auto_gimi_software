@@ -8,6 +8,9 @@ import 'package:auto_mobile_software/core/domain/business_category.dart';
 import 'package:auto_mobile_software/core/l10n/app_localizations.dart';
 import 'package:auto_mobile_software/core/routing/routes.dart';
 import 'package:auto_mobile_software/features/establishment/domain/models/establishment.dart';
+import 'package:auto_mobile_software/features/establishment/domain/models/establishment_member.dart';
+import 'package:auto_mobile_software/features/establishment/domain/models/establishment_role.dart';
+import 'package:auto_mobile_software/features/establishment/domain/models/user_profile.dart';
 import 'package:auto_mobile_software/features/establishment/presentation/providers/establishment_providers.dart';
 import 'package:auto_mobile_software/features/establishment/presentation/screens/establishment_form_screen.dart';
 import 'package:auto_mobile_software/features/primary_module/screens/primary_module_screen.dart';
@@ -24,13 +27,17 @@ final _establishment = Establishment(
   createdAt: DateTime(2026, 1, 1),
 );
 
-Future<void> _pump(WidgetTester tester) async {
+Future<void> _pump(
+  WidgetTester tester, {
+  List<Override> extraOverrides = const [],
+}) async {
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
         currentEstablishmentProvider.overrideWith(
           (ref) => Stream.value(_establishment),
         ),
+        ...extraOverrides,
       ],
       child: MaterialApp.router(
         locale: const Locale('fr'),
@@ -152,6 +159,81 @@ void main() {
       expect(find.text('Établissements'), findsNothing);
       expect(find.text('Nouvel établissement'), findsOneWidget);
       expect(find.text('Créer l’établissement'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'le sélecteur affiche plusieurs établissements avec leurs rôles',
+    (tester) async {
+      final garage = Establishment(
+        id: 'etab-2',
+        name: 'Garage Zuri',
+        category: BusinessCategory.garageAuto,
+        ownerId: 'owner-2',
+        managerName: 'Amina Kabasele',
+        phone: '+243911111111',
+        phoneVerified: true,
+        createdAt: DateTime(2026, 1, 2),
+      );
+
+      await _pump(
+        tester,
+        extraOverrides: [
+          userEstablishmentsProvider.overrideWith(
+            (ref) => Stream.value([_establishment, garage]),
+          ),
+          userMembershipsProvider.overrideWith(
+            (ref) => Stream.value([
+              EstablishmentMember(
+                uid: 'uid-test',
+                establishmentId: _establishment.id,
+                phone: '+243900000000',
+                fullName: 'Jean Kalonji',
+                role: EstablishmentRole.owner,
+                phoneVerified: true,
+                joinedAt: DateTime(2026, 1, 1),
+              ),
+              EstablishmentMember(
+                uid: 'uid-test',
+                establishmentId: garage.id,
+                phone: '+243900000000',
+                fullName: 'Jean Kalonji',
+                role: EstablishmentRole.manager,
+                phoneVerified: true,
+                joinedAt: DateTime(2026, 1, 2),
+              ),
+            ]),
+          ),
+          userProfileProvider.overrideWith(
+            (ref) => Stream.value(
+              UserProfile(
+                uid: 'uid-test',
+                phone: '+243900000000',
+                fullName: 'Jean Kalonji',
+                establishmentId: _establishment.id,
+                role: 'owner',
+                phoneVerified: true,
+                createdAt: DateTime(2026, 1, 1),
+                establishmentIds: [_establishment.id, garage.id],
+                activeEstablishmentId: _establishment.id,
+                rolesByEstablishment: {
+                  _establishment.id: 'owner',
+                  garage.id: 'manager',
+                },
+              ),
+            ),
+          ),
+        ],
+      );
+
+      await tester.tap(find.text('Le Goût Parfait'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Établissements'), findsOneWidget);
+      expect(find.text('Le Goût Parfait'), findsWidgets);
+      expect(find.text('Garage Zuri'), findsOneWidget);
+      expect(find.text('Restaurant • Propriétaire'), findsOneWidget);
+      expect(find.text('Garage Auto-Mobile • Gérant'), findsOneWidget);
     },
   );
 }
