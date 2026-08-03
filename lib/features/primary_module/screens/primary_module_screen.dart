@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_spacing.dart';
+import '../../shell/presentation/widgets/app_drawer.dart';
 import '../widgets/activity_list.dart';
 import '../widgets/business_header.dart';
 import '../widgets/module_fab.dart';
@@ -15,6 +16,7 @@ class PrimaryModuleScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: const AppDrawer(),
       floatingActionButton: const ModuleFab(),
       body: SafeArea(
         child: Column(

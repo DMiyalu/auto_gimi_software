@@ -9,9 +9,11 @@ import '../../establishment/domain/models/establishment.dart';
 import '../../establishment/presentation/providers/establishment_providers.dart';
 import '../controllers/primary_module_providers.dart';
 
-/// En-tête réutilisable pour tous les métiers : identité de l'établissement,
-/// sélecteur d'établissement (préparé, inerte pour l'instant), notifications
-/// et avatar utilisateur.
+/// En-tête réutilisable pour tous les métiers : menu hamburger (ouvre le
+/// Drawer de navigation globale), identité de l'établissement, sélecteur
+/// d'établissement (préparé, inerte pour l'instant), notifications et avatar
+/// utilisateur. Doit être monté à l'intérieur d'un [Scaffold] qui définit
+/// `drawer:` (ex. [PrimaryScaffold]).
 class BusinessHeader extends ConsumerWidget {
   const BusinessHeader({super.key});
 
@@ -28,13 +30,17 @@ class BusinessHeader extends ConsumerWidget {
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-        AppSpacing.sm,
+        AppSpacing.xs,
         AppSpacing.xs,
         AppSpacing.sm,
         AppSpacing.xs,
       ),
       child: Row(
         children: [
+          IconButton(
+            icon: const Icon(Icons.menu_outlined),
+            onPressed: () => Scaffold.of(context).openDrawer(),
+          ),
           CircleAvatar(
             radius: 22,
             backgroundColor: config.primaryColor.withValues(alpha: 0.12),

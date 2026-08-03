@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/l10n/app_localizations.dart';
+import '../../../../core/presentation/widgets/module_list_header.dart';
 import '../../../../core/routing/routes.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../garage/presentation/providers/prestation_providers.dart';
 import '../../../primary_module/config/business_module_config.dart';
 import '../../../primary_module/widgets/business_header.dart';
 import '../../../primary_module/widgets/module_fab.dart';
+import '../../../shell/presentation/widgets/app_drawer.dart';
 import '../providers/client_list_view_providers.dart';
 import '../providers/client_providers.dart';
 import '../widgets/client_card.dart';
@@ -23,6 +25,7 @@ class ClientsListScreen extends ConsumerWidget {
     final clientsAsync = ref.watch(clientsProvider);
 
     return Scaffold(
+      drawer: const AppDrawer(),
       floatingActionButton: ModuleFab(
         actions: [
           FabActionConfig(
@@ -173,25 +176,9 @@ class _ClientListView extends ConsumerWidget {
       separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.xs),
       itemBuilder: (context, index) {
         if (index == 0) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: AppSpacing.xs),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  l10n.clientsListTitle,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                Text(
-                  l10n.clientsCount(clients.length),
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
+          return ModuleListHeader(
+            title: l10n.clientsListTitle,
+            countLabel: l10n.clientsCount(clients.length),
           );
         }
 
