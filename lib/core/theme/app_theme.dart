@@ -6,7 +6,7 @@ abstract final class AppTheme {
   static const _seed = Color(0xFF1565C0);
 
   static const _buttonShape = RoundedRectangleBorder(
-    borderRadius: BorderRadius.all(Radius.circular(AppRadius.button)),
+    borderRadius: BorderRadius.all(Radius.circular(AppRadius.chip)),
   );
 
   static ThemeData light() {
@@ -16,7 +16,14 @@ abstract final class AppTheme {
       scaffoldBackgroundColor: Colors.white,
       appBarTheme: const AppBarTheme(centerTitle: false),
       inputDecorationTheme: const InputDecorationTheme(
-        border: OutlineInputBorder(),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(AppRadius.chip)),
+        ),
+      ),
+      chipTheme: ChipThemeData(
+        shape: const StadiumBorder(),
+        side: BorderSide.none,
+        selectedColor: ColorScheme.fromSeed(seedColor: _seed).primary,
       ),
       filledButtonTheme: const FilledButtonThemeData(
         style: ButtonStyle(shape: WidgetStatePropertyAll(_buttonShape)),
@@ -42,7 +49,17 @@ abstract final class AppTheme {
       useMaterial3: true,
       appBarTheme: const AppBarTheme(centerTitle: false),
       inputDecorationTheme: const InputDecorationTheme(
-        border: OutlineInputBorder(),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(AppRadius.chip)),
+        ),
+      ),
+      chipTheme: ChipThemeData(
+        shape: const StadiumBorder(),
+        side: BorderSide.none,
+        selectedColor: ColorScheme.fromSeed(
+          seedColor: _seed,
+          brightness: Brightness.dark,
+        ).primary,
       ),
       filledButtonTheme: const FilledButtonThemeData(
         style: ButtonStyle(shape: WidgetStatePropertyAll(_buttonShape)),

@@ -6,6 +6,7 @@ import '../../../../core/routing/routes.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../garage/presentation/providers/prestation_providers.dart';
 import '../../../primary_module/config/business_module_config.dart';
+import '../../../primary_module/widgets/business_header.dart';
 import '../../../primary_module/widgets/module_fab.dart';
 import '../providers/client_list_view_providers.dart';
 import '../providers/client_providers.dart';
@@ -22,7 +23,6 @@ class ClientsListScreen extends ConsumerWidget {
     final clientsAsync = ref.watch(clientsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.clients)),
       floatingActionButton: ModuleFab(
         actions: [
           FabActionConfig(
@@ -32,35 +32,46 @@ class ClientsListScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: clientsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text(error.toString())),
-        data: (clients) {
-          if (clients.isEmpty) {
-            return _EmptyClients(l10n: l10n);
-          }
+      body: SafeArea(
+        child: Column(
+          children: [
+            const BusinessHeader(),
+            const SizedBox(height: AppSpacing.xs),
+            Expanded(
+              child: clientsAsync.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (error, _) => Center(child: Text(error.toString())),
+                data: (clients) {
+                  if (clients.isEmpty) {
+                    return _EmptyClients(l10n: l10n);
+                  }
 
-          return Column(
-            children: [
-              const SizedBox(height: AppSpacing.xs),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const Expanded(child: ClientSearchBar()),
-                    const SizedBox(width: AppSpacing.xs),
-                    const _FiltersButton(),
-                  ],
-                ),
+                  return Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.sm,
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            const Expanded(child: ClientSearchBar()),
+                            const SizedBox(width: AppSpacing.xs),
+                            const _FiltersButton(),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      const ClientFilters(),
+                      const SizedBox(height: AppSpacing.sm),
+                      const Expanded(child: _ClientListView()),
+                    ],
+                  );
+                },
               ),
-              const SizedBox(height: AppSpacing.sm),
-              const ClientFilters(),
-              const SizedBox(height: AppSpacing.sm),
-              const Expanded(child: _ClientListView()),
-            ],
-          );
-        },
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -74,6 +85,12 @@ class _FiltersButton extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
 
     return OutlinedButton.icon(
+      style: OutlinedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm,
+          vertical: 16,
+        ),
+      ),
       onPressed: () {
         ScaffoldMessenger.of(
           context,

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/l10n/app_localizations.dart';
+import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/currency_formatter.dart';
+import '../../../primary_module/widgets/business_header.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -15,34 +17,41 @@ class DashboardScreen extends ConsumerWidget {
     const prestationsCount = 0;
     const revenue = 0.0;
 
-    return Padding(
-      padding: const EdgeInsets.all(16),
+    return SafeArea(
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            l10n.dashboard,
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: _StatCard(
-                  label: l10n.todayPrestations,
-                  value: '$prestationsCount',
-                  icon: Icons.build_circle_outlined,
+          const BusinessHeader(),
+          const SizedBox(height: AppSpacing.xs),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.all(AppSpacing.sm),
+              children: [
+                Text(
+                  l10n.dashboard,
+                  style: Theme.of(context).textTheme.headlineSmall,
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _StatCard(
-                  label: l10n.todayRevenue,
-                  value: CurrencyFormatter.format(revenue),
-                  icon: Icons.attach_money,
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _StatCard(
+                        label: l10n.todayPrestations,
+                        value: '$prestationsCount',
+                        icon: Icons.build_circle_outlined,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _StatCard(
+                        label: l10n.todayRevenue,
+                        value: CurrencyFormatter.format(revenue),
+                        icon: Icons.attach_money,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),

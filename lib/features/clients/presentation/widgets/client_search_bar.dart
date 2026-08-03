@@ -5,9 +5,8 @@ import '../../../../core/l10n/app_localizations.dart';
 import '../../../../core/theme/app_spacing.dart' show AppRadius;
 import '../providers/client_providers.dart';
 
-/// Barre de recherche de l'écran Clients — même comportement que la barre
-/// de recherche de l'écran principal, mais avec le radius commun aux
-/// boutons (pas de forme pilule) plutôt que celui des chips.
+/// Barre de recherche de l'écran Clients — même comportement et même forme
+/// pilule que la barre de recherche de l'écran principal.
 class ClientSearchBar extends ConsumerStatefulWidget {
   const ClientSearchBar({super.key});
 
@@ -50,7 +49,7 @@ class _ClientSearchBarState extends ConsumerState<ClientSearchBar> {
         filled: true,
         fillColor: Theme.of(context).colorScheme.surfaceContainerLow,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppRadius.button),
+          borderRadius: BorderRadius.circular(AppRadius.chip),
           borderSide: BorderSide.none,
         ),
         contentPadding: const EdgeInsets.symmetric(vertical: 0),
