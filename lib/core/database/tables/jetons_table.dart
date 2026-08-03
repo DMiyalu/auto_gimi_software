@@ -6,6 +6,7 @@ import 'prestations_table.dart';
 
 class Jetons extends Table {
   TextColumn get id => text()();
+  TextColumn get establishmentId => text().withDefault(const Constant(''))();
   TextColumn get prestationId => text().references(Prestations, #id)();
   TextColumn get clientId => text().references(Clients, #id)();
   TextColumn get statut => text().map(const JetonStatutConverter())();

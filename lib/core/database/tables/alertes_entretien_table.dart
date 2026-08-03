@@ -6,6 +6,7 @@ import 'vehicules_table.dart';
 
 class AlertesEntretien extends Table {
   TextColumn get id => text()();
+  TextColumn get establishmentId => text().withDefault(const Constant(''))();
   TextColumn get vehiculeId => text().references(Vehicules, #id)();
   TextColumn get serviceId => text().references(CatalogServices, #id)();
   DateTimeColumn get dateEcheance => dateTime()();

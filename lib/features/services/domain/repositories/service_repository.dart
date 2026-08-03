@@ -3,13 +3,23 @@ import '../entities/catalog_service_entity.dart';
 import '../entities/service_category_entity.dart';
 
 abstract class ServiceRepository {
-  Stream<List<ServiceCategoryEntity>> watchCategories();
+  Stream<List<ServiceCategoryEntity>> watchCategories({
+    required String establishmentId,
+  });
 
-  Stream<List<CatalogServiceEntity>> watchServices();
+  Stream<List<CatalogServiceEntity>> watchServices({
+    required String establishmentId,
+  });
 
-  Future<CatalogServiceEntity?> getService(String id);
+  Future<CatalogServiceEntity?> getService({
+    required String establishmentId,
+    required String id,
+  });
 
-  Future<ServiceCategoryEntity?> getCategory(String id);
+  Future<ServiceCategoryEntity?> getCategory({
+    required String establishmentId,
+    required String id,
+  });
 
   Future<ServiceCategoryEntity> createCategory({
     required String establishmentId,

@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 
 class Clients extends Table {
   TextColumn get id => text()();
+  TextColumn get establishmentId => text().withDefault(const Constant(''))();
   TextColumn get phone => text()();
   TextColumn get nom => text()();
   TextColumn get prenom => text().nullable()();

@@ -41,7 +41,7 @@ void main() {
     expect(prestation.clientId, isNull);
 
     final vehicule = await repository
-        .watchVehicule(prestation.vehiculeId)
+        .watchVehicule(establishmentId: 'est-1', id: prestation.vehiculeId)
         .first;
     expect(vehicule, isNotNull);
     expect(vehicule!.immatriculation, 'CD 214 KM');
@@ -95,14 +95,18 @@ void main() {
       serviceId: service.id,
     );
 
-    final lignes = await repository.watchLignes(prestation.id).first;
+    final lignes = await repository
+        .watchLignes(establishmentId: 'est-1', prestationId: prestation.id)
+        .first;
     expect(lignes, hasLength(1));
     expect(lignes.first.libelle, 'Vidange');
     expect(lignes.first.type, LigneType.service);
     expect(lignes.first.quantite, 1);
     expect(lignes.first.montantLigne, 45000);
 
-    final updated = await repository.watchPrestation(prestation.id).first;
+    final updated = await repository
+        .watchPrestation(establishmentId: 'est-1', id: prestation.id)
+        .first;
     expect(updated!.montantTotal, 45000);
   });
 
@@ -131,12 +135,16 @@ void main() {
       serviceId: service.id,
     );
 
-    final lignes = await repository.watchLignes(prestation.id).first;
+    final lignes = await repository
+        .watchLignes(establishmentId: 'est-1', prestationId: prestation.id)
+        .first;
     expect(lignes, hasLength(1));
     expect(lignes.first.quantite, 2);
     expect(lignes.first.montantLigne, 20000);
 
-    final updated = await repository.watchPrestation(prestation.id).first;
+    final updated = await repository
+        .watchPrestation(establishmentId: 'est-1', id: prestation.id)
+        .first;
     expect(updated!.montantTotal, 20000);
   });
 
@@ -160,7 +168,9 @@ void main() {
         produitId: produit.id,
       );
 
-      final lignes = await repository.watchLignes(prestation.id).first;
+      final lignes = await repository
+          .watchLignes(establishmentId: 'est-1', prestationId: prestation.id)
+          .first;
       expect(lignes, hasLength(1));
       expect(lignes.first.type, LigneType.produit);
       expect(lignes.first.produitId, produit.id);
@@ -185,16 +195,22 @@ void main() {
       prestationId: prestation.id,
       serviceId: service.id,
     );
-    final lignes = await repository.watchLignes(prestation.id).first;
+    final lignes = await repository
+        .watchLignes(establishmentId: 'est-1', prestationId: prestation.id)
+        .first;
 
     await repository.removeLine(
       establishmentId: 'est-1',
       ligneId: lignes.first.id,
     );
 
-    final remaining = await repository.watchLignes(prestation.id).first;
+    final remaining = await repository
+        .watchLignes(establishmentId: 'est-1', prestationId: prestation.id)
+        .first;
     expect(remaining, isEmpty);
-    final updated = await repository.watchPrestation(prestation.id).first;
+    final updated = await repository
+        .watchPrestation(establishmentId: 'est-1', id: prestation.id)
+        .first;
     expect(updated!.montantTotal, 0);
   });
 
@@ -218,10 +234,10 @@ void main() {
       );
 
       final updatedPrestation = await repository
-          .watchPrestation(prestation.id)
+          .watchPrestation(establishmentId: 'est-1', id: prestation.id)
           .first;
       final updatedVehicule = await repository
-          .watchVehicule(prestation.vehiculeId)
+          .watchVehicule(establishmentId: 'est-1', id: prestation.vehiculeId)
           .first;
       expect(updatedPrestation!.clientId, client.id);
       expect(updatedVehicule!.clientId, client.id);
@@ -250,10 +266,10 @@ void main() {
     );
 
     final updatedPrestation = await repository
-        .watchPrestation(prestation.id)
+        .watchPrestation(establishmentId: 'est-1', id: prestation.id)
         .first;
     final updatedVehicule = await repository
-        .watchVehicule(prestation.vehiculeId)
+        .watchVehicule(establishmentId: 'est-1', id: prestation.vehiculeId)
         .first;
     expect(updatedPrestation!.clientId, isNull);
     expect(updatedVehicule!.clientId, client.id);
@@ -316,7 +332,9 @@ void main() {
       PrestationsCompanion(dateOuverture: Value(DateTime(2020, 6, 1))),
     );
 
-    final stats = await repository.watchClientOrderStats().first;
+    final stats = await repository
+        .watchClientOrderStats(establishmentId: 'est-1')
+        .first;
 
     expect(stats[client.id]!.totalSpent, 90000);
     expect(stats[client.id]!.lastOrderContext, 'CD 011 BB');
@@ -330,7 +348,9 @@ void main() {
         immatriculation: 'CD 012 CC',
       );
 
-      final stats = await repository.watchClientOrderStats().first;
+      final stats = await repository
+          .watchClientOrderStats(establishmentId: 'est-1')
+          .first;
 
       expect(stats, isEmpty);
     },
@@ -343,8 +363,14 @@ void main() {
       whatsappPhone: '243933333333',
     );
 
-    final found = await clientRepository.findByPhone('243933333333');
-    final notFound = await clientRepository.findByPhone('243900009999');
+    final found = await clientRepository.findByPhone(
+      establishmentId: 'est-1',
+      phone: '243933333333',
+    );
+    final notFound = await clientRepository.findByPhone(
+      establishmentId: 'est-1',
+      phone: '243900009999',
+    );
 
     expect(found, isNotNull);
     expect(found!.name, 'Société Kin Transport');

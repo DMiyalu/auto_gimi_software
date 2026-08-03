@@ -26,12 +26,18 @@ class ClientSyncAdapter implements SyncAdapter {
   @override
   Future<Map<String, Map<String, dynamic>>> loadDirtyDocs(
     AppDatabase db, {
+    required String establishmentId,
     required int limit,
   }) async {
-    final rows = await (db.select(db.clients)
-          ..where((t) => t.isDirty.equals(true))
-          ..limit(limit))
-        .get();
+    final rows =
+        await (db.select(db.clients)
+              ..where(
+                (t) =>
+                    t.establishmentId.equals(establishmentId) &
+                    t.isDirty.equals(true),
+              )
+              ..limit(limit))
+            .get();
     return {
       for (final row in rows)
         row.id: {
@@ -51,13 +57,15 @@ class ClientSyncAdapter implements SyncAdapter {
 
   @override
   Future<void> clearDirty(AppDatabase db, Iterable<String> ids) async {
-    await (db.update(db.clients)..where((t) => t.id.isIn(ids.toList())))
-        .write(const ClientsCompanion(isDirty: Value(false)));
+    await (db.update(db.clients)..where((t) => t.id.isIn(ids.toList()))).write(
+      const ClientsCompanion(isDirty: Value(false)),
+    );
   }
 
   @override
   Future<DateTime?> applyRemoteDocs(
     AppDatabase db,
+    String establishmentId,
     List<QueryDocumentSnapshot<Map<String, dynamic>>> docs,
   ) async {
     DateTime? maxSeen;
@@ -70,27 +78,36 @@ class ClientSyncAdapter implements SyncAdapter {
           maxSeen = remoteUpdatedAt;
         }
 
-        final existing = await (db.select(db.clients)
-              ..where((t) => t.id.equals(doc.id)))
-            .getSingleOrNull();
+        final existing =
+            await (db.select(db.clients)..where(
+                  (t) =>
+                      t.establishmentId.equals(establishmentId) &
+                      t.id.equals(doc.id),
+                ))
+                .getSingleOrNull();
         if (existing != null &&
             existing.isDirty &&
             !existing.updatedAt.isBefore(remoteUpdatedAt)) {
           continue;
         }
 
-        await db.into(db.clients).insertOnConflictUpdate(
+        await db
+            .into(db.clients)
+            .insertOnConflictUpdate(
               ClientsCompanion(
                 id: Value(doc.id),
+                establishmentId: Value(establishmentId),
                 nom: Value(data['name'] as String? ?? ''),
                 phone: Value(data['phone'] as String? ?? ''),
                 email: Value(data['email'] as String?),
                 adresse: Value(data['address'] as String?),
-                typeClient:
-                    Value(data['clientType'] as String? ?? 'particulier'),
+                typeClient: Value(
+                  data['clientType'] as String? ?? 'particulier',
+                ),
                 notes: Value(data['notes'] as String?),
-                pointsFidelite:
-                    Value((data['loyaltyPoints'] as num?)?.toInt() ?? 0),
+                pointsFidelite: Value(
+                  (data['loyaltyPoints'] as num?)?.toInt() ?? 0,
+                ),
                 createdAt: Value(
                   readFirestoreDate(data['createdAt']) ?? remoteUpdatedAt,
                 ),
@@ -112,12 +129,18 @@ class ProductCategorySyncAdapter implements SyncAdapter {
   @override
   Future<Map<String, Map<String, dynamic>>> loadDirtyDocs(
     AppDatabase db, {
+    required String establishmentId,
     required int limit,
   }) async {
-    final rows = await (db.select(db.productCategories)
-          ..where((t) => t.isDirty.equals(true))
-          ..limit(limit))
-        .get();
+    final rows =
+        await (db.select(db.productCategories)
+              ..where(
+                (t) =>
+                    t.establishmentId.equals(establishmentId) &
+                    t.isDirty.equals(true),
+              )
+              ..limit(limit))
+            .get();
     return {
       for (final row in rows)
         row.id: {
@@ -140,6 +163,7 @@ class ProductCategorySyncAdapter implements SyncAdapter {
   @override
   Future<DateTime?> applyRemoteDocs(
     AppDatabase db,
+    String establishmentId,
     List<QueryDocumentSnapshot<Map<String, dynamic>>> docs,
   ) async {
     DateTime? maxSeen;
@@ -152,18 +176,25 @@ class ProductCategorySyncAdapter implements SyncAdapter {
           maxSeen = remoteUpdatedAt;
         }
 
-        final existing = await (db.select(db.productCategories)
-              ..where((t) => t.id.equals(doc.id)))
-            .getSingleOrNull();
+        final existing =
+            await (db.select(db.productCategories)..where(
+                  (t) =>
+                      t.establishmentId.equals(establishmentId) &
+                      t.id.equals(doc.id),
+                ))
+                .getSingleOrNull();
         if (existing != null &&
             existing.isDirty &&
             !existing.updatedAt.isBefore(remoteUpdatedAt)) {
           continue;
         }
 
-        await db.into(db.productCategories).insertOnConflictUpdate(
+        await db
+            .into(db.productCategories)
+            .insertOnConflictUpdate(
               ProductCategoriesCompanion(
                 id: Value(doc.id),
+                establishmentId: Value(establishmentId),
                 nom: Value(data['name'] as String? ?? ''),
                 ordre: Value((data['order'] as num?)?.toInt() ?? 0),
                 createdAt: Value(
@@ -187,12 +218,18 @@ class CategorySyncAdapter implements SyncAdapter {
   @override
   Future<Map<String, Map<String, dynamic>>> loadDirtyDocs(
     AppDatabase db, {
+    required String establishmentId,
     required int limit,
   }) async {
-    final rows = await (db.select(db.categories)
-          ..where((t) => t.isDirty.equals(true))
-          ..limit(limit))
-        .get();
+    final rows =
+        await (db.select(db.categories)
+              ..where(
+                (t) =>
+                    t.establishmentId.equals(establishmentId) &
+                    t.isDirty.equals(true),
+              )
+              ..limit(limit))
+            .get();
     return {
       for (final row in rows)
         row.id: {
@@ -214,6 +251,7 @@ class CategorySyncAdapter implements SyncAdapter {
   @override
   Future<DateTime?> applyRemoteDocs(
     AppDatabase db,
+    String establishmentId,
     List<QueryDocumentSnapshot<Map<String, dynamic>>> docs,
   ) async {
     DateTime? maxSeen;
@@ -226,18 +264,25 @@ class CategorySyncAdapter implements SyncAdapter {
           maxSeen = remoteUpdatedAt;
         }
 
-        final existing = await (db.select(db.categories)
-              ..where((t) => t.id.equals(doc.id)))
-            .getSingleOrNull();
+        final existing =
+            await (db.select(db.categories)..where(
+                  (t) =>
+                      t.establishmentId.equals(establishmentId) &
+                      t.id.equals(doc.id),
+                ))
+                .getSingleOrNull();
         if (existing != null &&
             existing.isDirty &&
             !existing.updatedAt.isBefore(remoteUpdatedAt)) {
           continue;
         }
 
-        await db.into(db.categories).insertOnConflictUpdate(
+        await db
+            .into(db.categories)
+            .insertOnConflictUpdate(
               CategoriesCompanion(
                 id: Value(doc.id),
+                establishmentId: Value(establishmentId),
                 nom: Value(data['name'] as String? ?? ''),
                 ordre: Value((data['order'] as num?)?.toInt() ?? 0),
                 createdAt: Value(
@@ -261,12 +306,18 @@ class ProduitSyncAdapter implements SyncAdapter {
   @override
   Future<Map<String, Map<String, dynamic>>> loadDirtyDocs(
     AppDatabase db, {
+    required String establishmentId,
     required int limit,
   }) async {
-    final rows = await (db.select(db.produits)
-          ..where((t) => t.isDirty.equals(true))
-          ..limit(limit))
-        .get();
+    final rows =
+        await (db.select(db.produits)
+              ..where(
+                (t) =>
+                    t.establishmentId.equals(establishmentId) &
+                    t.isDirty.equals(true),
+              )
+              ..limit(limit))
+            .get();
     return {
       for (final row in rows)
         row.id: {
@@ -284,13 +335,15 @@ class ProduitSyncAdapter implements SyncAdapter {
 
   @override
   Future<void> clearDirty(AppDatabase db, Iterable<String> ids) async {
-    await (db.update(db.produits)..where((t) => t.id.isIn(ids.toList())))
-        .write(const ProduitsCompanion(isDirty: Value(false)));
+    await (db.update(db.produits)..where((t) => t.id.isIn(ids.toList()))).write(
+      const ProduitsCompanion(isDirty: Value(false)),
+    );
   }
 
   @override
   Future<DateTime?> applyRemoteDocs(
     AppDatabase db,
+    String establishmentId,
     List<QueryDocumentSnapshot<Map<String, dynamic>>> docs,
   ) async {
     DateTime? maxSeen;
@@ -303,18 +356,25 @@ class ProduitSyncAdapter implements SyncAdapter {
           maxSeen = remoteUpdatedAt;
         }
 
-        final existing = await (db.select(db.produits)
-              ..where((t) => t.id.equals(doc.id)))
-            .getSingleOrNull();
+        final existing =
+            await (db.select(db.produits)..where(
+                  (t) =>
+                      t.establishmentId.equals(establishmentId) &
+                      t.id.equals(doc.id),
+                ))
+                .getSingleOrNull();
         if (existing != null &&
             existing.isDirty &&
             !existing.updatedAt.isBefore(remoteUpdatedAt)) {
           continue;
         }
 
-        await db.into(db.produits).insertOnConflictUpdate(
+        await db
+            .into(db.produits)
+            .insertOnConflictUpdate(
               ProduitsCompanion(
                 id: Value(doc.id),
+                establishmentId: Value(establishmentId),
                 categorieId: Value(data['categoryId'] as String?),
                 nom: Value(data['name'] as String? ?? ''),
                 prix: Value((data['price'] as num?)?.toDouble() ?? 0),
@@ -341,12 +401,18 @@ class CatalogServiceSyncAdapter implements SyncAdapter {
   @override
   Future<Map<String, Map<String, dynamic>>> loadDirtyDocs(
     AppDatabase db, {
+    required String establishmentId,
     required int limit,
   }) async {
-    final rows = await (db.select(db.catalogServices)
-          ..where((t) => t.isDirty.equals(true))
-          ..limit(limit))
-        .get();
+    final rows =
+        await (db.select(db.catalogServices)
+              ..where(
+                (t) =>
+                    t.establishmentId.equals(establishmentId) &
+                    t.isDirty.equals(true),
+              )
+              ..limit(limit))
+            .get();
     return {
       for (final row in rows)
         row.id: {
@@ -364,14 +430,14 @@ class CatalogServiceSyncAdapter implements SyncAdapter {
 
   @override
   Future<void> clearDirty(AppDatabase db, Iterable<String> ids) async {
-    await (db.update(db.catalogServices)
-          ..where((t) => t.id.isIn(ids.toList())))
+    await (db.update(db.catalogServices)..where((t) => t.id.isIn(ids.toList())))
         .write(const CatalogServicesCompanion(isDirty: Value(false)));
   }
 
   @override
   Future<DateTime?> applyRemoteDocs(
     AppDatabase db,
+    String establishmentId,
     List<QueryDocumentSnapshot<Map<String, dynamic>>> docs,
   ) async {
     DateTime? maxSeen;
@@ -384,24 +450,32 @@ class CatalogServiceSyncAdapter implements SyncAdapter {
           maxSeen = remoteUpdatedAt;
         }
 
-        final existing = await (db.select(db.catalogServices)
-              ..where((t) => t.id.equals(doc.id)))
-            .getSingleOrNull();
+        final existing =
+            await (db.select(db.catalogServices)..where(
+                  (t) =>
+                      t.establishmentId.equals(establishmentId) &
+                      t.id.equals(doc.id),
+                ))
+                .getSingleOrNull();
         if (existing != null &&
             existing.isDirty &&
             !existing.updatedAt.isBefore(remoteUpdatedAt)) {
           continue;
         }
 
-        await db.into(db.catalogServices).insertOnConflictUpdate(
+        await db
+            .into(db.catalogServices)
+            .insertOnConflictUpdate(
               CatalogServicesCompanion(
                 id: Value(doc.id),
+                establishmentId: Value(establishmentId),
                 categorieId: Value(data['categoryId'] as String?),
                 nom: Value(data['name'] as String? ?? ''),
                 prix: Value((data['price'] as num?)?.toDouble() ?? 0),
                 devise: Value(data['currency'] as String? ?? 'USD'),
-                intervalleJours:
-                    Value((data['intervalDays'] as num?)?.toInt() ?? 0),
+                intervalleJours: Value(
+                  (data['intervalDays'] as num?)?.toInt() ?? 0,
+                ),
                 createdAt: Value(
                   readFirestoreDate(data['createdAt']) ?? remoteUpdatedAt,
                 ),
@@ -423,12 +497,18 @@ class VehiculeSyncAdapter implements SyncAdapter {
   @override
   Future<Map<String, Map<String, dynamic>>> loadDirtyDocs(
     AppDatabase db, {
+    required String establishmentId,
     required int limit,
   }) async {
-    final rows = await (db.select(db.vehicules)
-          ..where((t) => t.isDirty.equals(true))
-          ..limit(limit))
-        .get();
+    final rows =
+        await (db.select(db.vehicules)
+              ..where(
+                (t) =>
+                    t.establishmentId.equals(establishmentId) &
+                    t.isDirty.equals(true),
+              )
+              ..limit(limit))
+            .get();
     return {
       for (final row in rows)
         row.id: {
@@ -454,6 +534,7 @@ class VehiculeSyncAdapter implements SyncAdapter {
   @override
   Future<DateTime?> applyRemoteDocs(
     AppDatabase db,
+    String establishmentId,
     List<QueryDocumentSnapshot<Map<String, dynamic>>> docs,
   ) async {
     DateTime? maxSeen;
@@ -466,21 +547,29 @@ class VehiculeSyncAdapter implements SyncAdapter {
           maxSeen = remoteUpdatedAt;
         }
 
-        final existing = await (db.select(db.vehicules)
-              ..where((t) => t.id.equals(doc.id)))
-            .getSingleOrNull();
+        final existing =
+            await (db.select(db.vehicules)..where(
+                  (t) =>
+                      t.establishmentId.equals(establishmentId) &
+                      t.id.equals(doc.id),
+                ))
+                .getSingleOrNull();
         if (existing != null &&
             existing.isDirty &&
             !existing.updatedAt.isBefore(remoteUpdatedAt)) {
           continue;
         }
 
-        await db.into(db.vehicules).insertOnConflictUpdate(
+        await db
+            .into(db.vehicules)
+            .insertOnConflictUpdate(
               VehiculesCompanion(
                 id: Value(doc.id),
+                establishmentId: Value(establishmentId),
                 clientId: Value(data['clientId'] as String?),
-                immatriculation:
-                    Value(data['immatriculation'] as String? ?? ''),
+                immatriculation: Value(
+                  data['immatriculation'] as String? ?? '',
+                ),
                 marque: Value(data['marque'] as String?),
                 modele: Value(data['modele'] as String?),
                 annee: Value((data['annee'] as num?)?.toInt()),
@@ -506,12 +595,18 @@ class PrestationSyncAdapter implements SyncAdapter {
   @override
   Future<Map<String, Map<String, dynamic>>> loadDirtyDocs(
     AppDatabase db, {
+    required String establishmentId,
     required int limit,
   }) async {
-    final rows = await (db.select(db.prestations)
-          ..where((t) => t.isDirty.equals(true))
-          ..limit(limit))
-        .get();
+    final rows =
+        await (db.select(db.prestations)
+              ..where(
+                (t) =>
+                    t.establishmentId.equals(establishmentId) &
+                    t.isDirty.equals(true),
+              )
+              ..limit(limit))
+            .get();
     return {
       for (final row in rows)
         row.id: {
@@ -543,6 +638,7 @@ class PrestationSyncAdapter implements SyncAdapter {
   @override
   Future<DateTime?> applyRemoteDocs(
     AppDatabase db,
+    String establishmentId,
     List<QueryDocumentSnapshot<Map<String, dynamic>>> docs,
   ) async {
     DateTime? maxSeen;
@@ -555,9 +651,13 @@ class PrestationSyncAdapter implements SyncAdapter {
           maxSeen = remoteUpdatedAt;
         }
 
-        final existing = await (db.select(db.prestations)
-              ..where((t) => t.id.equals(doc.id)))
-            .getSingleOrNull();
+        final existing =
+            await (db.select(db.prestations)..where(
+                  (t) =>
+                      t.establishmentId.equals(establishmentId) &
+                      t.id.equals(doc.id),
+                ))
+                .getSingleOrNull();
         if (existing != null &&
             existing.isDirty &&
             !existing.updatedAt.isBefore(remoteUpdatedAt)) {
@@ -566,9 +666,12 @@ class PrestationSyncAdapter implements SyncAdapter {
 
         final remoteDateOuverture = readFirestoreDate(data['dateOuverture']);
 
-        await db.into(db.prestations).insertOnConflictUpdate(
+        await db
+            .into(db.prestations)
+            .insertOnConflictUpdate(
               PrestationsCompanion(
                 id: Value(doc.id),
+                establishmentId: Value(establishmentId),
                 clientId: Value(data['clientId'] as String?),
                 vehiculeId: Value(data['vehiculeId'] as String? ?? ''),
                 statut: Value(
@@ -612,12 +715,18 @@ class LignePrestationSyncAdapter implements SyncAdapter {
   @override
   Future<Map<String, Map<String, dynamic>>> loadDirtyDocs(
     AppDatabase db, {
+    required String establishmentId,
     required int limit,
   }) async {
-    final rows = await (db.select(db.lignePrestations)
-          ..where((t) => t.isDirty.equals(true))
-          ..limit(limit))
-        .get();
+    final rows =
+        await (db.select(db.lignePrestations)
+              ..where(
+                (t) =>
+                    t.establishmentId.equals(establishmentId) &
+                    t.isDirty.equals(true),
+              )
+              ..limit(limit))
+            .get();
     return {
       for (final row in rows)
         row.id: {
@@ -646,6 +755,7 @@ class LignePrestationSyncAdapter implements SyncAdapter {
   @override
   Future<DateTime?> applyRemoteDocs(
     AppDatabase db,
+    String establishmentId,
     List<QueryDocumentSnapshot<Map<String, dynamic>>> docs,
   ) async {
     DateTime? maxSeen;
@@ -658,23 +768,28 @@ class LignePrestationSyncAdapter implements SyncAdapter {
           maxSeen = remoteUpdatedAt;
         }
 
-        final existing = await (db.select(db.lignePrestations)
-              ..where((t) => t.id.equals(doc.id)))
-            .getSingleOrNull();
+        final existing =
+            await (db.select(db.lignePrestations)..where(
+                  (t) =>
+                      t.establishmentId.equals(establishmentId) &
+                      t.id.equals(doc.id),
+                ))
+                .getSingleOrNull();
         if (existing != null &&
             existing.isDirty &&
             !existing.updatedAt.isBefore(remoteUpdatedAt)) {
           continue;
         }
 
-        await db.into(db.lignePrestations).insertOnConflictUpdate(
+        await db
+            .into(db.lignePrestations)
+            .insertOnConflictUpdate(
               LignePrestationsCompanion(
                 id: Value(doc.id),
+                establishmentId: Value(establishmentId),
                 prestationId: Value(data['prestationId'] as String? ?? ''),
                 type: Value(
-                  LigneType.values.byName(
-                    data['type'] as String? ?? 'service',
-                  ),
+                  LigneType.values.byName(data['type'] as String? ?? 'service'),
                 ),
                 serviceId: Value(data['serviceId'] as String?),
                 produitId: Value(data['produitId'] as String?),

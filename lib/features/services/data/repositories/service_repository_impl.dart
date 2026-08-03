@@ -8,16 +8,21 @@ import '../../domain/entities/service_category_entity.dart';
 import '../../domain/repositories/service_repository.dart';
 
 class ServiceRepositoryImpl implements ServiceRepository {
-  ServiceRepositoryImpl({required AppDatabase database})
-      : _database = database;
+  ServiceRepositoryImpl({required AppDatabase database}) : _database = database;
 
   final AppDatabase _database;
   final _uuid = const Uuid();
 
   @override
-  Stream<List<ServiceCategoryEntity>> watchCategories() {
+  Stream<List<ServiceCategoryEntity>> watchCategories({
+    required String establishmentId,
+  }) {
     final query = _database.select(_database.categories)
-      ..where((c) => c.isDeleted.equals(false))
+      ..where(
+        (c) =>
+            c.establishmentId.equals(establishmentId) &
+            c.isDeleted.equals(false),
+      )
       ..orderBy([
         (c) => OrderingTerm.asc(c.ordre),
         (c) => OrderingTerm.asc(c.nom),
@@ -27,18 +32,25 @@ class ServiceRepositoryImpl implements ServiceRepository {
   }
 
   @override
-  Stream<List<CatalogServiceEntity>> watchServices() {
-    final query = _database.select(_database.catalogServices).join([
-      leftOuterJoin(
-        _database.categories,
-        _database.categories.id.equalsExp(
-              _database.catalogServices.categorieId,
-            ) &
-            _database.categories.isDeleted.equals(false),
-      ),
-    ])
-      ..where(_database.catalogServices.isDeleted.equals(false))
-      ..orderBy([OrderingTerm.asc(_database.catalogServices.nom)]);
+  Stream<List<CatalogServiceEntity>> watchServices({
+    required String establishmentId,
+  }) {
+    final query =
+        _database.select(_database.catalogServices).join([
+            leftOuterJoin(
+              _database.categories,
+              _database.categories.id.equalsExp(
+                    _database.catalogServices.categorieId,
+                  ) &
+                  _database.categories.establishmentId.equals(establishmentId) &
+                  _database.categories.isDeleted.equals(false),
+            ),
+          ])
+          ..where(
+            _database.catalogServices.establishmentId.equals(establishmentId) &
+                _database.catalogServices.isDeleted.equals(false),
+          )
+          ..orderBy([OrderingTerm.asc(_database.catalogServices.nom)]);
 
     return query.watch().map((rows) {
       return rows.map((row) {
@@ -50,20 +62,25 @@ class ServiceRepositoryImpl implements ServiceRepository {
   }
 
   @override
-  Future<CatalogServiceEntity?> getService(String id) async {
-    final query = _database.select(_database.catalogServices).join([
-      leftOuterJoin(
-        _database.categories,
-        _database.categories.id.equalsExp(
-              _database.catalogServices.categorieId,
-            ) &
-            _database.categories.isDeleted.equals(false),
-      ),
-    ])
-      ..where(
-        _database.catalogServices.id.equals(id) &
-            _database.catalogServices.isDeleted.equals(false),
-      );
+  Future<CatalogServiceEntity?> getService({
+    required String establishmentId,
+    required String id,
+  }) async {
+    final query =
+        _database.select(_database.catalogServices).join([
+          leftOuterJoin(
+            _database.categories,
+            _database.categories.id.equalsExp(
+                  _database.catalogServices.categorieId,
+                ) &
+                _database.categories.establishmentId.equals(establishmentId) &
+                _database.categories.isDeleted.equals(false),
+          ),
+        ])..where(
+          _database.catalogServices.establishmentId.equals(establishmentId) &
+              _database.catalogServices.id.equals(id) &
+              _database.catalogServices.isDeleted.equals(false),
+        );
 
     final row = await query.getSingleOrNull();
     if (row == null) return null;
@@ -73,9 +90,17 @@ class ServiceRepositoryImpl implements ServiceRepository {
   }
 
   @override
-  Future<ServiceCategoryEntity?> getCategory(String id) async {
+  Future<ServiceCategoryEntity?> getCategory({
+    required String establishmentId,
+    required String id,
+  }) async {
     final query = _database.select(_database.categories)
-      ..where((c) => c.id.equals(id) & c.isDeleted.equals(false));
+      ..where(
+        (c) =>
+            c.establishmentId.equals(establishmentId) &
+            c.id.equals(id) &
+            c.isDeleted.equals(false),
+      );
     final row = await query.getSingleOrNull();
     return row == null ? null : _categoryFromDrift(row);
   }
@@ -86,14 +111,17 @@ class ServiceRepositoryImpl implements ServiceRepository {
     required String name,
   }) async {
     final trimmedName = _requireName(name, 'catégorie');
-    final maxOrder = await _maxCategoryOrder();
+    final maxOrder = await _maxCategoryOrder(establishmentId);
     final id = _uuid.v4();
     final now = DateTime.now();
     final order = maxOrder + 1;
 
-    await _database.into(_database.categories).insert(
+    await _database
+        .into(_database.categories)
+        .insert(
           CategoriesCompanion.insert(
             id: id,
+            establishmentId: Value(establishmentId),
             nom: trimmedName,
             ordre: Value(order),
             createdAt: now,
@@ -117,18 +145,23 @@ class ServiceRepositoryImpl implements ServiceRepository {
     required String name,
   }) async {
     final trimmedName = _requireName(name, 'catégorie');
-    final existing = await getCategory(id);
+    final existing = await getCategory(
+      establishmentId: establishmentId,
+      id: id,
+    );
     if (existing == null) throw StateError('Catégorie introuvable.');
 
     final now = DateTime.now();
-    await (_database.update(_database.categories)..where((c) => c.id.equals(id)))
+    await (_database.update(_database.categories)..where(
+          (c) => c.establishmentId.equals(establishmentId) & c.id.equals(id),
+        ))
         .write(
-      CategoriesCompanion(
-        nom: Value(trimmedName),
-        updatedAt: Value(now),
-        isDirty: const Value(true),
-      ),
-    );
+          CategoriesCompanion(
+            nom: Value(trimmedName),
+            updatedAt: Value(now),
+            isDirty: const Value(true),
+          ),
+        );
 
     return ServiceCategoryEntity(
       id: id,
@@ -147,25 +180,29 @@ class ServiceRepositoryImpl implements ServiceRepository {
     final now = DateTime.now();
 
     await _database.transaction(() async {
-      await (_database.update(_database.catalogServices)
-            ..where((s) => s.categorieId.equals(id)))
+      await (_database.update(_database.catalogServices)..where(
+            (s) =>
+                s.establishmentId.equals(establishmentId) &
+                s.categorieId.equals(id),
+          ))
           .write(
-        CatalogServicesCompanion(
-          categorieId: const Value(null),
-          updatedAt: Value(now),
-          isDirty: const Value(true),
-        ),
-      );
+            CatalogServicesCompanion(
+              categorieId: const Value(null),
+              updatedAt: Value(now),
+              isDirty: const Value(true),
+            ),
+          );
 
-      await (_database.update(_database.categories)
-            ..where((c) => c.id.equals(id)))
+      await (_database.update(_database.categories)..where(
+            (c) => c.establishmentId.equals(establishmentId) & c.id.equals(id),
+          ))
           .write(
-        CategoriesCompanion(
-          isDeleted: const Value(true),
-          updatedAt: Value(now),
-          isDirty: const Value(true),
-        ),
-      );
+            CategoriesCompanion(
+              isDeleted: const Value(true),
+              updatedAt: Value(now),
+              isDirty: const Value(true),
+            ),
+          );
     });
   }
 
@@ -181,14 +218,20 @@ class ServiceRepositoryImpl implements ServiceRepository {
     final trimmedName = _requireName(name, 'service');
     _requirePrice(price);
     _requireInterval(intervalDays);
-    final categoryName = await _resolveCategoryName(categoryId);
+    final categoryName = await _resolveCategoryName(
+      establishmentId,
+      categoryId,
+    );
 
     final id = _uuid.v4();
     final now = DateTime.now();
 
-    await _database.into(_database.catalogServices).insert(
+    await _database
+        .into(_database.catalogServices)
+        .insert(
           CatalogServicesCompanion.insert(
             id: id,
+            establishmentId: Value(establishmentId),
             categorieId: Value(categoryId),
             nom: trimmedName,
             prix: price,
@@ -225,24 +268,28 @@ class ServiceRepositoryImpl implements ServiceRepository {
     final trimmedName = _requireName(name, 'service');
     _requirePrice(price);
     _requireInterval(intervalDays);
-    final existing = await getService(id);
+    final existing = await getService(establishmentId: establishmentId, id: id);
     if (existing == null) throw StateError('Service introuvable.');
-    final categoryName = await _resolveCategoryName(categoryId);
+    final categoryName = await _resolveCategoryName(
+      establishmentId,
+      categoryId,
+    );
     final now = DateTime.now();
 
-    await (_database.update(_database.catalogServices)
-          ..where((s) => s.id.equals(id)))
+    await (_database.update(_database.catalogServices)..where(
+          (s) => s.establishmentId.equals(establishmentId) & s.id.equals(id),
+        ))
         .write(
-      CatalogServicesCompanion(
-        categorieId: Value(categoryId),
-        nom: Value(trimmedName),
-        prix: Value(price),
-        devise: Value(currency.code),
-        intervalleJours: Value(intervalDays),
-        updatedAt: Value(now),
-        isDirty: const Value(true),
-      ),
-    );
+          CatalogServicesCompanion(
+            categorieId: Value(categoryId),
+            nom: Value(trimmedName),
+            prix: Value(price),
+            devise: Value(currency.code),
+            intervalleJours: Value(intervalDays),
+            updatedAt: Value(now),
+            isDirty: const Value(true),
+          ),
+        );
 
     return CatalogServiceEntity(
       id: id,
@@ -263,28 +310,39 @@ class ServiceRepositoryImpl implements ServiceRepository {
     required String id,
   }) async {
     final now = DateTime.now();
-    await (_database.update(_database.catalogServices)
-          ..where((s) => s.id.equals(id)))
+    await (_database.update(_database.catalogServices)..where(
+          (s) => s.establishmentId.equals(establishmentId) & s.id.equals(id),
+        ))
         .write(
-      CatalogServicesCompanion(
-        isDeleted: const Value(true),
-        updatedAt: Value(now),
-        isDirty: const Value(true),
-      ),
-    );
+          CatalogServicesCompanion(
+            isDeleted: const Value(true),
+            updatedAt: Value(now),
+            isDirty: const Value(true),
+          ),
+        );
   }
 
-  Future<int> _maxCategoryOrder() async {
-    final maxRow = await (_database.selectOnly(_database.categories)
-          ..addColumns([_database.categories.ordre.max()])
-          ..where(_database.categories.isDeleted.equals(false)))
-        .getSingleOrNull();
+  Future<int> _maxCategoryOrder(String establishmentId) async {
+    final maxRow =
+        await (_database.selectOnly(_database.categories)
+              ..addColumns([_database.categories.ordre.max()])
+              ..where(
+                _database.categories.establishmentId.equals(establishmentId) &
+                    _database.categories.isDeleted.equals(false),
+              ))
+            .getSingleOrNull();
     return maxRow?.read(_database.categories.ordre.max()) ?? -1;
   }
 
-  Future<String?> _resolveCategoryName(String? categoryId) async {
+  Future<String?> _resolveCategoryName(
+    String establishmentId,
+    String? categoryId,
+  ) async {
     if (categoryId == null) return null;
-    final category = await getCategory(categoryId);
+    final category = await getCategory(
+      establishmentId: establishmentId,
+      id: categoryId,
+    );
     if (category == null) throw StateError('Catégorie introuvable.');
     return category.name;
   }

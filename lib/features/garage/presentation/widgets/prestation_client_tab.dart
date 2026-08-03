@@ -112,7 +112,8 @@ class _AttachedClientCard extends ConsumerWidget {
                           ),
                           actions: [
                             TextButton(
-                              onPressed: () => Navigator.of(dialogContext).pop(),
+                              onPressed: () =>
+                                  Navigator.of(dialogContext).pop(),
                               child: const Text('Annuler'),
                             ),
                             FilledButton(
@@ -172,8 +173,12 @@ class _ClientSearchSectionState extends ConsumerState<_ClientSearchSection> {
       _found = null;
     });
 
-    final client =
-        await ref.read(clientRepositoryProvider).findByPhone(_phone);
+    final establishment = ref.read(currentEstablishmentProvider).valueOrNull;
+    if (establishment == null) return;
+
+    final client = await ref
+        .read(clientRepositoryProvider)
+        .findByPhone(establishmentId: establishment.id, phone: _phone);
 
     if (!mounted) return;
     setState(() {
@@ -184,10 +189,9 @@ class _ClientSearchSectionState extends ConsumerState<_ClientSearchSection> {
   }
 
   Future<void> _attach(String clientId) async {
-    await ref.read(prestationControllerProvider.notifier).attachClient(
-          prestationId: widget.prestationId,
-          clientId: clientId,
-        );
+    await ref
+        .read(prestationControllerProvider.notifier)
+        .attachClient(prestationId: widget.prestationId, clientId: clientId);
   }
 
   Future<void> _createAndAttach() async {
@@ -199,7 +203,9 @@ class _ClientSearchSectionState extends ConsumerState<_ClientSearchSection> {
 
     setState(() => _loading = true);
     try {
-      final client = await ref.read(clientRepositoryProvider).createClient(
+      final client = await ref
+          .read(clientRepositoryProvider)
+          .createClient(
             establishmentId: establishment.id,
             name: name,
             whatsappPhone: _phone,
@@ -209,9 +215,9 @@ class _ClientSearchSectionState extends ConsumerState<_ClientSearchSection> {
       await _attach(client.id);
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$error')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('$error')));
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -231,10 +237,9 @@ class _ClientSearchSectionState extends ConsumerState<_ClientSearchSection> {
           ),
           const SizedBox(height: AppSpacing.xs),
           FilledButton(
-            onPressed:
-                _loading || !PhoneAuthMapper.isValidFullNumber(_phone)
-                    ? null
-                    : _search,
+            onPressed: _loading || !PhoneAuthMapper.isValidFullNumber(_phone)
+                ? null
+                : _search,
             child: const Text('Rechercher'),
           ),
           const SizedBox(height: AppSpacing.md),

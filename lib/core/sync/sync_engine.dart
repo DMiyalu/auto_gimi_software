@@ -30,9 +30,9 @@ class SyncEngine {
     required AppDatabase database,
     required FirebaseFirestore? firestore,
     List<SyncAdapter>? adapters,
-  })  : _database = database,
-        _firestore = firestore,
-        _adapters = adapters ?? defaultSyncAdapters;
+  }) : _database = database,
+       _firestore = firestore,
+       _adapters = adapters ?? defaultSyncAdapters;
 
   static const int _pushPageSize = 200;
   static const int _pullPageSize = 100;
@@ -62,37 +62,50 @@ class SyncEngine {
   }
 
   Future<void> _run(FirebaseFirestore firestore, String establishmentId) async {
-    final establishmentRef =
-        firestore.collection('establishments').doc(establishmentId);
+    final establishmentRef = firestore
+        .collection('establishments')
+        .doc(establishmentId);
 
     for (final group in _chunked(_adapters, _adapterConcurrency)) {
       await Future.wait(
-        group.map((adapter) => _syncAdapter(establishmentRef, adapter)),
+        group.map(
+          (adapter) => _syncAdapter(establishmentId, establishmentRef, adapter),
+        ),
       );
     }
   }
 
   Future<void> _syncAdapter(
+    String establishmentId,
     DocumentReference<Map<String, dynamic>> establishmentRef,
     SyncAdapter adapter,
   ) async {
-    await _pushAdapter(establishmentRef, adapter);
-    await _pullAdapter(establishmentRef, adapter);
+    await _pushAdapter(establishmentId, establishmentRef, adapter);
+    await _pullAdapter(establishmentId, establishmentRef, adapter);
   }
 
   Future<void> _pushAdapter(
+    String establishmentId,
     DocumentReference<Map<String, dynamic>> establishmentRef,
     SyncAdapter adapter,
   ) async {
     final collection = establishmentRef.collection(adapter.firestoreCollection);
 
     while (true) {
-      final docs = await adapter.loadDirtyDocs(_database, limit: _pushPageSize);
+      final docs = await adapter.loadDirtyDocs(
+        _database,
+        establishmentId: establishmentId,
+        limit: _pushPageSize,
+      );
       if (docs.isEmpty) return;
 
       final batch = _firestore!.batch();
       for (final entry in docs.entries) {
-        batch.set(collection.doc(entry.key), entry.value, SetOptions(merge: true));
+        batch.set(
+          collection.doc(entry.key),
+          entry.value,
+          SetOptions(merge: true),
+        );
       }
       await batch.commit();
       await adapter.clearDirty(_database, docs.keys);
@@ -102,10 +115,14 @@ class SyncEngine {
   }
 
   Future<void> _pullAdapter(
+    String establishmentId,
     DocumentReference<Map<String, dynamic>> establishmentRef,
     SyncAdapter adapter,
   ) async {
-    final since = await _readLastSync(adapter.firestoreCollection);
+    final since = await _readLastSync(
+      establishmentId,
+      adapter.firestoreCollection,
+    );
     Query<Map<String, dynamic>> query = establishmentRef
         .collection(adapter.firestoreCollection)
         .where('updatedAt', isGreaterThan: Timestamp.fromDate(since))
@@ -117,7 +134,11 @@ class SyncEngine {
       final snapshot = await query.get();
       if (snapshot.docs.isEmpty) break;
 
-      final pageMax = await adapter.applyRemoteDocs(_database, snapshot.docs);
+      final pageMax = await adapter.applyRemoteDocs(
+        _database,
+        establishmentId,
+        snapshot.docs,
+      );
       if (pageMax != null && (maxSeen == null || pageMax.isAfter(maxSeen))) {
         maxSeen = pageMax;
       }
@@ -127,20 +148,43 @@ class SyncEngine {
     }
 
     if (maxSeen != null) {
-      await _writeLastSync(adapter.firestoreCollection, maxSeen);
+      await _writeLastSync(
+        establishmentId,
+        adapter.firestoreCollection,
+        maxSeen,
+      );
     }
   }
 
-  Future<DateTime> _readLastSync(String collection) async {
-    final row = await (_database.select(_database.syncState)
-          ..where((t) => t.collection.equals(collection)))
-        .getSingleOrNull();
+  String _syncStateKey(String establishmentId, String collection) =>
+      '$establishmentId/$collection';
+
+  Future<DateTime> _readLastSync(
+    String establishmentId,
+    String collection,
+  ) async {
+    final row =
+        await (_database.select(_database.syncState)..where(
+              (t) => t.collection.equals(
+                _syncStateKey(establishmentId, collection),
+              ),
+            ))
+            .getSingleOrNull();
     return row?.lastSyncAt ?? DateTime.fromMillisecondsSinceEpoch(0);
   }
 
-  Future<void> _writeLastSync(String collection, DateTime value) async {
-    await _database.into(_database.syncState).insertOnConflictUpdate(
-          SyncStateCompanion.insert(collection: collection, lastSyncAt: value),
+  Future<void> _writeLastSync(
+    String establishmentId,
+    String collection,
+    DateTime value,
+  ) async {
+    await _database
+        .into(_database.syncState)
+        .insertOnConflictUpdate(
+          SyncStateCompanion.insert(
+            collection: _syncStateKey(establishmentId, collection),
+            lastSyncAt: value,
+          ),
         );
   }
 }

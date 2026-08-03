@@ -13,29 +13,43 @@ final serviceRepositoryProvider = Provider<ServiceRepository>((ref) {
   return ServiceRepositoryImpl(database: ref.watch(databaseProvider));
 });
 
-final serviceCategoriesProvider =
-    StreamProvider<List<ServiceCategoryEntity>>((ref) {
+final serviceCategoriesProvider = StreamProvider<List<ServiceCategoryEntity>>((
+  ref,
+) {
   final establishment = ref.watch(currentEstablishmentProvider).valueOrNull;
   if (establishment == null) return Stream.value([]);
-  return ref.watch(serviceRepositoryProvider).watchCategories();
+  return ref
+      .watch(serviceRepositoryProvider)
+      .watchCategories(establishmentId: establishment.id);
 });
 
-final catalogServicesProvider =
-    StreamProvider<List<CatalogServiceEntity>>((ref) {
+final catalogServicesProvider = StreamProvider<List<CatalogServiceEntity>>((
+  ref,
+) {
   final establishment = ref.watch(currentEstablishmentProvider).valueOrNull;
   if (establishment == null) return Stream.value([]);
-  return ref.watch(serviceRepositoryProvider).watchServices();
+  return ref
+      .watch(serviceRepositoryProvider)
+      .watchServices(establishmentId: establishment.id);
 });
 
 final serviceByIdProvider =
     FutureProvider.family<CatalogServiceEntity?, String>((ref, id) {
-  return ref.watch(serviceRepositoryProvider).getService(id);
-});
+      final establishment = ref.watch(currentEstablishmentProvider).valueOrNull;
+      if (establishment == null) return null;
+      return ref
+          .watch(serviceRepositoryProvider)
+          .getService(establishmentId: establishment.id, id: id);
+    });
 
 final serviceCategoryByIdProvider =
     FutureProvider.family<ServiceCategoryEntity?, String>((ref, id) {
-  return ref.watch(serviceRepositoryProvider).getCategory(id);
-});
+      final establishment = ref.watch(currentEstablishmentProvider).valueOrNull;
+      if (establishment == null) return null;
+      return ref
+          .watch(serviceRepositoryProvider)
+          .getCategory(establishmentId: establishment.id, id: id);
+    });
 
 final serviceControllerProvider =
     AsyncNotifierProvider<ServiceController, void>(ServiceController.new);
@@ -60,10 +74,9 @@ class ServiceController extends AsyncNotifier<void> {
     final establishmentId = _establishmentId;
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      await ref.read(serviceRepositoryProvider).createCategory(
-            establishmentId: establishmentId,
-            name: name,
-          );
+      await ref
+          .read(serviceRepositoryProvider)
+          .createCategory(establishmentId: establishmentId, name: name);
       _schedulePush();
     });
   }
@@ -75,11 +88,9 @@ class ServiceController extends AsyncNotifier<void> {
     final establishmentId = _establishmentId;
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      await ref.read(serviceRepositoryProvider).updateCategory(
-            establishmentId: establishmentId,
-            id: id,
-            name: name,
-          );
+      await ref
+          .read(serviceRepositoryProvider)
+          .updateCategory(establishmentId: establishmentId, id: id, name: name);
       _schedulePush();
     });
   }
@@ -88,10 +99,9 @@ class ServiceController extends AsyncNotifier<void> {
     final establishmentId = _establishmentId;
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      await ref.read(serviceRepositoryProvider).deleteCategory(
-            establishmentId: establishmentId,
-            id: id,
-          );
+      await ref
+          .read(serviceRepositoryProvider)
+          .deleteCategory(establishmentId: establishmentId, id: id);
       _schedulePush();
     });
   }
@@ -106,7 +116,9 @@ class ServiceController extends AsyncNotifier<void> {
     final establishmentId = _establishmentId;
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      await ref.read(serviceRepositoryProvider).createService(
+      await ref
+          .read(serviceRepositoryProvider)
+          .createService(
             establishmentId: establishmentId,
             categoryId: categoryId,
             name: name,
@@ -129,7 +141,9 @@ class ServiceController extends AsyncNotifier<void> {
     final establishmentId = _establishmentId;
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      await ref.read(serviceRepositoryProvider).updateService(
+      await ref
+          .read(serviceRepositoryProvider)
+          .updateService(
             establishmentId: establishmentId,
             id: id,
             categoryId: categoryId,
@@ -146,10 +160,9 @@ class ServiceController extends AsyncNotifier<void> {
     final establishmentId = _establishmentId;
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      await ref.read(serviceRepositoryProvider).deleteService(
-            establishmentId: establishmentId,
-            id: id,
-          );
+      await ref
+          .read(serviceRepositoryProvider)
+          .deleteService(establishmentId: establishmentId, id: id);
       _schedulePush();
     });
   }

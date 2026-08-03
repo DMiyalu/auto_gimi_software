@@ -4,6 +4,7 @@ import 'product_categories_table.dart';
 
 class Produits extends Table {
   TextColumn get id => text()();
+  TextColumn get establishmentId => text().withDefault(const Constant(''))();
   TextColumn get categorieId =>
       text().nullable().references(ProductCategories, #id)();
   TextColumn get nom => text()();

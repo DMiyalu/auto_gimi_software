@@ -3,13 +3,21 @@ import '../entities/product_category_entity.dart';
 import '../entities/produit_entity.dart';
 
 abstract class ProduitRepository {
-  Stream<List<ProductCategoryEntity>> watchCategories();
+  Stream<List<ProductCategoryEntity>> watchCategories({
+    required String establishmentId,
+  });
 
-  Stream<List<ProduitEntity>> watchProduits();
+  Stream<List<ProduitEntity>> watchProduits({required String establishmentId});
 
-  Future<ProduitEntity?> getProduit(String id);
+  Future<ProduitEntity?> getProduit({
+    required String establishmentId,
+    required String id,
+  });
 
-  Future<ProductCategoryEntity?> getCategory(String id);
+  Future<ProductCategoryEntity?> getCategory({
+    required String establishmentId,
+    required String id,
+  });
 
   Future<ProductCategoryEntity> createCategory({
     required String establishmentId,

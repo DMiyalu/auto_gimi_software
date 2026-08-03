@@ -28,7 +28,9 @@ void main() {
     expect(client.name, 'Amadou Diallo');
     expect(client.whatsappPhone, '221771234567');
 
-    final clients = await repository.watchClients().first;
+    final clients = await repository
+        .watchClients(establishmentId: 'est-1')
+        .first;
     expect(clients, hasLength(1));
     expect(clients.first.name, 'Amadou Diallo');
     expect(clients.first.displayPhone, '+221771234567');
@@ -50,6 +52,34 @@ void main() {
       throwsStateError,
     );
   });
+
+  test(
+    'createClient autorise le même téléphone dans deux établissements',
+    () async {
+      final est1Client = await repository.createClient(
+        establishmentId: 'est-1',
+        name: 'Client Est 1',
+        whatsappPhone: '221771234567',
+      );
+      final est2Client = await repository.createClient(
+        establishmentId: 'est-2',
+        name: 'Client Est 2',
+        whatsappPhone: '221771234567',
+      );
+
+      expect(est1Client.id, isNot(est2Client.id));
+
+      final est1Clients = await repository
+          .watchClients(establishmentId: 'est-1')
+          .first;
+      final est2Clients = await repository
+          .watchClients(establishmentId: 'est-2')
+          .first;
+
+      expect(est1Clients.single.name, 'Client Est 1');
+      expect(est2Clients.single.name, 'Client Est 2');
+    },
+  );
 
   test('createClient enregistre email, adresse, type et notes', () async {
     final client = await repository.createClient(

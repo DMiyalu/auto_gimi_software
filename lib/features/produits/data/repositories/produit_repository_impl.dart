@@ -8,16 +8,21 @@ import '../../domain/entities/produit_entity.dart';
 import '../../domain/repositories/produit_repository.dart';
 
 class ProduitRepositoryImpl implements ProduitRepository {
-  ProduitRepositoryImpl({required AppDatabase database})
-      : _database = database;
+  ProduitRepositoryImpl({required AppDatabase database}) : _database = database;
 
   final AppDatabase _database;
   final _uuid = const Uuid();
 
   @override
-  Stream<List<ProductCategoryEntity>> watchCategories() {
+  Stream<List<ProductCategoryEntity>> watchCategories({
+    required String establishmentId,
+  }) {
     final query = _database.select(_database.productCategories)
-      ..where((c) => c.isDeleted.equals(false))
+      ..where(
+        (c) =>
+            c.establishmentId.equals(establishmentId) &
+            c.isDeleted.equals(false),
+      )
       ..orderBy([
         (c) => OrderingTerm.asc(c.ordre),
         (c) => OrderingTerm.asc(c.nom),
@@ -27,18 +32,25 @@ class ProduitRepositoryImpl implements ProduitRepository {
   }
 
   @override
-  Stream<List<ProduitEntity>> watchProduits() {
-    final query = _database.select(_database.produits).join([
-      leftOuterJoin(
-        _database.productCategories,
-        _database.productCategories.id.equalsExp(
-              _database.produits.categorieId,
-            ) &
-            _database.productCategories.isDeleted.equals(false),
-      ),
-    ])
-      ..where(_database.produits.isDeleted.equals(false))
-      ..orderBy([OrderingTerm.asc(_database.produits.nom)]);
+  Stream<List<ProduitEntity>> watchProduits({required String establishmentId}) {
+    final query =
+        _database.select(_database.produits).join([
+            leftOuterJoin(
+              _database.productCategories,
+              _database.productCategories.id.equalsExp(
+                    _database.produits.categorieId,
+                  ) &
+                  _database.productCategories.establishmentId.equals(
+                    establishmentId,
+                  ) &
+                  _database.productCategories.isDeleted.equals(false),
+            ),
+          ])
+          ..where(
+            _database.produits.establishmentId.equals(establishmentId) &
+                _database.produits.isDeleted.equals(false),
+          )
+          ..orderBy([OrderingTerm.asc(_database.produits.nom)]);
 
     return query.watch().map((rows) {
       return rows.map((row) {
@@ -50,20 +62,27 @@ class ProduitRepositoryImpl implements ProduitRepository {
   }
 
   @override
-  Future<ProduitEntity?> getProduit(String id) async {
-    final query = _database.select(_database.produits).join([
-      leftOuterJoin(
-        _database.productCategories,
-        _database.productCategories.id.equalsExp(
-              _database.produits.categorieId,
-            ) &
-            _database.productCategories.isDeleted.equals(false),
-      ),
-    ])
-      ..where(
-        _database.produits.id.equals(id) &
-            _database.produits.isDeleted.equals(false),
-      );
+  Future<ProduitEntity?> getProduit({
+    required String establishmentId,
+    required String id,
+  }) async {
+    final query =
+        _database.select(_database.produits).join([
+          leftOuterJoin(
+            _database.productCategories,
+            _database.productCategories.id.equalsExp(
+                  _database.produits.categorieId,
+                ) &
+                _database.productCategories.establishmentId.equals(
+                  establishmentId,
+                ) &
+                _database.productCategories.isDeleted.equals(false),
+          ),
+        ])..where(
+          _database.produits.establishmentId.equals(establishmentId) &
+              _database.produits.id.equals(id) &
+              _database.produits.isDeleted.equals(false),
+        );
 
     final row = await query.getSingleOrNull();
     if (row == null) return null;
@@ -73,9 +92,17 @@ class ProduitRepositoryImpl implements ProduitRepository {
   }
 
   @override
-  Future<ProductCategoryEntity?> getCategory(String id) async {
+  Future<ProductCategoryEntity?> getCategory({
+    required String establishmentId,
+    required String id,
+  }) async {
     final query = _database.select(_database.productCategories)
-      ..where((c) => c.id.equals(id) & c.isDeleted.equals(false));
+      ..where(
+        (c) =>
+            c.establishmentId.equals(establishmentId) &
+            c.id.equals(id) &
+            c.isDeleted.equals(false),
+      );
     final row = await query.getSingleOrNull();
     return row == null ? null : _categoryFromDrift(row);
   }
@@ -86,14 +113,17 @@ class ProduitRepositoryImpl implements ProduitRepository {
     required String name,
   }) async {
     final trimmedName = _requireName(name, 'catégorie');
-    final maxOrder = await _maxCategoryOrder();
+    final maxOrder = await _maxCategoryOrder(establishmentId);
     final id = _uuid.v4();
     final now = DateTime.now();
     final order = maxOrder + 1;
 
-    await _database.into(_database.productCategories).insert(
+    await _database
+        .into(_database.productCategories)
+        .insert(
           ProductCategoriesCompanion.insert(
             id: id,
+            establishmentId: Value(establishmentId),
             nom: trimmedName,
             ordre: Value(order),
             createdAt: now,
@@ -117,19 +147,23 @@ class ProduitRepositoryImpl implements ProduitRepository {
     required String name,
   }) async {
     final trimmedName = _requireName(name, 'catégorie');
-    final existing = await getCategory(id);
+    final existing = await getCategory(
+      establishmentId: establishmentId,
+      id: id,
+    );
     if (existing == null) throw StateError('Catégorie introuvable.');
 
     final now = DateTime.now();
-    await (_database.update(_database.productCategories)
-          ..where((c) => c.id.equals(id)))
+    await (_database.update(_database.productCategories)..where(
+          (c) => c.establishmentId.equals(establishmentId) & c.id.equals(id),
+        ))
         .write(
-      ProductCategoriesCompanion(
-        nom: Value(trimmedName),
-        updatedAt: Value(now),
-        isDirty: const Value(true),
-      ),
-    );
+          ProductCategoriesCompanion(
+            nom: Value(trimmedName),
+            updatedAt: Value(now),
+            isDirty: const Value(true),
+          ),
+        );
 
     return ProductCategoryEntity(
       id: id,
@@ -148,25 +182,29 @@ class ProduitRepositoryImpl implements ProduitRepository {
     final now = DateTime.now();
 
     await _database.transaction(() async {
-      await (_database.update(_database.produits)
-            ..where((p) => p.categorieId.equals(id)))
+      await (_database.update(_database.produits)..where(
+            (p) =>
+                p.establishmentId.equals(establishmentId) &
+                p.categorieId.equals(id),
+          ))
           .write(
-        ProduitsCompanion(
-          categorieId: const Value(null),
-          updatedAt: Value(now),
-          isDirty: const Value(true),
-        ),
-      );
+            ProduitsCompanion(
+              categorieId: const Value(null),
+              updatedAt: Value(now),
+              isDirty: const Value(true),
+            ),
+          );
 
-      await (_database.update(_database.productCategories)
-            ..where((c) => c.id.equals(id)))
+      await (_database.update(_database.productCategories)..where(
+            (c) => c.establishmentId.equals(establishmentId) & c.id.equals(id),
+          ))
           .write(
-        ProductCategoriesCompanion(
-          isDeleted: const Value(true),
-          updatedAt: Value(now),
-          isDirty: const Value(true),
-        ),
-      );
+            ProductCategoriesCompanion(
+              isDeleted: const Value(true),
+              updatedAt: Value(now),
+              isDirty: const Value(true),
+            ),
+          );
     });
   }
 
@@ -181,14 +219,20 @@ class ProduitRepositoryImpl implements ProduitRepository {
   }) async {
     final trimmedName = _requireName(name, 'produit');
     _requirePrice(price);
-    final categoryName = await _resolveCategoryName(categoryId);
+    final categoryName = await _resolveCategoryName(
+      establishmentId,
+      categoryId,
+    );
 
     final id = _uuid.v4();
     final now = DateTime.now();
 
-    await _database.into(_database.produits).insert(
+    await _database
+        .into(_database.produits)
+        .insert(
           ProduitsCompanion.insert(
             id: id,
+            establishmentId: Value(establishmentId),
             categorieId: Value(categoryId),
             nom: trimmedName,
             prix: price,
@@ -224,23 +268,28 @@ class ProduitRepositoryImpl implements ProduitRepository {
   }) async {
     final trimmedName = _requireName(name, 'produit');
     _requirePrice(price);
-    final existing = await getProduit(id);
+    final existing = await getProduit(establishmentId: establishmentId, id: id);
     if (existing == null) throw StateError('Produit introuvable.');
-    final categoryName = await _resolveCategoryName(categoryId);
+    final categoryName = await _resolveCategoryName(
+      establishmentId,
+      categoryId,
+    );
     final now = DateTime.now();
 
-    await (_database.update(_database.produits)..where((p) => p.id.equals(id)))
+    await (_database.update(_database.produits)..where(
+          (p) => p.establishmentId.equals(establishmentId) & p.id.equals(id),
+        ))
         .write(
-      ProduitsCompanion(
-        categorieId: Value(categoryId),
-        nom: Value(trimmedName),
-        prix: Value(price),
-        devise: Value(currency.code),
-        stock: Value(stock),
-        updatedAt: Value(now),
-        isDirty: const Value(true),
-      ),
-    );
+          ProduitsCompanion(
+            categorieId: Value(categoryId),
+            nom: Value(trimmedName),
+            prix: Value(price),
+            devise: Value(currency.code),
+            stock: Value(stock),
+            updatedAt: Value(now),
+            isDirty: const Value(true),
+          ),
+        );
 
     return ProduitEntity(
       id: id,
@@ -261,27 +310,41 @@ class ProduitRepositoryImpl implements ProduitRepository {
     required String id,
   }) async {
     final now = DateTime.now();
-    await (_database.update(_database.produits)..where((p) => p.id.equals(id)))
+    await (_database.update(_database.produits)..where(
+          (p) => p.establishmentId.equals(establishmentId) & p.id.equals(id),
+        ))
         .write(
-      ProduitsCompanion(
-        isDeleted: const Value(true),
-        updatedAt: Value(now),
-        isDirty: const Value(true),
-      ),
-    );
+          ProduitsCompanion(
+            isDeleted: const Value(true),
+            updatedAt: Value(now),
+            isDirty: const Value(true),
+          ),
+        );
   }
 
-  Future<int> _maxCategoryOrder() async {
-    final maxRow = await (_database.selectOnly(_database.productCategories)
-          ..addColumns([_database.productCategories.ordre.max()])
-          ..where(_database.productCategories.isDeleted.equals(false)))
-        .getSingleOrNull();
+  Future<int> _maxCategoryOrder(String establishmentId) async {
+    final maxRow =
+        await (_database.selectOnly(_database.productCategories)
+              ..addColumns([_database.productCategories.ordre.max()])
+              ..where(
+                _database.productCategories.establishmentId.equals(
+                      establishmentId,
+                    ) &
+                    _database.productCategories.isDeleted.equals(false),
+              ))
+            .getSingleOrNull();
     return maxRow?.read(_database.productCategories.ordre.max()) ?? -1;
   }
 
-  Future<String?> _resolveCategoryName(String? categoryId) async {
+  Future<String?> _resolveCategoryName(
+    String establishmentId,
+    String? categoryId,
+  ) async {
     if (categoryId == null) return null;
-    final category = await getCategory(categoryId);
+    final category = await getCategory(
+      establishmentId: establishmentId,
+      id: categoryId,
+    );
     if (category == null) throw StateError('Catégorie introuvable.');
     return category.name;
   }

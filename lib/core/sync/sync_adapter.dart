@@ -14,6 +14,7 @@ abstract class SyncAdapter {
   /// `{ id du document Firestore -> données à écrire }`.
   Future<Map<String, Map<String, dynamic>>> loadDirtyDocs(
     AppDatabase db, {
+    required String establishmentId,
     required int limit,
   });
 
@@ -29,6 +30,7 @@ abstract class SyncAdapter {
   /// `null` si aucun document n'avait de `updatedAt` exploitable.
   Future<DateTime?> applyRemoteDocs(
     AppDatabase db,
+    String establishmentId,
     List<QueryDocumentSnapshot<Map<String, dynamic>>> docs,
   );
 }

@@ -7,6 +7,7 @@ import 'produits_table.dart';
 
 class LignePrestations extends Table {
   TextColumn get id => text()();
+  TextColumn get establishmentId => text().withDefault(const Constant(''))();
   TextColumn get prestationId => text().references(Prestations, #id)();
   TextColumn get type => text().map(const LigneTypeConverter())();
   TextColumn get serviceId =>

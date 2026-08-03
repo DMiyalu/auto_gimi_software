@@ -19,33 +19,54 @@ final prestationProvider = StreamProvider.family<PrestationEntity?, String>((
   ref,
   id,
 ) {
-  return ref.watch(prestationRepositoryProvider).watchPrestation(id);
+  final establishment = ref.watch(currentEstablishmentProvider).valueOrNull;
+  if (establishment == null) return Stream.value(null);
+  return ref
+      .watch(prestationRepositoryProvider)
+      .watchPrestation(establishmentId: establishment.id, id: id);
 });
 
 final vehiculeProvider = StreamProvider.family<VehiculeEntity?, String>((
   ref,
   id,
 ) {
-  return ref.watch(prestationRepositoryProvider).watchVehicule(id);
+  final establishment = ref.watch(currentEstablishmentProvider).valueOrNull;
+  if (establishment == null) return Stream.value(null);
+  return ref
+      .watch(prestationRepositoryProvider)
+      .watchVehicule(establishmentId: establishment.id, id: id);
 });
 
 final prestationsSummaryProvider = StreamProvider<List<PrestationSummary>>((
   ref,
 ) {
-  return ref.watch(prestationRepositoryProvider).watchPrestationsSummary();
+  final establishment = ref.watch(currentEstablishmentProvider).valueOrNull;
+  if (establishment == null) return Stream.value([]);
+  return ref
+      .watch(prestationRepositoryProvider)
+      .watchPrestationsSummary(establishmentId: establishment.id);
 });
 
 final prestationsForClientProvider =
     StreamProvider.family<List<PrestationSummary>, String>((ref, clientId) {
+      final establishment = ref.watch(currentEstablishmentProvider).valueOrNull;
+      if (establishment == null) return Stream.value([]);
       return ref
           .watch(prestationRepositoryProvider)
-          .watchPrestationsForClient(clientId);
+          .watchPrestationsForClient(
+            establishmentId: establishment.id,
+            clientId: clientId,
+          );
     });
 
 final clientOrderStatsProvider = StreamProvider<Map<String, ClientOrderStats>>((
   ref,
 ) {
-  return ref.watch(prestationRepositoryProvider).watchClientOrderStats();
+  final establishment = ref.watch(currentEstablishmentProvider).valueOrNull;
+  if (establishment == null) return Stream.value({});
+  return ref
+      .watch(prestationRepositoryProvider)
+      .watchClientOrderStats(establishmentId: establishment.id);
 });
 
 final prestationLinesProvider =
@@ -53,7 +74,14 @@ final prestationLinesProvider =
       ref,
       prestationId,
     ) {
-      return ref.watch(prestationRepositoryProvider).watchLignes(prestationId);
+      final establishment = ref.watch(currentEstablishmentProvider).valueOrNull;
+      if (establishment == null) return Stream.value([]);
+      return ref
+          .watch(prestationRepositoryProvider)
+          .watchLignes(
+            establishmentId: establishment.id,
+            prestationId: prestationId,
+          );
     });
 
 final prestationControllerProvider =

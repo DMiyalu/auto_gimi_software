@@ -2,13 +2,19 @@ import '../../../../core/domain/client_type.dart';
 import '../entities/client_entity.dart';
 
 abstract class ClientRepository {
-  Stream<List<ClientEntity>> watchClients();
+  Stream<List<ClientEntity>> watchClients({required String establishmentId});
 
-  Stream<ClientEntity?> watchClient(String id);
+  Stream<ClientEntity?> watchClient({
+    required String establishmentId,
+    required String id,
+  });
 
   /// Recherche un client par numéro de téléphone (normalisé comme
   /// [createClient]) — `null` si aucun client actif ne correspond.
-  Future<ClientEntity?> findByPhone(String phone);
+  Future<ClientEntity?> findByPhone({
+    required String establishmentId,
+    required String phone,
+  });
 
   Future<ClientEntity> createClient({
     required String establishmentId,

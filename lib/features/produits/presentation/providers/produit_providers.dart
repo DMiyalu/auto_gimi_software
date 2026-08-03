@@ -13,22 +13,33 @@ final produitRepositoryProvider = Provider<ProduitRepository>((ref) {
   return ProduitRepositoryImpl(database: ref.watch(databaseProvider));
 });
 
-final productCategoriesProvider =
-    StreamProvider<List<ProductCategoryEntity>>((ref) {
+final productCategoriesProvider = StreamProvider<List<ProductCategoryEntity>>((
+  ref,
+) {
   final establishment = ref.watch(currentEstablishmentProvider).valueOrNull;
   if (establishment == null) return Stream.value([]);
-  return ref.watch(produitRepositoryProvider).watchCategories();
+  return ref
+      .watch(produitRepositoryProvider)
+      .watchCategories(establishmentId: establishment.id);
 });
 
 final produitsProvider = StreamProvider<List<ProduitEntity>>((ref) {
   final establishment = ref.watch(currentEstablishmentProvider).valueOrNull;
   if (establishment == null) return Stream.value([]);
-  return ref.watch(produitRepositoryProvider).watchProduits();
+  return ref
+      .watch(produitRepositoryProvider)
+      .watchProduits(establishmentId: establishment.id);
 });
 
-final produitByIdProvider =
-    FutureProvider.family<ProduitEntity?, String>((ref, id) {
-  return ref.watch(produitRepositoryProvider).getProduit(id);
+final produitByIdProvider = FutureProvider.family<ProduitEntity?, String>((
+  ref,
+  id,
+) {
+  final establishment = ref.watch(currentEstablishmentProvider).valueOrNull;
+  if (establishment == null) return null;
+  return ref
+      .watch(produitRepositoryProvider)
+      .getProduit(establishmentId: establishment.id, id: id);
 });
 
 /// Valeur sentinelle de [produitFilterProvider] représentant le filtre
@@ -43,8 +54,12 @@ final produitFilterProvider = StateProvider<String?>((ref) => null);
 
 final productCategoryByIdProvider =
     FutureProvider.family<ProductCategoryEntity?, String>((ref, id) {
-  return ref.watch(produitRepositoryProvider).getCategory(id);
-});
+      final establishment = ref.watch(currentEstablishmentProvider).valueOrNull;
+      if (establishment == null) return null;
+      return ref
+          .watch(produitRepositoryProvider)
+          .getCategory(establishmentId: establishment.id, id: id);
+    });
 
 final produitControllerProvider =
     AsyncNotifierProvider<ProduitController, void>(ProduitController.new);
@@ -69,10 +84,9 @@ class ProduitController extends AsyncNotifier<void> {
     final establishmentId = _establishmentId;
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      await ref.read(produitRepositoryProvider).createCategory(
-            establishmentId: establishmentId,
-            name: name,
-          );
+      await ref
+          .read(produitRepositoryProvider)
+          .createCategory(establishmentId: establishmentId, name: name);
       _schedulePush();
     });
   }
@@ -84,11 +98,9 @@ class ProduitController extends AsyncNotifier<void> {
     final establishmentId = _establishmentId;
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      await ref.read(produitRepositoryProvider).updateCategory(
-            establishmentId: establishmentId,
-            id: id,
-            name: name,
-          );
+      await ref
+          .read(produitRepositoryProvider)
+          .updateCategory(establishmentId: establishmentId, id: id, name: name);
       _schedulePush();
     });
   }
@@ -97,10 +109,9 @@ class ProduitController extends AsyncNotifier<void> {
     final establishmentId = _establishmentId;
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      await ref.read(produitRepositoryProvider).deleteCategory(
-            establishmentId: establishmentId,
-            id: id,
-          );
+      await ref
+          .read(produitRepositoryProvider)
+          .deleteCategory(establishmentId: establishmentId, id: id);
       _schedulePush();
     });
   }
@@ -115,7 +126,9 @@ class ProduitController extends AsyncNotifier<void> {
     final establishmentId = _establishmentId;
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      await ref.read(produitRepositoryProvider).createProduit(
+      await ref
+          .read(produitRepositoryProvider)
+          .createProduit(
             establishmentId: establishmentId,
             categoryId: categoryId,
             name: name,
@@ -138,7 +151,9 @@ class ProduitController extends AsyncNotifier<void> {
     final establishmentId = _establishmentId;
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      await ref.read(produitRepositoryProvider).updateProduit(
+      await ref
+          .read(produitRepositoryProvider)
+          .updateProduit(
             establishmentId: establishmentId,
             id: id,
             categoryId: categoryId,
@@ -155,10 +170,9 @@ class ProduitController extends AsyncNotifier<void> {
     final establishmentId = _establishmentId;
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      await ref.read(produitRepositoryProvider).deleteProduit(
-            establishmentId: establishmentId,
-            id: id,
-          );
+      await ref
+          .read(produitRepositoryProvider)
+          .deleteProduit(establishmentId: establishmentId, id: id);
       _schedulePush();
     });
   }

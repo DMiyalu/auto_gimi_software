@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 
 class Categories extends Table {
   TextColumn get id => text()();
+  TextColumn get establishmentId => text().withDefault(const Constant(''))();
   TextColumn get nom => text()();
   IntColumn get ordre => integer().withDefault(const Constant(0))();
   DateTimeColumn get createdAt => dateTime()();

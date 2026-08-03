@@ -4,8 +4,8 @@ import 'categories_table.dart';
 
 class CatalogServices extends Table {
   TextColumn get id => text()();
-  TextColumn get categorieId =>
-      text().nullable().references(Categories, #id)();
+  TextColumn get establishmentId => text().withDefault(const Constant(''))();
+  TextColumn get categorieId => text().nullable().references(Categories, #id)();
   TextColumn get nom => text()();
   RealColumn get prix => real()();
   TextColumn get devise => text().withDefault(const Constant('USD'))();

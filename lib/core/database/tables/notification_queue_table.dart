@@ -5,12 +5,12 @@ import 'clients_table.dart';
 
 class NotificationQueue extends Table {
   TextColumn get id => text()();
+  TextColumn get establishmentId => text().withDefault(const Constant(''))();
   TextColumn get clientId => text().references(Clients, #id)();
   TextColumn get telephone => text()();
   TextColumn get type => text().map(const NotificationTypeConverter())();
   TextColumn get payload => text().withDefault(const Constant('{}'))();
-  TextColumn get statut =>
-      text().map(const NotificationStatutConverter())();
+  TextColumn get statut => text().map(const NotificationStatutConverter())();
   TextColumn get alerteEntretienId => text().nullable()();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();

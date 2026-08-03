@@ -41,37 +41,40 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-        onCreate: (m) async {
-          await m.createAll();
-        },
-        onUpgrade: (m, from, to) async {
-          if (from < 3) {
-            await _createProductTablesIfMissing(m);
-          }
-          if (from < 5) {
-            await _ensureCatalogItemSchema(m);
-          }
-          if (from < 6) {
-            await _migrateGarageSchema(m);
-          }
-          if (from < 7) {
-            await _addClientProfileColumns(m);
-          }
-          if (from < 8) {
-            await _addProductStockColumn(m);
-          }
-        },
-        beforeOpen: (details) async {
-          if (!details.wasCreated) {
-            await _createProductTablesIfMissing(Migrator(this));
-            await _ensureCatalogItemSchema(Migrator(this));
-          }
-        },
-      );
+    onCreate: (m) async {
+      await m.createAll();
+    },
+    onUpgrade: (m, from, to) async {
+      if (from < 3) {
+        await _createProductTablesIfMissing(m);
+      }
+      if (from < 5) {
+        await _ensureCatalogItemSchema(m);
+      }
+      if (from < 6) {
+        await _migrateGarageSchema(m);
+      }
+      if (from < 7) {
+        await _addClientProfileColumns(m);
+      }
+      if (from < 8) {
+        await _addProductStockColumn(m);
+      }
+      if (from < 9) {
+        await _addEstablishmentScopeColumns(m);
+      }
+    },
+    beforeOpen: (details) async {
+      if (!details.wasCreated) {
+        await _createProductTablesIfMissing(Migrator(this));
+        await _ensureCatalogItemSchema(Migrator(this));
+      }
+    },
+  );
 
   Future<void> _createProductTablesIfMissing(Migrator m) async {
     final existing = await customSelect(
@@ -92,9 +95,7 @@ class AppDatabase extends _$AppDatabase {
   Future<void> _ensureCatalogItemSchema(Migrator m) async {
     // Nettoie d'éventuelles tables temporaires d'une migration interrompue.
     await customStatement('DROP TABLE IF EXISTS tmp_for_copy_produits');
-    await customStatement(
-      'DROP TABLE IF EXISTS tmp_for_copy_catalog_services',
-    );
+    await customStatement('DROP TABLE IF EXISTS tmp_for_copy_catalog_services');
 
     await _migrateCatalogTable(
       m: m,
@@ -119,12 +120,9 @@ class AppDatabase extends _$AppDatabase {
     final info = await customSelect('PRAGMA table_info($tableName)').get();
     if (info.isEmpty) return;
 
-    final columns = {
-      for (final row in info) row.read<String>('name'): row,
-    };
+    final columns = {for (final row in info) row.read<String>('name'): row};
     final hasDevise = columns.containsKey('devise');
-    final categorieNotNull =
-        columns['categorie_id']?.read<int>('notnull') == 1;
+    final categorieNotNull = columns['categorie_id']?.read<int>('notnull') == 1;
 
     if (hasDevise && !categorieNotNull) return;
 
@@ -139,9 +137,7 @@ class AppDatabase extends _$AppDatabase {
     await m.alterTable(
       TableMigration(
         table,
-        newColumns: [
-          if (!hasDevise) deviseColumn,
-        ],
+        newColumns: [if (!hasDevise) deviseColumn],
         columnTransformer: {
           if (!hasDevise) deviseColumn: const Constant('USD'),
         },
@@ -191,6 +187,23 @@ class AppDatabase extends _$AppDatabase {
   /// `0`, aucun backfill nécessaire.
   Future<void> _addProductStockColumn(Migrator m) async {
     await m.addColumn(produits, produits.stock);
+  }
+
+  /// Ajoute le scope tenant local. Les anciennes lignes restent avec une
+  /// chaîne vide et ne seront plus affichées une fois un établissement actif
+  /// sélectionné ; elles pourront être resynchronisées par établissement.
+  Future<void> _addEstablishmentScopeColumns(Migrator m) async {
+    await m.addColumn(clients, clients.establishmentId);
+    await m.addColumn(vehicules, vehicules.establishmentId);
+    await m.addColumn(categories, categories.establishmentId);
+    await m.addColumn(catalogServices, catalogServices.establishmentId);
+    await m.addColumn(productCategories, productCategories.establishmentId);
+    await m.addColumn(produits, produits.establishmentId);
+    await m.addColumn(prestations, prestations.establishmentId);
+    await m.addColumn(lignePrestations, lignePrestations.establishmentId);
+    await m.addColumn(jetons, jetons.establishmentId);
+    await m.addColumn(alertesEntretien, alertesEntretien.establishmentId);
+    await m.addColumn(notificationQueue, notificationQueue.establishmentId);
   }
 }
 

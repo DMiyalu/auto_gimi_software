@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -29,9 +30,12 @@ void main() {
       .collection('clients');
 
   test('runSync pousse les lignes locales isDirty vers Firestore', () async {
-    await database.into(database.clients).insert(
+    await database
+        .into(database.clients)
+        .insert(
           ClientsCompanion.insert(
             id: 'c1',
+            establishmentId: const Value(_establishmentId),
             phone: '221771234567',
             nom: 'Amadou Diallo',
             createdAt: DateTime(2026, 1, 1),
@@ -45,14 +49,13 @@ void main() {
     expect(doc.exists, isTrue);
     expect(doc.data()!['name'], 'Amadou Diallo');
 
-    final row = await (database.select(database.clients)
-          ..where((t) => t.id.equals('c1')))
-        .getSingle();
+    final row = await (database.select(
+      database.clients,
+    )..where((t) => t.id.equals('c1'))).getSingle();
     expect(row.isDirty, isFalse);
   });
 
-  test(
-      'runSync sur une base locale vide peuple tout depuis Firestore '
+  test('runSync sur une base locale vide peuple tout depuis Firestore '
       '(reproduit le changement d\'appareil)', () async {
     await clientsCollection().doc('remote-1').set({
       'name': 'Client distant',
@@ -70,60 +73,69 @@ void main() {
     expect(rows.single.nom, 'Client distant');
   });
 
-  test('runSync est incrémental : un second appel sans changement ne casse rien',
-      () async {
-    await clientsCollection().doc('remote-1').set({
-      'name': 'Client distant',
-      'phone': '221770000000',
-      'loyaltyPoints': 0,
-      'createdAt': Timestamp.fromDate(DateTime(2026, 1, 1)),
-      'updatedAt': Timestamp.fromDate(DateTime(2026, 1, 1)),
-      'isDeleted': false,
-    });
+  test(
+    'runSync est incrémental : un second appel sans changement ne casse rien',
+    () async {
+      await clientsCollection().doc('remote-1').set({
+        'name': 'Client distant',
+        'phone': '221770000000',
+        'loyaltyPoints': 0,
+        'createdAt': Timestamp.fromDate(DateTime(2026, 1, 1)),
+        'updatedAt': Timestamp.fromDate(DateTime(2026, 1, 1)),
+        'isDeleted': false,
+      });
 
-    await engine.runSync(establishmentId: _establishmentId);
-    await engine.runSync(establishmentId: _establishmentId);
+      await engine.runSync(establishmentId: _establishmentId);
+      await engine.runSync(establishmentId: _establishmentId);
 
-    final rows = await database.select(database.clients).get();
-    expect(rows, hasLength(1));
+      final rows = await database.select(database.clients).get();
+      expect(rows, hasLength(1));
 
-    final syncState = await (database.select(database.syncState)
-          ..where((t) => t.collection.equals('clients')))
-        .getSingle();
-    expect(syncState.lastSyncAt, DateTime(2026, 1, 1));
-  });
+      final syncState =
+          await (database.select(
+                database.syncState,
+              )..where((t) => t.collection.equals('$_establishmentId/clients')))
+              .getSingle();
+      expect(syncState.lastSyncAt, DateTime(2026, 1, 1));
+    },
+  );
 
-  test('runSync propage une suppression distante lors d\'un cycle ultérieur',
-      () async {
-    await clientsCollection().doc('c1').set({
-      'name': 'Client actif',
-      'phone': '221770000000',
-      'loyaltyPoints': 0,
-      'createdAt': Timestamp.fromDate(DateTime(2026, 1, 1)),
-      'updatedAt': Timestamp.fromDate(DateTime(2026, 1, 1)),
-      'isDeleted': false,
-    });
-    await engine.runSync(establishmentId: _establishmentId);
+  test(
+    'runSync propage une suppression distante lors d\'un cycle ultérieur',
+    () async {
+      await clientsCollection().doc('c1').set({
+        'name': 'Client actif',
+        'phone': '221770000000',
+        'loyaltyPoints': 0,
+        'createdAt': Timestamp.fromDate(DateTime(2026, 1, 1)),
+        'updatedAt': Timestamp.fromDate(DateTime(2026, 1, 1)),
+        'isDeleted': false,
+      });
+      await engine.runSync(establishmentId: _establishmentId);
 
-    await clientsCollection().doc('c1').update({
-      'isDeleted': true,
-      'updatedAt': Timestamp.fromDate(DateTime(2026, 1, 2)),
-    });
-    await engine.runSync(establishmentId: _establishmentId);
+      await clientsCollection().doc('c1').update({
+        'isDeleted': true,
+        'updatedAt': Timestamp.fromDate(DateTime(2026, 1, 2)),
+      });
+      await engine.runSync(establishmentId: _establishmentId);
 
-    final row = await (database.select(database.clients)
-          ..where((t) => t.id.equals('c1')))
-        .getSingle();
-    expect(row.isDeleted, isTrue);
-  });
+      final row = await (database.select(
+        database.clients,
+      )..where((t) => t.id.equals('c1'))).getSingle();
+      expect(row.isDeleted, isTrue);
+    },
+  );
 
-  test('runSync ne lance pas deux cycles concurrents (single-flight)', () async {
-    final first = engine.runSync(establishmentId: _establishmentId);
-    final second = engine.runSync(establishmentId: _establishmentId);
+  test(
+    'runSync ne lance pas deux cycles concurrents (single-flight)',
+    () async {
+      final first = engine.runSync(establishmentId: _establishmentId);
+      final second = engine.runSync(establishmentId: _establishmentId);
 
-    expect(identical(first, second), isTrue);
-    await first;
-  });
+      expect(identical(first, second), isTrue);
+      await first;
+    },
+  );
 
   test('runSync ne fait rien si Firebase n\'est pas configuré', () async {
     final offlineEngine = SyncEngine(database: database, firestore: null);

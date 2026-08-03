@@ -18,47 +18,77 @@ class PrestationRepositoryImpl implements PrestationRepository {
   final _uuid = const Uuid();
 
   @override
-  Stream<PrestationEntity?> watchPrestation(String id) {
+  Stream<PrestationEntity?> watchPrestation({
+    required String establishmentId,
+    required String id,
+  }) {
     final query = _database.select(_database.prestations)
-      ..where((p) => p.id.equals(id) & p.isDeleted.equals(false));
+      ..where(
+        (p) =>
+            p.establishmentId.equals(establishmentId) &
+            p.id.equals(id) &
+            p.isDeleted.equals(false),
+      );
     return query.watchSingleOrNull().map(
       (row) => row == null ? null : _prestationFromDrift(row),
     );
   }
 
   @override
-  Stream<VehiculeEntity?> watchVehicule(String id) {
+  Stream<VehiculeEntity?> watchVehicule({
+    required String establishmentId,
+    required String id,
+  }) {
     final query = _database.select(_database.vehicules)
-      ..where((v) => v.id.equals(id) & v.isDeleted.equals(false));
+      ..where(
+        (v) =>
+            v.establishmentId.equals(establishmentId) &
+            v.id.equals(id) &
+            v.isDeleted.equals(false),
+      );
     return query.watchSingleOrNull().map(
       (row) => row == null ? null : _vehiculeFromDrift(row),
     );
   }
 
   @override
-  Stream<List<LignePrestationEntity>> watchLignes(String prestationId) {
+  Stream<List<LignePrestationEntity>> watchLignes({
+    required String establishmentId,
+    required String prestationId,
+  }) {
     final query = _database.select(_database.lignePrestations)
       ..where(
-        (l) => l.prestationId.equals(prestationId) & l.isDeleted.equals(false),
+        (l) =>
+            l.establishmentId.equals(establishmentId) &
+            l.prestationId.equals(prestationId) &
+            l.isDeleted.equals(false),
       )
       ..orderBy([(l) => OrderingTerm.asc(l.createdAt)]);
     return query.watch().map((rows) => rows.map(_ligneFromDrift).toList());
   }
 
   @override
-  Stream<List<PrestationSummary>> watchPrestationsSummary() {
-    return _watchPrestationSummaries();
+  Stream<List<PrestationSummary>> watchPrestationsSummary({
+    required String establishmentId,
+  }) {
+    return _watchPrestationSummaries(establishmentId: establishmentId);
   }
 
   @override
-  Stream<List<PrestationSummary>> watchPrestationsForClient(String clientId) {
+  Stream<List<PrestationSummary>> watchPrestationsForClient({
+    required String establishmentId,
+    required String clientId,
+  }) {
     return _watchPrestationSummaries(
+      establishmentId: establishmentId,
       extraWhere: _database.prestations.clientId.equals(clientId),
     );
   }
 
   @override
-  Stream<Map<String, ClientOrderStats>> watchClientOrderStats() {
+  Stream<Map<String, ClientOrderStats>> watchClientOrderStats({
+    required String establishmentId,
+  }) {
     final query =
         _database.select(_database.prestations).join([
             innerJoin(
@@ -69,7 +99,8 @@ class PrestationRepositoryImpl implements PrestationRepository {
             ),
           ])
           ..where(
-            _database.prestations.isDeleted.equals(false) &
+            _database.prestations.establishmentId.equals(establishmentId) &
+                _database.prestations.isDeleted.equals(false) &
                 _database.prestations.clientId.isNotNull(),
           )
           ..orderBy([OrderingTerm.desc(_database.prestations.dateOuverture)]);
@@ -109,6 +140,7 @@ class PrestationRepositoryImpl implements PrestationRepository {
   }
 
   Stream<List<PrestationSummary>> _watchPrestationSummaries({
+    required String establishmentId,
     Expression<bool>? extraWhere,
   }) {
     final query =
@@ -116,19 +148,21 @@ class PrestationRepositoryImpl implements PrestationRepository {
             innerJoin(
               _database.vehicules,
               _database.vehicules.id.equalsExp(
-                _database.prestations.vehiculeId,
-              ),
+                    _database.prestations.vehiculeId,
+                  ) &
+                  _database.vehicules.establishmentId.equals(establishmentId),
             ),
             leftOuterJoin(
               _database.clients,
               _database.clients.id.equalsExp(_database.prestations.clientId) &
+                  _database.clients.establishmentId.equals(establishmentId) &
                   _database.clients.isDeleted.equals(false),
             ),
           ])
           ..where(
-            extraWhere == null
-                ? _database.prestations.isDeleted.equals(false)
-                : _database.prestations.isDeleted.equals(false) & extraWhere,
+            _database.prestations.establishmentId.equals(establishmentId) &
+                _database.prestations.isDeleted.equals(false) &
+                (extraWhere ?? const Constant(true)),
           )
           ..orderBy([OrderingTerm.desc(_database.prestations.dateOuverture)]);
 
@@ -165,7 +199,10 @@ class PrestationRepositoryImpl implements PrestationRepository {
     }
 
     final now = DateTime.now();
-    final existingVehicule = await _findVehiculeByImmatriculation(normalized);
+    final existingVehicule = await _findVehiculeByImmatriculation(
+      establishmentId,
+      normalized,
+    );
 
     final vehiculeId = existingVehicule?.id ?? _uuid.v4();
     final clientId = existingVehicule?.clientId;
@@ -176,6 +213,7 @@ class PrestationRepositoryImpl implements PrestationRepository {
           .insert(
             VehiculesCompanion.insert(
               id: vehiculeId,
+              establishmentId: Value(establishmentId),
               immatriculation: normalized,
               createdAt: now,
               updatedAt: now,
@@ -189,6 +227,7 @@ class PrestationRepositoryImpl implements PrestationRepository {
         .insert(
           PrestationsCompanion.insert(
             id: prestationId,
+            establishmentId: Value(establishmentId),
             vehiculeId: vehiculeId,
             clientId: Value(clientId),
             statut: PrestationStatut.ouverte,
@@ -217,13 +256,17 @@ class PrestationRepositoryImpl implements PrestationRepository {
     required String serviceId,
   }) async {
     final service =
-        await (_database.select(
-              _database.catalogServices,
-            )..where((s) => s.id.equals(serviceId) & s.isDeleted.equals(false)))
+        await (_database.select(_database.catalogServices)..where(
+              (s) =>
+                  s.establishmentId.equals(establishmentId) &
+                  s.id.equals(serviceId) &
+                  s.isDeleted.equals(false),
+            ))
             .getSingleOrNull();
     if (service == null) throw StateError('Service introuvable.');
 
     await _addOrIncrementLine(
+      establishmentId: establishmentId,
       prestationId: prestationId,
       type: LigneType.service,
       serviceId: serviceId,
@@ -240,13 +283,17 @@ class PrestationRepositoryImpl implements PrestationRepository {
     required String produitId,
   }) async {
     final produit =
-        await (_database.select(
-              _database.produits,
-            )..where((p) => p.id.equals(produitId) & p.isDeleted.equals(false)))
+        await (_database.select(_database.produits)..where(
+              (p) =>
+                  p.establishmentId.equals(establishmentId) &
+                  p.id.equals(produitId) &
+                  p.isDeleted.equals(false),
+            ))
             .getSingleOrNull();
     if (produit == null) throw StateError('Produit introuvable.');
 
     await _addOrIncrementLine(
+      establishmentId: establishmentId,
       prestationId: prestationId,
       type: LigneType.produit,
       serviceId: null,
@@ -263,22 +310,29 @@ class PrestationRepositoryImpl implements PrestationRepository {
   }) async {
     final now = DateTime.now();
     await _database.transaction(() async {
-      final ligne = await (_database.select(
-        _database.lignePrestations,
-      )..where((l) => l.id.equals(ligneId))).getSingleOrNull();
+      final ligne =
+          await (_database.select(_database.lignePrestations)..where(
+                (l) =>
+                    l.establishmentId.equals(establishmentId) &
+                    l.id.equals(ligneId),
+              ))
+              .getSingleOrNull();
       if (ligne == null) return;
 
-      await (_database.update(
-        _database.lignePrestations,
-      )..where((l) => l.id.equals(ligneId))).write(
-        LignePrestationsCompanion(
-          isDeleted: const Value(true),
-          updatedAt: Value(now),
-          isDirty: const Value(true),
-        ),
-      );
+      await (_database.update(_database.lignePrestations)..where(
+            (l) =>
+                l.establishmentId.equals(establishmentId) &
+                l.id.equals(ligneId),
+          ))
+          .write(
+            LignePrestationsCompanion(
+              isDeleted: const Value(true),
+              updatedAt: Value(now),
+              isDirty: const Value(true),
+            ),
+          );
 
-      await _recomputeTotal(ligne.prestationId, now);
+      await _recomputeTotal(establishmentId, ligne.prestationId, now);
     });
   }
 
@@ -290,30 +344,40 @@ class PrestationRepositoryImpl implements PrestationRepository {
   }) async {
     final now = DateTime.now();
     await _database.transaction(() async {
-      final prestation = await (_database.select(
-        _database.prestations,
-      )..where((p) => p.id.equals(prestationId))).getSingleOrNull();
+      final prestation =
+          await (_database.select(_database.prestations)..where(
+                (p) =>
+                    p.establishmentId.equals(establishmentId) &
+                    p.id.equals(prestationId),
+              ))
+              .getSingleOrNull();
       if (prestation == null) throw StateError('Prestation introuvable.');
 
-      await (_database.update(
-        _database.prestations,
-      )..where((p) => p.id.equals(prestationId))).write(
-        PrestationsCompanion(
-          clientId: Value(clientId),
-          updatedAt: Value(now),
-          isDirty: const Value(true),
-        ),
-      );
+      await (_database.update(_database.prestations)..where(
+            (p) =>
+                p.establishmentId.equals(establishmentId) &
+                p.id.equals(prestationId),
+          ))
+          .write(
+            PrestationsCompanion(
+              clientId: Value(clientId),
+              updatedAt: Value(now),
+              isDirty: const Value(true),
+            ),
+          );
 
-      await (_database.update(
-        _database.vehicules,
-      )..where((v) => v.id.equals(prestation.vehiculeId))).write(
-        VehiculesCompanion(
-          clientId: Value(clientId),
-          updatedAt: Value(now),
-          isDirty: const Value(true),
-        ),
-      );
+      await (_database.update(_database.vehicules)..where(
+            (v) =>
+                v.establishmentId.equals(establishmentId) &
+                v.id.equals(prestation.vehiculeId),
+          ))
+          .write(
+            VehiculesCompanion(
+              clientId: Value(clientId),
+              updatedAt: Value(now),
+              isDirty: const Value(true),
+            ),
+          );
     });
   }
 
@@ -323,18 +387,22 @@ class PrestationRepositoryImpl implements PrestationRepository {
     required String prestationId,
   }) async {
     final now = DateTime.now();
-    await (_database.update(
-      _database.prestations,
-    )..where((p) => p.id.equals(prestationId))).write(
-      PrestationsCompanion(
-        clientId: const Value(null),
-        updatedAt: Value(now),
-        isDirty: const Value(true),
-      ),
-    );
+    await (_database.update(_database.prestations)..where(
+          (p) =>
+              p.establishmentId.equals(establishmentId) &
+              p.id.equals(prestationId),
+        ))
+        .write(
+          PrestationsCompanion(
+            clientId: const Value(null),
+            updatedAt: Value(now),
+            isDirty: const Value(true),
+          ),
+        );
   }
 
   Future<void> _addOrIncrementLine({
+    required String establishmentId,
     required String prestationId,
     required LigneType type,
     required String? serviceId,
@@ -349,6 +417,7 @@ class PrestationRepositoryImpl implements PrestationRepository {
         ..where(
           (l) =>
               l.prestationId.equals(prestationId) &
+              l.establishmentId.equals(establishmentId) &
               l.isDeleted.equals(false) &
               (serviceId != null
                   ? l.serviceId.equals(serviceId)
@@ -358,22 +427,26 @@ class PrestationRepositoryImpl implements PrestationRepository {
 
       if (existing != null) {
         final newQuantite = existing.quantite + 1;
-        await (_database.update(
-          _database.lignePrestations,
-        )..where((l) => l.id.equals(existing.id))).write(
-          LignePrestationsCompanion(
-            quantite: Value(newQuantite),
-            montantLigne: Value(newQuantite * existing.prixUnitaire),
-            updatedAt: Value(now),
-            isDirty: const Value(true),
-          ),
-        );
+        await (_database.update(_database.lignePrestations)..where(
+              (l) =>
+                  l.establishmentId.equals(establishmentId) &
+                  l.id.equals(existing.id),
+            ))
+            .write(
+              LignePrestationsCompanion(
+                quantite: Value(newQuantite),
+                montantLigne: Value(newQuantite * existing.prixUnitaire),
+                updatedAt: Value(now),
+                isDirty: const Value(true),
+              ),
+            );
       } else {
         await _database
             .into(_database.lignePrestations)
             .insert(
               LignePrestationsCompanion.insert(
                 id: _uuid.v4(),
+                establishmentId: Value(establishmentId),
                 prestationId: prestationId,
                 type: type,
                 serviceId: Value(serviceId),
@@ -387,37 +460,53 @@ class PrestationRepositoryImpl implements PrestationRepository {
             );
       }
 
-      await _recomputeTotal(prestationId, now);
+      await _recomputeTotal(establishmentId, prestationId, now);
     });
   }
 
-  Future<void> _recomputeTotal(String prestationId, DateTime now) async {
+  Future<void> _recomputeTotal(
+    String establishmentId,
+    String prestationId,
+    DateTime now,
+  ) async {
     final sumRow =
         await (_database.selectOnly(_database.lignePrestations)
               ..addColumns([_database.lignePrestations.montantLigne.sum()])
               ..where(
                 _database.lignePrestations.prestationId.equals(prestationId) &
+                    _database.lignePrestations.establishmentId.equals(
+                      establishmentId,
+                    ) &
                     _database.lignePrestations.isDeleted.equals(false),
               ))
             .getSingleOrNull();
     final total =
         sumRow?.read(_database.lignePrestations.montantLigne.sum()) ?? 0;
 
-    await (_database.update(
-      _database.prestations,
-    )..where((p) => p.id.equals(prestationId))).write(
-      PrestationsCompanion(
-        montantTotal: Value(total),
-        updatedAt: Value(now),
-        isDirty: const Value(true),
-      ),
-    );
+    await (_database.update(_database.prestations)..where(
+          (p) =>
+              p.establishmentId.equals(establishmentId) &
+              p.id.equals(prestationId),
+        ))
+        .write(
+          PrestationsCompanion(
+            montantTotal: Value(total),
+            updatedAt: Value(now),
+            isDirty: const Value(true),
+          ),
+        );
   }
 
-  Future<Vehicule?> _findVehiculeByImmatriculation(String normalized) {
+  Future<Vehicule?> _findVehiculeByImmatriculation(
+    String establishmentId,
+    String normalized,
+  ) {
     final query = _database.select(_database.vehicules)
       ..where(
-        (v) => v.immatriculation.equals(normalized) & v.isDeleted.equals(false),
+        (v) =>
+            v.establishmentId.equals(establishmentId) &
+            v.immatriculation.equals(normalized) &
+            v.isDeleted.equals(false),
       );
     return query.getSingleOrNull();
   }

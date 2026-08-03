@@ -15,12 +15,21 @@ final clientRepositoryProvider = Provider<ClientRepository>((ref) {
 final clientsProvider = StreamProvider<List<ClientEntity>>((ref) {
   final establishment = ref.watch(currentEstablishmentProvider).valueOrNull;
   if (establishment == null) return Stream.value([]);
-  return ref.watch(clientRepositoryProvider).watchClients();
+  return ref
+      .watch(clientRepositoryProvider)
+      .watchClients(establishmentId: establishment.id);
 });
 
-final clientByIdProvider = StreamProvider.family<ClientEntity?, String>(
-  (ref, id) => ref.watch(clientRepositoryProvider).watchClient(id),
-);
+final clientByIdProvider = StreamProvider.family<ClientEntity?, String>((
+  ref,
+  id,
+) {
+  final establishment = ref.watch(currentEstablishmentProvider).valueOrNull;
+  if (establishment == null) return Stream.value(null);
+  return ref
+      .watch(clientRepositoryProvider)
+      .watchClient(establishmentId: establishment.id, id: id);
+});
 
 /// Filtres rapides de l'écran Clients — indépendants du métier actif
 /// (contrairement aux filtres de statut de l'écran principal). Le filtrage
