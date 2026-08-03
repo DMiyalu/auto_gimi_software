@@ -138,6 +138,20 @@ class FakeEstablishmentRepository implements EstablishmentRepository {
   }
 
   @override
+  Stream<List<EstablishmentMember>> watchEstablishmentMembers(
+    String establishmentId,
+  ) async* {
+    yield memberships
+        .where((member) => member.establishmentId == establishmentId)
+        .toList();
+    yield* _membershipsController.stream.map(
+      (items) => items
+          .where((member) => member.establishmentId == establishmentId)
+          .toList(),
+    );
+  }
+
+  @override
   Future<void> setActiveEstablishment({
     required String uid,
     required String establishmentId,

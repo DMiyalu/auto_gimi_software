@@ -26,6 +26,10 @@ abstract class EstablishmentRepository {
 
   Stream<List<EstablishmentMember>> watchUserMemberships(String uid);
 
+  Stream<List<EstablishmentMember>> watchEstablishmentMembers(
+    String establishmentId,
+  );
+
   Future<void> setActiveEstablishment({
     required String uid,
     required String establishmentId,

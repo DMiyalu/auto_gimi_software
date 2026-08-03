@@ -68,6 +68,22 @@ final activeEstablishmentRoleProvider = Provider<EstablishmentRole?>((ref) {
   return EstablishmentRole.fromFirestore(profile.roleFor(establishmentId));
 });
 
+final canInviteMembersProvider = Provider<bool>((ref) {
+  return ref.watch(activeEstablishmentRoleProvider)?.canInviteMembers ?? false;
+});
+
+final establishmentMembersProvider = StreamProvider<List<EstablishmentMember>>((
+  ref,
+) {
+  final establishmentId = ref.watch(currentEstablishmentIdProvider);
+  if (establishmentId == null || establishmentId.isEmpty) {
+    return Stream.value(const []);
+  }
+  return ref
+      .watch(establishmentRepositoryProvider)
+      .watchEstablishmentMembers(establishmentId);
+});
+
 final establishmentControllerProvider =
     AsyncNotifierProvider<EstablishmentController, void>(
       EstablishmentController.new,

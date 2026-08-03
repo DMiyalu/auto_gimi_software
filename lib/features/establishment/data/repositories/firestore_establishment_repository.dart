@@ -162,6 +162,17 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
   }
 
   @override
+  Stream<List<EstablishmentMember>> watchEstablishmentMembers(
+    String establishmentId,
+  ) {
+    return _establishments
+        .doc(establishmentId)
+        .collection('members')
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map(_memberFromSnapshot).toList());
+  }
+
+  @override
   Future<void> setActiveEstablishment({
     required String uid,
     required String establishmentId,

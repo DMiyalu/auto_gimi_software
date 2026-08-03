@@ -41,6 +41,11 @@ class DisabledEstablishmentRepository implements EstablishmentRepository {
       Stream.value(const []);
 
   @override
+  Stream<List<EstablishmentMember>> watchEstablishmentMembers(
+    String establishmentId,
+  ) => Stream.value(const []);
+
+  @override
   Future<void> setActiveEstablishment({
     required String uid,
     required String establishmentId,

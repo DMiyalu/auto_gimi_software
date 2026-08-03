@@ -19,14 +19,13 @@ class MoreMenuContent extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final config = ref.watch(primaryModuleConfigProvider);
     final establishment = ref.watch(currentEstablishmentProvider).valueOrNull;
+    final canInviteMembers = ref.watch(canInviteMembersProvider);
 
     return ListView(
       children: [
         if (establishment != null)
           ListTile(
-            leading: const CircleAvatar(
-              child: Icon(Icons.storefront_outlined),
-            ),
+            leading: const CircleAvatar(child: Icon(Icons.storefront_outlined)),
             title: Text(establishment.name),
             subtitle: Text(establishment.category.label(l10n)),
           ),
@@ -36,6 +35,12 @@ class MoreMenuContent extends ConsumerWidget {
             leading: Icon(item.icon),
             title: Text(item.label),
             onTap: () => context.push(item.route),
+          ),
+        if (canInviteMembers)
+          ListTile(
+            leading: const Icon(Icons.groups_outlined),
+            title: const Text('Équipe'),
+            onTap: () => context.push(Routes.team),
           ),
         ListTile(
           leading: const Icon(Icons.settings_outlined),
