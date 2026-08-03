@@ -177,6 +177,7 @@ class ProduitRepositoryImpl implements ProduitRepository {
     required String name,
     required double price,
     required AppCurrency currency,
+    int stock = 0,
   }) async {
     final trimmedName = _requireName(name, 'produit');
     _requirePrice(price);
@@ -192,6 +193,7 @@ class ProduitRepositoryImpl implements ProduitRepository {
             nom: trimmedName,
             prix: price,
             devise: Value(currency.code),
+            stock: Value(stock),
             createdAt: now,
             updatedAt: now,
           ),
@@ -204,6 +206,7 @@ class ProduitRepositoryImpl implements ProduitRepository {
       name: trimmedName,
       price: price,
       currency: currency,
+      stock: stock,
       createdAt: now,
       updatedAt: now,
     );
@@ -217,6 +220,7 @@ class ProduitRepositoryImpl implements ProduitRepository {
     required String name,
     required double price,
     required AppCurrency currency,
+    int stock = 0,
   }) async {
     final trimmedName = _requireName(name, 'produit');
     _requirePrice(price);
@@ -232,6 +236,7 @@ class ProduitRepositoryImpl implements ProduitRepository {
         nom: Value(trimmedName),
         prix: Value(price),
         devise: Value(currency.code),
+        stock: Value(stock),
         updatedAt: Value(now),
         isDirty: const Value(true),
       ),
@@ -244,6 +249,7 @@ class ProduitRepositoryImpl implements ProduitRepository {
       name: trimmedName,
       price: price,
       currency: currency,
+      stock: stock,
       createdAt: existing.createdAt,
       updatedAt: now,
     );
@@ -312,6 +318,7 @@ class ProduitRepositoryImpl implements ProduitRepository {
       name: row.nom,
       price: row.prix,
       currency: AppCurrency.fromCode(row.devise),
+      stock: row.stock,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     );

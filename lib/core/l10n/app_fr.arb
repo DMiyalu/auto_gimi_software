@@ -45,6 +45,32 @@
   "noServiceCategories": "Aucune catégorie",
   "noServiceCategoriesHint": "Créez une catégorie pour regrouper vos services.",
   "noCategory": "Aucune",
+  "noProductsMatchFilter": "Aucun produit ne correspond à ce filtre.",
+  "noServicesMatchFilter": "Aucun service ne correspond à ce filtre.",
+  "productsListTitle": "Liste des produits",
+  "servicesListTitle": "Liste des services",
+  "searchProductPlaceholder": "Rechercher un produit...",
+  "searchServicePlaceholder": "Rechercher un service...",
+  "productStock": "Stock",
+  "productStockInvalid": "Quantité invalide",
+  "productFilterOutOfStock": "En rupture",
+  "productInStockLabel": "En stock ({count})",
+  "@productInStockLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productStockLowLabel": "Stock faible ({count})",
+  "@productStockLowLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productOutOfStockLabel": "En rupture",
   "currency": "Devise",
   "editProduct": "Modifier le produit",
   "editService": "Modifier le service",

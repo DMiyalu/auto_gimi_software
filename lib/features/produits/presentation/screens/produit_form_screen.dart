@@ -21,6 +21,7 @@ class _ProduitFormScreenState extends ConsumerState<ProduitFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _priceController = TextEditingController();
+  final _stockController = TextEditingController(text: '0');
   String? _categoryId;
   AppCurrency _currency = AppCurrency.usd;
   var _initialized = false;
@@ -31,6 +32,7 @@ class _ProduitFormScreenState extends ConsumerState<ProduitFormScreen> {
   void dispose() {
     _nameController.dispose();
     _priceController.dispose();
+    _stockController.dispose();
     super.dispose();
   }
 
@@ -41,6 +43,7 @@ class _ProduitFormScreenState extends ConsumerState<ProduitFormScreen> {
       if (produit == null || _initialized) return;
       _nameController.text = produit.name;
       _priceController.text = produit.price.toString();
+      _stockController.text = produit.stock.toString();
       _categoryId = produit.categoryId;
       _currency = produit.currency;
       _initialized = true;
@@ -53,6 +56,7 @@ class _ProduitFormScreenState extends ConsumerState<ProduitFormScreen> {
 
     final price = double.tryParse(_priceController.text.replaceAll(',', '.'));
     if (price == null) return;
+    final stock = int.tryParse(_stockController.text) ?? 0;
 
     final controller = ref.read(produitControllerProvider.notifier);
     if (_isEditing) {
@@ -62,6 +66,7 @@ class _ProduitFormScreenState extends ConsumerState<ProduitFormScreen> {
         name: _nameController.text,
         price: price,
         currency: _currency,
+        stock: stock,
       );
     } else {
       await controller.createProduit(
@@ -69,6 +74,7 @@ class _ProduitFormScreenState extends ConsumerState<ProduitFormScreen> {
         name: _nameController.text,
         price: price,
         currency: _currency,
+        stock: stock,
       );
     }
 

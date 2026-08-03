@@ -33,6 +33,7 @@ abstract class ProduitRepository {
     required String name,
     required double price,
     required AppCurrency currency,
+    int stock = 0,
   });
 
   Future<ProduitEntity> updateProduit({
@@ -42,6 +43,7 @@ abstract class ProduitRepository {
     required String name,
     required double price,
     required AppCurrency currency,
+    int stock = 0,
   });
 
   Future<void> deleteProduit({

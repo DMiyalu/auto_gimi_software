@@ -9,6 +9,7 @@ class Produits extends Table {
   TextColumn get nom => text()();
   RealColumn get prix => real()();
   TextColumn get devise => text().withDefault(const Constant('USD'))();
+  IntColumn get stock => integer().withDefault(const Constant(0))();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
   BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();

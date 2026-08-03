@@ -2999,6 +2999,16 @@ class $ProduitsTable extends Produits with TableInfo<$ProduitsTable, Produit> {
     requiredDuringInsert: false,
     defaultValue: const Constant('USD'),
   );
+  static const VerificationMeta _stockMeta = const VerificationMeta('stock');
+  @override
+  late final GeneratedColumn<int> stock = GeneratedColumn<int>(
+    'stock',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -3058,6 +3068,7 @@ class $ProduitsTable extends Produits with TableInfo<$ProduitsTable, Produit> {
     nom,
     prix,
     devise,
+    stock,
     createdAt,
     updatedAt,
     isDeleted,
@@ -3109,6 +3120,12 @@ class $ProduitsTable extends Produits with TableInfo<$ProduitsTable, Produit> {
       context.handle(
         _deviseMeta,
         devise.isAcceptableOrUnknown(data['devise']!, _deviseMeta),
+      );
+    }
+    if (data.containsKey('stock')) {
+      context.handle(
+        _stockMeta,
+        stock.isAcceptableOrUnknown(data['stock']!, _stockMeta),
       );
     }
     if (data.containsKey('created_at')) {
@@ -3168,6 +3185,10 @@ class $ProduitsTable extends Produits with TableInfo<$ProduitsTable, Produit> {
         DriftSqlType.string,
         data['${effectivePrefix}devise'],
       )!,
+      stock: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}stock'],
+      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -3199,6 +3220,7 @@ class Produit extends DataClass implements Insertable<Produit> {
   final String nom;
   final double prix;
   final String devise;
+  final int stock;
   final DateTime createdAt;
   final DateTime updatedAt;
   final bool isDeleted;
@@ -3209,6 +3231,7 @@ class Produit extends DataClass implements Insertable<Produit> {
     required this.nom,
     required this.prix,
     required this.devise,
+    required this.stock,
     required this.createdAt,
     required this.updatedAt,
     required this.isDeleted,
@@ -3224,6 +3247,7 @@ class Produit extends DataClass implements Insertable<Produit> {
     map['nom'] = Variable<String>(nom);
     map['prix'] = Variable<double>(prix);
     map['devise'] = Variable<String>(devise);
+    map['stock'] = Variable<int>(stock);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     map['is_deleted'] = Variable<bool>(isDeleted);
@@ -3240,6 +3264,7 @@ class Produit extends DataClass implements Insertable<Produit> {
       nom: Value(nom),
       prix: Value(prix),
       devise: Value(devise),
+      stock: Value(stock),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
       isDeleted: Value(isDeleted),
@@ -3258,6 +3283,7 @@ class Produit extends DataClass implements Insertable<Produit> {
       nom: serializer.fromJson<String>(json['nom']),
       prix: serializer.fromJson<double>(json['prix']),
       devise: serializer.fromJson<String>(json['devise']),
+      stock: serializer.fromJson<int>(json['stock']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       isDeleted: serializer.fromJson<bool>(json['isDeleted']),
@@ -3273,6 +3299,7 @@ class Produit extends DataClass implements Insertable<Produit> {
       'nom': serializer.toJson<String>(nom),
       'prix': serializer.toJson<double>(prix),
       'devise': serializer.toJson<String>(devise),
+      'stock': serializer.toJson<int>(stock),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'isDeleted': serializer.toJson<bool>(isDeleted),
@@ -3286,6 +3313,7 @@ class Produit extends DataClass implements Insertable<Produit> {
     String? nom,
     double? prix,
     String? devise,
+    int? stock,
     DateTime? createdAt,
     DateTime? updatedAt,
     bool? isDeleted,
@@ -3296,6 +3324,7 @@ class Produit extends DataClass implements Insertable<Produit> {
     nom: nom ?? this.nom,
     prix: prix ?? this.prix,
     devise: devise ?? this.devise,
+    stock: stock ?? this.stock,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     isDeleted: isDeleted ?? this.isDeleted,
@@ -3310,6 +3339,7 @@ class Produit extends DataClass implements Insertable<Produit> {
       nom: data.nom.present ? data.nom.value : this.nom,
       prix: data.prix.present ? data.prix.value : this.prix,
       devise: data.devise.present ? data.devise.value : this.devise,
+      stock: data.stock.present ? data.stock.value : this.stock,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       isDeleted: data.isDeleted.present ? data.isDeleted.value : this.isDeleted,
@@ -3325,6 +3355,7 @@ class Produit extends DataClass implements Insertable<Produit> {
           ..write('nom: $nom, ')
           ..write('prix: $prix, ')
           ..write('devise: $devise, ')
+          ..write('stock: $stock, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('isDeleted: $isDeleted, ')
@@ -3340,6 +3371,7 @@ class Produit extends DataClass implements Insertable<Produit> {
     nom,
     prix,
     devise,
+    stock,
     createdAt,
     updatedAt,
     isDeleted,
@@ -3354,6 +3386,7 @@ class Produit extends DataClass implements Insertable<Produit> {
           other.nom == this.nom &&
           other.prix == this.prix &&
           other.devise == this.devise &&
+          other.stock == this.stock &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.isDeleted == this.isDeleted &&
@@ -3366,6 +3399,7 @@ class ProduitsCompanion extends UpdateCompanion<Produit> {
   final Value<String> nom;
   final Value<double> prix;
   final Value<String> devise;
+  final Value<int> stock;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<bool> isDeleted;
@@ -3377,6 +3411,7 @@ class ProduitsCompanion extends UpdateCompanion<Produit> {
     this.nom = const Value.absent(),
     this.prix = const Value.absent(),
     this.devise = const Value.absent(),
+    this.stock = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.isDeleted = const Value.absent(),
@@ -3389,6 +3424,7 @@ class ProduitsCompanion extends UpdateCompanion<Produit> {
     required String nom,
     required double prix,
     this.devise = const Value.absent(),
+    this.stock = const Value.absent(),
     required DateTime createdAt,
     required DateTime updatedAt,
     this.isDeleted = const Value.absent(),
@@ -3405,6 +3441,7 @@ class ProduitsCompanion extends UpdateCompanion<Produit> {
     Expression<String>? nom,
     Expression<double>? prix,
     Expression<String>? devise,
+    Expression<int>? stock,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<bool>? isDeleted,
@@ -3417,6 +3454,7 @@ class ProduitsCompanion extends UpdateCompanion<Produit> {
       if (nom != null) 'nom': nom,
       if (prix != null) 'prix': prix,
       if (devise != null) 'devise': devise,
+      if (stock != null) 'stock': stock,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (isDeleted != null) 'is_deleted': isDeleted,
@@ -3431,6 +3469,7 @@ class ProduitsCompanion extends UpdateCompanion<Produit> {
     Value<String>? nom,
     Value<double>? prix,
     Value<String>? devise,
+    Value<int>? stock,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<bool>? isDeleted,
@@ -3443,6 +3482,7 @@ class ProduitsCompanion extends UpdateCompanion<Produit> {
       nom: nom ?? this.nom,
       prix: prix ?? this.prix,
       devise: devise ?? this.devise,
+      stock: stock ?? this.stock,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       isDeleted: isDeleted ?? this.isDeleted,
@@ -3468,6 +3508,9 @@ class ProduitsCompanion extends UpdateCompanion<Produit> {
     }
     if (devise.present) {
       map['devise'] = Variable<String>(devise.value);
+    }
+    if (stock.present) {
+      map['stock'] = Variable<int>(stock.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
@@ -3495,6 +3538,7 @@ class ProduitsCompanion extends UpdateCompanion<Produit> {
           ..write('nom: $nom, ')
           ..write('prix: $prix, ')
           ..write('devise: $devise, ')
+          ..write('stock: $stock, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('isDeleted: $isDeleted, ')
@@ -10067,6 +10111,7 @@ typedef $$ProduitsTableCreateCompanionBuilder =
       required String nom,
       required double prix,
       Value<String> devise,
+      Value<int> stock,
       required DateTime createdAt,
       required DateTime updatedAt,
       Value<bool> isDeleted,
@@ -10080,6 +10125,7 @@ typedef $$ProduitsTableUpdateCompanionBuilder =
       Value<String> nom,
       Value<double> prix,
       Value<String> devise,
+      Value<int> stock,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<bool> isDeleted,
@@ -10160,6 +10206,11 @@ class $$ProduitsTableFilterComposer
 
   ColumnFilters<String> get devise => $composableBuilder(
     column: $table.devise,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get stock => $composableBuilder(
+    column: $table.stock,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -10261,6 +10312,11 @@ class $$ProduitsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get stock => $composableBuilder(
+    column: $table.stock,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -10325,6 +10381,9 @@ class $$ProduitsTableAnnotationComposer
 
   GeneratedColumn<String> get devise =>
       $composableBuilder(column: $table.devise, builder: (column) => column);
+
+  GeneratedColumn<int> get stock =>
+      $composableBuilder(column: $table.stock, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -10421,6 +10480,7 @@ class $$ProduitsTableTableManager
                 Value<String> nom = const Value.absent(),
                 Value<double> prix = const Value.absent(),
                 Value<String> devise = const Value.absent(),
+                Value<int> stock = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<bool> isDeleted = const Value.absent(),
@@ -10432,6 +10492,7 @@ class $$ProduitsTableTableManager
                 nom: nom,
                 prix: prix,
                 devise: devise,
+                stock: stock,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 isDeleted: isDeleted,
@@ -10445,6 +10506,7 @@ class $$ProduitsTableTableManager
                 required String nom,
                 required double prix,
                 Value<String> devise = const Value.absent(),
+                Value<int> stock = const Value.absent(),
                 required DateTime createdAt,
                 required DateTime updatedAt,
                 Value<bool> isDeleted = const Value.absent(),
@@ -10456,6 +10518,7 @@ class $$ProduitsTableTableManager
                 nom: nom,
                 prix: prix,
                 devise: devise,
+                stock: stock,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 isDeleted: isDeleted,

@@ -45,6 +45,32 @@
   "noServiceCategories": "No categories yet",
   "noServiceCategoriesHint": "Create a category to group your services.",
   "noCategory": "None",
+  "noProductsMatchFilter": "No product matches this filter.",
+  "noServicesMatchFilter": "No service matches this filter.",
+  "productsListTitle": "Product list",
+  "servicesListTitle": "Service list",
+  "searchProductPlaceholder": "Search a product...",
+  "searchServicePlaceholder": "Search a service...",
+  "productStock": "Stock",
+  "productStockInvalid": "Invalid quantity",
+  "productFilterOutOfStock": "Out of stock",
+  "productInStockLabel": "In stock ({count})",
+  "@productInStockLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productStockLowLabel": "Low stock ({count})",
+  "@productStockLowLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productOutOfStockLabel": "Out of stock",
   "currency": "Currency",
   "editProduct": "Edit product",
   "editService": "Edit service",

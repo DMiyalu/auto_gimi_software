@@ -130,6 +130,48 @@ class AppLocalizationsFr extends AppLocalizations {
   String get noCategory => 'Aucune';
 
   @override
+  String get noProductsMatchFilter =>
+      'Aucun produit ne correspond à ce filtre.';
+
+  @override
+  String get noServicesMatchFilter =>
+      'Aucun service ne correspond à ce filtre.';
+
+  @override
+  String get productsListTitle => 'Liste des produits';
+
+  @override
+  String get servicesListTitle => 'Liste des services';
+
+  @override
+  String get searchProductPlaceholder => 'Rechercher un produit...';
+
+  @override
+  String get searchServicePlaceholder => 'Rechercher un service...';
+
+  @override
+  String get productStock => 'Stock';
+
+  @override
+  String get productStockInvalid => 'Quantité invalide';
+
+  @override
+  String get productFilterOutOfStock => 'En rupture';
+
+  @override
+  String productInStockLabel(int count) {
+    return 'En stock ($count)';
+  }
+
+  @override
+  String productStockLowLabel(int count) {
+    return 'Stock faible ($count)';
+  }
+
+  @override
+  String get productOutOfStockLabel => 'En rupture';
+
+  @override
   String get currency => 'Devise';
 
   @override

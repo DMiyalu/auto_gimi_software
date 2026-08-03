@@ -129,6 +129,46 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noCategory => 'None';
 
   @override
+  String get noProductsMatchFilter => 'No product matches this filter.';
+
+  @override
+  String get noServicesMatchFilter => 'No service matches this filter.';
+
+  @override
+  String get productsListTitle => 'Product list';
+
+  @override
+  String get servicesListTitle => 'Service list';
+
+  @override
+  String get searchProductPlaceholder => 'Search a product...';
+
+  @override
+  String get searchServicePlaceholder => 'Search a service...';
+
+  @override
+  String get productStock => 'Stock';
+
+  @override
+  String get productStockInvalid => 'Invalid quantity';
+
+  @override
+  String get productFilterOutOfStock => 'Out of stock';
+
+  @override
+  String productInStockLabel(int count) {
+    return 'In stock ($count)';
+  }
+
+  @override
+  String productStockLowLabel(int count) {
+    return 'Low stock ($count)';
+  }
+
+  @override
+  String get productOutOfStockLabel => 'Out of stock';
+
+  @override
   String get currency => 'Currency';
 
   @override

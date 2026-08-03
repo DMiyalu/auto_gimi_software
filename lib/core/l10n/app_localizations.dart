@@ -326,6 +326,78 @@ abstract class AppLocalizations {
   /// **'None'**
   String get noCategory;
 
+  /// No description provided for @noProductsMatchFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'No product matches this filter.'**
+  String get noProductsMatchFilter;
+
+  /// No description provided for @noServicesMatchFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'No service matches this filter.'**
+  String get noServicesMatchFilter;
+
+  /// No description provided for @productsListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Product list'**
+  String get productsListTitle;
+
+  /// No description provided for @servicesListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Service list'**
+  String get servicesListTitle;
+
+  /// No description provided for @searchProductPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Search a product...'**
+  String get searchProductPlaceholder;
+
+  /// No description provided for @searchServicePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Search a service...'**
+  String get searchServicePlaceholder;
+
+  /// No description provided for @productStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock'**
+  String get productStock;
+
+  /// No description provided for @productStockInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid quantity'**
+  String get productStockInvalid;
+
+  /// No description provided for @productFilterOutOfStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Out of stock'**
+  String get productFilterOutOfStock;
+
+  /// No description provided for @productInStockLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'In stock ({count})'**
+  String productInStockLabel(int count);
+
+  /// No description provided for @productStockLowLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Low stock ({count})'**
+  String productStockLowLabel(int count);
+
+  /// No description provided for @productOutOfStockLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Out of stock'**
+  String get productOutOfStockLabel;
+
   /// No description provided for @currency.
   ///
   /// In en, this message translates to:

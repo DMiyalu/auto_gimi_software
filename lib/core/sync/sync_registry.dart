@@ -274,6 +274,7 @@ class ProduitSyncAdapter implements SyncAdapter {
           'name': row.nom,
           'price': row.prix,
           'currency': row.devise,
+          'stock': row.stock,
           'createdAt': Timestamp.fromDate(row.createdAt),
           'updatedAt': Timestamp.fromDate(row.updatedAt),
           'isDeleted': row.isDeleted,
@@ -318,6 +319,7 @@ class ProduitSyncAdapter implements SyncAdapter {
                 nom: Value(data['name'] as String? ?? ''),
                 prix: Value((data['price'] as num?)?.toDouble() ?? 0),
                 devise: Value(data['currency'] as String? ?? 'USD'),
+                stock: Value((data['stock'] as num?)?.toInt() ?? 0),
                 createdAt: Value(
                   readFirestoreDate(data['createdAt']) ?? remoteUpdatedAt,
                 ),

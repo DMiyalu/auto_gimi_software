@@ -31,6 +31,16 @@ final produitByIdProvider =
   return ref.watch(produitRepositoryProvider).getProduit(id);
 });
 
+/// Valeur sentinelle de [produitFilterProvider] représentant le filtre
+/// "En rupture" — les autres valeurs sont soit `null` ("Tous"), soit un id
+/// de catégorie réel, un ensemble dynamique qu'un enum fixe ne peut pas
+/// représenter (contrairement aux filtres de l'écran Clients).
+const produitOutOfStockFilterValue = '__out_of_stock__';
+
+final produitSearchQueryProvider = StateProvider<String>((ref) => '');
+
+final produitFilterProvider = StateProvider<String?>((ref) => null);
+
 final productCategoryByIdProvider =
     FutureProvider.family<ProductCategoryEntity?, String>((ref, id) {
   return ref.watch(produitRepositoryProvider).getCategory(id);
@@ -100,6 +110,7 @@ class ProduitController extends AsyncNotifier<void> {
     required String name,
     required double price,
     required AppCurrency currency,
+    int stock = 0,
   }) async {
     final establishmentId = _establishmentId;
     state = const AsyncLoading();
@@ -110,6 +121,7 @@ class ProduitController extends AsyncNotifier<void> {
             name: name,
             price: price,
             currency: currency,
+            stock: stock,
           );
       _schedulePush();
     });
@@ -121,6 +133,7 @@ class ProduitController extends AsyncNotifier<void> {
     required String name,
     required double price,
     required AppCurrency currency,
+    int stock = 0,
   }) async {
     final establishmentId = _establishmentId;
     state = const AsyncLoading();
@@ -132,6 +145,7 @@ class ProduitController extends AsyncNotifier<void> {
             name: name,
             price: price,
             currency: currency,
+            stock: stock,
           );
       _schedulePush();
     });
