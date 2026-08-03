@@ -9,10 +9,12 @@ import 'package:auto_mobile_software/core/database/app_database.dart';
 import 'package:auto_mobile_software/core/domain/business_category.dart';
 import 'package:auto_mobile_software/core/l10n/app_localizations.dart';
 import 'package:auto_mobile_software/core/providers/database_provider.dart';
+import 'package:auto_mobile_software/core/routing/routes.dart';
 import 'package:auto_mobile_software/features/establishment/domain/models/establishment.dart';
 import 'package:auto_mobile_software/features/establishment/presentation/providers/establishment_providers.dart';
 import 'package:auto_mobile_software/features/garage/data/repositories/prestation_repository_impl.dart';
 import 'package:auto_mobile_software/features/primary_module/screens/primary_module_screen.dart';
+import 'package:auto_mobile_software/features/restaurant/presentation/screens/commande_detail_screen.dart';
 import 'package:auto_mobile_software/features/restaurant/data/repositories/commande_repository_impl.dart';
 
 Establishment _establishment(BusinessCategory category) {
@@ -53,6 +55,11 @@ Future<void> _pump(
           initialLocation: '/',
           routes: [
             GoRoute(path: '/', builder: (_, __) => const PrimaryModuleScreen()),
+            GoRoute(
+              path: Routes.commandeDetail,
+              builder: (context, state) =>
+                  CommandeDetailScreen(commandeId: state.pathParameters['id']!),
+            ),
           ],
         ),
       ),
@@ -117,6 +124,28 @@ void main() {
     expect(find.textContaining('CMD-'), findsOneWidget);
     expect(find.text('Table VIP'), findsOneWidget);
     expect(find.text('Table 12'), findsNothing);
+
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump(const Duration(milliseconds: 1));
+  });
+
+  testWidgets('ouvre le détail réel depuis une commande restaurant', (
+    tester,
+  ) async {
+    final database = AppDatabase(NativeDatabase.memory());
+    addTearDown(database.close);
+    final commande = await CommandeRepositoryImpl(
+      database: database,
+    ).createCommande(establishmentId: 'etab-1', context: 'Table terrasse');
+
+    await _pump(tester, BusinessCategory.restaurant, database: database);
+
+    await tester.tap(find.text(commande.reference));
+    await tester.pumpAndSettle();
+
+    expect(find.text(commande.reference), findsWidgets);
+    expect(find.text('Table terrasse'), findsOneWidget);
+    expect(find.text('Lignes'), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox());
     await tester.pump(const Duration(milliseconds: 1));

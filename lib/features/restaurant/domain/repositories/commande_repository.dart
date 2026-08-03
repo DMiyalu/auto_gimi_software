@@ -6,6 +6,11 @@ abstract class CommandeRepository {
     required String establishmentId,
   });
 
+  Stream<CommandeEntity?> watchCommande({
+    required String establishmentId,
+    required String id,
+  });
+
   Stream<List<LigneCommandeEntity>> watchLignes({
     required String establishmentId,
     required String commandeId,

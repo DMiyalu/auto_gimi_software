@@ -20,6 +20,17 @@ final commandesProvider = StreamProvider<List<CommandeEntity>>((ref) {
       .watchCommandes(establishmentId: establishment.id);
 });
 
+final commandeProvider = StreamProvider.family<CommandeEntity?, String>((
+  ref,
+  commandeId,
+) {
+  final establishment = ref.watch(currentEstablishmentProvider).valueOrNull;
+  if (establishment == null) return Stream.value(null);
+  return ref
+      .watch(commandeRepositoryProvider)
+      .watchCommande(establishmentId: establishment.id, id: commandeId);
+});
+
 final commandeLinesProvider =
     StreamProvider.family<List<LigneCommandeEntity>, String>((ref, commandeId) {
       final establishment = ref.watch(currentEstablishmentProvider).valueOrNull;

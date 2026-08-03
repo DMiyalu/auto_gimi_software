@@ -29,6 +29,24 @@ class CommandeRepositoryImpl implements CommandeRepository {
   }
 
   @override
+  Stream<CommandeEntity?> watchCommande({
+    required String establishmentId,
+    required String id,
+  }) {
+    final query = _database.select(_database.commandes)
+      ..where(
+        (c) =>
+            c.establishmentId.equals(establishmentId) &
+            c.id.equals(id) &
+            c.isDeleted.equals(false),
+      );
+
+    return query.watchSingleOrNull().map(
+      (row) => row == null ? null : _commandeFromDrift(row),
+    );
+  }
+
+  @override
   Stream<List<LigneCommandeEntity>> watchLignes({
     required String establishmentId,
     required String commandeId,

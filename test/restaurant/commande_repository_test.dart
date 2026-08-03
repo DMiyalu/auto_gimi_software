@@ -64,4 +64,24 @@ void main() {
       expect(updatedProduit!.stock, 3);
     },
   );
+
+  test('observe une commande et persiste le changement de statut', () async {
+    final commande = await commandeRepository.createCommande(
+      establishmentId: 'est-1',
+      context: 'Livraison',
+    );
+
+    await commandeRepository.setStatus(
+      establishmentId: 'est-1',
+      commandeId: commande.id,
+      statusKey: 'en_preparation',
+    );
+
+    final updated = await commandeRepository
+        .watchCommande(establishmentId: 'est-1', id: commande.id)
+        .first;
+
+    expect(updated!.statusKey, 'en_preparation');
+    expect(updated.statusLabel, 'En préparation');
+  });
 }

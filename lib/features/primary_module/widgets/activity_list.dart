@@ -43,17 +43,34 @@ class ActivityList extends ConsumerWidget {
               key: ValueKey(item.id),
               index: index,
               child: Slidable(
-                startActionPane: _printActionPane(context, item, config.primaryColor),
-                endActionPane: _printActionPane(context, item, config.primaryColor),
+                startActionPane: _printActionPane(
+                  context,
+                  item,
+                  config.primaryColor,
+                ),
+                endActionPane: _printActionPane(
+                  context,
+                  item,
+                  config.primaryColor,
+                ),
                 child: ActivityCard(
                   item: item,
-                  onTap: () => config.category == BusinessCategory.garageAuto
-                      ? context.push(Routes.prestationDetailPath(item.id))
-                      : context.push(
-                          Routes.activityDetailPath(item.id),
-                          extra: item,
-                        ),
-                  onLongPress: () => showActivityCardActions(context, ref, item),
+                  onTap: () {
+                    if (config.category == BusinessCategory.garageAuto) {
+                      context.push(Routes.prestationDetailPath(item.id));
+                      return;
+                    }
+                    if (config.category == BusinessCategory.restaurant) {
+                      context.push(Routes.commandeDetailPath(item.id));
+                      return;
+                    }
+                    context.push(
+                      Routes.activityDetailPath(item.id),
+                      extra: item,
+                    );
+                  },
+                  onLongPress: () =>
+                      showActivityCardActions(context, ref, item),
                 ),
               ),
             );
@@ -136,11 +153,7 @@ class _EmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              icon,
-              size: 56,
-              color: Theme.of(context).colorScheme.outline,
-            ),
+            Icon(icon, size: 56, color: Theme.of(context).colorScheme.outline),
             const SizedBox(height: AppSpacing.xs),
             Text(
               'Rien à afficher pour l’instant',
