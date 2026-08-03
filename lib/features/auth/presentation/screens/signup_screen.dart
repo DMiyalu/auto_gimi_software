@@ -69,12 +69,12 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Icon(
-                      Icons.person_add_alt_outlined,
-                      size: 64,
-                      color: Theme.of(context).colorScheme.primary,
+                    Image.asset(
+                      'public/images/logo.png',
+                      height: 132,
+                      fit: BoxFit.contain,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
                     Text(
                       l10n.signUpTitle,
                       textAlign: TextAlign.center,

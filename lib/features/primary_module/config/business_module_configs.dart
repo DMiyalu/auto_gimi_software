@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/domain/business_category.dart';
 import '../../../core/routing/routes.dart';
+import '../../../core/theme/app_colors.dart';
 import 'business_module_config.dart';
 
 /// Registre unique métier -> configuration de l'écran principal.
@@ -22,7 +23,7 @@ abstract final class BusinessModuleConfigs {
     category: BusinessCategory.garageAuto,
     primaryModuleLabel: 'Prestations',
     searchPlaceholder: 'Rechercher une prestation, un véhicule ou un client…',
-    primaryColor: const Color(0xFF1565C0),
+    primaryColor: AppColors.bleuRoyal,
     activityIcon: Icons.build_circle_outlined,
     statusFilters: const [
       StatusFilterOption(key: 'all', label: 'Toutes'),
@@ -79,7 +80,7 @@ abstract final class BusinessModuleConfigs {
     category: BusinessCategory.restaurant,
     primaryModuleLabel: 'Commandes',
     searchPlaceholder: 'Rechercher une commande, une table ou un client…',
-    primaryColor: const Color(0xFF2E7D32),
+    primaryColor: AppColors.violetPrincipal,
     activityIcon: Icons.restaurant_outlined,
     statusFilters: const [
       StatusFilterOption(key: 'all', label: 'Toutes'),
@@ -98,18 +99,9 @@ abstract final class BusinessModuleConfigs {
         label: 'Nouvelle commande',
         icon: Icons.add_shopping_cart_outlined,
       ),
-      FabActionConfig(
-        label: 'Réservation',
-        icon: Icons.event_seat_outlined,
-      ),
-      FabActionConfig(
-        label: 'À emporter',
-        icon: Icons.shopping_bag_outlined,
-      ),
-      FabActionConfig(
-        label: 'Livraison',
-        icon: Icons.delivery_dining_outlined,
-      ),
+      FabActionConfig(label: 'Réservation', icon: Icons.event_seat_outlined),
+      FabActionConfig(label: 'À emporter', icon: Icons.shopping_bag_outlined),
+      FabActionConfig(label: 'Livraison', icon: Icons.delivery_dining_outlined),
     ],
     moreMenuItems: const [
       MoreMenuItemConfig(
@@ -124,7 +116,7 @@ abstract final class BusinessModuleConfigs {
     category: BusinessCategory.sanitation,
     primaryModuleLabel: 'Collectes',
     searchPlaceholder: 'Rechercher une collecte, une tournée ou un client…',
-    primaryColor: const Color(0xFF00695C),
+    primaryColor: AppColors.cyan,
     activityIcon: Icons.cleaning_services_outlined,
     statusFilters: const [
       StatusFilterOption(key: 'all', label: 'Toutes'),
@@ -168,7 +160,7 @@ abstract final class BusinessModuleConfigs {
       category: category,
       primaryModuleLabel: 'Activités',
       searchPlaceholder: 'Rechercher une activité ou un client…',
-      primaryColor: const Color(0xFF1565C0),
+      primaryColor: AppColors.bleuSaas,
       activityIcon: category.icon,
       statusFilters: const [
         StatusFilterOption(key: 'all', label: 'Toutes'),

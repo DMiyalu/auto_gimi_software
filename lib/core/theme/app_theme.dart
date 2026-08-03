@@ -1,17 +1,27 @@
 import 'package:flutter/material.dart';
 
+import 'app_colors.dart';
 import 'app_spacing.dart';
 
 abstract final class AppTheme {
-  static const _seed = Color(0xFF1565C0);
-
   static const _buttonShape = RoundedRectangleBorder(
     borderRadius: BorderRadius.all(Radius.circular(AppRadius.chip)),
   );
 
   static ThemeData light() {
+    final colorScheme =
+        ColorScheme.fromSeed(seedColor: AppColors.violetPrincipal).copyWith(
+          primary: AppColors.violetPrincipal,
+          secondary: AppColors.bleuRoyal,
+          tertiary: AppColors.cyan,
+          primaryContainer: const Color(0xFFEDE9FE),
+          secondaryContainer: const Color(0xFFDBEAFE),
+          tertiaryContainer: const Color(0xFFCFFAFE),
+          surfaceTint: AppColors.violetClair,
+        );
+
     return ThemeData(
-      colorScheme: ColorScheme.fromSeed(seedColor: _seed),
+      colorScheme: colorScheme,
       useMaterial3: true,
       scaffoldBackgroundColor: Colors.white,
       appBarTheme: const AppBarTheme(centerTitle: false),
@@ -23,7 +33,7 @@ abstract final class AppTheme {
       chipTheme: ChipThemeData(
         shape: const StadiumBorder(),
         side: BorderSide.none,
-        selectedColor: ColorScheme.fromSeed(seedColor: _seed).primary,
+        selectedColor: colorScheme.primary,
       ),
       filledButtonTheme: const FilledButtonThemeData(
         style: ButtonStyle(shape: WidgetStatePropertyAll(_buttonShape)),
@@ -41,11 +51,19 @@ abstract final class AppTheme {
   }
 
   static ThemeData dark() {
+    final colorScheme =
+        ColorScheme.fromSeed(
+          seedColor: AppColors.violetPrincipal,
+          brightness: Brightness.dark,
+        ).copyWith(
+          primary: AppColors.violetClair,
+          secondary: AppColors.bleuSaas,
+          tertiary: AppColors.cyanClair,
+          surfaceTint: AppColors.violetClair,
+        );
+
     return ThemeData(
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: _seed,
-        brightness: Brightness.dark,
-      ),
+      colorScheme: colorScheme,
       useMaterial3: true,
       appBarTheme: const AppBarTheme(centerTitle: false),
       inputDecorationTheme: const InputDecorationTheme(
@@ -56,10 +74,7 @@ abstract final class AppTheme {
       chipTheme: ChipThemeData(
         shape: const StadiumBorder(),
         side: BorderSide.none,
-        selectedColor: ColorScheme.fromSeed(
-          seedColor: _seed,
-          brightness: Brightness.dark,
-        ).primary,
+        selectedColor: colorScheme.primary,
       ),
       filledButtonTheme: const FilledButtonThemeData(
         style: ButtonStyle(shape: WidgetStatePropertyAll(_buttonShape)),

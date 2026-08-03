@@ -43,3 +43,6 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   generate: true
+  assets:
+    - public/images/logo.png
+    - public/images/icon.png

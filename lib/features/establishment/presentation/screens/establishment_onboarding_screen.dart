@@ -28,7 +28,7 @@ class EstablishmentOnboardingScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Konnect One'),
+        title: const Text('ZOLANA'),
         actions: [
           IconButton(
             tooltip: 'Déconnexion',
@@ -108,11 +108,11 @@ class _LandingIntro extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        CircleAvatar(
-          radius: 32,
-          backgroundColor: theme.colorScheme.primaryContainer,
-          foregroundColor: theme.colorScheme.onPrimaryContainer,
-          child: const Icon(Icons.storefront_outlined, size: 32),
+        Image.asset(
+          'public/images/icon.png',
+          width: 76,
+          height: 76,
+          fit: BoxFit.contain,
         ),
         const SizedBox(height: AppSpacing.md),
         Text(
@@ -121,7 +121,7 @@ class _LandingIntro extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.xs),
         Text(
-          'Konnect One centralise commandes, prestations, clients, catalogue et rapports pour chaque établissement que vous gérez.',
+          'ZOLANA centralise commandes, prestations, clients, catalogue et rapports pour chaque établissement que vous gérez.',
           style: theme.textTheme.bodyLarge?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),

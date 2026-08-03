@@ -30,10 +30,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    await ref.read(authControllerProvider.notifier).signIn(
-          _phone,
-          _passwordController.text,
-        );
+    await ref
+        .read(authControllerProvider.notifier)
+        .signIn(_phone, _passwordController.text);
   }
 
   @override
@@ -62,12 +61,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Icon(
-                      Icons.storefront_outlined,
-                      size: 64,
-                      color: Theme.of(context).colorScheme.primary,
+                    Image.asset(
+                      'public/images/logo.png',
+                      height: 132,
+                      fit: BoxFit.contain,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
                     Text(
                       l10n.appTitle,
                       textAlign: TextAlign.center,
@@ -78,9 +77,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       l10n.loginSubtitle,
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                     ),
                     const SizedBox(height: 32),
                     PhoneNumberField(
