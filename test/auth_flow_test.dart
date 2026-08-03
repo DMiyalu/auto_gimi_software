@@ -4,10 +4,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mocktail/mocktail.dart';
 
+import 'package:auto_mobile_software/core/domain/business_category.dart';
 import 'package:auto_mobile_software/core/database/app_database.dart';
 import 'package:auto_mobile_software/features/auth/presentation/providers/auth_state_provider.dart';
 import 'package:auto_mobile_software/features/auth/presentation/providers/phone_verification_repository_provider.dart';
 import 'package:auto_mobile_software/features/auth/presentation/providers/signup_otp_pending_provider.dart';
+import 'package:auto_mobile_software/features/establishment/domain/models/establishment.dart';
+import 'package:auto_mobile_software/features/establishment/domain/models/establishment_invitation.dart';
+import 'package:auto_mobile_software/features/establishment/domain/models/establishment_role.dart';
 import 'package:auto_mobile_software/features/establishment/domain/models/user_profile.dart';
 import 'package:auto_mobile_software/features/establishment/presentation/providers/establishment_repository_provider.dart';
 import 'helpers/fake_phone_verification_repository.dart';
@@ -25,36 +29,58 @@ void main() {
   late FakePhoneVerificationRepository phoneVerificationRepository;
   late AppDatabase database;
 
-  UserProfile unverifiedProfile() => UserProfile(
-        uid: 'uid-test',
-        phone: '33612345678',
-        fullName: 'Test Manager',
-        establishmentId: 'est-test',
-        role: 'owner',
-        phoneVerified: false,
-        createdAt: DateTime(2026, 1, 1),
-      );
+  UserProfile unverifiedProfileWithoutEstablishment() => UserProfile(
+    uid: 'uid-test',
+    phone: '33612345678',
+    fullName: 'Test Manager',
+    establishmentId: '',
+    role: 'agent',
+    phoneVerified: false,
+    createdAt: DateTime(2026, 1, 1),
+  );
 
-  UserProfile verifiedProfile() => UserProfile(
-        uid: 'uid-test',
-        phone: '33612345678',
-        fullName: 'Test Manager',
-        establishmentId: 'est-test',
-        role: 'owner',
-        phoneVerified: true,
-        createdAt: DateTime(2026, 1, 1),
-      );
+  UserProfile verifiedProfileWithoutEstablishment() => UserProfile(
+    uid: 'uid-test',
+    phone: '33612345678',
+    fullName: 'Test Manager',
+    establishmentId: '',
+    role: 'agent',
+    phoneVerified: true,
+    createdAt: DateTime(2026, 1, 1),
+  );
+
+  UserProfile verifiedProfileWithEstablishment() => UserProfile(
+    uid: 'uid-test',
+    phone: '33612345678',
+    fullName: 'Test Manager',
+    establishmentId: 'est-test',
+    role: 'owner',
+    phoneVerified: true,
+    createdAt: DateTime(2026, 1, 1),
+    establishmentIds: const ['est-test'],
+    activeEstablishmentId: 'est-test',
+    rolesByEstablishment: const {'est-test': 'owner'},
+  );
+
+  Establishment testEstablishment() => Establishment(
+    id: 'est-test',
+    name: 'Garage Test',
+    category: BusinessCategory.garageAuto,
+    ownerId: 'uid-test',
+    managerName: 'Test Manager',
+    phone: '33612345678',
+    phoneVerified: true,
+    createdAt: DateTime(2026, 1, 1),
+  );
 
   List<Override> testOverrides({bool otpPending = false}) => [
-        authRepositoryProvider.overrideWithValue(authRepository),
-        establishmentRepositoryProvider.overrideWithValue(
-          establishmentRepository,
-        ),
-        phoneVerificationRepositoryProvider.overrideWithValue(
-          phoneVerificationRepository,
-        ),
-        signupOtpPendingProvider.overrideWith((ref) => otpPending),
-      ];
+    authRepositoryProvider.overrideWithValue(authRepository),
+    establishmentRepositoryProvider.overrideWithValue(establishmentRepository),
+    phoneVerificationRepositoryProvider.overrideWithValue(
+      phoneVerificationRepository,
+    ),
+    signupOtpPendingProvider.overrideWith((ref) => otpPending),
+  ];
 
   setUp(() {
     user = MockFirebaseUser();
@@ -64,7 +90,9 @@ void main() {
     establishmentRepository = FakeEstablishmentRepository();
     phoneVerificationRepository = FakePhoneVerificationRepository(
       onVerified: () {
-        establishmentRepository.setProfile(verifiedProfile());
+        establishmentRepository.setProfile(
+          verifiedProfileWithoutEstablishment(),
+        );
       },
     );
   });
@@ -82,23 +110,27 @@ void main() {
     expect(find.text("Don't have an account? Sign up"), findsOneWidget);
   });
 
-  testWidgets('login sans OTP : accès direct au tableau de bord', (tester) async {
-    authRepository.setUser(user);
-    establishmentRepository.setProfile(unverifiedProfile());
+  testWidgets(
+    'login : accès direct au tableau de bord si un établissement existe',
+    (tester) async {
+      authRepository.setUser(user);
+      establishmentRepository.setProfile(verifiedProfileWithEstablishment());
+      establishmentRepository.setEstablishments([testEstablishment()]);
 
-    database = await pumpTestApp(
-      tester,
-      overrides: testOverrides(otpPending: false),
-    );
-    await tester.pumpAndSettle();
+      database = await pumpTestApp(
+        tester,
+        overrides: testOverrides(otpPending: false),
+      );
+      await tester.pumpAndSettle();
 
-    expect(find.text('Prestations'), findsWidgets);
-    expect(find.text('Phone verification'), findsNothing);
-  });
+      expect(find.text('Prestations'), findsWidgets);
+      expect(find.text('Phone verification'), findsNothing);
+    },
+  );
 
   testWidgets('signup : redirige vers la vérification OTP', (tester) async {
     authRepository.setUser(user);
-    establishmentRepository.setProfile(unverifiedProfile());
+    establishmentRepository.setProfile(unverifiedProfileWithoutEstablishment());
 
     database = await pumpTestApp(
       tester,
@@ -110,10 +142,11 @@ void main() {
     expect(find.byKey(const Key('verify_code_field')), findsOneWidget);
   });
 
-  testWidgets('flux e2e: signup -> vérification OTP -> tableau de bord',
-      (tester) async {
+  testWidgets('flux e2e: signup -> vérification OTP -> landing post-auth', (
+    tester,
+  ) async {
     authRepository.setUser(user);
-    establishmentRepository.setProfile(unverifiedProfile());
+    establishmentRepository.setProfile(unverifiedProfileWithoutEstablishment());
 
     database = await pumpTestApp(
       tester,
@@ -130,19 +163,60 @@ void main() {
     await tester.tap(find.byKey(const Key('verify_submit_button')));
     await tester.pumpAndSettle();
 
-    expect(find.text('Prestations'), findsWidgets);
-    expect(find.text('Rapports'), findsWidgets);
+    expect(find.text('Créer un établissement'), findsOneWidget);
+    expect(find.text('Aucune invitation en attente'), findsOneWidget);
   });
 
-  testWidgets('affiche le tableau de bord quand le téléphone est vérifié',
-      (tester) async {
+  testWidgets(
+    'affiche la landing quand le téléphone est vérifié sans établissement',
+    (tester) async {
+      authRepository.setUser(user);
+      establishmentRepository.setProfile(verifiedProfileWithoutEstablishment());
+
+      database = await pumpTestApp(tester, overrides: testOverrides());
+      await tester.pumpAndSettle();
+
+      expect(find.text('Bienvenue, Test Manager'), findsOneWidget);
+      expect(
+        find.byKey(const Key('onboarding_create_establishment_button')),
+        findsOneWidget,
+      );
+      expect(find.text('Phone verification'), findsNothing);
+    },
+  );
+
+  testWidgets('la landing affiche et accepte les invitations du numéro', (
+    tester,
+  ) async {
     authRepository.setUser(user);
-    establishmentRepository.setProfile(verifiedProfile());
+    establishmentRepository.setProfile(verifiedProfileWithoutEstablishment());
+    establishmentRepository.setInvitations([
+      EstablishmentInvitation(
+        id: 'inv-1',
+        establishmentId: 'est-invited',
+        establishmentName: 'Restaurant invité',
+        invitedPhone: '33612345678',
+        role: EstablishmentRole.manager,
+        status: EstablishmentInvitationStatus.pending,
+        invitedBy: 'owner-1',
+        invitedByName: 'Propriétaire',
+        createdAt: DateTime(2026, 1, 1),
+      ),
+    ]);
 
     database = await pumpTestApp(tester, overrides: testOverrides());
     await tester.pumpAndSettle();
 
-    expect(find.text('Prestations'), findsWidgets);
-    expect(find.text('Phone verification'), findsNothing);
+    expect(find.text('Invitations reçues'), findsOneWidget);
+    expect(find.text('Restaurant invité'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('accept_invitation_inv-1')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Commandes'), findsWidgets);
+    expect(find.text('Créer un établissement'), findsNothing);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump(const Duration(milliseconds: 1));
   });
 }

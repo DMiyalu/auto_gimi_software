@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/auth/auth_error_mapper.dart';
 import '../../../../core/routing/routes.dart';
+import '../../../../core/theme/app_spacing.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
+import '../../domain/models/establishment_invitation.dart';
 import '../providers/establishment_providers.dart';
 
 class EstablishmentOnboardingScreen extends ConsumerWidget {
@@ -13,6 +16,15 @@ class EstablishmentOnboardingScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final invitations = ref.watch(pendingInvitationsProvider);
     final profile = ref.watch(userProfileProvider).valueOrNull;
+    final controllerState = ref.watch(establishmentControllerProvider);
+
+    ref.listen(establishmentControllerProvider, (_, next) {
+      if (next.hasError) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AuthErrorMapper.message(next.error!))),
+        );
+      }
+    });
 
     return Scaffold(
       appBar: AppBar(
@@ -27,86 +39,55 @@ class EstablishmentOnboardingScreen extends ConsumerWidget {
         ],
       ),
       body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: ListView(
             padding: const EdgeInsets.all(24),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 560),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Icon(
-                    Icons.storefront_outlined,
-                    size: 72,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    profile == null
-                        ? 'Bienvenue'
-                        : 'Bienvenue, ${profile.fullName}',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Créez votre premier établissement ou acceptez une invitation pour rejoindre une équipe existante.',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                  FilledButton.icon(
-                    onPressed: () => context.push(Routes.establishmentNew),
-                    icon: const Icon(Icons.add_business_outlined),
-                    label: const Text('Créer mon premier établissement'),
-                  ),
-                  const SizedBox(height: 24),
-                  invitations.when(
-                    data: (items) {
-                      if (items.isEmpty) {
-                        return const _EmptyInvitations();
-                      }
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(
-                            'Invitations reçues',
-                            style: Theme.of(context).textTheme.titleMedium,
+            children: [
+              Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 640),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _LandingIntro(fullName: profile?.fullName),
+                      const SizedBox(height: AppSpacing.lg),
+                      invitations.when(
+                        data: (items) => _InvitationSection(
+                          invitations: items,
+                          loading: controllerState.isLoading,
+                          onAccept: (invitation) async {
+                            await ref
+                                .read(establishmentControllerProvider.notifier)
+                                .acceptInvitation(invitation);
+                            if (!context.mounted) return;
+                            final state = ref.read(
+                              establishmentControllerProvider,
+                            );
+                            if (!state.hasError) context.go(Routes.dashboard);
+                          },
+                        ),
+                        loading: () => const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(AppSpacing.md),
+                            child: CircularProgressIndicator(),
                           ),
-                          const SizedBox(height: 8),
-                          for (final invitation in items)
-                            Card(
-                              child: ListTile(
-                                leading: const CircleAvatar(
-                                  child: Icon(Icons.mail_outline),
-                                ),
-                                title: Text(invitation.establishmentName),
-                                subtitle: Text(
-                                  'Rôle proposé : ${invitation.role.label}',
-                                ),
-                                trailing: FilledButton(
-                                  onPressed: () => ref
-                                      .read(
-                                        establishmentControllerProvider
-                                            .notifier,
-                                      )
-                                      .acceptInvitation(invitation),
-                                  child: const Text('Accepter'),
-                                ),
-                              ),
-                            ),
-                        ],
-                      );
-                    },
-                    loading: () =>
-                        const Center(child: CircularProgressIndicator()),
-                    error: (error, _) => Text(error.toString()),
+                        ),
+                        error: (error, _) => _InfoRow(
+                          icon: Icons.error_outline,
+                          title: 'Invitations indisponibles',
+                          subtitle: AuthErrorMapper.message(error),
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
+                      _CreateEstablishmentPanel(
+                        onCreate: () => context.push(Routes.establishmentNew),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ),
@@ -114,17 +95,193 @@ class EstablishmentOnboardingScreen extends ConsumerWidget {
   }
 }
 
-class _EmptyInvitations extends StatelessWidget {
-  const _EmptyInvitations();
+class _LandingIntro extends StatelessWidget {
+  const _LandingIntro({required this.fullName});
+
+  final String? fullName;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final name = fullName?.trim();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        CircleAvatar(
+          radius: 32,
+          backgroundColor: theme.colorScheme.primaryContainer,
+          foregroundColor: theme.colorScheme.onPrimaryContainer,
+          child: const Icon(Icons.storefront_outlined, size: 32),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        Text(
+          name == null || name.isEmpty ? 'Bienvenue' : 'Bienvenue, $name',
+          style: theme.textTheme.headlineMedium,
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        Text(
+          'Konnect One centralise commandes, prestations, clients, catalogue et rapports pour chaque établissement que vous gérez.',
+          style: theme.textTheme.bodyLarge?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _InvitationSection extends StatelessWidget {
+  const _InvitationSection({
+    required this.invitations,
+    required this.loading,
+    required this.onAccept,
+  });
+
+  final List<EstablishmentInvitation> invitations;
+  final bool loading;
+  final Future<void> Function(EstablishmentInvitation invitation) onAccept;
+
+  @override
+  Widget build(BuildContext context) {
+    if (invitations.isEmpty) {
+      return const _InfoRow(
+        icon: Icons.mail_outline,
+        title: 'Aucune invitation en attente',
+        subtitle:
+            'Les invitations liées à votre numéro apparaîtront ici automatiquement.',
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'Invitations reçues',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        for (final invitation in invitations)
+          Card(
+            child: ListTile(
+              leading: const CircleAvatar(child: Icon(Icons.mail_outline)),
+              title: Text(invitation.establishmentName),
+              subtitle: Text('Rôle proposé : ${invitation.role.label}'),
+              trailing: FilledButton(
+                key: Key('accept_invitation_${invitation.id}'),
+                onPressed: loading ? null : () => onAccept(invitation),
+                child: loading
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('Accepter'),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _CreateEstablishmentPanel extends StatelessWidget {
+  const _CreateEstablishmentPanel({required this.onCreate});
+
+  final VoidCallback onCreate;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        border: Border.all(color: theme.colorScheme.outlineVariant),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final compact = constraints.maxWidth < 480;
+
+            final icon = CircleAvatar(
+              backgroundColor: theme.colorScheme.secondaryContainer,
+              foregroundColor: theme.colorScheme.onSecondaryContainer,
+              child: const Icon(Icons.add_business_outlined),
+            );
+            final text = Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Créer un établissement',
+                  style: theme.textTheme.titleMedium,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Démarrez avec un restaurant, un garage automobile, une activité d’assainissement ou un autre métier disponible.',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            );
+            final button = FilledButton.icon(
+              key: const Key('onboarding_create_establishment_button'),
+              onPressed: onCreate,
+              icon: const Icon(Icons.add),
+              label: const Text('Créer'),
+            );
+
+            if (compact) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Align(alignment: Alignment.centerLeft, child: icon),
+                  const SizedBox(height: AppSpacing.sm),
+                  text,
+                  const SizedBox(height: AppSpacing.md),
+                  button,
+                ],
+              );
+            }
+
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                icon,
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(child: text),
+                const SizedBox(width: AppSpacing.sm),
+                button,
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _InfoRow extends StatelessWidget {
+  const _InfoRow({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
       contentPadding: EdgeInsets.zero,
-      leading: const CircleAvatar(child: Icon(Icons.mail_outline)),
-      title: const Text('Aucune invitation en attente'),
+      leading: CircleAvatar(child: Icon(icon)),
+      title: Text(title),
       subtitle: Text(
-        'Si quelqu’un vous invite, l’invitation apparaîtra ici automatiquement.',
+        subtitle,
         style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
       ),
     );

@@ -224,6 +224,23 @@ class FakeEstablishmentRepository implements EstablishmentRepository {
     required String phone,
     required EstablishmentInvitation invitation,
   }) async {
+    final joinedEstablishment = Establishment(
+      id: invitation.establishmentId,
+      name: invitation.establishmentName,
+      category: BusinessCategory.restaurant,
+      ownerId: invitation.invitedBy,
+      managerName: invitation.invitedByName,
+      phone: phone,
+      phoneVerified: true,
+      createdAt: invitation.createdAt,
+    );
+    setEstablishments([
+      ...establishments.where((item) => item.id != invitation.establishmentId),
+      joinedEstablishment,
+    ]);
+    establishment = joinedEstablishment;
+    _establishmentController.add(joinedEstablishment);
+
     final member = EstablishmentMember(
       uid: uid,
       establishmentId: invitation.establishmentId,
