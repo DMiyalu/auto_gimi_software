@@ -50,7 +50,8 @@ class BusinessHeader extends ConsumerWidget {
           Expanded(
             child: InkWell(
               borderRadius: BorderRadius.circular(AppRadius.card),
-              onTap: () => _showEstablishmentSwitcher(context, establishment),
+              onTap: () =>
+                  _showEstablishmentSwitcher(context, ref, establishment),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 child: Column(
@@ -73,12 +74,9 @@ class BusinessHeader extends ConsumerWidget {
                     if (establishment != null)
                       Text(
                         establishment.category.label(l10n),
-                        style:
-                            Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onSurfaceVariant,
-                                ),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                       ),
                   ],
                 ),
@@ -89,10 +87,7 @@ class BusinessHeader extends ConsumerWidget {
           const SizedBox(width: AppSpacing.xs),
           GestureDetector(
             onTap: () => context.go(Routes.settings),
-            child: CircleAvatar(
-              radius: 20,
-              child: Text(initials),
-            ),
+            child: CircleAvatar(radius: 20, child: Text(initials)),
           ),
         ],
       ),
@@ -101,9 +96,13 @@ class BusinessHeader extends ConsumerWidget {
 
   void _showEstablishmentSwitcher(
     BuildContext context,
+    WidgetRef ref,
     Establishment? establishment,
   ) {
     final l10n = AppLocalizations.of(context);
+    final establishments =
+        ref.read(userEstablishmentsProvider).valueOrNull ?? const [];
+    final activeId = establishment?.id;
 
     showDialog<void>(
       context: context,
@@ -115,10 +114,30 @@ class BusinessHeader extends ConsumerWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (establishment != null)
+                for (final item in establishments)
                   ListTile(
-                    leading: const CircleAvatar(
-                      child: Icon(Icons.storefront_outlined),
+                    leading: CircleAvatar(child: Icon(item.category.icon)),
+                    title: Text(item.name),
+                    subtitle: Text(item.category.label(l10n)),
+                    trailing: item.id == activeId
+                        ? Icon(
+                            Icons.check_circle,
+                            color: Theme.of(dialogContext).colorScheme.primary,
+                          )
+                        : null,
+                    onTap: item.id == activeId
+                        ? null
+                        : () {
+                            Navigator.of(dialogContext).pop();
+                            ref
+                                .read(establishmentControllerProvider.notifier)
+                                .switchEstablishment(item.id);
+                          },
+                  ),
+                if (establishments.isEmpty && establishment != null)
+                  ListTile(
+                    leading: CircleAvatar(
+                      child: Icon(establishment.category.icon),
                     ),
                     title: Text(establishment.name),
                     subtitle: Text(establishment.category.label(l10n)),
@@ -137,9 +156,9 @@ class BusinessHeader extends ConsumerWidget {
                     // (un compte = un établissement pour l'instant) — la
                     // vraie création sera branchée avec le reste de la
                     // logique métier au retour sur Firebase.
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(l10n.comingSoon)),
-                    );
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text(l10n.comingSoon)));
                   },
                 ),
               ],

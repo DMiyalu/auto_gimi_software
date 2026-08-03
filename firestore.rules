@@ -14,25 +14,50 @@ service cloud.firestore {
       return userDoc().data.establishmentId;
     }
 
+    function userEstablishmentIds() {
+      return userDoc().data.establishmentIds;
+    }
+
+    function hasLegacyEstablishment(establishmentId) {
+      return userDoc().data.establishmentId == establishmentId;
+    }
+
+    function hasMultiEstablishment(establishmentId) {
+      return userDoc().data.establishmentIds is list
+        && establishmentId in userEstablishmentIds();
+    }
+
     function isEstablishmentMember(establishmentId) {
       return isSignedIn()
-        && userEstablishmentId() == establishmentId
+        && (hasLegacyEstablishment(establishmentId)
+          || hasMultiEstablishment(establishmentId))
         && exists(
           /databases/$(database)/documents/establishments/$(establishmentId)/members/$(request.auth.uid)
         );
     }
 
-    function isEstablishmentOwner(establishmentId) {
+    function memberRole(establishmentId) {
+      return get(
+        /databases/$(database)/documents/establishments/$(establishmentId)/members/$(request.auth.uid)
+      ).data.role;
+    }
+
+    function hasEstablishmentRole(establishmentId, roles) {
       return isEstablishmentMember(establishmentId)
-        && get(
-          /databases/$(database)/documents/establishments/$(establishmentId)/members/$(request.auth.uid)
-        ).data.role == 'owner';
+        && memberRole(establishmentId) in roles;
+    }
+
+    function canManageEstablishment(establishmentId) {
+      return hasEstablishmentRole(establishmentId, ['owner', 'manager']);
     }
 
     // --- Inscription SaaS : tout utilisateur authentifié peut créer son tenant ---
     function isValidOwnerSignup() {
       return isSignedIn()
         && request.resource.data.role == 'owner'
+        && request.resource.data.establishmentIds is list
+        && request.resource.data.activeEstablishmentId is string
+        && request.resource.data.rolesByEstablishment is map
         && request.resource.data.phoneVerified == false
         && request.resource.data.establishmentId is string
         && request.resource.data.fullName is string
@@ -52,6 +77,8 @@ service cloud.firestore {
     function isValidMemberSignup(memberId) {
       return isSignedIn()
         && request.auth.uid == memberId
+        && request.resource.data.uid == memberId
+        && request.resource.data.establishmentId is string
         && request.resource.data.role == 'owner'
         && request.resource.data.phoneVerified == false;
     }
@@ -71,13 +98,13 @@ service cloud.firestore {
       allow read: if isSignedIn() && resource.data.ownerId == request.auth.uid;
       allow read: if isEstablishmentMember(establishmentId);
       allow create: if isValidEstablishmentSignup();
-      allow update: if isEstablishmentOwner(establishmentId);
+      allow update: if canManageEstablishment(establishmentId);
 
       match /members/{memberId} {
         allow read: if isEstablishmentMember(establishmentId);
         allow read: if isSignedIn() && request.auth.uid == memberId;
         allow create: if isValidMemberSignup(memberId);
-        allow update, delete: if isEstablishmentOwner(establishmentId);
+        allow update, delete: if canManageEstablishment(establishmentId);
       }
 
       // Données métier — isolation stricte par établissement (tenant SaaS)
