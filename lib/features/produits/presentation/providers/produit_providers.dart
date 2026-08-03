@@ -80,10 +80,19 @@ class ProduitController extends AsyncNotifier<void> {
     ref.read(autoSyncCoordinatorProvider).schedulePush();
   }
 
+  void _ensureCanManageCatalog() {
+    if (!ref.read(canManageCatalogProvider)) {
+      throw StateError(
+        'Seuls le propriétaire et les gérants peuvent modifier le catalogue.',
+      );
+    }
+  }
+
   Future<void> createCategory({required String name}) async {
     final establishmentId = _establishmentId;
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
+      _ensureCanManageCatalog();
       await ref
           .read(produitRepositoryProvider)
           .createCategory(establishmentId: establishmentId, name: name);
@@ -98,6 +107,7 @@ class ProduitController extends AsyncNotifier<void> {
     final establishmentId = _establishmentId;
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
+      _ensureCanManageCatalog();
       await ref
           .read(produitRepositoryProvider)
           .updateCategory(establishmentId: establishmentId, id: id, name: name);
@@ -109,6 +119,7 @@ class ProduitController extends AsyncNotifier<void> {
     final establishmentId = _establishmentId;
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
+      _ensureCanManageCatalog();
       await ref
           .read(produitRepositoryProvider)
           .deleteCategory(establishmentId: establishmentId, id: id);
@@ -126,6 +137,7 @@ class ProduitController extends AsyncNotifier<void> {
     final establishmentId = _establishmentId;
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
+      _ensureCanManageCatalog();
       await ref
           .read(produitRepositoryProvider)
           .createProduit(
@@ -151,6 +163,7 @@ class ProduitController extends AsyncNotifier<void> {
     final establishmentId = _establishmentId;
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
+      _ensureCanManageCatalog();
       await ref
           .read(produitRepositoryProvider)
           .updateProduit(
@@ -170,6 +183,7 @@ class ProduitController extends AsyncNotifier<void> {
     final establishmentId = _establishmentId;
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
+      _ensureCanManageCatalog();
       await ref
           .read(produitRepositoryProvider)
           .deleteProduit(establishmentId: establishmentId, id: id);

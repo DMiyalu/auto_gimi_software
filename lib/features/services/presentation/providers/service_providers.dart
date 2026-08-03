@@ -70,10 +70,19 @@ class ServiceController extends AsyncNotifier<void> {
     ref.read(autoSyncCoordinatorProvider).schedulePush();
   }
 
+  void _ensureCanManageCatalog() {
+    if (!ref.read(canManageCatalogProvider)) {
+      throw StateError(
+        'Seuls le propriétaire et les gérants peuvent modifier le catalogue.',
+      );
+    }
+  }
+
   Future<void> createCategory({required String name}) async {
     final establishmentId = _establishmentId;
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
+      _ensureCanManageCatalog();
       await ref
           .read(serviceRepositoryProvider)
           .createCategory(establishmentId: establishmentId, name: name);
@@ -88,6 +97,7 @@ class ServiceController extends AsyncNotifier<void> {
     final establishmentId = _establishmentId;
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
+      _ensureCanManageCatalog();
       await ref
           .read(serviceRepositoryProvider)
           .updateCategory(establishmentId: establishmentId, id: id, name: name);
@@ -99,6 +109,7 @@ class ServiceController extends AsyncNotifier<void> {
     final establishmentId = _establishmentId;
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
+      _ensureCanManageCatalog();
       await ref
           .read(serviceRepositoryProvider)
           .deleteCategory(establishmentId: establishmentId, id: id);
@@ -116,6 +127,7 @@ class ServiceController extends AsyncNotifier<void> {
     final establishmentId = _establishmentId;
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
+      _ensureCanManageCatalog();
       await ref
           .read(serviceRepositoryProvider)
           .createService(
@@ -141,6 +153,7 @@ class ServiceController extends AsyncNotifier<void> {
     final establishmentId = _establishmentId;
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
+      _ensureCanManageCatalog();
       await ref
           .read(serviceRepositoryProvider)
           .updateService(
@@ -160,6 +173,7 @@ class ServiceController extends AsyncNotifier<void> {
     final establishmentId = _establishmentId;
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
+      _ensureCanManageCatalog();
       await ref
           .read(serviceRepositoryProvider)
           .deleteService(establishmentId: establishmentId, id: id);
