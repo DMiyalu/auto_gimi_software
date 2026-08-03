@@ -9,8 +9,8 @@ class FirebaseAuthRepository implements AuthRepository {
   FirebaseAuthRepository({
     FirebaseAuth? auth,
     required EstablishmentRepository establishmentRepository,
-  })  : _auth = auth ?? FirebaseAuth.instance,
-        _establishmentRepository = establishmentRepository;
+  }) : _auth = auth ?? FirebaseAuth.instance,
+       _establishmentRepository = establishmentRepository;
 
   final FirebaseAuth _auth;
   final EstablishmentRepository _establishmentRepository;
@@ -22,10 +22,7 @@ class FirebaseAuthRepository implements AuthRepository {
   User? get currentUser => _auth.currentUser;
 
   @override
-  Future<void> signIn({
-    required String phone,
-    required String password,
-  }) async {
+  Future<void> signIn({required String phone, required String password}) async {
     await _auth.signInWithEmailAndPassword(
       email: PhoneAuthMapper.toAuthEmail(phone),
       password: password,
@@ -45,9 +42,10 @@ class FirebaseAuthRepository implements AuthRepository {
     }
 
     try {
-      await _establishmentRepository.createEstablishmentForOwner(
-        ownerId: user.uid,
-        request: request,
+      await _establishmentRepository.createUserProfile(
+        uid: user.uid,
+        fullName: request.fullName,
+        phone: request.phone,
       );
     } catch (error) {
       await user.delete();

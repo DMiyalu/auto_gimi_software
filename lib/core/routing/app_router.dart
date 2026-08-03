@@ -9,6 +9,7 @@ import '../../features/auth/presentation/screens/phone_verification_screen.dart'
 import '../../features/auth/presentation/screens/signup_screen.dart';
 import '../../features/establishment/presentation/screens/establishment_form_screen.dart';
 import '../../features/establishment/presentation/providers/establishment_providers.dart';
+import '../../features/establishment/presentation/screens/establishment_onboarding_screen.dart';
 import '../../features/establishment/presentation/screens/invitations_screen.dart';
 import '../../features/establishment/presentation/screens/invite_member_screen.dart';
 import '../../features/establishment/presentation/screens/team_members_screen.dart';
@@ -38,6 +39,7 @@ final routerProvider = Provider<GoRouter>((ref) {
   final refresh = ValueNotifier<int>(0);
   ref.listen(authStateProvider, (_, __) => refresh.value++);
   ref.listen(userProfileProvider, (_, __) => refresh.value++);
+  ref.listen(userEstablishmentsProvider, (_, __) => refresh.value++);
   ref.listen(signupOtpPendingProvider, (_, __) => refresh.value++);
 
   return GoRouter(
@@ -46,6 +48,7 @@ final routerProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final auth = ref.read(authStateProvider);
       final profile = ref.read(userProfileProvider);
+      final establishments = ref.read(userEstablishmentsProvider);
       final location = state.matchedLocation;
 
       if (auth.isLoading) return null;
@@ -55,6 +58,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       final onSignUp = location == Routes.signUp;
       final onVerify = location == Routes.verifyPhone;
       final onAuthScreen = onLogin || onSignUp || onVerify;
+      final onEstablishmentSetup =
+          location == Routes.establishmentOnboarding ||
+          location == Routes.establishmentNew ||
+          location == Routes.invitations ||
+          location == Routes.settings;
 
       if (!isLoggedIn) {
         if (onLogin || onSignUp) return null;
@@ -63,14 +71,28 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       if (profile.isLoading) return null;
 
-      final phoneVerified = profile.valueOrNull?.phoneVerified ?? false;
+      final loadedProfile = profile.valueOrNull;
+      final phoneVerified = loadedProfile?.phoneVerified ?? false;
       final otpPending = ref.read(signupOtpPendingProvider);
 
-      if (otpPending && !phoneVerified) {
+      if (loadedProfile != null && (otpPending || !phoneVerified)) {
         if (onVerify) return null;
         return Routes.verifyPhone;
       }
 
+      if (establishments.isLoading) return null;
+
+      final hasEstablishment =
+          (establishments.valueOrNull ?? const []).isNotEmpty;
+      if (!hasEstablishment) {
+        if (onAuthScreen || location == Routes.dashboard) {
+          return Routes.establishmentOnboarding;
+        }
+        if (!onEstablishmentSetup) return Routes.establishmentOnboarding;
+        return null;
+      }
+
+      if (location == Routes.establishmentOnboarding) return Routes.dashboard;
       if (onAuthScreen) return Routes.dashboard;
       return null;
     },
@@ -87,6 +109,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: Routes.dashboard,
             builder: (_, __) => const PrimaryModuleScreen(),
+          ),
+          GoRoute(
+            path: Routes.establishmentOnboarding,
+            builder: (_, __) => const EstablishmentOnboardingScreen(),
           ),
           GoRoute(
             path: Routes.establishmentNew,

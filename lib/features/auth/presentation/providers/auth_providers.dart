@@ -1,12 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/domain/business_category.dart';
 import '../../domain/models/sign_up_request.dart';
 import 'auth_state_provider.dart';
 import 'signup_otp_pending_provider.dart';
 
-final authControllerProvider =
-    AsyncNotifierProvider<AuthController, void>(AuthController.new);
+final authControllerProvider = AsyncNotifierProvider<AuthController, void>(
+  AuthController.new,
+);
 
 class AuthController extends AsyncNotifier<void> {
   @override
@@ -16,30 +16,23 @@ class AuthController extends AsyncNotifier<void> {
     ref.read(signupOtpPendingProvider.notifier).state = false;
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      await ref.read(authRepositoryProvider).signIn(
-            phone: phone,
-            password: password,
-          );
+      await ref
+          .read(authRepositoryProvider)
+          .signIn(phone: phone, password: password);
     });
   }
 
   Future<void> signUp({
-    required BusinessCategory category,
-    required String establishmentName,
-    required String managerName,
+    required String fullName,
     required String phone,
     required String password,
   }) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      await ref.read(authRepositoryProvider).signUp(
-            SignUpRequest(
-              category: category,
-              establishmentName: establishmentName,
-              managerName: managerName,
-              phone: phone,
-              password: password,
-            ),
+      await ref
+          .read(authRepositoryProvider)
+          .signUp(
+            SignUpRequest(fullName: fullName, phone: phone, password: password),
           );
       ref.read(signupOtpPendingProvider.notifier).state = true;
     });

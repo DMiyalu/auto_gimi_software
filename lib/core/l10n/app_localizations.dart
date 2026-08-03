@@ -635,14 +635,20 @@ abstract class AppLocalizations {
   /// No description provided for @signUpTitle.
   ///
   /// In en, this message translates to:
-  /// **'Create your establishment'**
+  /// **'Create your account'**
   String get signUpTitle;
 
   /// No description provided for @signUpSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Sign up and start managing your business.'**
+  /// **'Verify your phone, then create or join an establishment.'**
   String get signUpSubtitle;
+
+  /// No description provided for @fullName.
+  ///
+  /// In en, this message translates to:
+  /// **'Full name'**
+  String get fullName;
 
   /// No description provided for @businessCategory.
   ///

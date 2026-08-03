@@ -293,10 +293,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get comingSoon => 'Coming soon';
 
   @override
-  String get signUpTitle => 'Create your establishment';
+  String get signUpTitle => 'Create your account';
 
   @override
-  String get signUpSubtitle => 'Sign up and start managing your business.';
+  String get signUpSubtitle =>
+      'Verify your phone, then create or join an establishment.';
+
+  @override
+  String get fullName => 'Full name';
 
   @override
   String get businessCategory => 'Business category';

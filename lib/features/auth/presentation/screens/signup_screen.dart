@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/auth/auth_error_mapper.dart';
 import '../../../../core/auth/phone_auth_mapper.dart';
-import '../../../../core/domain/business_category.dart';
 import '../../../../core/l10n/app_localizations.dart';
 import '../../../../core/presentation/widgets/phone_number_field.dart';
 import '../../../../core/routing/routes.dart';
@@ -19,19 +18,16 @@ class SignUpScreen extends ConsumerStatefulWidget {
 
 class _SignUpScreenState extends ConsumerState<SignUpScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _establishmentNameController = TextEditingController();
-  final _managerNameController = TextEditingController();
+  final _fullNameController = TextEditingController();
   String _phone = '';
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  BusinessCategory _category = BusinessCategory.restaurant;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
   @override
   void dispose() {
-    _establishmentNameController.dispose();
-    _managerNameController.dispose();
+    _fullNameController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
@@ -39,10 +35,10 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    await ref.read(authControllerProvider.notifier).signUp(
-          category: _category,
-          establishmentName: _establishmentNameController.text,
-          managerName: _managerNameController.text,
+    await ref
+        .read(authControllerProvider.notifier)
+        .signUp(
+          fullName: _fullNameController.text,
           phone: _phone,
           password: _passwordController.text,
         );
@@ -74,7 +70,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Icon(
-                      Icons.storefront_outlined,
+                      Icons.person_add_alt_outlined,
                       size: 64,
                       color: Theme.of(context).colorScheme.primary,
                     ),
@@ -89,68 +85,17 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                       l10n.signUpSubtitle,
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                     ),
                     const SizedBox(height: 32),
-                    DropdownButtonFormField<BusinessCategory>(
-                      value: _category,
-                      isExpanded: true,
-                      decoration: InputDecoration(
-                        labelText: l10n.businessCategory,
-                      ),
-                      items: BusinessCategory.values
-                          .map(
-                            (category) => DropdownMenuItem(
-                              value: category,
-                              child: Text(category.label(l10n)),
-                            ),
-                          )
-                          .toList(),
-                      selectedItemBuilder: (context) {
-                        return BusinessCategory.values
-                            .map(
-                              (category) => Row(
-                                children: [
-                                  Icon(category.icon, size: 20),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Text(
-                                      category.label(l10n),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            )
-                            .toList();
-                      },
-                      onChanged: authState.isLoading
-                          ? null
-                          : (value) {
-                              if (value != null) {
-                                setState(() => _category = value);
-                              }
-                            },
-                    ),
-                    const SizedBox(height: 16),
                     TextFormField(
-                      controller: _establishmentNameController,
-                      decoration:
-                          InputDecoration(labelText: l10n.establishmentName),
-                      textCapitalization: TextCapitalization.words,
-                      validator: (v) => v == null || v.trim().isEmpty
-                          ? l10n.establishmentName
-                          : null,
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _managerNameController,
-                      decoration: InputDecoration(labelText: l10n.managerName),
+                      controller: _fullNameController,
+                      enabled: !authState.isLoading,
+                      decoration: InputDecoration(labelText: l10n.fullName),
                       textCapitalization: TextCapitalization.words,
                       validator: (v) =>
-                          v == null || v.trim().isEmpty ? l10n.managerName : null,
+                          v == null || v.trim().isEmpty ? l10n.fullName : null,
                     ),
                     const SizedBox(height: 16),
                     PhoneNumberField(

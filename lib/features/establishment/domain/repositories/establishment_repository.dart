@@ -1,4 +1,3 @@
-import '../../../auth/domain/models/sign_up_request.dart';
 import '../../../../core/domain/business_category.dart';
 import '../models/establishment.dart';
 import '../models/establishment_invitation.dart';
@@ -7,9 +6,10 @@ import '../models/establishment_role.dart';
 import '../models/user_profile.dart';
 
 abstract class EstablishmentRepository {
-  Future<Establishment> createEstablishmentForOwner({
-    required String ownerId,
-    required SignUpRequest request,
+  Future<void> createUserProfile({
+    required String uid,
+    required String fullName,
+    required String phone,
   });
 
   Future<Establishment> createOwnedEstablishment({

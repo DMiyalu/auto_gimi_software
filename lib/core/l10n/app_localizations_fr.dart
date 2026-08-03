@@ -296,11 +296,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get comingSoon => 'Bientôt disponible';
 
   @override
-  String get signUpTitle => 'Créer votre établissement';
+  String get signUpTitle => 'Créer votre compte';
 
   @override
   String get signUpSubtitle =>
-      'Inscrivez-vous et commencez à gérer votre activité.';
+      'Vérifiez votre numéro, puis créez ou rejoignez un établissement.';
+
+  @override
+  String get fullName => 'Nom complet';
 
   @override
   String get businessCategory => 'Catégorie d\'activité';

@@ -89,11 +89,22 @@ class FakeEstablishmentRepository implements EstablishmentRepository {
   }
 
   @override
-  Future<Establishment> createEstablishmentForOwner({
-    required String ownerId,
-    required SignUpRequest request,
+  Future<void> createUserProfile({
+    required String uid,
+    required String fullName,
+    required String phone,
   }) async {
-    throw UnimplementedError();
+    setProfile(
+      UserProfile(
+        uid: uid,
+        phone: phone,
+        fullName: fullName,
+        establishmentId: '',
+        role: 'agent',
+        phoneVerified: false,
+        createdAt: DateTime(2026, 1, 1),
+      ),
+    );
   }
 
   @override
@@ -253,6 +264,28 @@ class FakeEstablishmentRepository implements EstablishmentRepository {
       uid: uid,
       establishmentId: invitation.establishmentId,
     );
+    final current = profile;
+    if (current != null) {
+      setProfile(
+        UserProfile(
+          uid: current.uid,
+          phone: phone,
+          fullName: fullName,
+          establishmentId: invitation.establishmentId,
+          role: invitation.role.firestoreValue,
+          phoneVerified: true,
+          createdAt: current.createdAt,
+          establishmentIds: [
+            ...{...current.establishmentIds, invitation.establishmentId},
+          ],
+          activeEstablishmentId: invitation.establishmentId,
+          rolesByEstablishment: {
+            ...current.rolesByEstablishment,
+            invitation.establishmentId: invitation.role.firestoreValue,
+          },
+        ),
+      );
+    }
   }
 
   @override

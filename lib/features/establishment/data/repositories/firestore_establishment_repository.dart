@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../../auth/domain/models/sign_up_request.dart';
 import '../../../../core/auth/phone_auth_mapper.dart';
 import '../../../../core/domain/business_category.dart';
 import '../../domain/models/establishment.dart';
@@ -25,17 +24,24 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
       _firestore.collection('users');
 
   @override
-  Future<Establishment> createEstablishmentForOwner({
-    required String ownerId,
-    required SignUpRequest request,
+  Future<void> createUserProfile({
+    required String uid,
+    required String fullName,
+    required String phone,
   }) async {
-    return createOwnedEstablishment(
-      ownerId: ownerId,
-      category: request.category,
-      establishmentName: request.establishmentName,
-      managerName: request.managerName,
-      phone: request.phone,
-    );
+    final normalizedPhone = PhoneAuthMapper.normalize(phone);
+    await _users.doc(uid).set({
+      'phone': normalizedPhone,
+      'fullName': fullName.trim(),
+      'establishmentId': '',
+      'establishmentIds': const <String>[],
+      'activeEstablishmentId': null,
+      'role': 'agent',
+      'rolesByEstablishment': const <String, String>{},
+      'phoneVerified': false,
+      'createdAt': FieldValue.serverTimestamp(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
   }
 
   @override
@@ -67,7 +73,11 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
     });
 
     if (userSnapshot.exists) {
+      final currentLegacyId =
+          userSnapshot.data()?['establishmentId'] as String?;
       batch.update(userRef, {
+        if (currentLegacyId == null || currentLegacyId.isEmpty)
+          'establishmentId': establishmentId,
         'establishmentIds': FieldValue.arrayUnion([establishmentId]),
         'activeEstablishmentId': establishmentId,
         'rolesByEstablishment.$establishmentId': 'owner',
@@ -128,9 +138,11 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
       final ids = profile.establishmentIds.isEmpty
           ? [profile.establishmentId]
           : profile.establishmentIds;
+      final validIds = ids.where((id) => id.isNotEmpty).toList();
+      if (validIds.isEmpty) return const <Establishment>[];
 
       final snapshots = await Future.wait(
-        ids.map((id) => _establishments.doc(id).get()),
+        validIds.map((id) => _establishments.doc(id).get()),
       );
 
       return snapshots
@@ -148,9 +160,11 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
       final ids = profile.establishmentIds.isEmpty
           ? [profile.establishmentId]
           : profile.establishmentIds;
+      final validIds = ids.where((id) => id.isNotEmpty).toList();
+      if (validIds.isEmpty) return const <EstablishmentMember>[];
 
       final snapshots = await Future.wait(
-        ids.map(
+        validIds.map(
           (id) => _establishments.doc(id).collection('members').doc(uid).get(),
         ),
       );
@@ -248,8 +262,10 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
     batch.set(userRef, {
       'phone': normalizedPhone,
       'fullName': fullName.trim(),
+      'establishmentId': invitation.establishmentId,
       'establishmentIds': FieldValue.arrayUnion([invitation.establishmentId]),
       'activeEstablishmentId': invitation.establishmentId,
+      'role': invitation.role.firestoreValue,
       'rolesByEstablishment.${invitation.establishmentId}':
           invitation.role.firestoreValue,
       'phoneVerified': true,
