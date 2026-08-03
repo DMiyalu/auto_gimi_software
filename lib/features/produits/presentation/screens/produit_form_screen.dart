@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/auth/auth_error_mapper.dart';
 import '../../../../core/domain/app_currency.dart';
 import '../../../../core/l10n/app_localizations.dart';
+import '../../../establishment/presentation/widgets/catalog_permission_gate.dart';
 import '../providers/produit_providers.dart';
 
 class ProduitFormScreen extends ConsumerStatefulWidget {
@@ -130,14 +131,18 @@ class _ProduitFormScreenState extends ConsumerState<ProduitFormScreen> {
       );
       return;
     }
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.productDeleted)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l10n.productDeleted)));
     context.pop();
   }
 
   @override
   Widget build(BuildContext context) {
+    return CatalogPermissionGate(child: _buildForm(context));
+  }
+
+  Widget _buildForm(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final formState = ref.watch(produitControllerProvider);
     final categoriesAsync = ref.watch(productCategoriesProvider);
@@ -201,8 +206,8 @@ class _ProduitFormScreenState extends ConsumerState<ProduitFormScreen> {
                       enabled: !formState.isLoading,
                       validator: (value) =>
                           value == null || value.trim().isEmpty
-                              ? l10n.productName
-                              : null,
+                          ? l10n.productName
+                          : null,
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
@@ -219,8 +224,9 @@ class _ProduitFormScreenState extends ConsumerState<ProduitFormScreen> {
                         if (value == null || value.trim().isEmpty) {
                           return l10n.price;
                         }
-                        final parsed =
-                            double.tryParse(value.replaceAll(',', '.'));
+                        final parsed = double.tryParse(
+                          value.replaceAll(',', '.'),
+                        );
                         if (parsed == null || parsed < 0) {
                           return l10n.priceInvalid;
                         }

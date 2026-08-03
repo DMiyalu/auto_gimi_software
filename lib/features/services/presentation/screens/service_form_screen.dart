@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/auth/auth_error_mapper.dart';
 import '../../../../core/domain/app_currency.dart';
 import '../../../../core/l10n/app_localizations.dart';
+import '../../../establishment/presentation/widgets/catalog_permission_gate.dart';
 import '../providers/service_providers.dart';
 
 class ServiceFormScreen extends ConsumerStatefulWidget {
@@ -130,14 +131,18 @@ class _ServiceFormScreenState extends ConsumerState<ServiceFormScreen> {
       );
       return;
     }
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.serviceDeleted)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l10n.serviceDeleted)));
     context.pop();
   }
 
   @override
   Widget build(BuildContext context) {
+    return CatalogPermissionGate(child: _buildForm(context));
+  }
+
+  Widget _buildForm(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final formState = ref.watch(serviceControllerProvider);
     final categoriesAsync = ref.watch(serviceCategoriesProvider);
@@ -201,8 +206,8 @@ class _ServiceFormScreenState extends ConsumerState<ServiceFormScreen> {
                       enabled: !formState.isLoading,
                       validator: (value) =>
                           value == null || value.trim().isEmpty
-                              ? l10n.serviceName
-                              : null,
+                          ? l10n.serviceName
+                          : null,
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
@@ -219,8 +224,9 @@ class _ServiceFormScreenState extends ConsumerState<ServiceFormScreen> {
                         if (value == null || value.trim().isEmpty) {
                           return l10n.price;
                         }
-                        final parsed =
-                            double.tryParse(value.replaceAll(',', '.'));
+                        final parsed = double.tryParse(
+                          value.replaceAll(',', '.'),
+                        );
                         if (parsed == null || parsed < 0) {
                           return l10n.priceInvalid;
                         }
@@ -256,9 +262,7 @@ class _ServiceFormScreenState extends ConsumerState<ServiceFormScreen> {
                         helperText: l10n.maintenanceIntervalHint,
                       ),
                       keyboardType: TextInputType.number,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                      ],
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       enabled: !formState.isLoading,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) return null;

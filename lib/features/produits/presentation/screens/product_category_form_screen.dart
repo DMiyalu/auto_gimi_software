@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/auth/auth_error_mapper.dart';
 import '../../../../core/l10n/app_localizations.dart';
+import '../../../establishment/presentation/widgets/catalog_permission_gate.dart';
 import '../providers/produit_providers.dart';
 
 class ProductCategoryFormScreen extends ConsumerStatefulWidget {
@@ -108,14 +109,18 @@ class _ProductCategoryFormScreenState
       );
       return;
     }
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.categoryDeleted)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l10n.categoryDeleted)));
     context.pop();
   }
 
   @override
   Widget build(BuildContext context) {
+    return CatalogPermissionGate(child: _buildForm(context));
+  }
+
+  Widget _buildForm(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final formState = ref.watch(produitControllerProvider);
 
@@ -126,9 +131,7 @@ class _ProductCategoryFormScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          _isEditing ? l10n.editCategory : l10n.addProductCategory,
-        ),
+        title: Text(_isEditing ? l10n.editCategory : l10n.addProductCategory),
         actions: [
           if (_isEditing)
             IconButton(
@@ -151,10 +154,9 @@ class _ProductCategoryFormScreenState
                   decoration: InputDecoration(labelText: l10n.categoryName),
                   textCapitalization: TextCapitalization.sentences,
                   enabled: !formState.isLoading,
-                  validator: (value) =>
-                      value == null || value.trim().isEmpty
-                          ? l10n.categoryName
-                          : null,
+                  validator: (value) => value == null || value.trim().isEmpty
+                      ? l10n.categoryName
+                      : null,
                 ),
                 const SizedBox(height: 32),
                 FilledButton(
