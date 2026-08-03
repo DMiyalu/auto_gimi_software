@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:auto_mobile_software/core/database/app_database.dart';
 import 'package:auto_mobile_software/core/domain/business_category.dart';
@@ -39,7 +40,7 @@ Future<void> _pump(
         ),
         if (database != null) databaseProvider.overrideWithValue(database),
       ],
-      child: MaterialApp(
+      child: MaterialApp.router(
         localizationsDelegates: const [
           AppLocalizations.delegate,
           GlobalMaterialLocalizations.delegate,
@@ -47,7 +48,12 @@ Future<void> _pump(
           GlobalCupertinoLocalizations.delegate,
         ],
         supportedLocales: AppLocalizations.supportedLocales,
-        home: const PrimaryModuleScreen(),
+        routerConfig: GoRouter(
+          initialLocation: '/',
+          routes: [
+            GoRoute(path: '/', builder: (_, __) => const PrimaryModuleScreen()),
+          ],
+        ),
       ),
     ),
   );

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:auto_mobile_software/core/domain/business_category.dart';
 import 'package:auto_mobile_software/core/l10n/app_localizations.dart';
@@ -29,7 +30,7 @@ Future<void> _pump(WidgetTester tester) async {
           (ref) => Stream.value(_establishment),
         ),
       ],
-      child: MaterialApp(
+      child: MaterialApp.router(
         locale: const Locale('fr'),
         localizationsDelegates: const [
           AppLocalizations.delegate,
@@ -38,7 +39,12 @@ Future<void> _pump(WidgetTester tester) async {
           GlobalCupertinoLocalizations.delegate,
         ],
         supportedLocales: AppLocalizations.supportedLocales,
-        home: const PrimaryModuleScreen(),
+        routerConfig: GoRouter(
+          initialLocation: '/',
+          routes: [
+            GoRoute(path: '/', builder: (_, __) => const PrimaryModuleScreen()),
+          ],
+        ),
       ),
     ),
   );

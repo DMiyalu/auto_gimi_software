@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/l10n/app_localizations.dart';
 import '../../../../core/routing/routes.dart';
 import '../../../../core/utils/currency_formatter.dart';
+import '../../../primary_module/controllers/primary_module_providers.dart';
+import '../../../shell/presentation/widgets/primary_scaffold.dart';
 import '../providers/service_providers.dart';
 
 class ServicesScreen extends ConsumerStatefulWidget {
@@ -37,39 +39,48 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen>
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final isCategories = _tabController.index == 1;
+    final config = ref.watch(primaryModuleConfigProvider);
+    final isPrimary = config.catalogTab.route == Routes.services;
 
-    return Scaffold(
-      body: Column(
-        children: [
-          TabBar(
+    final body = Column(
+      children: [
+        TabBar(
+          controller: _tabController,
+          tabs: [
+            Tab(text: l10n.services),
+            Tab(text: l10n.serviceCategories),
+          ],
+        ),
+        Expanded(
+          child: TabBarView(
             controller: _tabController,
-            tabs: [
-              Tab(text: l10n.services),
-              Tab(text: l10n.serviceCategories),
+            children: const [
+              _ServicesListTab(),
+              _ServiceCategoriesTab(),
             ],
           ),
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: const [
-                _ServicesListTab(),
-                _ServiceCategoriesTab(),
-              ],
-            ),
-          ),
-        ],
+        ),
+      ],
+    );
+    final fab = FloatingActionButton.extended(
+      onPressed: () => context.push(
+        isCategories ? Routes.serviceCategoryNew : Routes.serviceNew,
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push(
-          isCategories ? Routes.serviceCategoryNew : Routes.serviceNew,
-        ),
-        icon: Icon(
-          isCategories ? Icons.create_new_folder_outlined : Icons.add,
-        ),
-        label: Text(
-          isCategories ? l10n.addServiceCategory : l10n.addService,
-        ),
+      icon: Icon(
+        isCategories ? Icons.create_new_folder_outlined : Icons.add,
       ),
+      label: Text(
+        isCategories ? l10n.addServiceCategory : l10n.addService,
+      ),
+    );
+
+    if (isPrimary) {
+      return PrimaryScaffold(floatingActionButton: fab, body: body);
+    }
+    return Scaffold(
+      appBar: AppBar(title: Text(l10n.services)),
+      floatingActionButton: fab,
+      body: body,
     );
   }
 }

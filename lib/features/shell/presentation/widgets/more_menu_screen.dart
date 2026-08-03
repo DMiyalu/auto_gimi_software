@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/app_spacing.dart';
-import '../../../primary_module/widgets/business_header.dart';
-import 'app_drawer.dart';
 import 'more_menu_content.dart';
+import 'primary_scaffold.dart';
 
 /// Onglet "Plus" — regroupe les destinations qui ne tiennent pas dans les
 /// 4 premiers onglets de la bottom navigation. Entièrement piloté par la
@@ -14,17 +12,6 @@ class MoreMenuScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      drawer: const AppDrawer(),
-      body: SafeArea(
-        child: Column(
-          children: [
-            const BusinessHeader(),
-            const SizedBox(height: AppSpacing.xs),
-            const Expanded(child: MoreMenuContent()),
-          ],
-        ),
-      ),
-    );
+    return const PrimaryScaffold(body: MoreMenuContent());
   }
 }
