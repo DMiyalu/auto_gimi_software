@@ -109,6 +109,7 @@ class CommandeRepositoryImpl implements CommandeRepository {
     int quantity = 1,
   }) async {
     if (quantity <= 0) throw ArgumentError('La quantité doit être positive.');
+    await _requireMutableCommande(establishmentId, commandeId);
 
     final produit =
         await (_database.select(_database.produits)..where(
@@ -201,6 +202,7 @@ class CommandeRepositoryImpl implements CommandeRepository {
             ))
             .getSingleOrNull();
     if (line == null) throw StateError('Ligne de commande introuvable.');
+    await _requireMutableCommande(establishmentId, line.commandeId);
 
     final produit =
         await (_database.select(_database.produits)..where(
@@ -244,11 +246,92 @@ class CommandeRepositoryImpl implements CommandeRepository {
   }
 
   @override
+  Future<void> cancelCommande({
+    required String establishmentId,
+    required String commandeId,
+  }) async {
+    await _requireMutableCommande(establishmentId, commandeId);
+    final now = DateTime.now();
+
+    await _database.transaction(() async {
+      final lines =
+          await (_database.select(_database.ligneCommandes)..where(
+                (l) =>
+                    l.establishmentId.equals(establishmentId) &
+                    l.commandeId.equals(commandeId) &
+                    l.isDeleted.equals(false),
+              ))
+              .get();
+
+      for (final line in lines) {
+        final produit =
+            await (_database.select(_database.produits)..where(
+                  (p) =>
+                      p.establishmentId.equals(establishmentId) &
+                      p.id.equals(line.produitId) &
+                      p.isDeleted.equals(false),
+                ))
+                .getSingleOrNull();
+
+        if (produit != null) {
+          await (_database.update(_database.produits)..where(
+                (p) =>
+                    p.establishmentId.equals(establishmentId) &
+                    p.id.equals(line.produitId),
+              ))
+              .write(
+                ProduitsCompanion(
+                  stock: Value(produit.stock + line.quantite),
+                  updatedAt: Value(now),
+                  isDirty: const Value(true),
+                ),
+              );
+        }
+
+        await (_database.update(_database.ligneCommandes)..where(
+              (l) =>
+                  l.establishmentId.equals(establishmentId) &
+                  l.id.equals(line.id),
+            ))
+            .write(
+              LigneCommandesCompanion(
+                isDeleted: const Value(true),
+                updatedAt: Value(now),
+                isDirty: const Value(true),
+              ),
+            );
+      }
+
+      await (_database.update(_database.commandes)..where(
+            (c) =>
+                c.establishmentId.equals(establishmentId) &
+                c.id.equals(commandeId),
+          ))
+          .write(
+            CommandesCompanion(
+              statut: const Value('annulees'),
+              montantTotal: const Value(0),
+              updatedAt: Value(now),
+              isDirty: const Value(true),
+            ),
+          );
+    });
+  }
+
+  @override
   Future<void> setStatus({
     required String establishmentId,
     required String commandeId,
     required String statusKey,
   }) async {
+    if (statusKey == 'annulees') {
+      await cancelCommande(
+        establishmentId: establishmentId,
+        commandeId: commandeId,
+      );
+      return;
+    }
+    await _requireMutableCommande(establishmentId, commandeId);
     final now = DateTime.now();
     await (_database.update(_database.commandes)..where(
           (c) =>
@@ -262,6 +345,25 @@ class CommandeRepositoryImpl implements CommandeRepository {
             isDirty: const Value(true),
           ),
         );
+  }
+
+  Future<Commande> _requireMutableCommande(
+    String establishmentId,
+    String commandeId,
+  ) async {
+    final commande =
+        await (_database.select(_database.commandes)..where(
+              (c) =>
+                  c.establishmentId.equals(establishmentId) &
+                  c.id.equals(commandeId) &
+                  c.isDeleted.equals(false),
+            ))
+            .getSingleOrNull();
+    if (commande == null) throw StateError('Commande introuvable.');
+    if (commande.statut == 'annulees') {
+      throw StateError('Cette commande est annulée.');
+    }
+    return commande;
   }
 
   Future<void> _recalculateTotal(

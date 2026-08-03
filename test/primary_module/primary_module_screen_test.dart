@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:auto_mobile_software/core/database/app_database.dart';
+import 'package:auto_mobile_software/core/domain/app_currency.dart';
 import 'package:auto_mobile_software/core/domain/business_category.dart';
 import 'package:auto_mobile_software/core/l10n/app_localizations.dart';
 import 'package:auto_mobile_software/core/providers/database_provider.dart';
@@ -14,6 +15,7 @@ import 'package:auto_mobile_software/features/establishment/domain/models/establ
 import 'package:auto_mobile_software/features/establishment/presentation/providers/establishment_providers.dart';
 import 'package:auto_mobile_software/features/garage/data/repositories/prestation_repository_impl.dart';
 import 'package:auto_mobile_software/features/primary_module/screens/primary_module_screen.dart';
+import 'package:auto_mobile_software/features/produits/data/repositories/produit_repository_impl.dart';
 import 'package:auto_mobile_software/features/restaurant/presentation/screens/commande_detail_screen.dart';
 import 'package:auto_mobile_software/features/restaurant/data/repositories/commande_repository_impl.dart';
 
@@ -146,6 +148,51 @@ void main() {
     expect(find.text(commande.reference), findsWidgets);
     expect(find.text('Table terrasse'), findsOneWidget);
     expect(find.text('Lignes'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump(const Duration(milliseconds: 1));
+  });
+
+  testWidgets('le détail commande annulée bloque les actions opérationnelles', (
+    tester,
+  ) async {
+    final database = AppDatabase(NativeDatabase.memory());
+    addTearDown(database.close);
+    final produit = await ProduitRepositoryImpl(database: database)
+        .createProduit(
+          establishmentId: 'etab-1',
+          name: 'Burger',
+          price: 8,
+          currency: AppCurrency.usd,
+          stock: 2,
+        );
+    final repository = CommandeRepositoryImpl(database: database);
+    final commande = await repository.createCommande(
+      establishmentId: 'etab-1',
+      context: 'Table annulée',
+    );
+    await repository.addProduitLine(
+      establishmentId: 'etab-1',
+      commandeId: commande.id,
+      produitId: produit.id,
+    );
+    await repository.cancelCommande(
+      establishmentId: 'etab-1',
+      commandeId: commande.id,
+    );
+
+    await _pump(tester, BusinessCategory.restaurant, database: database);
+
+    await tester.tap(find.text(commande.reference));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Annulée'), findsWidgets);
+    expect(
+      find.text('Commande annulée : les produits ont été remis en stock.'),
+      findsOneWidget,
+    );
+    expect(find.text('Produit'), findsNothing);
+    expect(find.byIcon(Icons.delete_outline), findsNothing);
 
     await tester.pumpWidget(const SizedBox());
     await tester.pump(const Duration(milliseconds: 1));

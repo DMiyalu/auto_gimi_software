@@ -123,6 +123,22 @@ class CommandeController extends AsyncNotifier<void> {
     });
   }
 
+  Future<void> cancelCommande({required String commandeId}) async {
+    final establishmentId = _requireEstablishmentId();
+
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      _ensureCanCreateActivities();
+      await ref
+          .read(commandeRepositoryProvider)
+          .cancelCommande(
+            establishmentId: establishmentId,
+            commandeId: commandeId,
+          );
+      ref.read(autoSyncCoordinatorProvider).schedulePush();
+    });
+  }
+
   Future<void> setStatus({
     required String commandeId,
     required String statusKey,

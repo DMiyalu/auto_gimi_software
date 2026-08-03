@@ -35,16 +35,19 @@ class CommandeDetailScreen extends ConsumerWidget {
             body: const Center(child: Text('Commande introuvable')),
           );
         }
+        final isCanceled = item.statusKey == 'annulees';
 
         return Scaffold(
           appBar: AppBar(title: Text(item.reference)),
-          floatingActionButton: FloatingActionButton.extended(
-            onPressed: state.isLoading
-                ? null
-                : () => _showAddProductSheet(context, ref),
-            icon: const Icon(Icons.add_shopping_cart_outlined),
-            label: const Text('Produit'),
-          ),
+          floatingActionButton: isCanceled
+              ? null
+              : FloatingActionButton.extended(
+                  onPressed: state.isLoading
+                      ? null
+                      : () => _showAddProductSheet(context, ref),
+                  icon: const Icon(Icons.add_shopping_cart_outlined),
+                  label: const Text('Produit'),
+                ),
           body: ListView(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
             children: [
@@ -74,7 +77,7 @@ class CommandeDetailScreen extends ConsumerWidget {
                   ),
                   DropdownMenuItem(value: 'annulees', child: Text('Annulée')),
                 ],
-                onChanged: state.isLoading
+                onChanged: state.isLoading || isCanceled
                     ? null
                     : (value) {
                         if (value == null) return;
@@ -86,6 +89,24 @@ class CommandeDetailScreen extends ConsumerWidget {
                             );
                       },
               ),
+              if (!isCanceled) ...[
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: state.isLoading
+                      ? null
+                      : () => ref
+                            .read(commandeControllerProvider.notifier)
+                            .cancelCommande(commandeId: commandeId),
+                  icon: const Icon(Icons.cancel_outlined),
+                  label: const Text('Annuler la commande'),
+                ),
+              ] else ...[
+                const SizedBox(height: 12),
+                const Text(
+                  'Commande annulée : les produits ont été remis en stock.',
+                  textAlign: TextAlign.center,
+                ),
+              ],
               const SizedBox(height: 24),
               Text('Lignes', style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 8),
@@ -106,15 +127,16 @@ class CommandeDetailScreen extends ConsumerWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(line.lineAmount.toStringAsFixed(2)),
-                        IconButton(
-                          tooltip: 'Retirer',
-                          onPressed: state.isLoading
-                              ? null
-                              : () => ref
-                                    .read(commandeControllerProvider.notifier)
-                                    .removeLine(lineId: line.id),
-                          icon: const Icon(Icons.delete_outline),
-                        ),
+                        if (!isCanceled)
+                          IconButton(
+                            tooltip: 'Retirer',
+                            onPressed: state.isLoading
+                                ? null
+                                : () => ref
+                                      .read(commandeControllerProvider.notifier)
+                                      .removeLine(lineId: line.id),
+                            icon: const Icon(Icons.delete_outline),
+                          ),
                       ],
                     ),
                   ),
