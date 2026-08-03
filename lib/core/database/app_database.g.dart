@@ -5256,6 +5256,1522 @@ class LigneCommandesCompanion extends UpdateCompanion<LigneCommande> {
   }
 }
 
+class $FacturesTable extends Factures with TableInfo<$FacturesTable, Facture> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $FacturesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _establishmentIdMeta = const VerificationMeta(
+    'establishmentId',
+  );
+  @override
+  late final GeneratedColumn<String> establishmentId = GeneratedColumn<String>(
+    'establishment_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _referenceMeta = const VerificationMeta(
+    'reference',
+  );
+  @override
+  late final GeneratedColumn<String> reference = GeneratedColumn<String>(
+    'reference',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _activityTypeMeta = const VerificationMeta(
+    'activityType',
+  );
+  @override
+  late final GeneratedColumn<String> activityType = GeneratedColumn<String>(
+    'activity_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _activityIdMeta = const VerificationMeta(
+    'activityId',
+  );
+  @override
+  late final GeneratedColumn<String> activityId = GeneratedColumn<String>(
+    'activity_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _statutMeta = const VerificationMeta('statut');
+  @override
+  late final GeneratedColumn<String> statut = GeneratedColumn<String>(
+    'statut',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('emise'),
+  );
+  static const VerificationMeta _montantTotalMeta = const VerificationMeta(
+    'montantTotal',
+  );
+  @override
+  late final GeneratedColumn<double> montantTotal = GeneratedColumn<double>(
+    'montant_total',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _montantPayeMeta = const VerificationMeta(
+    'montantPaye',
+  );
+  @override
+  late final GeneratedColumn<double> montantPaye = GeneratedColumn<double>(
+    'montant_paye',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _deviseMeta = const VerificationMeta('devise');
+  @override
+  late final GeneratedColumn<String> devise = GeneratedColumn<String>(
+    'devise',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('USD'),
+  );
+  static const VerificationMeta _issuedAtMeta = const VerificationMeta(
+    'issuedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> issuedAt = GeneratedColumn<DateTime>(
+    'issued_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _paidAtMeta = const VerificationMeta('paidAt');
+  @override
+  late final GeneratedColumn<DateTime> paidAt = GeneratedColumn<DateTime>(
+    'paid_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _isDeletedMeta = const VerificationMeta(
+    'isDeleted',
+  );
+  @override
+  late final GeneratedColumn<bool> isDeleted = GeneratedColumn<bool>(
+    'is_deleted',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_deleted" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _isDirtyMeta = const VerificationMeta(
+    'isDirty',
+  );
+  @override
+  late final GeneratedColumn<bool> isDirty = GeneratedColumn<bool>(
+    'is_dirty',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_dirty" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    establishmentId,
+    reference,
+    activityType,
+    activityId,
+    statut,
+    montantTotal,
+    montantPaye,
+    devise,
+    issuedAt,
+    paidAt,
+    createdAt,
+    updatedAt,
+    isDeleted,
+    isDirty,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'factures';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Facture> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('establishment_id')) {
+      context.handle(
+        _establishmentIdMeta,
+        establishmentId.isAcceptableOrUnknown(
+          data['establishment_id']!,
+          _establishmentIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('reference')) {
+      context.handle(
+        _referenceMeta,
+        reference.isAcceptableOrUnknown(data['reference']!, _referenceMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_referenceMeta);
+    }
+    if (data.containsKey('activity_type')) {
+      context.handle(
+        _activityTypeMeta,
+        activityType.isAcceptableOrUnknown(
+          data['activity_type']!,
+          _activityTypeMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_activityTypeMeta);
+    }
+    if (data.containsKey('activity_id')) {
+      context.handle(
+        _activityIdMeta,
+        activityId.isAcceptableOrUnknown(data['activity_id']!, _activityIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_activityIdMeta);
+    }
+    if (data.containsKey('statut')) {
+      context.handle(
+        _statutMeta,
+        statut.isAcceptableOrUnknown(data['statut']!, _statutMeta),
+      );
+    }
+    if (data.containsKey('montant_total')) {
+      context.handle(
+        _montantTotalMeta,
+        montantTotal.isAcceptableOrUnknown(
+          data['montant_total']!,
+          _montantTotalMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_montantTotalMeta);
+    }
+    if (data.containsKey('montant_paye')) {
+      context.handle(
+        _montantPayeMeta,
+        montantPaye.isAcceptableOrUnknown(
+          data['montant_paye']!,
+          _montantPayeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('devise')) {
+      context.handle(
+        _deviseMeta,
+        devise.isAcceptableOrUnknown(data['devise']!, _deviseMeta),
+      );
+    }
+    if (data.containsKey('issued_at')) {
+      context.handle(
+        _issuedAtMeta,
+        issuedAt.isAcceptableOrUnknown(data['issued_at']!, _issuedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_issuedAtMeta);
+    }
+    if (data.containsKey('paid_at')) {
+      context.handle(
+        _paidAtMeta,
+        paidAt.isAcceptableOrUnknown(data['paid_at']!, _paidAtMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('is_deleted')) {
+      context.handle(
+        _isDeletedMeta,
+        isDeleted.isAcceptableOrUnknown(data['is_deleted']!, _isDeletedMeta),
+      );
+    }
+    if (data.containsKey('is_dirty')) {
+      context.handle(
+        _isDirtyMeta,
+        isDirty.isAcceptableOrUnknown(data['is_dirty']!, _isDirtyMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Facture map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Facture(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      establishmentId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}establishment_id'],
+      )!,
+      reference: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reference'],
+      )!,
+      activityType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}activity_type'],
+      )!,
+      activityId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}activity_id'],
+      )!,
+      statut: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}statut'],
+      )!,
+      montantTotal: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}montant_total'],
+      )!,
+      montantPaye: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}montant_paye'],
+      )!,
+      devise: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}devise'],
+      )!,
+      issuedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}issued_at'],
+      )!,
+      paidAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}paid_at'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      isDeleted: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_deleted'],
+      )!,
+      isDirty: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_dirty'],
+      )!,
+    );
+  }
+
+  @override
+  $FacturesTable createAlias(String alias) {
+    return $FacturesTable(attachedDatabase, alias);
+  }
+}
+
+class Facture extends DataClass implements Insertable<Facture> {
+  final String id;
+  final String establishmentId;
+  final String reference;
+  final String activityType;
+  final String activityId;
+  final String statut;
+  final double montantTotal;
+  final double montantPaye;
+  final String devise;
+  final DateTime issuedAt;
+  final DateTime? paidAt;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final bool isDeleted;
+  final bool isDirty;
+  const Facture({
+    required this.id,
+    required this.establishmentId,
+    required this.reference,
+    required this.activityType,
+    required this.activityId,
+    required this.statut,
+    required this.montantTotal,
+    required this.montantPaye,
+    required this.devise,
+    required this.issuedAt,
+    this.paidAt,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.isDeleted,
+    required this.isDirty,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['establishment_id'] = Variable<String>(establishmentId);
+    map['reference'] = Variable<String>(reference);
+    map['activity_type'] = Variable<String>(activityType);
+    map['activity_id'] = Variable<String>(activityId);
+    map['statut'] = Variable<String>(statut);
+    map['montant_total'] = Variable<double>(montantTotal);
+    map['montant_paye'] = Variable<double>(montantPaye);
+    map['devise'] = Variable<String>(devise);
+    map['issued_at'] = Variable<DateTime>(issuedAt);
+    if (!nullToAbsent || paidAt != null) {
+      map['paid_at'] = Variable<DateTime>(paidAt);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['is_deleted'] = Variable<bool>(isDeleted);
+    map['is_dirty'] = Variable<bool>(isDirty);
+    return map;
+  }
+
+  FacturesCompanion toCompanion(bool nullToAbsent) {
+    return FacturesCompanion(
+      id: Value(id),
+      establishmentId: Value(establishmentId),
+      reference: Value(reference),
+      activityType: Value(activityType),
+      activityId: Value(activityId),
+      statut: Value(statut),
+      montantTotal: Value(montantTotal),
+      montantPaye: Value(montantPaye),
+      devise: Value(devise),
+      issuedAt: Value(issuedAt),
+      paidAt: paidAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(paidAt),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      isDeleted: Value(isDeleted),
+      isDirty: Value(isDirty),
+    );
+  }
+
+  factory Facture.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Facture(
+      id: serializer.fromJson<String>(json['id']),
+      establishmentId: serializer.fromJson<String>(json['establishmentId']),
+      reference: serializer.fromJson<String>(json['reference']),
+      activityType: serializer.fromJson<String>(json['activityType']),
+      activityId: serializer.fromJson<String>(json['activityId']),
+      statut: serializer.fromJson<String>(json['statut']),
+      montantTotal: serializer.fromJson<double>(json['montantTotal']),
+      montantPaye: serializer.fromJson<double>(json['montantPaye']),
+      devise: serializer.fromJson<String>(json['devise']),
+      issuedAt: serializer.fromJson<DateTime>(json['issuedAt']),
+      paidAt: serializer.fromJson<DateTime?>(json['paidAt']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      isDeleted: serializer.fromJson<bool>(json['isDeleted']),
+      isDirty: serializer.fromJson<bool>(json['isDirty']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'establishmentId': serializer.toJson<String>(establishmentId),
+      'reference': serializer.toJson<String>(reference),
+      'activityType': serializer.toJson<String>(activityType),
+      'activityId': serializer.toJson<String>(activityId),
+      'statut': serializer.toJson<String>(statut),
+      'montantTotal': serializer.toJson<double>(montantTotal),
+      'montantPaye': serializer.toJson<double>(montantPaye),
+      'devise': serializer.toJson<String>(devise),
+      'issuedAt': serializer.toJson<DateTime>(issuedAt),
+      'paidAt': serializer.toJson<DateTime?>(paidAt),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'isDeleted': serializer.toJson<bool>(isDeleted),
+      'isDirty': serializer.toJson<bool>(isDirty),
+    };
+  }
+
+  Facture copyWith({
+    String? id,
+    String? establishmentId,
+    String? reference,
+    String? activityType,
+    String? activityId,
+    String? statut,
+    double? montantTotal,
+    double? montantPaye,
+    String? devise,
+    DateTime? issuedAt,
+    Value<DateTime?> paidAt = const Value.absent(),
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    bool? isDeleted,
+    bool? isDirty,
+  }) => Facture(
+    id: id ?? this.id,
+    establishmentId: establishmentId ?? this.establishmentId,
+    reference: reference ?? this.reference,
+    activityType: activityType ?? this.activityType,
+    activityId: activityId ?? this.activityId,
+    statut: statut ?? this.statut,
+    montantTotal: montantTotal ?? this.montantTotal,
+    montantPaye: montantPaye ?? this.montantPaye,
+    devise: devise ?? this.devise,
+    issuedAt: issuedAt ?? this.issuedAt,
+    paidAt: paidAt.present ? paidAt.value : this.paidAt,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    isDeleted: isDeleted ?? this.isDeleted,
+    isDirty: isDirty ?? this.isDirty,
+  );
+  Facture copyWithCompanion(FacturesCompanion data) {
+    return Facture(
+      id: data.id.present ? data.id.value : this.id,
+      establishmentId: data.establishmentId.present
+          ? data.establishmentId.value
+          : this.establishmentId,
+      reference: data.reference.present ? data.reference.value : this.reference,
+      activityType: data.activityType.present
+          ? data.activityType.value
+          : this.activityType,
+      activityId: data.activityId.present
+          ? data.activityId.value
+          : this.activityId,
+      statut: data.statut.present ? data.statut.value : this.statut,
+      montantTotal: data.montantTotal.present
+          ? data.montantTotal.value
+          : this.montantTotal,
+      montantPaye: data.montantPaye.present
+          ? data.montantPaye.value
+          : this.montantPaye,
+      devise: data.devise.present ? data.devise.value : this.devise,
+      issuedAt: data.issuedAt.present ? data.issuedAt.value : this.issuedAt,
+      paidAt: data.paidAt.present ? data.paidAt.value : this.paidAt,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      isDeleted: data.isDeleted.present ? data.isDeleted.value : this.isDeleted,
+      isDirty: data.isDirty.present ? data.isDirty.value : this.isDirty,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Facture(')
+          ..write('id: $id, ')
+          ..write('establishmentId: $establishmentId, ')
+          ..write('reference: $reference, ')
+          ..write('activityType: $activityType, ')
+          ..write('activityId: $activityId, ')
+          ..write('statut: $statut, ')
+          ..write('montantTotal: $montantTotal, ')
+          ..write('montantPaye: $montantPaye, ')
+          ..write('devise: $devise, ')
+          ..write('issuedAt: $issuedAt, ')
+          ..write('paidAt: $paidAt, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('isDeleted: $isDeleted, ')
+          ..write('isDirty: $isDirty')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    establishmentId,
+    reference,
+    activityType,
+    activityId,
+    statut,
+    montantTotal,
+    montantPaye,
+    devise,
+    issuedAt,
+    paidAt,
+    createdAt,
+    updatedAt,
+    isDeleted,
+    isDirty,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Facture &&
+          other.id == this.id &&
+          other.establishmentId == this.establishmentId &&
+          other.reference == this.reference &&
+          other.activityType == this.activityType &&
+          other.activityId == this.activityId &&
+          other.statut == this.statut &&
+          other.montantTotal == this.montantTotal &&
+          other.montantPaye == this.montantPaye &&
+          other.devise == this.devise &&
+          other.issuedAt == this.issuedAt &&
+          other.paidAt == this.paidAt &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.isDeleted == this.isDeleted &&
+          other.isDirty == this.isDirty);
+}
+
+class FacturesCompanion extends UpdateCompanion<Facture> {
+  final Value<String> id;
+  final Value<String> establishmentId;
+  final Value<String> reference;
+  final Value<String> activityType;
+  final Value<String> activityId;
+  final Value<String> statut;
+  final Value<double> montantTotal;
+  final Value<double> montantPaye;
+  final Value<String> devise;
+  final Value<DateTime> issuedAt;
+  final Value<DateTime?> paidAt;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<bool> isDeleted;
+  final Value<bool> isDirty;
+  final Value<int> rowid;
+  const FacturesCompanion({
+    this.id = const Value.absent(),
+    this.establishmentId = const Value.absent(),
+    this.reference = const Value.absent(),
+    this.activityType = const Value.absent(),
+    this.activityId = const Value.absent(),
+    this.statut = const Value.absent(),
+    this.montantTotal = const Value.absent(),
+    this.montantPaye = const Value.absent(),
+    this.devise = const Value.absent(),
+    this.issuedAt = const Value.absent(),
+    this.paidAt = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.isDeleted = const Value.absent(),
+    this.isDirty = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  FacturesCompanion.insert({
+    required String id,
+    this.establishmentId = const Value.absent(),
+    required String reference,
+    required String activityType,
+    required String activityId,
+    this.statut = const Value.absent(),
+    required double montantTotal,
+    this.montantPaye = const Value.absent(),
+    this.devise = const Value.absent(),
+    required DateTime issuedAt,
+    this.paidAt = const Value.absent(),
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.isDeleted = const Value.absent(),
+    this.isDirty = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       reference = Value(reference),
+       activityType = Value(activityType),
+       activityId = Value(activityId),
+       montantTotal = Value(montantTotal),
+       issuedAt = Value(issuedAt),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt);
+  static Insertable<Facture> custom({
+    Expression<String>? id,
+    Expression<String>? establishmentId,
+    Expression<String>? reference,
+    Expression<String>? activityType,
+    Expression<String>? activityId,
+    Expression<String>? statut,
+    Expression<double>? montantTotal,
+    Expression<double>? montantPaye,
+    Expression<String>? devise,
+    Expression<DateTime>? issuedAt,
+    Expression<DateTime>? paidAt,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<bool>? isDeleted,
+    Expression<bool>? isDirty,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (establishmentId != null) 'establishment_id': establishmentId,
+      if (reference != null) 'reference': reference,
+      if (activityType != null) 'activity_type': activityType,
+      if (activityId != null) 'activity_id': activityId,
+      if (statut != null) 'statut': statut,
+      if (montantTotal != null) 'montant_total': montantTotal,
+      if (montantPaye != null) 'montant_paye': montantPaye,
+      if (devise != null) 'devise': devise,
+      if (issuedAt != null) 'issued_at': issuedAt,
+      if (paidAt != null) 'paid_at': paidAt,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (isDeleted != null) 'is_deleted': isDeleted,
+      if (isDirty != null) 'is_dirty': isDirty,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  FacturesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? establishmentId,
+    Value<String>? reference,
+    Value<String>? activityType,
+    Value<String>? activityId,
+    Value<String>? statut,
+    Value<double>? montantTotal,
+    Value<double>? montantPaye,
+    Value<String>? devise,
+    Value<DateTime>? issuedAt,
+    Value<DateTime?>? paidAt,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<bool>? isDeleted,
+    Value<bool>? isDirty,
+    Value<int>? rowid,
+  }) {
+    return FacturesCompanion(
+      id: id ?? this.id,
+      establishmentId: establishmentId ?? this.establishmentId,
+      reference: reference ?? this.reference,
+      activityType: activityType ?? this.activityType,
+      activityId: activityId ?? this.activityId,
+      statut: statut ?? this.statut,
+      montantTotal: montantTotal ?? this.montantTotal,
+      montantPaye: montantPaye ?? this.montantPaye,
+      devise: devise ?? this.devise,
+      issuedAt: issuedAt ?? this.issuedAt,
+      paidAt: paidAt ?? this.paidAt,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      isDeleted: isDeleted ?? this.isDeleted,
+      isDirty: isDirty ?? this.isDirty,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (establishmentId.present) {
+      map['establishment_id'] = Variable<String>(establishmentId.value);
+    }
+    if (reference.present) {
+      map['reference'] = Variable<String>(reference.value);
+    }
+    if (activityType.present) {
+      map['activity_type'] = Variable<String>(activityType.value);
+    }
+    if (activityId.present) {
+      map['activity_id'] = Variable<String>(activityId.value);
+    }
+    if (statut.present) {
+      map['statut'] = Variable<String>(statut.value);
+    }
+    if (montantTotal.present) {
+      map['montant_total'] = Variable<double>(montantTotal.value);
+    }
+    if (montantPaye.present) {
+      map['montant_paye'] = Variable<double>(montantPaye.value);
+    }
+    if (devise.present) {
+      map['devise'] = Variable<String>(devise.value);
+    }
+    if (issuedAt.present) {
+      map['issued_at'] = Variable<DateTime>(issuedAt.value);
+    }
+    if (paidAt.present) {
+      map['paid_at'] = Variable<DateTime>(paidAt.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (isDeleted.present) {
+      map['is_deleted'] = Variable<bool>(isDeleted.value);
+    }
+    if (isDirty.present) {
+      map['is_dirty'] = Variable<bool>(isDirty.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FacturesCompanion(')
+          ..write('id: $id, ')
+          ..write('establishmentId: $establishmentId, ')
+          ..write('reference: $reference, ')
+          ..write('activityType: $activityType, ')
+          ..write('activityId: $activityId, ')
+          ..write('statut: $statut, ')
+          ..write('montantTotal: $montantTotal, ')
+          ..write('montantPaye: $montantPaye, ')
+          ..write('devise: $devise, ')
+          ..write('issuedAt: $issuedAt, ')
+          ..write('paidAt: $paidAt, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('isDeleted: $isDeleted, ')
+          ..write('isDirty: $isDirty, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $PaiementsTable extends Paiements
+    with TableInfo<$PaiementsTable, Paiement> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PaiementsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _establishmentIdMeta = const VerificationMeta(
+    'establishmentId',
+  );
+  @override
+  late final GeneratedColumn<String> establishmentId = GeneratedColumn<String>(
+    'establishment_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _factureIdMeta = const VerificationMeta(
+    'factureId',
+  );
+  @override
+  late final GeneratedColumn<String> factureId = GeneratedColumn<String>(
+    'facture_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES factures (id)',
+    ),
+  );
+  static const VerificationMeta _methodeMeta = const VerificationMeta(
+    'methode',
+  );
+  @override
+  late final GeneratedColumn<String> methode = GeneratedColumn<String>(
+    'methode',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _montantMeta = const VerificationMeta(
+    'montant',
+  );
+  @override
+  late final GeneratedColumn<double> montant = GeneratedColumn<double>(
+    'montant',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deviseMeta = const VerificationMeta('devise');
+  @override
+  late final GeneratedColumn<String> devise = GeneratedColumn<String>(
+    'devise',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('USD'),
+  );
+  static const VerificationMeta _paidAtMeta = const VerificationMeta('paidAt');
+  @override
+  late final GeneratedColumn<DateTime> paidAt = GeneratedColumn<DateTime>(
+    'paid_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _isDeletedMeta = const VerificationMeta(
+    'isDeleted',
+  );
+  @override
+  late final GeneratedColumn<bool> isDeleted = GeneratedColumn<bool>(
+    'is_deleted',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_deleted" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _isDirtyMeta = const VerificationMeta(
+    'isDirty',
+  );
+  @override
+  late final GeneratedColumn<bool> isDirty = GeneratedColumn<bool>(
+    'is_dirty',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_dirty" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    establishmentId,
+    factureId,
+    methode,
+    montant,
+    devise,
+    paidAt,
+    createdAt,
+    updatedAt,
+    isDeleted,
+    isDirty,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'paiements';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Paiement> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('establishment_id')) {
+      context.handle(
+        _establishmentIdMeta,
+        establishmentId.isAcceptableOrUnknown(
+          data['establishment_id']!,
+          _establishmentIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('facture_id')) {
+      context.handle(
+        _factureIdMeta,
+        factureId.isAcceptableOrUnknown(data['facture_id']!, _factureIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_factureIdMeta);
+    }
+    if (data.containsKey('methode')) {
+      context.handle(
+        _methodeMeta,
+        methode.isAcceptableOrUnknown(data['methode']!, _methodeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_methodeMeta);
+    }
+    if (data.containsKey('montant')) {
+      context.handle(
+        _montantMeta,
+        montant.isAcceptableOrUnknown(data['montant']!, _montantMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_montantMeta);
+    }
+    if (data.containsKey('devise')) {
+      context.handle(
+        _deviseMeta,
+        devise.isAcceptableOrUnknown(data['devise']!, _deviseMeta),
+      );
+    }
+    if (data.containsKey('paid_at')) {
+      context.handle(
+        _paidAtMeta,
+        paidAt.isAcceptableOrUnknown(data['paid_at']!, _paidAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_paidAtMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('is_deleted')) {
+      context.handle(
+        _isDeletedMeta,
+        isDeleted.isAcceptableOrUnknown(data['is_deleted']!, _isDeletedMeta),
+      );
+    }
+    if (data.containsKey('is_dirty')) {
+      context.handle(
+        _isDirtyMeta,
+        isDirty.isAcceptableOrUnknown(data['is_dirty']!, _isDirtyMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Paiement map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Paiement(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      establishmentId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}establishment_id'],
+      )!,
+      factureId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}facture_id'],
+      )!,
+      methode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}methode'],
+      )!,
+      montant: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}montant'],
+      )!,
+      devise: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}devise'],
+      )!,
+      paidAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}paid_at'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      isDeleted: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_deleted'],
+      )!,
+      isDirty: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_dirty'],
+      )!,
+    );
+  }
+
+  @override
+  $PaiementsTable createAlias(String alias) {
+    return $PaiementsTable(attachedDatabase, alias);
+  }
+}
+
+class Paiement extends DataClass implements Insertable<Paiement> {
+  final String id;
+  final String establishmentId;
+  final String factureId;
+  final String methode;
+  final double montant;
+  final String devise;
+  final DateTime paidAt;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final bool isDeleted;
+  final bool isDirty;
+  const Paiement({
+    required this.id,
+    required this.establishmentId,
+    required this.factureId,
+    required this.methode,
+    required this.montant,
+    required this.devise,
+    required this.paidAt,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.isDeleted,
+    required this.isDirty,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['establishment_id'] = Variable<String>(establishmentId);
+    map['facture_id'] = Variable<String>(factureId);
+    map['methode'] = Variable<String>(methode);
+    map['montant'] = Variable<double>(montant);
+    map['devise'] = Variable<String>(devise);
+    map['paid_at'] = Variable<DateTime>(paidAt);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['is_deleted'] = Variable<bool>(isDeleted);
+    map['is_dirty'] = Variable<bool>(isDirty);
+    return map;
+  }
+
+  PaiementsCompanion toCompanion(bool nullToAbsent) {
+    return PaiementsCompanion(
+      id: Value(id),
+      establishmentId: Value(establishmentId),
+      factureId: Value(factureId),
+      methode: Value(methode),
+      montant: Value(montant),
+      devise: Value(devise),
+      paidAt: Value(paidAt),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      isDeleted: Value(isDeleted),
+      isDirty: Value(isDirty),
+    );
+  }
+
+  factory Paiement.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Paiement(
+      id: serializer.fromJson<String>(json['id']),
+      establishmentId: serializer.fromJson<String>(json['establishmentId']),
+      factureId: serializer.fromJson<String>(json['factureId']),
+      methode: serializer.fromJson<String>(json['methode']),
+      montant: serializer.fromJson<double>(json['montant']),
+      devise: serializer.fromJson<String>(json['devise']),
+      paidAt: serializer.fromJson<DateTime>(json['paidAt']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      isDeleted: serializer.fromJson<bool>(json['isDeleted']),
+      isDirty: serializer.fromJson<bool>(json['isDirty']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'establishmentId': serializer.toJson<String>(establishmentId),
+      'factureId': serializer.toJson<String>(factureId),
+      'methode': serializer.toJson<String>(methode),
+      'montant': serializer.toJson<double>(montant),
+      'devise': serializer.toJson<String>(devise),
+      'paidAt': serializer.toJson<DateTime>(paidAt),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'isDeleted': serializer.toJson<bool>(isDeleted),
+      'isDirty': serializer.toJson<bool>(isDirty),
+    };
+  }
+
+  Paiement copyWith({
+    String? id,
+    String? establishmentId,
+    String? factureId,
+    String? methode,
+    double? montant,
+    String? devise,
+    DateTime? paidAt,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    bool? isDeleted,
+    bool? isDirty,
+  }) => Paiement(
+    id: id ?? this.id,
+    establishmentId: establishmentId ?? this.establishmentId,
+    factureId: factureId ?? this.factureId,
+    methode: methode ?? this.methode,
+    montant: montant ?? this.montant,
+    devise: devise ?? this.devise,
+    paidAt: paidAt ?? this.paidAt,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    isDeleted: isDeleted ?? this.isDeleted,
+    isDirty: isDirty ?? this.isDirty,
+  );
+  Paiement copyWithCompanion(PaiementsCompanion data) {
+    return Paiement(
+      id: data.id.present ? data.id.value : this.id,
+      establishmentId: data.establishmentId.present
+          ? data.establishmentId.value
+          : this.establishmentId,
+      factureId: data.factureId.present ? data.factureId.value : this.factureId,
+      methode: data.methode.present ? data.methode.value : this.methode,
+      montant: data.montant.present ? data.montant.value : this.montant,
+      devise: data.devise.present ? data.devise.value : this.devise,
+      paidAt: data.paidAt.present ? data.paidAt.value : this.paidAt,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      isDeleted: data.isDeleted.present ? data.isDeleted.value : this.isDeleted,
+      isDirty: data.isDirty.present ? data.isDirty.value : this.isDirty,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Paiement(')
+          ..write('id: $id, ')
+          ..write('establishmentId: $establishmentId, ')
+          ..write('factureId: $factureId, ')
+          ..write('methode: $methode, ')
+          ..write('montant: $montant, ')
+          ..write('devise: $devise, ')
+          ..write('paidAt: $paidAt, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('isDeleted: $isDeleted, ')
+          ..write('isDirty: $isDirty')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    establishmentId,
+    factureId,
+    methode,
+    montant,
+    devise,
+    paidAt,
+    createdAt,
+    updatedAt,
+    isDeleted,
+    isDirty,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Paiement &&
+          other.id == this.id &&
+          other.establishmentId == this.establishmentId &&
+          other.factureId == this.factureId &&
+          other.methode == this.methode &&
+          other.montant == this.montant &&
+          other.devise == this.devise &&
+          other.paidAt == this.paidAt &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.isDeleted == this.isDeleted &&
+          other.isDirty == this.isDirty);
+}
+
+class PaiementsCompanion extends UpdateCompanion<Paiement> {
+  final Value<String> id;
+  final Value<String> establishmentId;
+  final Value<String> factureId;
+  final Value<String> methode;
+  final Value<double> montant;
+  final Value<String> devise;
+  final Value<DateTime> paidAt;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<bool> isDeleted;
+  final Value<bool> isDirty;
+  final Value<int> rowid;
+  const PaiementsCompanion({
+    this.id = const Value.absent(),
+    this.establishmentId = const Value.absent(),
+    this.factureId = const Value.absent(),
+    this.methode = const Value.absent(),
+    this.montant = const Value.absent(),
+    this.devise = const Value.absent(),
+    this.paidAt = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.isDeleted = const Value.absent(),
+    this.isDirty = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PaiementsCompanion.insert({
+    required String id,
+    this.establishmentId = const Value.absent(),
+    required String factureId,
+    required String methode,
+    required double montant,
+    this.devise = const Value.absent(),
+    required DateTime paidAt,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.isDeleted = const Value.absent(),
+    this.isDirty = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       factureId = Value(factureId),
+       methode = Value(methode),
+       montant = Value(montant),
+       paidAt = Value(paidAt),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt);
+  static Insertable<Paiement> custom({
+    Expression<String>? id,
+    Expression<String>? establishmentId,
+    Expression<String>? factureId,
+    Expression<String>? methode,
+    Expression<double>? montant,
+    Expression<String>? devise,
+    Expression<DateTime>? paidAt,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<bool>? isDeleted,
+    Expression<bool>? isDirty,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (establishmentId != null) 'establishment_id': establishmentId,
+      if (factureId != null) 'facture_id': factureId,
+      if (methode != null) 'methode': methode,
+      if (montant != null) 'montant': montant,
+      if (devise != null) 'devise': devise,
+      if (paidAt != null) 'paid_at': paidAt,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (isDeleted != null) 'is_deleted': isDeleted,
+      if (isDirty != null) 'is_dirty': isDirty,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PaiementsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? establishmentId,
+    Value<String>? factureId,
+    Value<String>? methode,
+    Value<double>? montant,
+    Value<String>? devise,
+    Value<DateTime>? paidAt,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<bool>? isDeleted,
+    Value<bool>? isDirty,
+    Value<int>? rowid,
+  }) {
+    return PaiementsCompanion(
+      id: id ?? this.id,
+      establishmentId: establishmentId ?? this.establishmentId,
+      factureId: factureId ?? this.factureId,
+      methode: methode ?? this.methode,
+      montant: montant ?? this.montant,
+      devise: devise ?? this.devise,
+      paidAt: paidAt ?? this.paidAt,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      isDeleted: isDeleted ?? this.isDeleted,
+      isDirty: isDirty ?? this.isDirty,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (establishmentId.present) {
+      map['establishment_id'] = Variable<String>(establishmentId.value);
+    }
+    if (factureId.present) {
+      map['facture_id'] = Variable<String>(factureId.value);
+    }
+    if (methode.present) {
+      map['methode'] = Variable<String>(methode.value);
+    }
+    if (montant.present) {
+      map['montant'] = Variable<double>(montant.value);
+    }
+    if (devise.present) {
+      map['devise'] = Variable<String>(devise.value);
+    }
+    if (paidAt.present) {
+      map['paid_at'] = Variable<DateTime>(paidAt.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (isDeleted.present) {
+      map['is_deleted'] = Variable<bool>(isDeleted.value);
+    }
+    if (isDirty.present) {
+      map['is_dirty'] = Variable<bool>(isDirty.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PaiementsCompanion(')
+          ..write('id: $id, ')
+          ..write('establishmentId: $establishmentId, ')
+          ..write('factureId: $factureId, ')
+          ..write('methode: $methode, ')
+          ..write('montant: $montant, ')
+          ..write('devise: $devise, ')
+          ..write('paidAt: $paidAt, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('isDeleted: $isDeleted, ')
+          ..write('isDirty: $isDirty, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $PrestationsTable extends Prestations
     with TableInfo<$PrestationsTable, Prestation> {
   @override
@@ -9311,6 +10827,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $ProduitsTable produits = $ProduitsTable(this);
   late final $CommandesTable commandes = $CommandesTable(this);
   late final $LigneCommandesTable ligneCommandes = $LigneCommandesTable(this);
+  late final $FacturesTable factures = $FacturesTable(this);
+  late final $PaiementsTable paiements = $PaiementsTable(this);
   late final $PrestationsTable prestations = $PrestationsTable(this);
   late final $LignePrestationsTable lignePrestations = $LignePrestationsTable(
     this,
@@ -9335,6 +10853,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     produits,
     commandes,
     ligneCommandes,
+    factures,
+    paiements,
     prestations,
     lignePrestations,
     jetons,
@@ -13792,6 +15312,941 @@ typedef $$LigneCommandesTableProcessedTableManager =
       LigneCommande,
       PrefetchHooks Function({bool commandeId, bool produitId})
     >;
+typedef $$FacturesTableCreateCompanionBuilder =
+    FacturesCompanion Function({
+      required String id,
+      Value<String> establishmentId,
+      required String reference,
+      required String activityType,
+      required String activityId,
+      Value<String> statut,
+      required double montantTotal,
+      Value<double> montantPaye,
+      Value<String> devise,
+      required DateTime issuedAt,
+      Value<DateTime?> paidAt,
+      required DateTime createdAt,
+      required DateTime updatedAt,
+      Value<bool> isDeleted,
+      Value<bool> isDirty,
+      Value<int> rowid,
+    });
+typedef $$FacturesTableUpdateCompanionBuilder =
+    FacturesCompanion Function({
+      Value<String> id,
+      Value<String> establishmentId,
+      Value<String> reference,
+      Value<String> activityType,
+      Value<String> activityId,
+      Value<String> statut,
+      Value<double> montantTotal,
+      Value<double> montantPaye,
+      Value<String> devise,
+      Value<DateTime> issuedAt,
+      Value<DateTime?> paidAt,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<bool> isDeleted,
+      Value<bool> isDirty,
+      Value<int> rowid,
+    });
+
+final class $$FacturesTableReferences
+    extends BaseReferences<_$AppDatabase, $FacturesTable, Facture> {
+  $$FacturesTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$PaiementsTable, List<Paiement>>
+  _paiementsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.paiements,
+    aliasName: $_aliasNameGenerator(db.factures.id, db.paiements.factureId),
+  );
+
+  $$PaiementsTableProcessedTableManager get paiementsRefs {
+    final manager = $$PaiementsTableTableManager(
+      $_db,
+      $_db.paiements,
+    ).filter((f) => f.factureId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_paiementsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$FacturesTableFilterComposer
+    extends Composer<_$AppDatabase, $FacturesTable> {
+  $$FacturesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get establishmentId => $composableBuilder(
+    column: $table.establishmentId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reference => $composableBuilder(
+    column: $table.reference,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get activityType => $composableBuilder(
+    column: $table.activityType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get activityId => $composableBuilder(
+    column: $table.activityId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get statut => $composableBuilder(
+    column: $table.statut,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get montantTotal => $composableBuilder(
+    column: $table.montantTotal,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get montantPaye => $composableBuilder(
+    column: $table.montantPaye,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get devise => $composableBuilder(
+    column: $table.devise,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get issuedAt => $composableBuilder(
+    column: $table.issuedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get paidAt => $composableBuilder(
+    column: $table.paidAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isDirty => $composableBuilder(
+    column: $table.isDirty,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> paiementsRefs(
+    Expression<bool> Function($$PaiementsTableFilterComposer f) f,
+  ) {
+    final $$PaiementsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.paiements,
+      getReferencedColumn: (t) => t.factureId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PaiementsTableFilterComposer(
+            $db: $db,
+            $table: $db.paiements,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$FacturesTableOrderingComposer
+    extends Composer<_$AppDatabase, $FacturesTable> {
+  $$FacturesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get establishmentId => $composableBuilder(
+    column: $table.establishmentId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reference => $composableBuilder(
+    column: $table.reference,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get activityType => $composableBuilder(
+    column: $table.activityType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get activityId => $composableBuilder(
+    column: $table.activityId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get statut => $composableBuilder(
+    column: $table.statut,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get montantTotal => $composableBuilder(
+    column: $table.montantTotal,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get montantPaye => $composableBuilder(
+    column: $table.montantPaye,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get devise => $composableBuilder(
+    column: $table.devise,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get issuedAt => $composableBuilder(
+    column: $table.issuedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get paidAt => $composableBuilder(
+    column: $table.paidAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isDirty => $composableBuilder(
+    column: $table.isDirty,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$FacturesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $FacturesTable> {
+  $$FacturesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get establishmentId => $composableBuilder(
+    column: $table.establishmentId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get reference =>
+      $composableBuilder(column: $table.reference, builder: (column) => column);
+
+  GeneratedColumn<String> get activityType => $composableBuilder(
+    column: $table.activityType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get activityId => $composableBuilder(
+    column: $table.activityId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get statut =>
+      $composableBuilder(column: $table.statut, builder: (column) => column);
+
+  GeneratedColumn<double> get montantTotal => $composableBuilder(
+    column: $table.montantTotal,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get montantPaye => $composableBuilder(
+    column: $table.montantPaye,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get devise =>
+      $composableBuilder(column: $table.devise, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get issuedAt =>
+      $composableBuilder(column: $table.issuedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get paidAt =>
+      $composableBuilder(column: $table.paidAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get isDeleted =>
+      $composableBuilder(column: $table.isDeleted, builder: (column) => column);
+
+  GeneratedColumn<bool> get isDirty =>
+      $composableBuilder(column: $table.isDirty, builder: (column) => column);
+
+  Expression<T> paiementsRefs<T extends Object>(
+    Expression<T> Function($$PaiementsTableAnnotationComposer a) f,
+  ) {
+    final $$PaiementsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.paiements,
+      getReferencedColumn: (t) => t.factureId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PaiementsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.paiements,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$FacturesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $FacturesTable,
+          Facture,
+          $$FacturesTableFilterComposer,
+          $$FacturesTableOrderingComposer,
+          $$FacturesTableAnnotationComposer,
+          $$FacturesTableCreateCompanionBuilder,
+          $$FacturesTableUpdateCompanionBuilder,
+          (Facture, $$FacturesTableReferences),
+          Facture,
+          PrefetchHooks Function({bool paiementsRefs})
+        > {
+  $$FacturesTableTableManager(_$AppDatabase db, $FacturesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$FacturesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$FacturesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$FacturesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> establishmentId = const Value.absent(),
+                Value<String> reference = const Value.absent(),
+                Value<String> activityType = const Value.absent(),
+                Value<String> activityId = const Value.absent(),
+                Value<String> statut = const Value.absent(),
+                Value<double> montantTotal = const Value.absent(),
+                Value<double> montantPaye = const Value.absent(),
+                Value<String> devise = const Value.absent(),
+                Value<DateTime> issuedAt = const Value.absent(),
+                Value<DateTime?> paidAt = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<bool> isDeleted = const Value.absent(),
+                Value<bool> isDirty = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => FacturesCompanion(
+                id: id,
+                establishmentId: establishmentId,
+                reference: reference,
+                activityType: activityType,
+                activityId: activityId,
+                statut: statut,
+                montantTotal: montantTotal,
+                montantPaye: montantPaye,
+                devise: devise,
+                issuedAt: issuedAt,
+                paidAt: paidAt,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                isDeleted: isDeleted,
+                isDirty: isDirty,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                Value<String> establishmentId = const Value.absent(),
+                required String reference,
+                required String activityType,
+                required String activityId,
+                Value<String> statut = const Value.absent(),
+                required double montantTotal,
+                Value<double> montantPaye = const Value.absent(),
+                Value<String> devise = const Value.absent(),
+                required DateTime issuedAt,
+                Value<DateTime?> paidAt = const Value.absent(),
+                required DateTime createdAt,
+                required DateTime updatedAt,
+                Value<bool> isDeleted = const Value.absent(),
+                Value<bool> isDirty = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => FacturesCompanion.insert(
+                id: id,
+                establishmentId: establishmentId,
+                reference: reference,
+                activityType: activityType,
+                activityId: activityId,
+                statut: statut,
+                montantTotal: montantTotal,
+                montantPaye: montantPaye,
+                devise: devise,
+                issuedAt: issuedAt,
+                paidAt: paidAt,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                isDeleted: isDeleted,
+                isDirty: isDirty,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$FacturesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({paiementsRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (paiementsRefs) db.paiements],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (paiementsRefs)
+                    await $_getPrefetchedData<
+                      Facture,
+                      $FacturesTable,
+                      Paiement
+                    >(
+                      currentTable: table,
+                      referencedTable: $$FacturesTableReferences
+                          ._paiementsRefsTable(db),
+                      managerFromTypedResult: (p0) => $$FacturesTableReferences(
+                        db,
+                        table,
+                        p0,
+                      ).paiementsRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.factureId == item.id),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$FacturesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $FacturesTable,
+      Facture,
+      $$FacturesTableFilterComposer,
+      $$FacturesTableOrderingComposer,
+      $$FacturesTableAnnotationComposer,
+      $$FacturesTableCreateCompanionBuilder,
+      $$FacturesTableUpdateCompanionBuilder,
+      (Facture, $$FacturesTableReferences),
+      Facture,
+      PrefetchHooks Function({bool paiementsRefs})
+    >;
+typedef $$PaiementsTableCreateCompanionBuilder =
+    PaiementsCompanion Function({
+      required String id,
+      Value<String> establishmentId,
+      required String factureId,
+      required String methode,
+      required double montant,
+      Value<String> devise,
+      required DateTime paidAt,
+      required DateTime createdAt,
+      required DateTime updatedAt,
+      Value<bool> isDeleted,
+      Value<bool> isDirty,
+      Value<int> rowid,
+    });
+typedef $$PaiementsTableUpdateCompanionBuilder =
+    PaiementsCompanion Function({
+      Value<String> id,
+      Value<String> establishmentId,
+      Value<String> factureId,
+      Value<String> methode,
+      Value<double> montant,
+      Value<String> devise,
+      Value<DateTime> paidAt,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<bool> isDeleted,
+      Value<bool> isDirty,
+      Value<int> rowid,
+    });
+
+final class $$PaiementsTableReferences
+    extends BaseReferences<_$AppDatabase, $PaiementsTable, Paiement> {
+  $$PaiementsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $FacturesTable _factureIdTable(_$AppDatabase db) =>
+      db.factures.createAlias(
+        $_aliasNameGenerator(db.paiements.factureId, db.factures.id),
+      );
+
+  $$FacturesTableProcessedTableManager get factureId {
+    final $_column = $_itemColumn<String>('facture_id')!;
+
+    final manager = $$FacturesTableTableManager(
+      $_db,
+      $_db.factures,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_factureIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$PaiementsTableFilterComposer
+    extends Composer<_$AppDatabase, $PaiementsTable> {
+  $$PaiementsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get establishmentId => $composableBuilder(
+    column: $table.establishmentId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get methode => $composableBuilder(
+    column: $table.methode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get montant => $composableBuilder(
+    column: $table.montant,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get devise => $composableBuilder(
+    column: $table.devise,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get paidAt => $composableBuilder(
+    column: $table.paidAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isDirty => $composableBuilder(
+    column: $table.isDirty,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$FacturesTableFilterComposer get factureId {
+    final $$FacturesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.factureId,
+      referencedTable: $db.factures,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$FacturesTableFilterComposer(
+            $db: $db,
+            $table: $db.factures,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PaiementsTableOrderingComposer
+    extends Composer<_$AppDatabase, $PaiementsTable> {
+  $$PaiementsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get establishmentId => $composableBuilder(
+    column: $table.establishmentId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get methode => $composableBuilder(
+    column: $table.methode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get montant => $composableBuilder(
+    column: $table.montant,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get devise => $composableBuilder(
+    column: $table.devise,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get paidAt => $composableBuilder(
+    column: $table.paidAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isDirty => $composableBuilder(
+    column: $table.isDirty,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$FacturesTableOrderingComposer get factureId {
+    final $$FacturesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.factureId,
+      referencedTable: $db.factures,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$FacturesTableOrderingComposer(
+            $db: $db,
+            $table: $db.factures,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PaiementsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PaiementsTable> {
+  $$PaiementsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get establishmentId => $composableBuilder(
+    column: $table.establishmentId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get methode =>
+      $composableBuilder(column: $table.methode, builder: (column) => column);
+
+  GeneratedColumn<double> get montant =>
+      $composableBuilder(column: $table.montant, builder: (column) => column);
+
+  GeneratedColumn<String> get devise =>
+      $composableBuilder(column: $table.devise, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get paidAt =>
+      $composableBuilder(column: $table.paidAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get isDeleted =>
+      $composableBuilder(column: $table.isDeleted, builder: (column) => column);
+
+  GeneratedColumn<bool> get isDirty =>
+      $composableBuilder(column: $table.isDirty, builder: (column) => column);
+
+  $$FacturesTableAnnotationComposer get factureId {
+    final $$FacturesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.factureId,
+      referencedTable: $db.factures,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$FacturesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.factures,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PaiementsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PaiementsTable,
+          Paiement,
+          $$PaiementsTableFilterComposer,
+          $$PaiementsTableOrderingComposer,
+          $$PaiementsTableAnnotationComposer,
+          $$PaiementsTableCreateCompanionBuilder,
+          $$PaiementsTableUpdateCompanionBuilder,
+          (Paiement, $$PaiementsTableReferences),
+          Paiement,
+          PrefetchHooks Function({bool factureId})
+        > {
+  $$PaiementsTableTableManager(_$AppDatabase db, $PaiementsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PaiementsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PaiementsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PaiementsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> establishmentId = const Value.absent(),
+                Value<String> factureId = const Value.absent(),
+                Value<String> methode = const Value.absent(),
+                Value<double> montant = const Value.absent(),
+                Value<String> devise = const Value.absent(),
+                Value<DateTime> paidAt = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<bool> isDeleted = const Value.absent(),
+                Value<bool> isDirty = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PaiementsCompanion(
+                id: id,
+                establishmentId: establishmentId,
+                factureId: factureId,
+                methode: methode,
+                montant: montant,
+                devise: devise,
+                paidAt: paidAt,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                isDeleted: isDeleted,
+                isDirty: isDirty,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                Value<String> establishmentId = const Value.absent(),
+                required String factureId,
+                required String methode,
+                required double montant,
+                Value<String> devise = const Value.absent(),
+                required DateTime paidAt,
+                required DateTime createdAt,
+                required DateTime updatedAt,
+                Value<bool> isDeleted = const Value.absent(),
+                Value<bool> isDirty = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PaiementsCompanion.insert(
+                id: id,
+                establishmentId: establishmentId,
+                factureId: factureId,
+                methode: methode,
+                montant: montant,
+                devise: devise,
+                paidAt: paidAt,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                isDeleted: isDeleted,
+                isDirty: isDirty,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$PaiementsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({factureId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (factureId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.factureId,
+                                referencedTable: $$PaiementsTableReferences
+                                    ._factureIdTable(db),
+                                referencedColumn: $$PaiementsTableReferences
+                                    ._factureIdTable(db)
+                                    .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$PaiementsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PaiementsTable,
+      Paiement,
+      $$PaiementsTableFilterComposer,
+      $$PaiementsTableOrderingComposer,
+      $$PaiementsTableAnnotationComposer,
+      $$PaiementsTableCreateCompanionBuilder,
+      $$PaiementsTableUpdateCompanionBuilder,
+      (Paiement, $$PaiementsTableReferences),
+      Paiement,
+      PrefetchHooks Function({bool factureId})
+    >;
 typedef $$PrestationsTableCreateCompanionBuilder =
     PrestationsCompanion Function({
       required String id,
@@ -17024,6 +19479,10 @@ class $AppDatabaseManager {
       $$CommandesTableTableManager(_db, _db.commandes);
   $$LigneCommandesTableTableManager get ligneCommandes =>
       $$LigneCommandesTableTableManager(_db, _db.ligneCommandes);
+  $$FacturesTableTableManager get factures =>
+      $$FacturesTableTableManager(_db, _db.factures);
+  $$PaiementsTableTableManager get paiements =>
+      $$PaiementsTableTableManager(_db, _db.paiements);
   $$PrestationsTableTableManager get prestations =>
       $$PrestationsTableTableManager(_db, _db.prestations);
   $$LignePrestationsTableTableManager get lignePrestations =>
