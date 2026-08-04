@@ -5,18 +5,68 @@ import '../../../../core/theme/app_colors.dart';
 import '../../domain/entities/bluetooth_printer_device.dart';
 import '../providers/printer_providers.dart';
 
-class PrinterSettingsScreen extends ConsumerWidget {
+class PrinterSettingsScreen extends ConsumerStatefulWidget {
   const PrinterSettingsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final printers = ref.watch(pairedBluetoothPrintersProvider);
+  ConsumerState<PrinterSettingsScreen> createState() =>
+      _PrinterSettingsScreenState();
+}
 
+class _PrinterSettingsScreenState extends ConsumerState<PrinterSettingsScreen> {
+  var _devices = const <BluetoothPrinterDevice>[];
+  var _isSearching = false;
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _searchPrinters());
+  }
+
+  Future<void> _searchPrinters() async {
+    if (_isSearching) return;
+    setState(() {
+      _isSearching = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final devices = await ref
+          .read(bluetoothPrinterServiceProvider)
+          .searchDevices();
+      if (!mounted) return;
+      setState(() {
+        _devices = _sortDevices(devices);
+        _isSearching = false;
+      });
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _errorMessage = error.toString();
+        _isSearching = false;
+      });
+    }
+  }
+
+  List<BluetoothPrinterDevice> _sortDevices(
+    List<BluetoothPrinterDevice> devices,
+  ) {
+    return [...devices]..sort((a, b) {
+      if (a.isLikelyPrinter != b.isLikelyPrinter) {
+        return a.isLikelyPrinter ? -1 : 1;
+      }
+      return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Configuration imprimante')),
       body: SafeArea(
         child: RefreshIndicator(
-          onRefresh: () => ref.refresh(pairedBluetoothPrintersProvider.future),
+          onRefresh: _searchPrinters,
           child: ListView(
             padding: const EdgeInsets.fromLTRB(20, 18, 20, 32),
             children: [
@@ -34,43 +84,66 @@ class PrinterSettingsScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  IconButton.filledTonal(
-                    tooltip: 'Actualiser',
-                    onPressed: () =>
-                        ref.invalidate(pairedBluetoothPrintersProvider),
-                    icon: const Icon(Icons.refresh_rounded),
+                  FilledButton.icon(
+                    onPressed: _isSearching ? null : _searchPrinters,
+                    icon: _isSearching
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.search_rounded),
+                    label: Text(_isSearching ? 'Recherche...' : 'Rechercher'),
                   ),
                 ],
               ),
               const SizedBox(height: 12),
-              printers.when(
-                loading: () => const _LoadingPrinters(),
-                error: (error, _) => _PrinterError(message: error.toString()),
-                data: (devices) {
-                  if (devices.isEmpty) return const _NoPrinterFound();
-                  final sorted = [...devices]
-                    ..sort((a, b) {
-                      if (a.isLikelyPrinter != b.isLikelyPrinter) {
-                        return a.isLikelyPrinter ? -1 : 1;
-                      }
-                      return a.name.toLowerCase().compareTo(
-                        b.name.toLowerCase(),
-                      );
-                    });
-                  return Column(
-                    children: [
-                      for (final device in sorted) ...[
-                        _PrinterTile(device: device),
-                        const SizedBox(height: 10),
-                      ],
-                    ],
-                  );
-                },
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 240),
+                switchInCurve: Curves.easeOutCubic,
+                switchOutCurve: Curves.easeInCubic,
+                child: _PrinterSearchResult(
+                  key: ValueKey(
+                    '${_isSearching}_${_errorMessage}_${_devices.length}',
+                  ),
+                  isSearching: _isSearching,
+                  errorMessage: _errorMessage,
+                  devices: _devices,
+                ),
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+class _PrinterSearchResult extends StatelessWidget {
+  const _PrinterSearchResult({
+    super.key,
+    required this.isSearching,
+    required this.errorMessage,
+    required this.devices,
+  });
+
+  final bool isSearching;
+  final String? errorMessage;
+  final List<BluetoothPrinterDevice> devices;
+
+  @override
+  Widget build(BuildContext context) {
+    if (isSearching) return const _SearchingPrinters();
+    if (errorMessage != null) return _PrinterError(message: errorMessage!);
+    if (devices.isEmpty) return const _NoPrinterFound();
+
+    return Column(
+      children: [
+        for (final device in devices) ...[
+          _PrinterTile(device: device),
+          const SizedBox(height: 10),
+        ],
+      ],
     );
   }
 }
@@ -270,14 +343,41 @@ class _StatusBadge extends StatelessWidget {
   }
 }
 
-class _LoadingPrinters extends StatelessWidget {
-  const _LoadingPrinters();
+class _SearchingPrinters extends StatelessWidget {
+  const _SearchingPrinters();
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.symmetric(vertical: 34),
-      child: Center(child: CircularProgressIndicator()),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 24),
+      decoration: BoxDecoration(
+        color: AppColors.violetPrincipal.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppColors.violetPrincipal.withValues(alpha: 0.14),
+        ),
+      ),
+      child: const Row(
+        children: [
+          SizedBox(
+            width: 34,
+            height: 34,
+            child: CircularProgressIndicator(strokeWidth: 3),
+          ),
+          SizedBox(width: 16),
+          Expanded(
+            child: Text(
+              'Recherche des imprimantes Bluetooth autour de vous...',
+              style: TextStyle(
+                color: Color(0xFF101529),
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+                height: 1.3,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

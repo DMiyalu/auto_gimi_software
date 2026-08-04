@@ -7,10 +7,10 @@ class BluetoothPrinterService {
 
   static const _channel = MethodChannel('zolana/printers');
 
-  Future<List<BluetoothPrinterDevice>> pairedDevices() async {
+  Future<List<BluetoothPrinterDevice>> searchDevices() async {
     try {
       final result = await _channel.invokeListMethod<Map<dynamic, dynamic>>(
-        'pairedBluetoothDevices',
+        'scanBluetoothDevices',
       );
       return (result ?? const []).map(BluetoothPrinterDevice.fromMap).toList();
     } on MissingPluginException {

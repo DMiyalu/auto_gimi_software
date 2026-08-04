@@ -11,5 +11,5 @@ final bluetoothPrinterServiceProvider = Provider<BluetoothPrinterService>((
 
 final pairedBluetoothPrintersProvider =
     FutureProvider.autoDispose<List<BluetoothPrinterDevice>>((ref) {
-      return ref.watch(bluetoothPrinterServiceProvider).pairedDevices();
+      return ref.watch(bluetoothPrinterServiceProvider).searchDevices();
     });
