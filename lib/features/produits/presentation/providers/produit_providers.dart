@@ -80,6 +80,11 @@ class ProduitController extends AsyncNotifier<void> {
     ref.read(autoSyncCoordinatorProvider).schedulePush();
   }
 
+  void _refreshProduitCaches(String id) {
+    ref.invalidate(produitsProvider);
+    ref.invalidate(produitByIdProvider(id));
+  }
+
   void _ensureCanManageCatalog() {
     if (!ref.read(canManageCatalogProvider)) {
       throw StateError(
@@ -139,7 +144,7 @@ class ProduitController extends AsyncNotifier<void> {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       _ensureCanManageCatalog();
-      await ref
+      final produit = await ref
           .read(produitRepositoryProvider)
           .createProduit(
             establishmentId: establishmentId,
@@ -150,6 +155,7 @@ class ProduitController extends AsyncNotifier<void> {
             stock: stock,
             stockTrackingEnabled: stockTrackingEnabled,
           );
+      _refreshProduitCaches(produit.id);
       _schedulePush();
     });
   }
@@ -179,6 +185,7 @@ class ProduitController extends AsyncNotifier<void> {
             stock: stock,
             stockTrackingEnabled: stockTrackingEnabled,
           );
+      _refreshProduitCaches(id);
       _schedulePush();
     });
   }
@@ -198,6 +205,7 @@ class ProduitController extends AsyncNotifier<void> {
             id: id,
             enabled: enabled,
           );
+      _refreshProduitCaches(id);
       _schedulePush();
     });
   }
@@ -210,6 +218,7 @@ class ProduitController extends AsyncNotifier<void> {
       await ref
           .read(produitRepositoryProvider)
           .deleteProduit(establishmentId: establishmentId, id: id);
+      _refreshProduitCaches(id);
       _schedulePush();
     });
   }
