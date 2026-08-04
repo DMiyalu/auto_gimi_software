@@ -49,4 +49,15 @@ abstract class CommandeRepository {
     required String commandeId,
     required String statusKey,
   });
+
+  Future<void> attachClient({
+    required String establishmentId,
+    required String commandeId,
+    required String clientId,
+  });
+
+  Future<void> detachClient({
+    required String establishmentId,
+    required String commandeId,
+  });
 }

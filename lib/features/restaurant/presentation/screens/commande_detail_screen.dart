@@ -1,15 +1,22 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/auth/auth_error_mapper.dart';
+import '../../../../core/auth/phone_auth_mapper.dart';
 import '../../../../core/domain/app_currency.dart';
+import '../../../../core/domain/country_dial_code.dart';
 import '../../../../core/routing/routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../billing/presentation/providers/billing_providers.dart';
+import '../../../clients/domain/entities/client_entity.dart';
 import '../../../clients/presentation/providers/client_providers.dart';
+import '../../../clients/presentation/widgets/client_avatar.dart';
 import '../../../establishment/presentation/providers/establishment_providers.dart';
 import '../../../billing/domain/entities/facture_entity.dart';
 import '../../../printing/domain/entities/invoice_ticket_data.dart';
@@ -66,7 +73,9 @@ class _CommandeDetailScreenState extends ConsumerState<CommandeDetailScreen> {
           bottomNavigationBar: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (!isCanceled) _TotalBar(totalAmount: item.totalAmount),
+              if (_tabIndex == 0 && !isCanceled)
+                _TotalBar(totalAmount: item.totalAmount),
+              if (_tabIndex == 1) _PrintInvoiceBar(onPrint: () => _printInvoice(item)),
               const PrimaryBottomNavigation(location: Routes.dashboard),
             ],
           ),
@@ -109,16 +118,12 @@ class _CommandeDetailScreenState extends ConsumerState<CommandeDetailScreen> {
                             .read(commandeControllerProvider.notifier)
                             .removeLine(lineId: line.id),
                       ),
-                      _DetailsPlaceholder(
+                      _DetailsTab(
                         commande: item,
+                        lines: lines,
                         isCanceled: isCanceled,
-                        isLoading: state.isLoading,
-                        onStatusChanged: (statusKey) => ref
-                            .read(commandeControllerProvider.notifier)
-                            .setStatus(
-                              commandeId: widget.commandeId,
-                              statusKey: statusKey,
-                            ),
+                        onViewProducts: () =>
+                            setState(() => _tabIndex = 0),
                       ),
                     ],
                   ),
@@ -920,51 +925,790 @@ class _TotalBar extends StatelessWidget {
   }
 }
 
-class _DetailsPlaceholder extends StatelessWidget {
-  const _DetailsPlaceholder({
-    required this.commande,
-    required this.isCanceled,
-    required this.isLoading,
-    required this.onStatusChanged,
-  });
+class _PrintInvoiceBar extends StatelessWidget {
+  const _PrintInvoiceBar({required this.onPrint});
 
-  final CommandeEntity commande;
-  final bool isCanceled;
-  final bool isLoading;
-  final ValueChanged<String> onStatusChanged;
+  final VoidCallback onPrint;
 
   @override
   Widget build(BuildContext context) {
+    return SafeArea(
+      top: false,
+      bottom: false,
+      minimum: const EdgeInsets.fromLTRB(18, 0, 18, 10),
+      child: SizedBox(
+        height: 64,
+        child: FilledButton.icon(
+          onPressed: onPrint,
+          style: FilledButton.styleFrom(
+            backgroundColor: AppColors.vertPrincipal,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            textStyle: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          icon: const Icon(Icons.print_outlined, size: 26),
+          label: const Text('Imprimer facture'),
+        ),
+      ),
+    );
+  }
+}
+
+class _DetailsTab extends ConsumerStatefulWidget {
+  const _DetailsTab({
+    required this.commande,
+    required this.lines,
+    required this.isCanceled,
+    required this.onViewProducts,
+  });
+
+  final CommandeEntity commande;
+  final List<LigneCommandeEntity> lines;
+  final bool isCanceled;
+  final VoidCallback onViewProducts;
+
+  @override
+  ConsumerState<_DetailsTab> createState() => _DetailsTabState();
+}
+
+class _DetailsTabState extends ConsumerState<_DetailsTab> {
+  static final _defaultCountry = SupportedCountries.all.firstWhere(
+    (country) => country.isoCode == 'CD',
+  );
+
+  late CountryDialCode _country = _defaultCountry;
+  final _localController = TextEditingController();
+  Timer? _debounce;
+  bool _searching = false;
+  bool _notFound = false;
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _localController.dispose();
+    super.dispose();
+  }
+
+  void _handlePhoneChanged(String _) {
+    setState(() => _notFound = false);
+    _debounce?.cancel();
+    final digits = PhoneAuthMapper.normalize(_localController.text);
+    if (digits.length < 8) return;
+    _debounce = Timer(const Duration(milliseconds: 450), _lookupPhone);
+  }
+
+  Future<void> _lookupPhone() async {
+    final establishment = ref.read(currentEstablishmentProvider).valueOrNull;
+    if (establishment == null) return;
+    final fullPhone = PhoneAuthMapper.combine(
+      dialCode: _country.dialCode,
+      localNumber: _localController.text,
+    );
+
+    setState(() => _searching = true);
+    final client = await ref
+        .read(clientRepositoryProvider)
+        .findByPhone(establishmentId: establishment.id, phone: fullPhone);
+    if (!mounted) return;
+    setState(() {
+      _searching = false;
+      _notFound = client == null;
+    });
+
+    if (client != null) {
+      await ref
+          .read(commandeControllerProvider.notifier)
+          .attachClient(commandeId: widget.commande.id, clientId: client.id);
+      if (mounted) _localController.clear();
+    }
+  }
+
+  void _openClientPicker() {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(borderRadius: AppRadius.sheetRadius),
+      builder: (_) => _ClientPickerSheet(commandeId: widget.commande.id),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final clientId = widget.commande.clientId;
+    final clientAsync = clientId == null
+        ? null
+        : ref.watch(clientByIdProvider(clientId));
+    final enabled = !widget.isCanceled;
+
     return ListView(
       padding: const EdgeInsets.fromLTRB(18, 30, 18, 230),
       children: [
-        DropdownButtonFormField<String>(
-          initialValue: commande.statusKey,
-          decoration: const InputDecoration(labelText: 'Statut'),
-          items: const [
-            DropdownMenuItem(value: 'en_attente', child: Text('En attente')),
-            DropdownMenuItem(
-              value: 'en_preparation',
-              child: Text('En préparation'),
-            ),
-            DropdownMenuItem(value: 'pretes', child: Text('Prête')),
-            DropdownMenuItem(value: 'livraison', child: Text('Livraison')),
-            DropdownMenuItem(value: 'annulees', child: Text('Annulée')),
-          ],
-          onChanged: isLoading || isCanceled
-              ? null
-              : (value) {
-                  if (value != null) onStatusChanged(value);
-                },
+        Text(
+          'Client (optionnel)',
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            color: const Color(0xFF101529),
+            fontSize: 20,
+            fontWeight: FontWeight.w900,
+          ),
         ),
-        if (isCanceled) ...[
+        const SizedBox(height: 14),
+        _PhoneEntryField(
+          country: _country,
+          controller: _localController,
+          enabled: enabled,
+          onCountryChanged: (country) => setState(() => _country = country),
+          onChanged: _handlePhoneChanged,
+        ),
+        if (_searching || _notFound) ...[
+          const SizedBox(height: 8),
+          Text(
+            _searching
+                ? 'Recherche en cours…'
+                : 'Aucun client trouvé avec ce numéro.',
+            style: const TextStyle(
+              color: Color(0xFF707792),
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+        const SizedBox(height: 14),
+        _ClientSearchTrigger(enabled: enabled, onTap: _openClientPicker),
+        if (clientAsync != null) ...[
+          const SizedBox(height: 18),
+          clientAsync.when(
+            data: (client) => client == null
+                ? const SizedBox.shrink()
+                : _SelectedClientCard(
+                    client: client,
+                    onRemove: enabled
+                        ? () => ref
+                              .read(commandeControllerProvider.notifier)
+                              .detachClient(widget.commande.id)
+                        : null,
+                  ),
+            loading: () => const SizedBox.shrink(),
+            error: (_, _) => const SizedBox.shrink(),
+          ),
+        ],
+        const SizedBox(height: 32),
+        Row(
+          children: [
+            Text(
+              'Résumé des articles',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                color: const Color(0xFF101529),
+                fontSize: 22,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 5),
+              decoration: BoxDecoration(
+                border: Border.all(color: const Color(0xFFE6E8EF)),
+                borderRadius: BorderRadius.circular(AppRadius.chip),
+              ),
+              child: Text(
+                '${widget.lines.length} articles',
+                style: const TextStyle(
+                  color: Color(0xFF707792),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+            const Spacer(),
+            InkWell(
+              borderRadius: BorderRadius.circular(100),
+              onTap: widget.onViewProducts,
+              child: const Padding(
+                padding: EdgeInsets.all(6),
+                child: Icon(
+                  Icons.chevron_right_rounded,
+                  color: Color(0xFF101529),
+                  size: 26,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 14),
+        _ArticlesSummaryCard(
+          lines: widget.lines,
+          totalAmount: widget.commande.totalAmount,
+        ),
+        if (widget.isCanceled) ...[
           const SizedBox(height: 18),
           const Text(
             'Commande annulée : les produits ont été remis en stock.',
             textAlign: TextAlign.center,
+            style: TextStyle(color: Color(0xFF707792), fontWeight: FontWeight.w600),
           ),
         ],
       ],
+    );
+  }
+}
+
+class _PhoneEntryField extends StatelessWidget {
+  const _PhoneEntryField({
+    required this.country,
+    required this.controller,
+    required this.enabled,
+    required this.onCountryChanged,
+    required this.onChanged,
+  });
+
+  final CountryDialCode country;
+  final TextEditingController controller;
+  final bool enabled;
+  final ValueChanged<CountryDialCode> onCountryChanged;
+  final ValueChanged<String> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 64,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: const Color(0xFFE6E8EF)),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          DropdownButtonHideUnderline(
+            child: DropdownButton<CountryDialCode>(
+              value: country,
+              isDense: true,
+              onChanged: enabled
+                  ? (value) {
+                      if (value != null) onCountryChanged(value);
+                    }
+                  : null,
+              selectedItemBuilder: (_) {
+                return SupportedCountries.all
+                    .map(
+                      (c) => Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(c.flagEmoji, style: const TextStyle(fontSize: 18)),
+                          const SizedBox(width: 6),
+                          Text(
+                            c.displayCode,
+                            style: const TextStyle(
+                              color: Color(0xFF101529),
+                              fontSize: 17,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                    .toList();
+              },
+              items: SupportedCountries.all
+                  .map(
+                    (c) => DropdownMenuItem(
+                      value: c,
+                      child: Text(
+                        '${c.flagEmoji} ${c.displayCode} ${c.name}',
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  )
+                  .toList(),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Container(width: 1, height: 28, color: const Color(0xFFE6E8EF)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: TextField(
+              controller: controller,
+              enabled: enabled,
+              keyboardType: TextInputType.phone,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              onChanged: onChanged,
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                isDense: true,
+                hintText: '81 234 5678',
+                hintStyle: TextStyle(
+                  color: Color(0xFF9AA0B7),
+                  fontSize: 17,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              style: const TextStyle(
+                color: Color(0xFF101529),
+                fontSize: 17,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ClientSearchTrigger extends StatelessWidget {
+  const _ClientSearchTrigger({required this.enabled, required this.onTap});
+
+  final bool enabled;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: enabled ? onTap : null,
+        child: Container(
+          height: 64,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            border: Border.all(color: const Color(0xFFE6E8EF)),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.search_rounded,
+                color: Color(0xFF707792),
+                size: 26,
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Text(
+                  'Rechercher un client par téléphone',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Color(0xFF9AA0B7),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SelectedClientCard extends StatelessWidget {
+  const _SelectedClientCard({required this.client, required this.onRemove});
+
+  final ClientEntity client;
+  final VoidCallback? onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: const Color(0xFFE6E8EF)),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 52,
+            height: 52,
+            decoration: const BoxDecoration(
+              color: Color(0xFFEDEEF3),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.person_outline_rounded,
+              color: Color(0xFF101529),
+              size: 28,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  client.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Color(0xFF101529),
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  client.displayPhone,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Color(0xFF707792),
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (onRemove != null)
+            IconButton(
+              tooltip: 'Retirer le client',
+              onPressed: onRemove,
+              icon: const Icon(
+                Icons.close_rounded,
+                color: Color(0xFF707792),
+                size: 24,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ArticlesSummaryCard extends StatelessWidget {
+  const _ArticlesSummaryCard({required this.lines, required this.totalAmount});
+
+  final List<LigneCommandeEntity> lines;
+  final double totalAmount;
+
+  static final _amountFormat = NumberFormat('#,##0', 'fr');
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: const Color(0xFFE6E8EF)),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Column(
+        children: [
+          if (lines.isEmpty)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: Text(
+                'Aucun article dans cette commande.',
+                style: TextStyle(
+                  color: Color(0xFF707792),
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            )
+          else
+            for (final line in lines)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        line.label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Color(0xFF101529),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 36,
+                      child: Text(
+                        '${line.quantity}',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Color(0xFF707792),
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 96,
+                      child: Text(
+                        '${_amountFormat.format(line.lineAmount)} FC',
+                        textAlign: TextAlign.right,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Color(0xFF101529),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 12),
+            child: Divider(height: 1, color: Color(0xFFE6E8EF)),
+          ),
+          Row(
+            children: [
+              const Text(
+                'Total',
+                style: TextStyle(
+                  color: Color(0xFF101529),
+                  fontSize: 19,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                '${_amountFormat.format(totalAmount)} FC',
+                style: const TextStyle(
+                  color: Color(0xFF101529),
+                  fontSize: 24,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ClientPickerSheet extends ConsumerStatefulWidget {
+  const _ClientPickerSheet({required this.commandeId});
+
+  final String commandeId;
+
+  @override
+  ConsumerState<_ClientPickerSheet> createState() =>
+      _ClientPickerSheetState();
+}
+
+class _ClientPickerSheetState extends ConsumerState<_ClientPickerSheet> {
+  final _searchController = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _select(ClientEntity client) async {
+    await ref
+        .read(commandeControllerProvider.notifier)
+        .attachClient(commandeId: widget.commandeId, clientId: client.id);
+    if (!mounted) return;
+    final state = ref.read(commandeControllerProvider);
+    if (!state.hasError) Navigator.of(context).pop();
+  }
+
+  List<ClientEntity> _filter(List<ClientEntity> clients) {
+    final query = _query.trim().toLowerCase();
+    if (query.isEmpty) return clients;
+    final digits = PhoneAuthMapper.normalize(query);
+    return clients.where((client) {
+      final matchesName = client.name.toLowerCase().contains(query);
+      final matchesPhone =
+          digits.isNotEmpty && client.whatsappPhone.contains(digits);
+      return matchesName || matchesPhone;
+    }).toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final clients = ref.watch(clientsProvider).valueOrNull ?? [];
+    final filtered = _filter(clients);
+    final state = ref.watch(commandeControllerProvider);
+
+    return SafeArea(
+      top: false,
+      child: FractionallySizedBox(
+        heightFactor: 0.85,
+        alignment: Alignment.bottomCenter,
+        child: Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+          ),
+          child: Column(
+            children: [
+              const SizedBox(height: 12),
+              Center(
+                child: Container(
+                  width: 48,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFD7DAE5),
+                    borderRadius: BorderRadius.circular(100),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(18, 18, 18, 12),
+                child: Row(
+                  children: [
+                    _CircleActionButton(
+                      icon: Icons.close_rounded,
+                      onTap: () => Navigator.of(context).pop(),
+                      iconSize: 26,
+                    ),
+                    const SizedBox(width: 16),
+                    const Expanded(
+                      child: Text(
+                        'Choisir un client',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Color(0xFF101529),
+                          fontSize: 20,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 60),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 18),
+                child: SizedBox(
+                  height: 56,
+                  child: TextField(
+                    controller: _searchController,
+                    autofocus: true,
+                    onChanged: (value) => setState(() => _query = value),
+                    decoration: InputDecoration(
+                      hintText: 'Rechercher un client par téléphone',
+                      hintStyle: const TextStyle(
+                        color: Color(0xFF9AA0B7),
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      prefixIcon: const Icon(
+                        Icons.search_rounded,
+                        color: Color(0xFF707792),
+                      ),
+                      filled: true,
+                      fillColor: Colors.white,
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: const BorderSide(
+                          color: Color(0xFFE6E8EF),
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: const BorderSide(
+                          color: AppColors.violetPrincipal,
+                        ),
+                      ),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Expanded(
+                child: filtered.isEmpty
+                    ? const Center(
+                        child: Text(
+                          'Aucun client trouvé.',
+                          style: TextStyle(
+                            color: Color(0xFF707792),
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      )
+                    : ListView.separated(
+                        padding: const EdgeInsets.fromLTRB(18, 0, 18, 18),
+                        itemCount: filtered.length,
+                        separatorBuilder: (_, _) => const SizedBox(height: 8),
+                        itemBuilder: (context, index) {
+                          final client = filtered[index];
+                          return Material(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(14),
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(14),
+                              onTap: state.isLoading
+                                  ? null
+                                  : () => _select(client),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 12,
+                                ),
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: const Color(0xFFE6E8EF),
+                                  ),
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                child: Row(
+                                  children: [
+                                    ClientAvatar(client: client),
+                                    const SizedBox(width: 14),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            client.name,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: const TextStyle(
+                                              color: Color(0xFF101529),
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w800,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 3),
+                                          Text(
+                                            client.displayPhone,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: const TextStyle(
+                                              color: Color(0xFF707792),
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

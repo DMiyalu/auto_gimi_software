@@ -7,4 +7,5 @@ abstract final class AppColors {
   static const bleuSaas = Color(0xFF3B82F6);
   static const cyan = Color(0xFF22C7F5);
   static const cyanClair = Color(0xFF60D8FF);
+  static const vertPrincipal = Color(0xFF1F5D3B);
 }

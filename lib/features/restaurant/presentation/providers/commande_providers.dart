@@ -171,4 +171,37 @@ class CommandeController extends AsyncNotifier<void> {
       ref.read(autoSyncCoordinatorProvider).schedulePush();
     });
   }
+
+  Future<void> attachClient({
+    required String commandeId,
+    required String clientId,
+  }) async {
+    final establishmentId = _requireEstablishmentId();
+
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      _ensureCanCreateActivities();
+      await ref
+          .read(commandeRepositoryProvider)
+          .attachClient(
+            establishmentId: establishmentId,
+            commandeId: commandeId,
+            clientId: clientId,
+          );
+      ref.read(autoSyncCoordinatorProvider).schedulePush();
+    });
+  }
+
+  Future<void> detachClient(String commandeId) async {
+    final establishmentId = _requireEstablishmentId();
+
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      _ensureCanCreateActivities();
+      await ref
+          .read(commandeRepositoryProvider)
+          .detachClient(establishmentId: establishmentId, commandeId: commandeId);
+      ref.read(autoSyncCoordinatorProvider).schedulePush();
+    });
+  }
 }

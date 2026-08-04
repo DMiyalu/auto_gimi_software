@@ -418,6 +418,49 @@ class CommandeRepositoryImpl implements CommandeRepository {
         );
   }
 
+  @override
+  Future<void> attachClient({
+    required String establishmentId,
+    required String commandeId,
+    required String clientId,
+  }) async {
+    await _requireMutableCommande(establishmentId, commandeId);
+    final now = DateTime.now();
+    await (_database.update(_database.commandes)..where(
+          (c) =>
+              c.establishmentId.equals(establishmentId) &
+              c.id.equals(commandeId),
+        ))
+        .write(
+          CommandesCompanion(
+            clientId: Value(clientId),
+            updatedAt: Value(now),
+            isDirty: const Value(true),
+          ),
+        );
+  }
+
+  @override
+  Future<void> detachClient({
+    required String establishmentId,
+    required String commandeId,
+  }) async {
+    await _requireMutableCommande(establishmentId, commandeId);
+    final now = DateTime.now();
+    await (_database.update(_database.commandes)..where(
+          (c) =>
+              c.establishmentId.equals(establishmentId) &
+              c.id.equals(commandeId),
+        ))
+        .write(
+          CommandesCompanion(
+            clientId: const Value(null),
+            updatedAt: Value(now),
+            isDirty: const Value(true),
+          ),
+        );
+  }
+
   Future<Commande> _requireMutableCommande(
     String establishmentId,
     String commandeId,
