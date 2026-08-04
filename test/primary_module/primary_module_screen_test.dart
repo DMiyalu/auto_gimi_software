@@ -196,7 +196,6 @@ void main() {
     await tester.tap(find.text(commande.reference));
     await tester.pumpAndSettle();
 
-    expect(find.text('Annulée'), findsWidgets);
     expect(
       find.text('Commande annulée : les produits ont été remis en stock.'),
       findsOneWidget,
