@@ -141,6 +141,26 @@ class _ProduitFormScreenState extends ConsumerState<ProduitFormScreen> {
     context.pop();
   }
 
+  Future<void> _toggleStockTracking(bool enabled) async {
+    final previous = _stockTrackingEnabled;
+    setState(() => _stockTrackingEnabled = enabled);
+
+    if (!_isEditing) return;
+
+    await ref
+        .read(produitControllerProvider.notifier)
+        .updateStockTracking(id: widget.produitId!, enabled: enabled);
+
+    if (!mounted) return;
+    final state = ref.read(produitControllerProvider);
+    if (!state.hasError) return;
+
+    setState(() => _stockTrackingEnabled = previous);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(AuthErrorMapper.message(state.error!))),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return CatalogPermissionGate(child: _buildForm(context));
@@ -270,8 +290,7 @@ class _ProduitFormScreenState extends ConsumerState<ProduitFormScreen> {
                       value: _stockTrackingEnabled,
                       onChanged: formState.isLoading
                           ? null
-                          : (value) =>
-                                setState(() => _stockTrackingEnabled = value),
+                          : _toggleStockTracking,
                     ),
                     AnimatedSwitcher(
                       duration: const Duration(milliseconds: 220),

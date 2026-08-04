@@ -183,6 +183,25 @@ class ProduitController extends AsyncNotifier<void> {
     });
   }
 
+  Future<void> updateStockTracking({
+    required String id,
+    required bool enabled,
+  }) async {
+    final establishmentId = _establishmentId;
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      _ensureCanManageCatalog();
+      await ref
+          .read(produitRepositoryProvider)
+          .updateStockTracking(
+            establishmentId: establishmentId,
+            id: id,
+            enabled: enabled,
+          );
+      _schedulePush();
+    });
+  }
+
   Future<void> deleteProduit({required String id}) async {
     final establishmentId = _establishmentId;
     state = const AsyncLoading();

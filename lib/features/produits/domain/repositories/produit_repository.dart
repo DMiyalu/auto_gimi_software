@@ -56,6 +56,12 @@ abstract class ProduitRepository {
     bool stockTrackingEnabled = true,
   });
 
+  Future<void> updateStockTracking({
+    required String establishmentId,
+    required String id,
+    required bool enabled,
+  });
+
   Future<void> deleteProduit({
     required String establishmentId,
     required String id,

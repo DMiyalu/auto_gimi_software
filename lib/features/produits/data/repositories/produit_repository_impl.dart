@@ -311,6 +311,28 @@ class ProduitRepositoryImpl implements ProduitRepository {
   }
 
   @override
+  Future<void> updateStockTracking({
+    required String establishmentId,
+    required String id,
+    required bool enabled,
+  }) async {
+    final existing = await getProduit(establishmentId: establishmentId, id: id);
+    if (existing == null) throw StateError('Produit introuvable.');
+
+    final now = DateTime.now();
+    await (_database.update(_database.produits)..where(
+          (p) => p.establishmentId.equals(establishmentId) & p.id.equals(id),
+        ))
+        .write(
+          ProduitsCompanion(
+            stockTrackingEnabled: Value(enabled),
+            updatedAt: Value(now),
+            isDirty: const Value(true),
+          ),
+        );
+  }
+
+  @override
   Future<void> deleteProduit({
     required String establishmentId,
     required String id,
