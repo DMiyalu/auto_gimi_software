@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -16,25 +18,30 @@ class PrinterSettingsScreen extends ConsumerStatefulWidget {
 class _PrinterSettingsScreenState extends ConsumerState<PrinterSettingsScreen> {
   var _devices = const <BluetoothPrinterDevice>[];
   var _isSearching = false;
+  var _hasSearched = false;
   String? _errorMessage;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _searchPrinters());
-  }
 
   Future<void> _searchPrinters() async {
     if (_isSearching) return;
     setState(() {
       _isSearching = true;
+      _hasSearched = true;
       _errorMessage = null;
     });
 
     try {
+      await Future<void>.delayed(const Duration(milliseconds: 180));
       final devices = await ref
           .read(bluetoothPrinterServiceProvider)
-          .searchDevices();
+          .searchDevices()
+          .timeout(
+            const Duration(seconds: 18),
+            onTimeout: () {
+              throw TimeoutException(
+                'La recherche Bluetooth prend trop de temps. Vérifiez que le Bluetooth est activé, puis réessayez.',
+              );
+            },
+          );
       if (!mounted) return;
       setState(() {
         _devices = _sortDevices(devices);
@@ -47,6 +54,10 @@ class _PrinterSettingsScreenState extends ConsumerState<PrinterSettingsScreen> {
         _isSearching = false;
       });
     }
+  }
+
+  Future<void> _openBluetoothSettings() {
+    return ref.read(bluetoothPrinterServiceProvider).openBluetoothSettings();
   }
 
   List<BluetoothPrinterDevice> _sortDevices(
@@ -76,7 +87,7 @@ class _PrinterSettingsScreenState extends ConsumerState<PrinterSettingsScreen> {
                 children: [
                   const Expanded(
                     child: Text(
-                      'Imprimantes Bluetooth',
+                      'Recherche imprimante',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w900,
@@ -104,11 +115,14 @@ class _PrinterSettingsScreenState extends ConsumerState<PrinterSettingsScreen> {
                 switchOutCurve: Curves.easeInCubic,
                 child: _PrinterSearchResult(
                   key: ValueKey(
-                    '${_isSearching}_${_errorMessage}_${_devices.length}',
+                    '${_isSearching}_${_hasSearched}_${_errorMessage}_${_devices.length}',
                   ),
+                  hasSearched: _hasSearched,
                   isSearching: _isSearching,
                   errorMessage: _errorMessage,
                   devices: _devices,
+                  onRetry: _searchPrinters,
+                  onOpenBluetoothSettings: _openBluetoothSettings,
                 ),
               ),
             ],
@@ -122,20 +136,45 @@ class _PrinterSettingsScreenState extends ConsumerState<PrinterSettingsScreen> {
 class _PrinterSearchResult extends StatelessWidget {
   const _PrinterSearchResult({
     super.key,
+    required this.hasSearched,
     required this.isSearching,
     required this.errorMessage,
     required this.devices,
+    required this.onRetry,
+    required this.onOpenBluetoothSettings,
   });
 
+  final bool hasSearched;
   final bool isSearching;
   final String? errorMessage;
   final List<BluetoothPrinterDevice> devices;
+  final VoidCallback onRetry;
+  final VoidCallback onOpenBluetoothSettings;
 
   @override
   Widget build(BuildContext context) {
     if (isSearching) return const _SearchingPrinters();
-    if (errorMessage != null) return _PrinterError(message: errorMessage!);
-    if (devices.isEmpty) return const _NoPrinterFound();
+    if (errorMessage != null) {
+      return _PrinterError(
+        message: errorMessage!,
+        onRetry: onRetry,
+        onOpenBluetoothSettings: onOpenBluetoothSettings,
+      );
+    }
+    if (!hasSearched) {
+      return const _MessagePanel(
+        icon: Icons.bluetooth_searching_rounded,
+        title: 'Prêt à rechercher',
+        message:
+            'Touchez Rechercher pour demander les autorisations Bluetooth et détecter les imprimantes proches.',
+      );
+    }
+    if (devices.isEmpty) {
+      return _NoPrinterFound(
+        onRetry: onRetry,
+        onOpenBluetoothSettings: onOpenBluetoothSettings,
+      );
+    }
 
     return Column(
       children: [
@@ -383,30 +422,50 @@ class _SearchingPrinters extends StatelessWidget {
 }
 
 class _NoPrinterFound extends StatelessWidget {
-  const _NoPrinterFound();
+  const _NoPrinterFound({
+    required this.onRetry,
+    required this.onOpenBluetoothSettings,
+  });
+
+  final VoidCallback onRetry;
+  final VoidCallback onOpenBluetoothSettings;
 
   @override
   Widget build(BuildContext context) {
-    return const _MessagePanel(
+    return _MessagePanel(
       icon: Icons.print_disabled_outlined,
       title: 'Aucune imprimante détectée',
       message:
-          'Associez une imprimante thermique dans les paramètres Bluetooth, puis actualisez cette page.',
+          'Associez une imprimante thermique dans les paramètres Bluetooth, puis relancez la recherche.',
+      primaryActionLabel: 'Rechercher encore',
+      onPrimaryAction: onRetry,
+      secondaryActionLabel: 'Ouvrir Bluetooth',
+      onSecondaryAction: onOpenBluetoothSettings,
     );
   }
 }
 
 class _PrinterError extends StatelessWidget {
-  const _PrinterError({required this.message});
+  const _PrinterError({
+    required this.message,
+    required this.onRetry,
+    required this.onOpenBluetoothSettings,
+  });
 
   final String message;
+  final VoidCallback onRetry;
+  final VoidCallback onOpenBluetoothSettings;
 
   @override
   Widget build(BuildContext context) {
     return _MessagePanel(
       icon: Icons.bluetooth_disabled_outlined,
-      title: 'Bluetooth indisponible',
+      title: 'Recherche impossible',
       message: message,
+      primaryActionLabel: 'Réessayer',
+      onPrimaryAction: onRetry,
+      secondaryActionLabel: 'Ouvrir Bluetooth',
+      onSecondaryAction: onOpenBluetoothSettings,
     );
   }
 }
@@ -416,11 +475,19 @@ class _MessagePanel extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.message,
+    this.primaryActionLabel,
+    this.onPrimaryAction,
+    this.secondaryActionLabel,
+    this.onSecondaryAction,
   });
 
   final IconData icon;
   final String title;
   final String message;
+  final String? primaryActionLabel;
+  final VoidCallback? onPrimaryAction;
+  final String? secondaryActionLabel;
+  final VoidCallback? onSecondaryAction;
 
   @override
   Widget build(BuildContext context) {
@@ -455,6 +522,28 @@ class _MessagePanel extends StatelessWidget {
               height: 1.35,
             ),
           ),
+          if (primaryActionLabel != null || secondaryActionLabel != null) ...[
+            const SizedBox(height: 16),
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 10,
+              runSpacing: 10,
+              children: [
+                if (secondaryActionLabel != null)
+                  OutlinedButton.icon(
+                    onPressed: onSecondaryAction,
+                    icon: const Icon(Icons.settings_bluetooth_outlined),
+                    label: Text(secondaryActionLabel!),
+                  ),
+                if (primaryActionLabel != null)
+                  FilledButton.icon(
+                    onPressed: onPrimaryAction,
+                    icon: const Icon(Icons.search_rounded),
+                    label: Text(primaryActionLabel!),
+                  ),
+              ],
+            ),
+          ],
         ],
       ),
     );

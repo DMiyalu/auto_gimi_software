@@ -13,12 +13,17 @@ import UIKit
         binaryMessenger: controller.binaryMessenger
       )
       channel.setMethodCallHandler { call, result in
-        if call.method == "pairedBluetoothDevices" {
+        if call.method == "pairedBluetoothDevices" || call.method == "scanBluetoothDevices" {
           result(FlutterError(
             code: "bluetooth_printer_unavailable",
             message: "iOS ne permet pas de lister automatiquement les imprimantes Bluetooth classiques. Associez une imprimante compatible AirPrint, BLE ou MFi.",
             details: nil
           ))
+        } else if call.method == "openBluetoothSettings" {
+          if let url = URL(string: UIApplication.openSettingsURLString) {
+            UIApplication.shared.open(url)
+          }
+          result(nil)
         } else {
           result(FlutterMethodNotImplemented)
         }

@@ -19,6 +19,16 @@ class BluetoothPrinterService {
       throw BluetoothPrinterException(error.message ?? error.code);
     }
   }
+
+  Future<void> openBluetoothSettings() async {
+    try {
+      await _channel.invokeMethod<void>('openBluetoothSettings');
+    } on MissingPluginException {
+      return;
+    } on PlatformException catch (error) {
+      throw BluetoothPrinterException(error.message ?? error.code);
+    }
+  }
 }
 
 class BluetoothPrinterException implements Exception {

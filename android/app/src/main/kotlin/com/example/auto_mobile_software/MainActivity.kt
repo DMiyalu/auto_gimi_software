@@ -9,6 +9,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.provider.Settings
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
@@ -29,12 +30,22 @@ class MainActivity : FlutterActivity() {
                 when (call.method) {
                     "pairedBluetoothDevices" -> handleBluetoothDevices(result, scan = false)
                     "scanBluetoothDevices" -> handleBluetoothDevices(result, scan = true)
+                    "openBluetoothSettings" -> openBluetoothSettings(result)
                     else -> result.notImplemented()
                 }
             }
     }
 
     private fun handleBluetoothDevices(result: MethodChannel.Result, scan: Boolean) {
+        if (pendingResult != null) {
+            result.error(
+                "bluetooth_search_running",
+                "Une recherche Bluetooth est déjà en cours.",
+                null,
+            )
+            return
+        }
+
         val missingPermissions = missingBluetoothPermissions(scan)
         if (missingPermissions.isNotEmpty()) {
             pendingResult = result
@@ -49,6 +60,19 @@ class MainActivity : FlutterActivity() {
             resolveScannedDevices(result)
         } else {
             resolveBondedDevices(result)
+        }
+    }
+
+    private fun openBluetoothSettings(result: MethodChannel.Result) {
+        try {
+            startActivity(Intent(Settings.ACTION_BLUETOOTH_SETTINGS))
+            result.success(null)
+        } catch (error: Exception) {
+            result.error(
+                "bluetooth_settings_unavailable",
+                "Impossible d'ouvrir les paramètres Bluetooth sur ce device.",
+                null,
+            )
         }
     }
 
