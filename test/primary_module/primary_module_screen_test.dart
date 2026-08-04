@@ -111,7 +111,10 @@ void main() {
     await _pump(tester, BusinessCategory.restaurant, database: database);
 
     expect(find.text('Livraison'), findsOneWidget);
-    expect(find.text('Rien à afficher pour l’instant'), findsOneWidget);
+    expect(
+      find.text('Votre salle est prête à accueillir sa première commande'),
+      findsOneWidget,
+    );
     expect(find.text('Table 12'), findsNothing);
     expect(find.text('Toyota Corolla — CD 214 KM'), findsNothing);
 

@@ -10,6 +10,7 @@ import '../controllers/primary_module_providers.dart';
 import '../models/activity_item.dart';
 import 'activity_card.dart';
 import 'activity_card_actions_sheet.dart';
+import '../config/business_module_config.dart';
 
 /// Liste principale de l'activité métier — recherche + filtre déjà
 /// appliqués en amont par [filteredActivityListProvider].
@@ -23,7 +24,7 @@ class ActivityList extends ConsumerWidget {
     final isRestaurant = config.category == BusinessCategory.restaurant;
 
     if (items.isEmpty) {
-      return _EmptyState(icon: config.activityIcon);
+      return _EmptyState(config: config);
     }
 
     return LayoutBuilder(
@@ -185,27 +186,118 @@ class _AnimatedEntry extends StatelessWidget {
 }
 
 class _EmptyState extends StatelessWidget {
-  const _EmptyState({required this.icon});
+  const _EmptyState({required this.config});
 
-  final IconData icon;
+  final BusinessModuleConfig config;
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 56, color: Theme.of(context).colorScheme.outline),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              'Rien à afficher pour l’instant',
-              style: Theme.of(context).textTheme.titleMedium,
+    final copy = _copyFor(config.category);
+    final primaryAction = config.fabActions
+        .where((action) => action.route != null)
+        .firstOrNull;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(32, 20, 32, 120),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: (constraints.maxHeight - 140).clamp(
+                0.0,
+                double.infinity,
+              ),
             ),
-          ],
-        ),
-      ),
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 76,
+                    height: 76,
+                    decoration: BoxDecoration(
+                      color: config.primaryColor.withValues(alpha: 0.10),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      config.activityIcon,
+                      size: 38,
+                      color: config.primaryColor,
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  Text(
+                    copy.title,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: const Color(0xFF101529),
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    copy.subtitle,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: const Color(0xFF707792),
+                      height: 1.35,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  if (primaryAction != null) ...[
+                    const SizedBox(height: 20),
+                    FilledButton.icon(
+                      onPressed: () => context.push(primaryAction.route!),
+                      icon: Icon(primaryAction.icon),
+                      label: Text(primaryAction.label),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: config.primaryColor,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 22,
+                          vertical: 16,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
+
+  _EmptyCopy _copyFor(BusinessCategory category) {
+    return switch (category) {
+      BusinessCategory.restaurant => const _EmptyCopy(
+        title: 'Votre salle est prête à accueillir sa première commande',
+        subtitle:
+            'Créez une commande en quelques secondes, puis ajoutez les produits au fil du service.',
+      ),
+      BusinessCategory.garageAuto => const _EmptyCopy(
+        title: 'Votre atelier est prêt pour la première prestation',
+        subtitle:
+            'Ajoutez une prestation dès qu’un véhicule arrive et suivez chaque étape depuis ici.',
+      ),
+      BusinessCategory.sanitation => const _EmptyCopy(
+        title: 'Votre tournée peut commencer ici',
+        subtitle:
+            'Planifiez une première collecte et gardez le suivi opérationnel au même endroit.',
+      ),
+      _ => const _EmptyCopy(
+        title: 'Tout est prêt pour démarrer',
+        subtitle:
+            'Ajoutez une première activité pour commencer à suivre votre journée.',
+      ),
+    };
+  }
+}
+
+class _EmptyCopy {
+  const _EmptyCopy({required this.title, required this.subtitle});
+
+  final String title;
+  final String subtitle;
 }
