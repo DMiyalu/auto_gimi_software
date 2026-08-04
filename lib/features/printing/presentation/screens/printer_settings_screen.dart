@@ -21,6 +21,8 @@ class _PrinterSettingsScreenState extends ConsumerState<PrinterSettingsScreen> {
   var _hasSearched = false;
   String? _selectedAddress;
   String? _errorMessage;
+  String? _verifiedAddress;
+  var _testingConnection = false;
 
   @override
   void initState() {
@@ -112,10 +114,45 @@ class _PrinterSettingsScreenState extends ConsumerState<PrinterSettingsScreen> {
   Future<void> _selectPrinter(BluetoothPrinterDevice device) async {
     await ref.read(bluetoothPrinterServiceProvider).saveSelectedPrinter(device);
     if (!mounted) return;
-    setState(() => _selectedAddress = device.address);
+    setState(() {
+      _selectedAddress = device.address;
+      _verifiedAddress = null;
+    });
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('${device.name} sélectionnée pour les factures.')),
     );
+    await _testConnection();
+  }
+
+  /// Établit (ou vérifie) une vraie connexion socket avec l'imprimante
+  /// sélectionnée via print_bluetooth_thermal — l'appairage Bluetooth seul
+  /// ne garantit pas qu'une impression aboutira.
+  Future<void> _testConnection() async {
+    final address = _selectedAddress;
+    if (address == null || _testingConnection) return;
+
+    setState(() => _testingConnection = true);
+    final service = ref.read(bluetoothPrinterServiceProvider);
+    try {
+      await service.ensureConnectedToSelectedPrinter();
+      if (!mounted) return;
+      final name = await service.selectedPrinterName();
+      if (!mounted) return;
+      setState(() => _verifiedAddress = address);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${name ?? "Imprimante"} connectée avec succès.')),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        if (_verifiedAddress == address) _verifiedAddress = null;
+      });
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('$error')));
+    } finally {
+      if (mounted) setState(() => _testingConnection = false);
+    }
   }
 
   Future<void> _showManualPrinterDialog() async {
@@ -251,6 +288,22 @@ class _PrinterSettingsScreenState extends ConsumerState<PrinterSettingsScreen> {
                     icon: const Icon(Icons.edit_outlined),
                     label: const Text('Ajouter manuellement'),
                   ),
+                  if (_selectedAddress != null)
+                    OutlinedButton.icon(
+                      onPressed: _testingConnection ? null : _testConnection,
+                      icon: _testingConnection
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.wifi_tethering_rounded),
+                      label: Text(
+                        _testingConnection
+                            ? 'Vérification...'
+                            : 'Tester la connexion',
+                      ),
+                    ),
                 ],
               ),
               const SizedBox(height: 14),
@@ -267,6 +320,8 @@ class _PrinterSettingsScreenState extends ConsumerState<PrinterSettingsScreen> {
                   errorMessage: _errorMessage,
                   devices: _devices,
                   selectedAddress: _selectedAddress,
+                  verifiedAddress: _verifiedAddress,
+                  testingConnection: _testingConnection,
                   onRetry: _searchPrinters,
                   onLoadPaired: _loadPairedPrinters,
                   onOpenBluetoothSettings: _openBluetoothSettings,
@@ -290,6 +345,8 @@ class _PrinterSearchResult extends StatelessWidget {
     required this.errorMessage,
     required this.devices,
     required this.selectedAddress,
+    required this.verifiedAddress,
+    required this.testingConnection,
     required this.onRetry,
     required this.onLoadPaired,
     required this.onOpenBluetoothSettings,
@@ -302,6 +359,8 @@ class _PrinterSearchResult extends StatelessWidget {
   final String? errorMessage;
   final List<BluetoothPrinterDevice> devices;
   final String? selectedAddress;
+  final String? verifiedAddress;
+  final bool testingConnection;
   final VoidCallback onRetry;
   final VoidCallback onLoadPaired;
   final VoidCallback onOpenBluetoothSettings;
@@ -355,6 +414,8 @@ class _PrinterSearchResult extends StatelessWidget {
           _PrinterTile(
             device: device,
             selected: device.address == selectedAddress,
+            verified: device.address == verifiedAddress,
+            testing: testingConnection && device.address == selectedAddress,
             onSelect: () => onSelect(device),
           ),
           const SizedBox(height: 10),
@@ -456,11 +517,15 @@ class _PrinterTile extends StatelessWidget {
   const _PrinterTile({
     required this.device,
     required this.selected,
+    required this.verified,
+    required this.testing,
     required this.onSelect,
   });
 
   final BluetoothPrinterDevice device;
   final bool selected;
+  final bool verified;
+  final bool testing;
   final VoidCallback onSelect;
 
   @override
@@ -526,7 +591,11 @@ class _PrinterTile extends StatelessWidget {
           ),
           const SizedBox(width: 10),
           _StatusBadge(
-            label: selected
+            label: testing
+                ? 'Vérification...'
+                : selected && verified
+                ? 'Connectée ✅'
+                : selected
                 ? 'Sélectionnée'
                 : device.isConnected
                 ? 'Connectée'

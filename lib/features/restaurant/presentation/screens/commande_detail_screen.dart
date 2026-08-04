@@ -4,9 +4,16 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/auth/auth_error_mapper.dart';
+import '../../../../core/domain/app_currency.dart';
 import '../../../../core/routing/routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../billing/presentation/providers/billing_providers.dart';
+import '../../../clients/presentation/providers/client_providers.dart';
+import '../../../establishment/presentation/providers/establishment_providers.dart';
+import '../../../billing/domain/entities/facture_entity.dart';
+import '../../../printing/domain/entities/invoice_ticket_data.dart';
+import '../../../printing/presentation/utils/invoice_print_flow.dart';
 import '../../../produits/domain/entities/produit_entity.dart';
 import '../../../produits/presentation/providers/produit_providers.dart';
 import '../../../shell/presentation/widgets/primary_bottom_navigation.dart';
@@ -71,6 +78,7 @@ class _CommandeDetailScreenState extends ConsumerState<CommandeDetailScreen> {
                   commande: item,
                   onBack: () => context.pop(),
                   onMore: () => _showActionsSheet(context, item),
+                  onPrint: () => _printInvoice(item),
                 ),
                 _SegmentedTabs(
                   selectedIndex: _tabIndex,
@@ -141,6 +149,49 @@ class _CommandeDetailScreenState extends ConsumerState<CommandeDetailScreen> {
     );
   }
 
+  Future<void> _printInvoice(CommandeEntity commande) async {
+    final establishment = await ref.read(currentEstablishmentProvider.future);
+    final lines = await ref.read(commandeLinesProvider(commande.id).future);
+    final client = commande.clientId != null
+        ? await ref.read(clientByIdProvider(commande.clientId!).future)
+        : null;
+    final facture = await ref.read(
+      factureForActivityProvider(
+        BillingActivityRef(
+          type: BillingActivityType.commande,
+          id: commande.id,
+        ),
+      ).future,
+    );
+
+    if (!mounted) return;
+
+    final data = InvoiceTicketData(
+      establishmentName: establishment?.name ?? 'Facture',
+      establishmentPhone: establishment?.phone,
+      reference: facture?.reference ?? commande.reference,
+      date: facture?.issuedAt ?? DateTime.now(),
+      clientName: client?.name,
+      clientPhone: client?.displayPhone,
+      lines: [
+        for (final line in lines)
+          InvoiceTicketLine(
+            label: line.label,
+            quantity: line.quantity,
+            unitPrice: line.unitPrice,
+            lineAmount: line.lineAmount,
+          ),
+      ],
+      totalAmount: facture?.totalAmount ?? commande.totalAmount,
+      paidAmount: facture?.paidAmount,
+      balanceDue: facture?.balanceDue,
+      currency: facture?.currency ?? AppCurrency.cdf,
+      statusLabel: facture?.status.label ?? commande.statusLabel,
+    );
+
+    await printInvoiceTicket(context, ref, data);
+  }
+
   void _showActionsSheet(BuildContext context, CommandeEntity commande) {
     final isCanceled = commande.statusKey == 'annulees';
     showModalBottomSheet<void>(
@@ -157,7 +208,10 @@ class _CommandeDetailScreenState extends ConsumerState<CommandeDetailScreen> {
                 ListTile(
                   leading: const Icon(Icons.print_outlined),
                   title: const Text('Imprimer'),
-                  onTap: () => Navigator.of(sheetContext).pop(),
+                  onTap: () {
+                    Navigator.of(sheetContext).pop();
+                    _printInvoice(commande);
+                  },
                 ),
                 if (!isCanceled)
                   ListTile(
@@ -187,11 +241,13 @@ class _DetailHeader extends StatelessWidget {
     required this.commande,
     required this.onBack,
     required this.onMore,
+    required this.onPrint,
   });
 
   final CommandeEntity commande;
   final VoidCallback onBack;
   final VoidCallback onMore;
+  final VoidCallback onPrint;
 
   @override
   Widget build(BuildContext context) {
@@ -248,7 +304,7 @@ class _DetailHeader extends StatelessWidget {
           const SizedBox(width: 12),
           _CircleActionButton(
             icon: Icons.print_outlined,
-            onTap: () {},
+            onTap: onPrint,
             iconSize: 30,
           ),
           const SizedBox(width: 14),

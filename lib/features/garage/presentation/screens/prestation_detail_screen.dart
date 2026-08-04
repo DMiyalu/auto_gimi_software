@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/domain/app_currency.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../billing/domain/entities/facture_entity.dart';
 import '../../../billing/presentation/providers/billing_providers.dart';
 import '../../../billing/presentation/widgets/activity_billing_panel.dart';
+import '../../../clients/presentation/providers/client_providers.dart';
+import '../../../establishment/presentation/providers/establishment_providers.dart';
+import '../../../printing/domain/entities/invoice_ticket_data.dart';
+import '../../../printing/presentation/utils/invoice_print_flow.dart';
+import '../../domain/entities/prestation_entity.dart';
 import '../providers/prestation_providers.dart';
 import '../widgets/prestation_client_tab.dart';
 import '../widgets/prestation_works_tab.dart';
@@ -29,30 +35,71 @@ class PrestationDetailScreen extends ConsumerWidget {
             body: Center(child: Text('Prestation introuvable.')),
           );
         }
-        return _PrestationDetailBody(
-          prestationId: prestationId,
-          vehiculeId: prestation.vehiculeId,
-          totalAmount: prestation.montantTotal,
-        );
+        return _PrestationDetailBody(prestation: prestation);
       },
     );
   }
 }
 
 class _PrestationDetailBody extends ConsumerWidget {
-  const _PrestationDetailBody({
-    required this.prestationId,
-    required this.vehiculeId,
-    required this.totalAmount,
-  });
+  const _PrestationDetailBody({required this.prestation});
 
-  final String prestationId;
-  final String vehiculeId;
-  final double totalAmount;
+  final PrestationEntity prestation;
+
+  Future<void> _printInvoice(BuildContext context, WidgetRef ref) async {
+    final prestationId = prestation.id;
+    final establishment = await ref.read(currentEstablishmentProvider.future);
+    final vehicule = await ref.read(
+      vehiculeProvider(prestation.vehiculeId).future,
+    );
+    final lines = await ref.read(prestationLinesProvider(prestationId).future);
+    final client = prestation.clientId != null
+        ? await ref.read(clientByIdProvider(prestation.clientId!).future)
+        : null;
+    final facture = await ref.read(
+      factureForActivityProvider(
+        BillingActivityRef(
+          type: BillingActivityType.prestation,
+          id: prestationId,
+        ),
+      ).future,
+    );
+
+    if (!context.mounted) return;
+
+    final data = InvoiceTicketData(
+      establishmentName: establishment?.name ?? 'Facture',
+      establishmentPhone: establishment?.phone,
+      reference: facture?.reference ?? prestationId,
+      date: facture?.issuedAt ?? DateTime.now(),
+      clientName: client?.name,
+      clientPhone: client?.displayPhone,
+      vehicleLabel: vehicule != null
+          ? '${vehicule.displayName} (${vehicule.immatriculation})'
+          : null,
+      lines: [
+        for (final line in lines)
+          InvoiceTicketLine(
+            label: line.libelle,
+            quantity: line.quantite,
+            unitPrice: line.prixUnitaire,
+            lineAmount: line.montantLigne,
+          ),
+      ],
+      totalAmount: facture?.totalAmount ?? prestation.montantTotal,
+      paidAmount: facture?.paidAmount,
+      balanceDue: facture?.balanceDue,
+      currency: facture?.currency ?? AppCurrency.cdf,
+      statusLabel: facture?.status.label,
+    );
+
+    await printInvoiceTicket(context, ref, data);
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final vehicule = ref.watch(vehiculeProvider(vehiculeId)).valueOrNull;
+    final vehicule =
+        ref.watch(vehiculeProvider(prestation.vehiculeId)).valueOrNull;
     final title = vehicule?.displayName ?? '…';
     final showSubtitle =
         vehicule != null && vehicule.marque != null && vehicule.modele != null;
@@ -75,6 +122,13 @@ class _PrestationDetailBody extends ConsumerWidget {
                 ),
             ],
           ),
+          actions: [
+            IconButton(
+              tooltip: 'Imprimer la facture',
+              icon: const Icon(Icons.print_outlined),
+              onPressed: () => _printInvoice(context, ref),
+            ),
+          ],
           bottom: const TabBar(
             tabs: [
               Tab(text: 'Travaux'),
@@ -85,11 +139,11 @@ class _PrestationDetailBody extends ConsumerWidget {
         ),
         body: TabBarView(
           children: [
-            PrestationWorksTab(prestationId: prestationId),
-            PrestationClientTab(prestationId: prestationId),
+            PrestationWorksTab(prestationId: prestation.id),
+            PrestationClientTab(prestationId: prestation.id),
             _PrestationBillingTab(
-              prestationId: prestationId,
-              totalAmount: totalAmount,
+              prestationId: prestation.id,
+              totalAmount: prestation.montantTotal,
             ),
           ],
         ),
