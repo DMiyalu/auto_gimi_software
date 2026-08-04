@@ -80,7 +80,7 @@ abstract final class BusinessModuleConfigs {
     category: BusinessCategory.restaurant,
     primaryModuleLabel: 'Commandes',
     searchPlaceholder: 'Rechercher une commande, une table ou un client…',
-    primaryColor: const Color(0xFF006B43),
+    primaryColor: AppColors.violetPrincipal,
     activityIcon: Icons.restaurant_outlined,
     statusFilters: const [
       StatusFilterOption(key: 'all', label: 'Toutes'),

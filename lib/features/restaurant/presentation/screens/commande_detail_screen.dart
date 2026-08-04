@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/auth/auth_error_mapper.dart';
 import '../../../../core/routing/routes.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../produits/domain/entities/produit_entity.dart';
 import '../../../produits/presentation/providers/produit_providers.dart';
@@ -312,9 +313,9 @@ class _DetailHeader extends StatelessWidget {
 
   static Color _accentForTitle(String title) {
     final lower = title.toLowerCase();
-    if (lower.contains('livraison')) return const Color(0xFFFF5A66);
-    if (lower.contains('emporter')) return const Color(0xFF40C979);
-    return const Color(0xFF006B43);
+    if (lower.contains('livraison')) return AppColors.cyan;
+    if (lower.contains('emporter')) return AppColors.bleuRoyal;
+    return AppColors.violetPrincipal;
   }
 }
 
@@ -379,7 +380,7 @@ class _TabButton extends StatelessWidget {
                 label,
                 style: TextStyle(
                   color: selected
-                      ? const Color(0xFF006B43)
+                      ? AppColors.violetPrincipal
                       : const Color(0xFF707792),
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
@@ -390,7 +391,7 @@ class _TabButton extends StatelessWidget {
               duration: const Duration(milliseconds: 160),
               height: 3,
               width: selected ? double.infinity : 0,
-              color: const Color(0xFF006B43),
+              color: AppColors.violetPrincipal,
             ),
           ],
         ),
@@ -459,7 +460,9 @@ class _ProductsTab extends StatelessWidget {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Color(0xFF006B43)),
+                      borderSide: const BorderSide(
+                        color: AppColors.violetPrincipal,
+                      ),
                     ),
                     contentPadding: EdgeInsets.zero,
                   ),
@@ -531,7 +534,7 @@ class _ProductsTab extends StatelessWidget {
                 child: OutlinedButton.icon(
                   onPressed: onAddProduct,
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFF006B43),
+                    foregroundColor: AppColors.violetPrincipal,
                     side: const BorderSide(color: Color(0xFFE6E8EF)),
                     padding: const EdgeInsets.symmetric(
                       horizontal: 14,
@@ -774,11 +777,11 @@ class _ProductThumb extends StatelessWidget {
   }
 
   static Color _colorFor(String label) {
-    if (label.contains('poulet')) return const Color(0xFFD9480F);
-    if (label.contains('riz')) return const Color(0xFFB08968);
-    if (label.contains('alloco')) return const Color(0xFF2F9E44);
-    if (label.contains('coca')) return const Color(0xFFE03131);
-    return const Color(0xFF006B43);
+    if (label.contains('poulet')) return AppColors.violetPrincipal;
+    if (label.contains('riz')) return AppColors.violetClair;
+    if (label.contains('alloco')) return AppColors.bleuRoyal;
+    if (label.contains('coca')) return AppColors.cyan;
+    return AppColors.bleuSaas;
   }
 }
 
@@ -847,7 +850,7 @@ class _StepperButton extends StatelessWidget {
       child: SizedBox(
         width: 45,
         height: double.infinity,
-        child: Icon(icon, color: const Color(0xFF006B43), size: 24),
+        child: Icon(icon, color: AppColors.violetPrincipal, size: 24),
       ),
     );
   }
@@ -866,7 +869,7 @@ class _EmptyProductsHint extends StatelessWidget {
         Icon(
           Icons.inventory_2_outlined,
           size: 72,
-          color: const Color(0xFF006B43).withValues(alpha: 0.22),
+          color: AppColors.violetPrincipal.withValues(alpha: 0.22),
         ),
         const SizedBox(height: 16),
         Text(
@@ -952,7 +955,7 @@ class _TotalBar extends StatelessWidget {
               child: FilledButton.icon(
                 onPressed: () {},
                 style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xFF006B43),
+                  backgroundColor: AppColors.violetPrincipal,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(horizontal: 32),
                   shape: RoundedRectangleBorder(

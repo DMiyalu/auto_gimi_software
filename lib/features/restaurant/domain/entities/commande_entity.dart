@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_colors.dart';
+
 class CommandeEntity {
   const CommandeEntity({
     required this.id,
@@ -37,10 +39,10 @@ String commandeStatusLabel(String key) {
 
 Color commandeStatusColor(String key) {
   return switch (key) {
-    'en_attente' => const Color(0xFFEF2E2E),
-    'en_preparation' => const Color(0xFF006B43),
-    'pretes' => const Color(0xFF1FA85B),
-    'livraison' => const Color(0xFF1E88E5),
+    'en_attente' => AppColors.violetClair,
+    'en_preparation' => AppColors.violetPrincipal,
+    'pretes' => AppColors.bleuRoyal,
+    'livraison' => AppColors.cyan,
     'annulees' => Colors.grey.shade500,
     _ => Colors.blueGrey.shade500,
   };

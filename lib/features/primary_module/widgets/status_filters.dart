@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/domain/business_category.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../controllers/primary_module_providers.dart';
 
@@ -33,9 +34,9 @@ class StatusFilters extends ConsumerWidget {
               : items.any((item) => item.statusKey == option.key);
 
           final dotColor = switch (option.key) {
-            'en_attente' => const Color(0xFFFF970F),
-            'en_preparation' => const Color(0xFF1E88E5),
-            'pretes' => const Color(0xFF40C979),
+            'en_attente' => AppColors.violetClair,
+            'en_preparation' => AppColors.violetPrincipal,
+            'pretes' => AppColors.bleuRoyal,
             _ => config.primaryColor,
           };
 

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/domain/business_category.dart';
 import '../../../core/domain/enums.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../establishment/presentation/providers/establishment_providers.dart';
 import '../../garage/domain/entities/prestation_summary.dart';
 import '../../garage/presentation/providers/prestation_providers.dart';
@@ -121,13 +122,13 @@ class ActivityListNotifier extends Notifier<List<ActivityItem>> {
 
 Color _statusColorFor(String key) {
   return switch (key) {
-    'en_attente' => const Color(0xFFEF2E2E),
+    'en_attente' => AppColors.violetClair,
     'en_preparation' ||
     'en_cours' ||
     'diagnostic' ||
-    'planifiees' => const Color(0xFF1E88E5),
-    'pretes' || 'terminees' => const Color(0xFF1FA85B),
-    'livraison' => Colors.deepOrange,
+    'planifiees' => AppColors.violetPrincipal,
+    'pretes' || 'terminees' => AppColors.bleuRoyal,
+    'livraison' => AppColors.cyan,
     'annulees' => Colors.grey,
     _ => Colors.blueGrey,
   };

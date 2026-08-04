@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/domain/business_category.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/routing/routes.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../establishment/domain/models/establishment.dart';
 import '../../establishment/domain/models/establishment_member.dart';
@@ -89,13 +90,11 @@ class BusinessHeader extends ConsumerWidget {
           CircleAvatar(
             radius: isRestaurant ? 32 : 22,
             backgroundColor: isRestaurant
-                ? const Color(0xFF0E6141)
+                ? AppColors.violetPrincipal
                 : config.primaryColor.withValues(alpha: 0.12),
             child: Icon(
               isRestaurant ? Icons.room_service_outlined : config.activityIcon,
-              color: isRestaurant
-                  ? const Color(0xFFE5A445)
-                  : config.primaryColor,
+              color: isRestaurant ? AppColors.cyanClair : config.primaryColor,
               size: isRestaurant ? 34 : 24,
             ),
           ),
