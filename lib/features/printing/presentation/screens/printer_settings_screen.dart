@@ -20,6 +20,7 @@ class _PrinterSettingsScreenState extends ConsumerState<PrinterSettingsScreen> {
   var _isSearching = false;
   var _hasSearched = false;
   String? _selectedAddress;
+  String? _selectedName;
   String? _errorMessage;
   String? _verifiedAddress;
   var _testingConnection = false;
@@ -31,11 +32,21 @@ class _PrinterSettingsScreenState extends ConsumerState<PrinterSettingsScreen> {
   }
 
   Future<void> _loadSelectedPrinter() async {
-    final address = await ref
-        .read(bluetoothPrinterServiceProvider)
-        .selectedPrinterAddress();
+    final service = ref.read(bluetoothPrinterServiceProvider);
+    final address = await service.selectedPrinterAddress();
+    final name = await service.selectedPrinterName();
     if (!mounted) return;
-    setState(() => _selectedAddress = address);
+    setState(() {
+      _selectedAddress = address;
+      _selectedName = name;
+    });
+
+    if (address == null) return;
+    // Vérifie l'état réel de la connexion (sans tenter de reconnecter) pour
+    // savoir si l'imprimante est effectivement connectée à l'application.
+    final connected = await service.isConnected();
+    if (!mounted) return;
+    if (connected) setState(() => _verifiedAddress = address);
   }
 
   Future<void> _searchPrinters() async {
@@ -116,6 +127,7 @@ class _PrinterSettingsScreenState extends ConsumerState<PrinterSettingsScreen> {
     if (!mounted) return;
     setState(() {
       _selectedAddress = device.address;
+      _selectedName = device.name;
       _verifiedAddress = null;
     });
     ScaffoldMessenger.of(context).showSnackBar(
@@ -153,6 +165,19 @@ class _PrinterSettingsScreenState extends ConsumerState<PrinterSettingsScreen> {
     } finally {
       if (mounted) setState(() => _testingConnection = false);
     }
+  }
+
+  Future<void> _disconnectPrinter() async {
+    final address = _selectedAddress;
+    if (address == null) return;
+    await ref.read(bluetoothPrinterServiceProvider).disconnectPrinter();
+    if (!mounted) return;
+    setState(() {
+      if (_verifiedAddress == address) _verifiedAddress = null;
+    });
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Imprimante déconnectée.')));
   }
 
   Future<void> _showManualPrinterDialog() async {
@@ -241,6 +266,17 @@ class _PrinterSettingsScreenState extends ConsumerState<PrinterSettingsScreen> {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(20, 18, 20, 32),
             children: [
+              _ConnectedPrinterCard(
+                name: _selectedName,
+                address: _selectedAddress,
+                connected:
+                    _selectedAddress != null &&
+                    _verifiedAddress == _selectedAddress,
+                testing: _testingConnection,
+                onTest: _testConnection,
+                onDisconnect: _disconnectPrinter,
+              ),
+              const SizedBox(height: 18),
               const _BluetoothGuideCard(),
               const SizedBox(height: 22),
               Row(
@@ -288,22 +324,6 @@ class _PrinterSettingsScreenState extends ConsumerState<PrinterSettingsScreen> {
                     icon: const Icon(Icons.edit_outlined),
                     label: const Text('Ajouter manuellement'),
                   ),
-                  if (_selectedAddress != null)
-                    OutlinedButton.icon(
-                      onPressed: _testingConnection ? null : _testConnection,
-                      icon: _testingConnection
-                          ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.wifi_tethering_rounded),
-                      label: Text(
-                        _testingConnection
-                            ? 'Vérification...'
-                            : 'Tester la connexion',
-                      ),
-                    ),
                 ],
               ),
               const SizedBox(height: 14),
@@ -421,6 +441,133 @@ class _PrinterSearchResult extends StatelessWidget {
           const SizedBox(height: 10),
         ],
       ],
+    );
+  }
+}
+
+class _ConnectedPrinterCard extends StatelessWidget {
+  const _ConnectedPrinterCard({
+    required this.name,
+    required this.address,
+    required this.connected,
+    required this.testing,
+    required this.onTest,
+    required this.onDisconnect,
+  });
+
+  final String? name;
+  final String? address;
+  final bool connected;
+  final bool testing;
+  final VoidCallback onTest;
+  final VoidCallback onDisconnect;
+
+  @override
+  Widget build(BuildContext context) {
+    if (address == null) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF4F5F9),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFE6E8EF)),
+        ),
+        child: const Row(
+          children: [
+            Icon(Icons.print_disabled_outlined, color: Color(0xFF707792)),
+            SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Aucune imprimante connectée à l’application pour le moment.',
+                style: TextStyle(
+                  color: Color(0xFF5C637D),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final statusColor = connected
+        ? AppColors.violetPrincipal
+        : const Color(0xFFEF2E2E);
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: statusColor.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: statusColor.withValues(alpha: 0.24)),
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 22,
+            backgroundColor: statusColor.withValues(alpha: 0.14),
+            foregroundColor: statusColor,
+            child: Icon(
+              connected ? Icons.print_rounded : Icons.print_disabled_outlined,
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name ?? 'Imprimante',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Color(0xFF101529),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  testing
+                      ? 'Vérification de la connexion...'
+                      : connected
+                      ? 'Connectée à l’application'
+                      : 'Non connectée actuellement',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: statusColor,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          if (testing)
+            const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          else if (connected)
+            IconButton(
+              tooltip: 'Déconnecter',
+              onPressed: onDisconnect,
+              icon: const Icon(Icons.link_off_rounded),
+              color: statusColor,
+            )
+          else
+            IconButton(
+              tooltip: 'Tester la connexion',
+              onPressed: onTest,
+              icon: const Icon(Icons.refresh_rounded),
+              color: statusColor,
+            ),
+        ],
+      ),
     );
   }
 }
