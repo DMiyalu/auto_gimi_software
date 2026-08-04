@@ -11,7 +11,6 @@ import '../../restaurant/presentation/providers/commande_providers.dart';
 import '../config/business_module_config.dart';
 import '../config/business_module_configs.dart';
 import '../models/activity_item.dart';
-import '../services/mock_activity_data.dart';
 
 /// Métier actif, dérivé de l'établissement réel. `garageAuto` sert de
 /// valeur par défaut le temps que l'établissement se charge.
@@ -33,9 +32,8 @@ final moduleSearchQueryProvider = StateProvider<String>((ref) => '');
 /// Clé du filtre de statut sélectionné ('all' par défaut).
 final moduleSelectedFilterProvider = StateProvider<String>((ref) => 'all');
 
-/// Jeu de données mocké pour le métier actif — reste mutable en mémoire
-/// (épinglage, changement de statut, annulation) le temps de brancher un
-/// vrai repository.
+/// Liste d'activité issue uniquement des repositories réels du métier actif.
+/// Si aucune donnée n'existe en base, l'écran reste vide.
 final activityListProvider =
     NotifierProvider<ActivityListNotifier, List<ActivityItem>>(
       ActivityListNotifier.new,
@@ -45,20 +43,15 @@ class ActivityListNotifier extends Notifier<List<ActivityItem>> {
   @override
   List<ActivityItem> build() {
     final category = ref.watch(activeBusinessCategoryProvider);
-    // Le garage est le métier réel de l'app : sa liste vient des vraies
-    // prestations. Les autres métiers restent mockés (démonstration de
-    // l'architecture générique uniquement).
     if (category == BusinessCategory.garageAuto) {
       final summaries = ref.watch(prestationsSummaryProvider).valueOrNull ?? [];
       return summaries.map(_fromPrestationSummary).toList();
     }
     if (category == BusinessCategory.restaurant) {
       final commandes = ref.watch(commandesProvider).valueOrNull ?? [];
-      if (commandes.isNotEmpty) {
-        return commandes.map(_fromCommande).toList();
-      }
+      return commandes.map(_fromCommande).toList();
     }
-    return MockActivityData.forCategory(category);
+    return const [];
   }
 
   ActivityItem _fromPrestationSummary(PrestationSummary summary) {
@@ -75,7 +68,7 @@ class ActivityListNotifier extends Notifier<List<ActivityItem>> {
       time: summary.dateOuverture,
       statusKey: statusKey,
       statusLabel: isOuverte ? 'En cours' : 'Terminée',
-      statusColor: MockActivityData.statusColorFor(statusKey),
+      statusColor: _statusColorFor(statusKey),
       leadingIcon: Icons.build_circle_outlined,
       amount: summary.montantTotal,
       metaLabel: titleIsImmatriculation ? null : summary.immatriculation,
@@ -116,7 +109,7 @@ class ActivityListNotifier extends Notifier<List<ActivityItem>> {
           item.copyWith(
             statusKey: statusKey,
             statusLabel: statusLabel,
-            statusColor: MockActivityData.statusColorFor(statusKey),
+            statusColor: _statusColorFor(statusKey),
           )
         else
           item,
@@ -124,6 +117,20 @@ class ActivityListNotifier extends Notifier<List<ActivityItem>> {
   }
 
   void cancel(String id) => setStatus(id, 'annulees', 'Annulée');
+}
+
+Color _statusColorFor(String key) {
+  return switch (key) {
+    'en_attente' => const Color(0xFFEF2E2E),
+    'en_preparation' ||
+    'en_cours' ||
+    'diagnostic' ||
+    'planifiees' => const Color(0xFF1E88E5),
+    'pretes' || 'terminees' => const Color(0xFF1FA85B),
+    'livraison' => Colors.deepOrange,
+    'annulees' => Colors.grey,
+    _ => Colors.blueGrey,
+  };
 }
 
 /// Liste affichée après application de la recherche et du filtre de statut.

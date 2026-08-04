@@ -1,11 +1,14 @@
+import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:auto_mobile_software/core/database/app_database.dart';
 import 'package:auto_mobile_software/core/domain/business_category.dart';
 import 'package:auto_mobile_software/core/l10n/app_localizations.dart';
+import 'package:auto_mobile_software/core/providers/database_provider.dart';
 import 'package:auto_mobile_software/core/routing/routes.dart';
 import 'package:auto_mobile_software/features/establishment/domain/models/establishment.dart';
 import 'package:auto_mobile_software/features/establishment/domain/models/establishment_member.dart';
@@ -15,6 +18,7 @@ import 'package:auto_mobile_software/features/establishment/presentation/provide
 import 'package:auto_mobile_software/features/establishment/presentation/screens/establishment_form_screen.dart';
 import 'package:auto_mobile_software/features/primary_module/screens/primary_module_screen.dart';
 import 'package:auto_mobile_software/features/primary_module/widgets/activity_card.dart';
+import 'package:auto_mobile_software/features/restaurant/data/repositories/commande_repository_impl.dart';
 
 final _establishment = Establishment(
   id: 'etab-1',
@@ -29,6 +33,7 @@ final _establishment = Establishment(
 
 Future<void> _pump(
   WidgetTester tester, {
+  AppDatabase? database,
   List<Override> extraOverrides = const [],
 }) async {
   await tester.pumpWidget(
@@ -37,6 +42,7 @@ Future<void> _pump(
         currentEstablishmentProvider.overrideWith(
           (ref) => Stream.value(_establishment),
         ),
+        if (database != null) databaseProvider.overrideWithValue(database),
         ...extraOverrides,
       ],
       child: MaterialApp.router(
@@ -64,11 +70,27 @@ Future<void> _pump(
   await tester.pumpAndSettle();
 }
 
+Future<AppDatabase> _databaseWithCommande() async {
+  final database = AppDatabase(NativeDatabase.memory());
+  await CommandeRepositoryImpl(
+    database: database,
+  ).createCommande(establishmentId: 'etab-1', context: 'Table 12');
+  return database;
+}
+
+Future<void> _disposeTree(WidgetTester tester) async {
+  await tester.pumpWidget(const SizedBox());
+  await tester.pump(const Duration(milliseconds: 1));
+  await tester.pump(const Duration(milliseconds: 1));
+}
+
 void main() {
   testWidgets(
     "l'appui long ouvre un menu avec épingler / statut / imprimer / annuler",
     (tester) async {
-      await _pump(tester);
+      final database = await _databaseWithCommande();
+      addTearDown(database.close);
+      await _pump(tester, database: database);
 
       await tester.longPress(find.byType(ActivityCard).first);
       await tester.pumpAndSettle();
@@ -77,13 +99,17 @@ void main() {
       expect(find.text('Changer le statut'), findsOneWidget);
       expect(find.text('Imprimer la facture'), findsOneWidget);
       expect(find.text('Annuler'), findsOneWidget);
+
+      await _disposeTree(tester);
     },
   );
 
   testWidgets('épingler une carte affiche l\'indicateur épinglé', (
     tester,
   ) async {
-    await _pump(tester);
+    final database = await _databaseWithCommande();
+    addTearDown(database.close);
+    await _pump(tester, database: database);
 
     expect(find.byIcon(Icons.push_pin), findsNothing);
 
@@ -93,12 +119,16 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byIcon(Icons.push_pin), findsOneWidget);
+
+    await _disposeTree(tester);
   });
 
   testWidgets('changer le statut met à jour le badge de la carte', (
     tester,
   ) async {
-    await _pump(tester);
+    final database = await _databaseWithCommande();
+    addTearDown(database.close);
+    await _pump(tester, database: database);
 
     await tester.longPress(find.byType(ActivityCard).first);
     await tester.pumpAndSettle();
@@ -113,10 +143,14 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Prêtes'), findsWidgets);
+
+    await _disposeTree(tester);
   });
 
   testWidgets('annuler marque la carte comme annulée', (tester) async {
-    await _pump(tester);
+    final database = await _databaseWithCommande();
+    addTearDown(database.close);
+    await _pump(tester, database: database);
 
     await tester.longPress(find.byType(ActivityCard).first);
     await tester.pumpAndSettle();
@@ -124,12 +158,16 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Annulée'), findsOneWidget);
+
+    await _disposeTree(tester);
   });
 
   testWidgets('glisser révèle Imprimer des deux côtés et déclenche un retour', (
     tester,
   ) async {
-    await _pump(tester);
+    final database = await _databaseWithCommande();
+    addTearDown(database.close);
+    await _pump(tester, database: database);
 
     await tester.drag(find.byType(ActivityCard).first, const Offset(-300, 0));
     await tester.pumpAndSettle();
@@ -140,6 +178,8 @@ void main() {
     await tester.pump();
 
     expect(find.textContaining('Impression de la facture'), findsOneWidget);
+
+    await _disposeTree(tester);
   });
 
   testWidgets(

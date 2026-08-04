@@ -105,11 +105,18 @@ void main() {
   testWidgets('affiche la config restaurant sans libellé garage codé en dur', (
     tester,
   ) async {
-    await _pump(tester, BusinessCategory.restaurant);
+    final database = AppDatabase(NativeDatabase.memory());
+    addTearDown(database.close);
 
-    expect(find.text('Table 12'), findsOneWidget);
+    await _pump(tester, BusinessCategory.restaurant, database: database);
+
     expect(find.text('Livraison'), findsOneWidget);
+    expect(find.text('Rien à afficher pour l’instant'), findsOneWidget);
+    expect(find.text('Table 12'), findsNothing);
     expect(find.text('Toyota Corolla — CD 214 KM'), findsNothing);
+
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump(const Duration(milliseconds: 1));
   });
 
   testWidgets('affiche les vraies commandes pour un restaurant', (
@@ -199,7 +206,19 @@ void main() {
   });
 
   testWidgets('la recherche filtre instantanément la liste', (tester) async {
-    await _pump(tester, BusinessCategory.restaurant);
+    final database = AppDatabase(NativeDatabase.memory());
+    addTearDown(database.close);
+    final repository = CommandeRepositoryImpl(database: database);
+    await repository.createCommande(
+      establishmentId: 'etab-1',
+      context: 'Table 5',
+    );
+    await repository.createCommande(
+      establishmentId: 'etab-1',
+      context: 'Table 12',
+    );
+
+    await _pump(tester, BusinessCategory.restaurant, database: database);
 
     expect(find.text('Table 5'), findsOneWidget);
 
@@ -208,15 +227,38 @@ void main() {
 
     expect(find.text('Table 12'), findsWidgets);
     expect(find.text('Table 5'), findsNothing);
+
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump(const Duration(milliseconds: 1));
   });
 
   testWidgets('un filtre de statut restreint la liste', (tester) async {
-    await _pump(tester, BusinessCategory.restaurant);
+    final database = AppDatabase(NativeDatabase.memory());
+    addTearDown(database.close);
+    final repository = CommandeRepositoryImpl(database: database);
+    final prete = await repository.createCommande(
+      establishmentId: 'etab-1',
+      context: 'Table prête',
+    );
+    await repository.setStatus(
+      establishmentId: 'etab-1',
+      commandeId: prete.id,
+      statusKey: 'pretes',
+    );
+    await repository.createCommande(
+      establishmentId: 'etab-1',
+      context: 'Table 12',
+    );
+
+    await _pump(tester, BusinessCategory.restaurant, database: database);
 
     await tester.tap(find.text('Prêtes'));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 300));
 
-    expect(find.text('À emporter #1256'), findsOneWidget);
+    expect(find.text('Table prête'), findsOneWidget);
     expect(find.text('Table 12'), findsNothing);
+
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump(const Duration(milliseconds: 1));
   });
 }
