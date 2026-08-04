@@ -246,6 +246,69 @@ class CommandeRepositoryImpl implements CommandeRepository {
   }
 
   @override
+  Future<void> decrementLine({
+    required String establishmentId,
+    required String lineId,
+  }) async {
+    final line =
+        await (_database.select(_database.ligneCommandes)..where(
+              (l) =>
+                  l.establishmentId.equals(establishmentId) &
+                  l.id.equals(lineId) &
+                  l.isDeleted.equals(false),
+            ))
+            .getSingleOrNull();
+    if (line == null) throw StateError('Ligne de commande introuvable.');
+    if (line.quantite <= 1) {
+      await removeLine(establishmentId: establishmentId, lineId: lineId);
+      return;
+    }
+    await _requireMutableCommande(establishmentId, line.commandeId);
+
+    final produit =
+        await (_database.select(_database.produits)..where(
+              (p) =>
+                  p.establishmentId.equals(establishmentId) &
+                  p.id.equals(line.produitId) &
+                  p.isDeleted.equals(false),
+            ))
+            .getSingleOrNull();
+    if (produit == null) throw StateError('Produit introuvable.');
+
+    final now = DateTime.now();
+    final newQuantity = line.quantite - 1;
+    await _database.transaction(() async {
+      await (_database.update(_database.ligneCommandes)..where(
+            (l) =>
+                l.establishmentId.equals(establishmentId) & l.id.equals(lineId),
+          ))
+          .write(
+            LigneCommandesCompanion(
+              quantite: Value(newQuantity),
+              montantLigne: Value(line.prixUnitaire * newQuantity),
+              updatedAt: Value(now),
+              isDirty: const Value(true),
+            ),
+          );
+
+      await (_database.update(_database.produits)..where(
+            (p) =>
+                p.establishmentId.equals(establishmentId) &
+                p.id.equals(line.produitId),
+          ))
+          .write(
+            ProduitsCompanion(
+              stock: Value(produit.stock + 1),
+              updatedAt: Value(now),
+              isDirty: const Value(true),
+            ),
+          );
+
+      await _recalculateTotal(establishmentId, line.commandeId, now);
+    });
+  }
+
+  @override
   Future<void> cancelCommande({
     required String establishmentId,
     required String commandeId,

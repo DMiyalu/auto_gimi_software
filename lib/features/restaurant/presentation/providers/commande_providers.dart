@@ -123,6 +123,19 @@ class CommandeController extends AsyncNotifier<void> {
     });
   }
 
+  Future<void> decrementLine({required String lineId}) async {
+    final establishmentId = _requireEstablishmentId();
+
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      _ensureCanCreateActivities();
+      await ref
+          .read(commandeRepositoryProvider)
+          .decrementLine(establishmentId: establishmentId, lineId: lineId);
+      ref.read(autoSyncCoordinatorProvider).schedulePush();
+    });
+  }
+
   Future<void> cancelCommande({required String commandeId}) async {
     final establishmentId = _requireEstablishmentId();
 

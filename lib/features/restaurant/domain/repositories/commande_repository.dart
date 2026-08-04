@@ -34,6 +34,11 @@ abstract class CommandeRepository {
     required String lineId,
   });
 
+  Future<void> decrementLine({
+    required String establishmentId,
+    required String lineId,
+  });
+
   Future<void> cancelCommande({
     required String establishmentId,
     required String commandeId,
