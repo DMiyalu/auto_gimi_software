@@ -18,6 +18,8 @@ import '../../features/clients/presentation/screens/client_form_screen.dart';
 import '../../features/clients/presentation/screens/clients_list_screen.dart';
 import '../../features/garage/presentation/screens/new_prestation_screen.dart';
 import '../../features/garage/presentation/screens/prestation_detail_screen.dart';
+import '../../features/inventory/presentation/screens/inventories_screen.dart';
+import '../../features/inventory/presentation/screens/inventory_detail_screen.dart';
 import '../../features/primary_module/models/activity_item.dart';
 import '../../features/primary_module/screens/activity_detail_screen.dart';
 import '../../features/primary_module/screens/primary_module_screen.dart';
@@ -208,6 +210,15 @@ final routerProvider = Provider<GoRouter>((ref) {
             builder: (_, state) => ProductCategoryFormScreen(
               categoryId: state.pathParameters['id'],
             ),
+          ),
+          GoRoute(
+            path: Routes.inventories,
+            builder: (context, state) => const InventoriesScreen(),
+          ),
+          GoRoute(
+            path: Routes.inventoryDetail,
+            builder: (_, state) =>
+                InventoryDetailScreen(inventoryId: state.pathParameters['id']!),
           ),
           GoRoute(
             path: Routes.prestationScan,

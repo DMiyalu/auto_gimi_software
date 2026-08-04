@@ -25,6 +25,8 @@ abstract final class Routes {
   static const produitEdit = '/produits/edit/:id';
   static const productCategoryNew = '/produits/categories/new';
   static const productCategoryEdit = '/produits/categories/edit/:id';
+  static const inventories = '/inventaires';
+  static const inventoryDetail = '/inventaires/:id';
 
   static String serviceEditPath(String id) => '/services/edit/$id';
   static String serviceCategoryEditPath(String id) =>
@@ -32,6 +34,7 @@ abstract final class Routes {
   static String produitEditPath(String id) => '/produits/edit/$id';
   static String productCategoryEditPath(String id) =>
       '/produits/categories/edit/$id';
+  static String inventoryDetailPath(String id) => '/inventaires/$id';
   static String clientDetailPath(String id) => '/clients/$id';
   static String clientEditPath(String id) => '/clients/edit/$id';
   static const prestationScan = '/prestations/scan';
