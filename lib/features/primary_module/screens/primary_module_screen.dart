@@ -19,9 +19,9 @@ class PrimaryModuleScreen extends StatelessWidget {
       body: Column(
         children: [
           ModuleSearchBar(),
-          SizedBox(height: AppSpacing.sm),
+          SizedBox(height: AppSpacing.md),
           StatusFilters(),
-          SizedBox(height: AppSpacing.xs),
+          SizedBox(height: AppSpacing.sm),
           Expanded(child: ActivityList()),
         ],
       ),

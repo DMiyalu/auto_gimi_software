@@ -16,6 +16,7 @@ class ActivityItem {
     this.amount,
     this.metaLabel,
     this.badgeCount,
+    this.accentColor,
     this.pinned = false,
   });
 
@@ -30,6 +31,7 @@ class ActivityItem {
   final double? amount;
   final String? metaLabel;
   final int? badgeCount;
+  final Color? accentColor;
   final bool pinned;
 
   ActivityItem copyWith({
@@ -50,6 +52,7 @@ class ActivityItem {
       amount: amount,
       metaLabel: metaLabel,
       badgeCount: badgeCount,
+      accentColor: accentColor,
       pinned: pinned ?? this.pinned,
     );
   }

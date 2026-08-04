@@ -27,8 +27,10 @@ class PrimaryScaffold extends StatelessWidget {
     final location = GoRouterState.of(context).uri.path;
 
     return Scaffold(
+      extendBody: true,
       drawer: const AppDrawer(),
       floatingActionButton: floatingActionButton,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       bottomNavigationBar: PrimaryBottomNavigation(location: location),
       body: SafeArea(
         child: Column(

@@ -20,6 +20,7 @@ class ActivityList extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final items = ref.watch(filteredActivityListProvider);
     final config = ref.watch(primaryModuleConfigProvider);
+    final isRestaurant = config.category == BusinessCategory.restaurant;
 
     if (items.isEmpty) {
       return _EmptyState(icon: config.activityIcon);
@@ -28,60 +29,103 @@ class ActivityList extends ConsumerWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isWide = constraints.maxWidth > 900;
-        final list = ListView.separated(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.sm,
-            AppSpacing.xs,
-            AppSpacing.sm,
-            96,
-          ),
-          itemCount: items.length,
-          separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.xs),
-          itemBuilder: (context, index) {
-            final item = items[index];
-            return _AnimatedEntry(
-              key: ValueKey(item.id),
-              index: index,
-              child: Slidable(
-                startActionPane: _printActionPane(
-                  context,
-                  item,
-                  config.primaryColor,
+        Widget buildItem(int index) {
+          final item = items[index];
+          return _AnimatedEntry(
+            key: ValueKey(item.id),
+            index: index,
+            child: Slidable(
+              startActionPane: _printActionPane(
+                context,
+                item,
+                config.primaryColor,
+              ),
+              endActionPane: _printActionPane(
+                context,
+                item,
+                config.primaryColor,
+              ),
+              child: ActivityCard(
+                item: item,
+                onTap: () {
+                  if (config.category == BusinessCategory.garageAuto) {
+                    context.push(Routes.prestationDetailPath(item.id));
+                    return;
+                  }
+                  if (config.category == BusinessCategory.restaurant) {
+                    context.push(Routes.commandeDetailPath(item.id));
+                    return;
+                  }
+                  context.push(Routes.activityDetailPath(item.id), extra: item);
+                },
+                onLongPress: () => showActivityCardActions(context, ref, item),
+              ),
+            ),
+          );
+        }
+
+        final list = isRestaurant
+            ? SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(18, 0, 18, 120),
+                child: Column(
+                  children: [
+                    for (var index = 0; index < items.length; index++) ...[
+                      buildItem(index),
+                      if (index < items.length - 1)
+                        const SizedBox(height: AppSpacing.xs),
+                    ],
+                  ],
                 ),
-                endActionPane: _printActionPane(
-                  context,
-                  item,
-                  config.primaryColor,
+              )
+            : ListView.separated(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.sm,
+                  0,
+                  AppSpacing.sm,
+                  96,
                 ),
-                child: ActivityCard(
-                  item: item,
-                  onTap: () {
-                    if (config.category == BusinessCategory.garageAuto) {
-                      context.push(Routes.prestationDetailPath(item.id));
-                      return;
-                    }
-                    if (config.category == BusinessCategory.restaurant) {
-                      context.push(Routes.commandeDetailPath(item.id));
-                      return;
-                    }
-                    context.push(
-                      Routes.activityDetailPath(item.id),
-                      extra: item,
-                    );
-                  },
-                  onLongPress: () =>
-                      showActivityCardActions(context, ref, item),
+                itemCount: items.length,
+                separatorBuilder: (_, _) =>
+                    const SizedBox(height: AppSpacing.xs),
+                itemBuilder: (context, index) => buildItem(index),
+              );
+
+        final content = Column(
+          children: [
+            if (isRestaurant)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(18, 0, 18, 18),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Aujourd'hui",
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: const Color(0xFF101C4A),
+                        fontSize: 21,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    Text(
+                      '28 commandes',
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: const Color(0xFF7B819B),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            );
-          },
+            Expanded(child: list),
+          ],
         );
 
-        if (!isWide) return list;
+        if (!isWide) return content;
         return Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 720),
-            child: list,
+            child: content,
           ),
         );
       },

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/domain/business_category.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../config/business_module_config.dart';
@@ -23,15 +24,29 @@ class ModuleFab extends ConsumerWidget {
     final config = ref.watch(primaryModuleConfigProvider);
     final resolvedColor = color ?? config.primaryColor;
     final resolvedActions = actions ?? config.fabActions;
+    final isRestaurant = config.category == BusinessCategory.restaurant;
 
-    return FloatingActionButton(
-      backgroundColor: resolvedColor,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppRadius.chip),
+    return SizedBox(
+      width: isRestaurant ? 74 : null,
+      height: isRestaurant ? 74 : null,
+      child: FloatingActionButton(
+        backgroundColor: resolvedColor,
+        elevation: isRestaurant ? 12 : null,
+        highlightElevation: isRestaurant ? 14 : null,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(
+            isRestaurant ? AppRadius.chip : AppRadius.button,
+          ),
+        ),
+        mini: false,
+        onPressed: () =>
+            _openActionsSheet(context, resolvedActions, resolvedColor),
+        child: Icon(
+          Icons.add_rounded,
+          color: Colors.white,
+          size: isRestaurant ? 42 : 28,
+        ),
       ),
-      onPressed: () =>
-          _openActionsSheet(context, resolvedActions, resolvedColor),
-      child: const Icon(Icons.add, color: Colors.white),
     );
   }
 

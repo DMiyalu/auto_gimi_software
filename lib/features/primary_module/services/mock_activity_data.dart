@@ -25,10 +25,12 @@ abstract final class MockActivityData {
   /// mis à part) restent visuellement cohérents avec les données mockées.
   static Color statusColorFor(String key) {
     return switch (key) {
-      'en_attente' => Colors.red.shade400,
-      'en_preparation' || 'en_cours' || 'diagnostic' || 'planifiees' =>
-        Colors.blue.shade400,
-      'pretes' || 'terminees' => Colors.green.shade600,
+      'en_attente' => const Color(0xFFEF2E2E),
+      'en_preparation' ||
+      'en_cours' ||
+      'diagnostic' ||
+      'planifiees' => const Color(0xFF1E88E5),
+      'pretes' || 'terminees' => const Color(0xFF1FA85B),
       'livraison' => Colors.deepOrange.shade400,
       'annulees' => Colors.grey.shade500,
       _ => Colors.blueGrey,
@@ -50,6 +52,7 @@ abstract final class MockActivityData {
         amount: 18000,
         metaLabel: '2 personnes',
         badgeCount: 2,
+        accentColor: const Color(0xFF006B43),
       ),
       ActivityItem(
         id: 'livraison-1258',
@@ -63,6 +66,7 @@ abstract final class MockActivityData {
         amount: 32000,
         metaLabel: 'Kalamu, Avenue Kasavubu',
         badgeCount: 1,
+        accentColor: const Color(0xFFFF5A66),
       ),
       ActivityItem(
         id: 'table-5',
@@ -75,6 +79,7 @@ abstract final class MockActivityData {
         leadingIcon: Icons.table_restaurant_outlined,
         amount: 22500,
         metaLabel: '3 personnes',
+        accentColor: const Color(0xFFFF970F),
       ),
       ActivityItem(
         id: 'emporter-1256',
@@ -87,6 +92,7 @@ abstract final class MockActivityData {
         leadingIcon: Icons.shopping_bag_outlined,
         amount: 15000,
         metaLabel: '1 personne',
+        accentColor: const Color(0xFF40C979),
       ),
       ActivityItem(
         id: 'livraison-1255',
@@ -100,6 +106,7 @@ abstract final class MockActivityData {
         amount: 27000,
         metaLabel: 'Gombe, Rue des Jardins',
         badgeCount: 3,
+        accentColor: const Color(0xFFFF5A66),
       ),
       ActivityItem(
         id: 'table-8',
@@ -112,6 +119,7 @@ abstract final class MockActivityData {
         leadingIcon: Icons.table_restaurant_outlined,
         amount: 31000,
         metaLabel: '4 personnes',
+        accentColor: const Color(0xFF4AAEFF),
       ),
     ];
   }

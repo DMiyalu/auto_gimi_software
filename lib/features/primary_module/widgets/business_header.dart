@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/domain/business_category.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/routing/routes.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -30,6 +31,8 @@ class BusinessHeader extends ConsumerWidget {
     final memberships =
         ref.watch(userMembershipsProvider).valueOrNull ?? const [];
     final profile = ref.watch(userProfileProvider).valueOrNull;
+    final isRestaurant = config.category == BusinessCategory.restaurant;
+    final hasSystemTopInset = MediaQuery.paddingOf(context).top > 0;
 
     ref.listen(establishmentControllerProvider, (_, next) {
       if (next.hasError) {
@@ -45,24 +48,58 @@ class BusinessHeader extends ConsumerWidget {
         : '?';
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.xs,
-        AppSpacing.xs,
-        AppSpacing.sm,
-        AppSpacing.xs,
+      padding: EdgeInsets.fromLTRB(
+        isRestaurant ? 18 : AppSpacing.xs,
+        isRestaurant ? (hasSystemTopInset ? 22 : 8) : AppSpacing.xs,
+        isRestaurant ? 18 : AppSpacing.sm,
+        isRestaurant ? 16 : AppSpacing.xs,
       ),
       child: Row(
         children: [
-          IconButton(
-            icon: const Icon(Icons.menu_outlined),
+          _HeaderCircleButton(
             onPressed: () => Scaffold.of(context).openDrawer(),
+            size: isRestaurant ? 56 : 48,
+            backgroundColor: isRestaurant
+                ? const Color(0xFFF4F5F9)
+                : Colors.transparent,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Icon(
+                  Icons.menu_rounded,
+                  size: isRestaurant ? 34 : 24,
+                  color: const Color(0xFF101529),
+                ),
+                if (isRestaurant)
+                  const Positioned(
+                    right: -2,
+                    top: -2,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: Color(0xFF7D56FF),
+                        shape: BoxShape.circle,
+                      ),
+                      child: SizedBox(width: 9, height: 9),
+                    ),
+                  ),
+              ],
+            ),
           ),
+          SizedBox(width: isRestaurant ? 18 : AppSpacing.xs),
           CircleAvatar(
-            radius: 22,
-            backgroundColor: config.primaryColor.withValues(alpha: 0.12),
-            child: Icon(config.activityIcon, color: config.primaryColor),
+            radius: isRestaurant ? 32 : 22,
+            backgroundColor: isRestaurant
+                ? const Color(0xFF0E6141)
+                : config.primaryColor.withValues(alpha: 0.12),
+            child: Icon(
+              isRestaurant ? Icons.room_service_outlined : config.activityIcon,
+              color: isRestaurant
+                  ? const Color(0xFFE5A445)
+                  : config.primaryColor,
+              size: isRestaurant ? 34 : 24,
+            ),
           ),
-          const SizedBox(width: AppSpacing.xs),
+          SizedBox(width: isRestaurant ? 14 : AppSpacing.xs),
           Expanded(
             child: InkWell(
               borderRadius: BorderRadius.circular(AppRadius.card),
@@ -86,21 +123,33 @@ class BusinessHeader extends ConsumerWidget {
                         Flexible(
                           child: Text(
                             name,
-                            style: Theme.of(context).textTheme.titleLarge,
+                            style: Theme.of(context).textTheme.titleLarge
+                                ?.copyWith(
+                                  fontSize: isRestaurant ? 23 : null,
+                                  fontWeight: FontWeight.w800,
+                                  color: const Color(0xFF101529),
+                                  height: 1.05,
+                                ),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        const Icon(Icons.keyboard_arrow_down, size: 20),
+                        const SizedBox(width: 2),
+                        const Icon(
+                          Icons.keyboard_arrow_down_rounded,
+                          size: 22,
+                          color: Color(0xFF101529),
+                        ),
                       ],
                     ),
                     if (establishment != null)
                       Text(
                         establishment.category.label(l10n),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          fontSize: isRestaurant ? 16 : null,
+                          color: const Color(0xFF7B819B),
                         ),
                       ),
-                    if (role != null)
+                    if (role != null && !isRestaurant)
                       Text(
                         role.label,
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
@@ -113,10 +162,20 @@ class BusinessHeader extends ConsumerWidget {
             ),
           ),
           const _NotificationBell(),
-          const SizedBox(width: AppSpacing.xs),
+          SizedBox(width: isRestaurant ? 14 : AppSpacing.xs),
           GestureDetector(
             onTap: () => context.go(Routes.settings),
-            child: CircleAvatar(radius: 20, child: Text(initials)),
+            child: CircleAvatar(
+              radius: isRestaurant ? 28 : 20,
+              backgroundColor: const Color(0xFFEFF1F5),
+              child: Text(
+                initials,
+                style: TextStyle(
+                  color: isRestaurant ? const Color(0xFF101529) : null,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -219,7 +278,11 @@ class _NotificationBell extends StatelessWidget {
       clipBehavior: Clip.none,
       children: [
         IconButton(
-          icon: const Icon(Icons.notifications_none_outlined),
+          icon: const Icon(
+            Icons.notifications_none_rounded,
+            size: 34,
+            color: Color(0xFF101529),
+          ),
           onPressed: () {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
@@ -230,22 +293,57 @@ class _NotificationBell extends StatelessWidget {
         ),
         Positioned(
           right: 6,
-          top: 6,
+          top: 4,
           child: Container(
-            padding: const EdgeInsets.all(4),
+            padding: const EdgeInsets.all(5),
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.error,
               shape: BoxShape.circle,
             ),
-            constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+            constraints: const BoxConstraints(minWidth: 20, minHeight: 20),
             child: const Text(
               '3',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white, fontSize: 10),
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+              ),
             ),
           ),
         ),
       ],
+    );
+  }
+}
+
+class _HeaderCircleButton extends StatelessWidget {
+  const _HeaderCircleButton({
+    required this.child,
+    required this.onPressed,
+    required this.size,
+    required this.backgroundColor,
+  });
+
+  final Widget child;
+  final VoidCallback onPressed;
+  final double size;
+  final Color backgroundColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: backgroundColor,
+      shape: const CircleBorder(),
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onPressed,
+        child: SizedBox(
+          width: size,
+          height: size,
+          child: Center(child: child),
+        ),
+      ),
     );
   }
 }

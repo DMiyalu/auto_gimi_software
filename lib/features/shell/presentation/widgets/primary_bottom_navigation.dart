@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/domain/business_category.dart';
 import '../../../../core/routing/routes.dart';
 import '../../../primary_module/controllers/primary_module_providers.dart';
 
@@ -51,9 +52,47 @@ class PrimaryBottomNavigation extends ConsumerWidget {
     ];
 
     final selectedIndex = _selectedIndex(destinations.map((d) => d.route));
+    final safeSelectedIndex = selectedIndex < 0 ? 0 : selectedIndex;
+
+    if (config.category == BusinessCategory.restaurant) {
+      return SafeArea(
+        minimum: const EdgeInsets.fromLTRB(10, 0, 10, 8),
+        child: Container(
+          height: 96,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.10),
+                blurRadius: 26,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+          child: Row(
+            children: [
+              for (var i = 0; i < destinations.length; i++)
+                Expanded(
+                  child: _RestaurantNavItem(
+                    icon: i == safeSelectedIndex
+                        ? destinations[i].selectedIcon
+                        : destinations[i].icon,
+                    label: destinations[i].label,
+                    selected: i == safeSelectedIndex,
+                    color: config.primaryColor,
+                    onTap: () => context.go(destinations[i].route),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      );
+    }
 
     return NavigationBar(
-      selectedIndex: selectedIndex < 0 ? 0 : selectedIndex,
+      selectedIndex: safeSelectedIndex,
       onDestinationSelected: (index) => context.go(destinations[index].route),
       destinations: [
         for (final d in destinations)
@@ -73,5 +112,61 @@ class PrimaryBottomNavigation extends ConsumerWidget {
       if (location.startsWith(routeList[i])) return i;
     }
     return -1;
+  }
+}
+
+class _RestaurantNavItem extends StatelessWidget {
+  const _RestaurantNavItem({
+    required this.icon,
+    required this.label,
+    required this.selected,
+    required this.color,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final bool selected;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final itemColor = selected ? color : const Color(0xFF7B819B);
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(18),
+      onTap: onTap,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 160),
+            width: 42,
+            height: 36,
+            decoration: BoxDecoration(
+              color: selected ? color : Colors.transparent,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              icon,
+              size: 27,
+              color: selected ? Colors.white : itemColor,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: itemColor,
+              fontSize: 14,
+              fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
