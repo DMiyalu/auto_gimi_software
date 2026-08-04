@@ -16,18 +16,16 @@ class NewCommandeScreen extends ConsumerStatefulWidget {
 }
 
 class _NewCommandeScreenState extends ConsumerState<NewCommandeScreen> {
-  final _tableController = TextEditingController();
+  static final _tableNumbers = List<int>.unmodifiable(
+    List.generate(20, (index) => index + 1),
+  );
 
-  @override
-  void dispose() {
-    _tableController.dispose();
-    super.dispose();
-  }
+  int? _selectedTable;
 
   Future<void> _submit() async {
     final controller = ref.read(commandeControllerProvider.notifier);
     final commandeId = await controller.createCommande(
-      context: _contextFromTable(_tableController.text),
+      context: _contextFromTable(_selectedTable),
     );
 
     if (!mounted) return;
@@ -35,12 +33,8 @@ class _NewCommandeScreenState extends ConsumerState<NewCommandeScreen> {
     if (!state.hasError) context.go(Routes.commandeDetailPath(commandeId));
   }
 
-  String? _contextFromTable(String value) {
-    final trimmed = value.trim();
-    if (trimmed.isEmpty) return null;
-    final hasTablePrefix = trimmed.toLowerCase().startsWith('table');
-    return hasTablePrefix ? trimmed : 'Table $trimmed';
-  }
+  String? _contextFromTable(int? tableNumber) =>
+      tableNumber == null ? null : 'Table $tableNumber';
 
   @override
   Widget build(BuildContext context) {
@@ -108,15 +102,27 @@ class _NewCommandeScreenState extends ConsumerState<NewCommandeScreen> {
                     ),
                   ),
                   const SizedBox(height: AppSpacing.lg),
-                  TextField(
-                    controller: _tableController,
-                    enabled: !state.isLoading,
+                  DropdownButtonFormField<int?>(
+                    initialValue: _selectedTable,
+                    isExpanded: true,
                     decoration: const InputDecoration(
-                      labelText: 'Numéro de table',
-                      hintText: 'Ex. 12',
+                      labelText: 'Table',
                       prefixIcon: Icon(Icons.table_restaurant_outlined),
                     ),
-                    keyboardType: TextInputType.number,
+                    items: [
+                      const DropdownMenuItem<int?>(
+                        value: null,
+                        child: Text('Sans table'),
+                      ),
+                      for (final number in _tableNumbers)
+                        DropdownMenuItem<int?>(
+                          value: number,
+                          child: Text('Table $number'),
+                        ),
+                    ],
+                    onChanged: state.isLoading
+                        ? null
+                        : (value) => setState(() => _selectedTable = value),
                   ),
                   const SizedBox(height: 24),
                   FilledButton.icon(
