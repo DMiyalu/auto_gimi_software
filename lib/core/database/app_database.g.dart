@@ -6772,6 +6772,1299 @@ class PaiementsCompanion extends UpdateCompanion<Paiement> {
   }
 }
 
+class $InventairesTable extends Inventaires
+    with TableInfo<$InventairesTable, Inventaire> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $InventairesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _establishmentIdMeta = const VerificationMeta(
+    'establishmentId',
+  );
+  @override
+  late final GeneratedColumn<String> establishmentId = GeneratedColumn<String>(
+    'establishment_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _referenceMeta = const VerificationMeta(
+    'reference',
+  );
+  @override
+  late final GeneratedColumn<String> reference = GeneratedColumn<String>(
+    'reference',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _statutMeta = const VerificationMeta('statut');
+  @override
+  late final GeneratedColumn<String> statut = GeneratedColumn<String>(
+    'statut',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('brouillon'),
+  );
+  static const VerificationMeta _startedAtMeta = const VerificationMeta(
+    'startedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> startedAt = GeneratedColumn<DateTime>(
+    'started_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _closedAtMeta = const VerificationMeta(
+    'closedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> closedAt = GeneratedColumn<DateTime>(
+    'closed_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _isDeletedMeta = const VerificationMeta(
+    'isDeleted',
+  );
+  @override
+  late final GeneratedColumn<bool> isDeleted = GeneratedColumn<bool>(
+    'is_deleted',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_deleted" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _isDirtyMeta = const VerificationMeta(
+    'isDirty',
+  );
+  @override
+  late final GeneratedColumn<bool> isDirty = GeneratedColumn<bool>(
+    'is_dirty',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_dirty" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    establishmentId,
+    reference,
+    statut,
+    startedAt,
+    closedAt,
+    createdAt,
+    updatedAt,
+    isDeleted,
+    isDirty,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'inventaires';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Inventaire> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('establishment_id')) {
+      context.handle(
+        _establishmentIdMeta,
+        establishmentId.isAcceptableOrUnknown(
+          data['establishment_id']!,
+          _establishmentIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('reference')) {
+      context.handle(
+        _referenceMeta,
+        reference.isAcceptableOrUnknown(data['reference']!, _referenceMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_referenceMeta);
+    }
+    if (data.containsKey('statut')) {
+      context.handle(
+        _statutMeta,
+        statut.isAcceptableOrUnknown(data['statut']!, _statutMeta),
+      );
+    }
+    if (data.containsKey('started_at')) {
+      context.handle(
+        _startedAtMeta,
+        startedAt.isAcceptableOrUnknown(data['started_at']!, _startedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_startedAtMeta);
+    }
+    if (data.containsKey('closed_at')) {
+      context.handle(
+        _closedAtMeta,
+        closedAt.isAcceptableOrUnknown(data['closed_at']!, _closedAtMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('is_deleted')) {
+      context.handle(
+        _isDeletedMeta,
+        isDeleted.isAcceptableOrUnknown(data['is_deleted']!, _isDeletedMeta),
+      );
+    }
+    if (data.containsKey('is_dirty')) {
+      context.handle(
+        _isDirtyMeta,
+        isDirty.isAcceptableOrUnknown(data['is_dirty']!, _isDirtyMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Inventaire map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Inventaire(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      establishmentId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}establishment_id'],
+      )!,
+      reference: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reference'],
+      )!,
+      statut: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}statut'],
+      )!,
+      startedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}started_at'],
+      )!,
+      closedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}closed_at'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      isDeleted: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_deleted'],
+      )!,
+      isDirty: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_dirty'],
+      )!,
+    );
+  }
+
+  @override
+  $InventairesTable createAlias(String alias) {
+    return $InventairesTable(attachedDatabase, alias);
+  }
+}
+
+class Inventaire extends DataClass implements Insertable<Inventaire> {
+  final String id;
+  final String establishmentId;
+  final String reference;
+  final String statut;
+  final DateTime startedAt;
+  final DateTime? closedAt;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final bool isDeleted;
+  final bool isDirty;
+  const Inventaire({
+    required this.id,
+    required this.establishmentId,
+    required this.reference,
+    required this.statut,
+    required this.startedAt,
+    this.closedAt,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.isDeleted,
+    required this.isDirty,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['establishment_id'] = Variable<String>(establishmentId);
+    map['reference'] = Variable<String>(reference);
+    map['statut'] = Variable<String>(statut);
+    map['started_at'] = Variable<DateTime>(startedAt);
+    if (!nullToAbsent || closedAt != null) {
+      map['closed_at'] = Variable<DateTime>(closedAt);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['is_deleted'] = Variable<bool>(isDeleted);
+    map['is_dirty'] = Variable<bool>(isDirty);
+    return map;
+  }
+
+  InventairesCompanion toCompanion(bool nullToAbsent) {
+    return InventairesCompanion(
+      id: Value(id),
+      establishmentId: Value(establishmentId),
+      reference: Value(reference),
+      statut: Value(statut),
+      startedAt: Value(startedAt),
+      closedAt: closedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(closedAt),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      isDeleted: Value(isDeleted),
+      isDirty: Value(isDirty),
+    );
+  }
+
+  factory Inventaire.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Inventaire(
+      id: serializer.fromJson<String>(json['id']),
+      establishmentId: serializer.fromJson<String>(json['establishmentId']),
+      reference: serializer.fromJson<String>(json['reference']),
+      statut: serializer.fromJson<String>(json['statut']),
+      startedAt: serializer.fromJson<DateTime>(json['startedAt']),
+      closedAt: serializer.fromJson<DateTime?>(json['closedAt']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      isDeleted: serializer.fromJson<bool>(json['isDeleted']),
+      isDirty: serializer.fromJson<bool>(json['isDirty']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'establishmentId': serializer.toJson<String>(establishmentId),
+      'reference': serializer.toJson<String>(reference),
+      'statut': serializer.toJson<String>(statut),
+      'startedAt': serializer.toJson<DateTime>(startedAt),
+      'closedAt': serializer.toJson<DateTime?>(closedAt),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'isDeleted': serializer.toJson<bool>(isDeleted),
+      'isDirty': serializer.toJson<bool>(isDirty),
+    };
+  }
+
+  Inventaire copyWith({
+    String? id,
+    String? establishmentId,
+    String? reference,
+    String? statut,
+    DateTime? startedAt,
+    Value<DateTime?> closedAt = const Value.absent(),
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    bool? isDeleted,
+    bool? isDirty,
+  }) => Inventaire(
+    id: id ?? this.id,
+    establishmentId: establishmentId ?? this.establishmentId,
+    reference: reference ?? this.reference,
+    statut: statut ?? this.statut,
+    startedAt: startedAt ?? this.startedAt,
+    closedAt: closedAt.present ? closedAt.value : this.closedAt,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    isDeleted: isDeleted ?? this.isDeleted,
+    isDirty: isDirty ?? this.isDirty,
+  );
+  Inventaire copyWithCompanion(InventairesCompanion data) {
+    return Inventaire(
+      id: data.id.present ? data.id.value : this.id,
+      establishmentId: data.establishmentId.present
+          ? data.establishmentId.value
+          : this.establishmentId,
+      reference: data.reference.present ? data.reference.value : this.reference,
+      statut: data.statut.present ? data.statut.value : this.statut,
+      startedAt: data.startedAt.present ? data.startedAt.value : this.startedAt,
+      closedAt: data.closedAt.present ? data.closedAt.value : this.closedAt,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      isDeleted: data.isDeleted.present ? data.isDeleted.value : this.isDeleted,
+      isDirty: data.isDirty.present ? data.isDirty.value : this.isDirty,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Inventaire(')
+          ..write('id: $id, ')
+          ..write('establishmentId: $establishmentId, ')
+          ..write('reference: $reference, ')
+          ..write('statut: $statut, ')
+          ..write('startedAt: $startedAt, ')
+          ..write('closedAt: $closedAt, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('isDeleted: $isDeleted, ')
+          ..write('isDirty: $isDirty')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    establishmentId,
+    reference,
+    statut,
+    startedAt,
+    closedAt,
+    createdAt,
+    updatedAt,
+    isDeleted,
+    isDirty,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Inventaire &&
+          other.id == this.id &&
+          other.establishmentId == this.establishmentId &&
+          other.reference == this.reference &&
+          other.statut == this.statut &&
+          other.startedAt == this.startedAt &&
+          other.closedAt == this.closedAt &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.isDeleted == this.isDeleted &&
+          other.isDirty == this.isDirty);
+}
+
+class InventairesCompanion extends UpdateCompanion<Inventaire> {
+  final Value<String> id;
+  final Value<String> establishmentId;
+  final Value<String> reference;
+  final Value<String> statut;
+  final Value<DateTime> startedAt;
+  final Value<DateTime?> closedAt;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<bool> isDeleted;
+  final Value<bool> isDirty;
+  final Value<int> rowid;
+  const InventairesCompanion({
+    this.id = const Value.absent(),
+    this.establishmentId = const Value.absent(),
+    this.reference = const Value.absent(),
+    this.statut = const Value.absent(),
+    this.startedAt = const Value.absent(),
+    this.closedAt = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.isDeleted = const Value.absent(),
+    this.isDirty = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  InventairesCompanion.insert({
+    required String id,
+    this.establishmentId = const Value.absent(),
+    required String reference,
+    this.statut = const Value.absent(),
+    required DateTime startedAt,
+    this.closedAt = const Value.absent(),
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.isDeleted = const Value.absent(),
+    this.isDirty = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       reference = Value(reference),
+       startedAt = Value(startedAt),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt);
+  static Insertable<Inventaire> custom({
+    Expression<String>? id,
+    Expression<String>? establishmentId,
+    Expression<String>? reference,
+    Expression<String>? statut,
+    Expression<DateTime>? startedAt,
+    Expression<DateTime>? closedAt,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<bool>? isDeleted,
+    Expression<bool>? isDirty,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (establishmentId != null) 'establishment_id': establishmentId,
+      if (reference != null) 'reference': reference,
+      if (statut != null) 'statut': statut,
+      if (startedAt != null) 'started_at': startedAt,
+      if (closedAt != null) 'closed_at': closedAt,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (isDeleted != null) 'is_deleted': isDeleted,
+      if (isDirty != null) 'is_dirty': isDirty,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  InventairesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? establishmentId,
+    Value<String>? reference,
+    Value<String>? statut,
+    Value<DateTime>? startedAt,
+    Value<DateTime?>? closedAt,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<bool>? isDeleted,
+    Value<bool>? isDirty,
+    Value<int>? rowid,
+  }) {
+    return InventairesCompanion(
+      id: id ?? this.id,
+      establishmentId: establishmentId ?? this.establishmentId,
+      reference: reference ?? this.reference,
+      statut: statut ?? this.statut,
+      startedAt: startedAt ?? this.startedAt,
+      closedAt: closedAt ?? this.closedAt,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      isDeleted: isDeleted ?? this.isDeleted,
+      isDirty: isDirty ?? this.isDirty,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (establishmentId.present) {
+      map['establishment_id'] = Variable<String>(establishmentId.value);
+    }
+    if (reference.present) {
+      map['reference'] = Variable<String>(reference.value);
+    }
+    if (statut.present) {
+      map['statut'] = Variable<String>(statut.value);
+    }
+    if (startedAt.present) {
+      map['started_at'] = Variable<DateTime>(startedAt.value);
+    }
+    if (closedAt.present) {
+      map['closed_at'] = Variable<DateTime>(closedAt.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (isDeleted.present) {
+      map['is_deleted'] = Variable<bool>(isDeleted.value);
+    }
+    if (isDirty.present) {
+      map['is_dirty'] = Variable<bool>(isDirty.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('InventairesCompanion(')
+          ..write('id: $id, ')
+          ..write('establishmentId: $establishmentId, ')
+          ..write('reference: $reference, ')
+          ..write('statut: $statut, ')
+          ..write('startedAt: $startedAt, ')
+          ..write('closedAt: $closedAt, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('isDeleted: $isDeleted, ')
+          ..write('isDirty: $isDirty, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $LigneInventairesTable extends LigneInventaires
+    with TableInfo<$LigneInventairesTable, LigneInventaire> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LigneInventairesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _establishmentIdMeta = const VerificationMeta(
+    'establishmentId',
+  );
+  @override
+  late final GeneratedColumn<String> establishmentId = GeneratedColumn<String>(
+    'establishment_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _inventaireIdMeta = const VerificationMeta(
+    'inventaireId',
+  );
+  @override
+  late final GeneratedColumn<String> inventaireId = GeneratedColumn<String>(
+    'inventaire_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES inventaires (id)',
+    ),
+  );
+  static const VerificationMeta _produitIdMeta = const VerificationMeta(
+    'produitId',
+  );
+  @override
+  late final GeneratedColumn<String> produitId = GeneratedColumn<String>(
+    'produit_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES produits (id)',
+    ),
+  );
+  static const VerificationMeta _libelleMeta = const VerificationMeta(
+    'libelle',
+  );
+  @override
+  late final GeneratedColumn<String> libelle = GeneratedColumn<String>(
+    'libelle',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _stockTheoriqueMeta = const VerificationMeta(
+    'stockTheorique',
+  );
+  @override
+  late final GeneratedColumn<int> stockTheorique = GeneratedColumn<int>(
+    'stock_theorique',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _stockCompteMeta = const VerificationMeta(
+    'stockCompte',
+  );
+  @override
+  late final GeneratedColumn<int> stockCompte = GeneratedColumn<int>(
+    'stock_compte',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _isDeletedMeta = const VerificationMeta(
+    'isDeleted',
+  );
+  @override
+  late final GeneratedColumn<bool> isDeleted = GeneratedColumn<bool>(
+    'is_deleted',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_deleted" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _isDirtyMeta = const VerificationMeta(
+    'isDirty',
+  );
+  @override
+  late final GeneratedColumn<bool> isDirty = GeneratedColumn<bool>(
+    'is_dirty',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_dirty" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    establishmentId,
+    inventaireId,
+    produitId,
+    libelle,
+    stockTheorique,
+    stockCompte,
+    createdAt,
+    updatedAt,
+    isDeleted,
+    isDirty,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'ligne_inventaires';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LigneInventaire> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('establishment_id')) {
+      context.handle(
+        _establishmentIdMeta,
+        establishmentId.isAcceptableOrUnknown(
+          data['establishment_id']!,
+          _establishmentIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('inventaire_id')) {
+      context.handle(
+        _inventaireIdMeta,
+        inventaireId.isAcceptableOrUnknown(
+          data['inventaire_id']!,
+          _inventaireIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_inventaireIdMeta);
+    }
+    if (data.containsKey('produit_id')) {
+      context.handle(
+        _produitIdMeta,
+        produitId.isAcceptableOrUnknown(data['produit_id']!, _produitIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_produitIdMeta);
+    }
+    if (data.containsKey('libelle')) {
+      context.handle(
+        _libelleMeta,
+        libelle.isAcceptableOrUnknown(data['libelle']!, _libelleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_libelleMeta);
+    }
+    if (data.containsKey('stock_theorique')) {
+      context.handle(
+        _stockTheoriqueMeta,
+        stockTheorique.isAcceptableOrUnknown(
+          data['stock_theorique']!,
+          _stockTheoriqueMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_stockTheoriqueMeta);
+    }
+    if (data.containsKey('stock_compte')) {
+      context.handle(
+        _stockCompteMeta,
+        stockCompte.isAcceptableOrUnknown(
+          data['stock_compte']!,
+          _stockCompteMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('is_deleted')) {
+      context.handle(
+        _isDeletedMeta,
+        isDeleted.isAcceptableOrUnknown(data['is_deleted']!, _isDeletedMeta),
+      );
+    }
+    if (data.containsKey('is_dirty')) {
+      context.handle(
+        _isDirtyMeta,
+        isDirty.isAcceptableOrUnknown(data['is_dirty']!, _isDirtyMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LigneInventaire map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LigneInventaire(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      establishmentId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}establishment_id'],
+      )!,
+      inventaireId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}inventaire_id'],
+      )!,
+      produitId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}produit_id'],
+      )!,
+      libelle: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}libelle'],
+      )!,
+      stockTheorique: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}stock_theorique'],
+      )!,
+      stockCompte: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}stock_compte'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      isDeleted: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_deleted'],
+      )!,
+      isDirty: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_dirty'],
+      )!,
+    );
+  }
+
+  @override
+  $LigneInventairesTable createAlias(String alias) {
+    return $LigneInventairesTable(attachedDatabase, alias);
+  }
+}
+
+class LigneInventaire extends DataClass implements Insertable<LigneInventaire> {
+  final String id;
+  final String establishmentId;
+  final String inventaireId;
+  final String produitId;
+  final String libelle;
+  final int stockTheorique;
+  final int? stockCompte;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final bool isDeleted;
+  final bool isDirty;
+  const LigneInventaire({
+    required this.id,
+    required this.establishmentId,
+    required this.inventaireId,
+    required this.produitId,
+    required this.libelle,
+    required this.stockTheorique,
+    this.stockCompte,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.isDeleted,
+    required this.isDirty,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['establishment_id'] = Variable<String>(establishmentId);
+    map['inventaire_id'] = Variable<String>(inventaireId);
+    map['produit_id'] = Variable<String>(produitId);
+    map['libelle'] = Variable<String>(libelle);
+    map['stock_theorique'] = Variable<int>(stockTheorique);
+    if (!nullToAbsent || stockCompte != null) {
+      map['stock_compte'] = Variable<int>(stockCompte);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['is_deleted'] = Variable<bool>(isDeleted);
+    map['is_dirty'] = Variable<bool>(isDirty);
+    return map;
+  }
+
+  LigneInventairesCompanion toCompanion(bool nullToAbsent) {
+    return LigneInventairesCompanion(
+      id: Value(id),
+      establishmentId: Value(establishmentId),
+      inventaireId: Value(inventaireId),
+      produitId: Value(produitId),
+      libelle: Value(libelle),
+      stockTheorique: Value(stockTheorique),
+      stockCompte: stockCompte == null && nullToAbsent
+          ? const Value.absent()
+          : Value(stockCompte),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      isDeleted: Value(isDeleted),
+      isDirty: Value(isDirty),
+    );
+  }
+
+  factory LigneInventaire.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LigneInventaire(
+      id: serializer.fromJson<String>(json['id']),
+      establishmentId: serializer.fromJson<String>(json['establishmentId']),
+      inventaireId: serializer.fromJson<String>(json['inventaireId']),
+      produitId: serializer.fromJson<String>(json['produitId']),
+      libelle: serializer.fromJson<String>(json['libelle']),
+      stockTheorique: serializer.fromJson<int>(json['stockTheorique']),
+      stockCompte: serializer.fromJson<int?>(json['stockCompte']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      isDeleted: serializer.fromJson<bool>(json['isDeleted']),
+      isDirty: serializer.fromJson<bool>(json['isDirty']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'establishmentId': serializer.toJson<String>(establishmentId),
+      'inventaireId': serializer.toJson<String>(inventaireId),
+      'produitId': serializer.toJson<String>(produitId),
+      'libelle': serializer.toJson<String>(libelle),
+      'stockTheorique': serializer.toJson<int>(stockTheorique),
+      'stockCompte': serializer.toJson<int?>(stockCompte),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'isDeleted': serializer.toJson<bool>(isDeleted),
+      'isDirty': serializer.toJson<bool>(isDirty),
+    };
+  }
+
+  LigneInventaire copyWith({
+    String? id,
+    String? establishmentId,
+    String? inventaireId,
+    String? produitId,
+    String? libelle,
+    int? stockTheorique,
+    Value<int?> stockCompte = const Value.absent(),
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    bool? isDeleted,
+    bool? isDirty,
+  }) => LigneInventaire(
+    id: id ?? this.id,
+    establishmentId: establishmentId ?? this.establishmentId,
+    inventaireId: inventaireId ?? this.inventaireId,
+    produitId: produitId ?? this.produitId,
+    libelle: libelle ?? this.libelle,
+    stockTheorique: stockTheorique ?? this.stockTheorique,
+    stockCompte: stockCompte.present ? stockCompte.value : this.stockCompte,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    isDeleted: isDeleted ?? this.isDeleted,
+    isDirty: isDirty ?? this.isDirty,
+  );
+  LigneInventaire copyWithCompanion(LigneInventairesCompanion data) {
+    return LigneInventaire(
+      id: data.id.present ? data.id.value : this.id,
+      establishmentId: data.establishmentId.present
+          ? data.establishmentId.value
+          : this.establishmentId,
+      inventaireId: data.inventaireId.present
+          ? data.inventaireId.value
+          : this.inventaireId,
+      produitId: data.produitId.present ? data.produitId.value : this.produitId,
+      libelle: data.libelle.present ? data.libelle.value : this.libelle,
+      stockTheorique: data.stockTheorique.present
+          ? data.stockTheorique.value
+          : this.stockTheorique,
+      stockCompte: data.stockCompte.present
+          ? data.stockCompte.value
+          : this.stockCompte,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      isDeleted: data.isDeleted.present ? data.isDeleted.value : this.isDeleted,
+      isDirty: data.isDirty.present ? data.isDirty.value : this.isDirty,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LigneInventaire(')
+          ..write('id: $id, ')
+          ..write('establishmentId: $establishmentId, ')
+          ..write('inventaireId: $inventaireId, ')
+          ..write('produitId: $produitId, ')
+          ..write('libelle: $libelle, ')
+          ..write('stockTheorique: $stockTheorique, ')
+          ..write('stockCompte: $stockCompte, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('isDeleted: $isDeleted, ')
+          ..write('isDirty: $isDirty')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    establishmentId,
+    inventaireId,
+    produitId,
+    libelle,
+    stockTheorique,
+    stockCompte,
+    createdAt,
+    updatedAt,
+    isDeleted,
+    isDirty,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LigneInventaire &&
+          other.id == this.id &&
+          other.establishmentId == this.establishmentId &&
+          other.inventaireId == this.inventaireId &&
+          other.produitId == this.produitId &&
+          other.libelle == this.libelle &&
+          other.stockTheorique == this.stockTheorique &&
+          other.stockCompte == this.stockCompte &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.isDeleted == this.isDeleted &&
+          other.isDirty == this.isDirty);
+}
+
+class LigneInventairesCompanion extends UpdateCompanion<LigneInventaire> {
+  final Value<String> id;
+  final Value<String> establishmentId;
+  final Value<String> inventaireId;
+  final Value<String> produitId;
+  final Value<String> libelle;
+  final Value<int> stockTheorique;
+  final Value<int?> stockCompte;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<bool> isDeleted;
+  final Value<bool> isDirty;
+  final Value<int> rowid;
+  const LigneInventairesCompanion({
+    this.id = const Value.absent(),
+    this.establishmentId = const Value.absent(),
+    this.inventaireId = const Value.absent(),
+    this.produitId = const Value.absent(),
+    this.libelle = const Value.absent(),
+    this.stockTheorique = const Value.absent(),
+    this.stockCompte = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.isDeleted = const Value.absent(),
+    this.isDirty = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LigneInventairesCompanion.insert({
+    required String id,
+    this.establishmentId = const Value.absent(),
+    required String inventaireId,
+    required String produitId,
+    required String libelle,
+    required int stockTheorique,
+    this.stockCompte = const Value.absent(),
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.isDeleted = const Value.absent(),
+    this.isDirty = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       inventaireId = Value(inventaireId),
+       produitId = Value(produitId),
+       libelle = Value(libelle),
+       stockTheorique = Value(stockTheorique),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt);
+  static Insertable<LigneInventaire> custom({
+    Expression<String>? id,
+    Expression<String>? establishmentId,
+    Expression<String>? inventaireId,
+    Expression<String>? produitId,
+    Expression<String>? libelle,
+    Expression<int>? stockTheorique,
+    Expression<int>? stockCompte,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<bool>? isDeleted,
+    Expression<bool>? isDirty,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (establishmentId != null) 'establishment_id': establishmentId,
+      if (inventaireId != null) 'inventaire_id': inventaireId,
+      if (produitId != null) 'produit_id': produitId,
+      if (libelle != null) 'libelle': libelle,
+      if (stockTheorique != null) 'stock_theorique': stockTheorique,
+      if (stockCompte != null) 'stock_compte': stockCompte,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (isDeleted != null) 'is_deleted': isDeleted,
+      if (isDirty != null) 'is_dirty': isDirty,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LigneInventairesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? establishmentId,
+    Value<String>? inventaireId,
+    Value<String>? produitId,
+    Value<String>? libelle,
+    Value<int>? stockTheorique,
+    Value<int?>? stockCompte,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<bool>? isDeleted,
+    Value<bool>? isDirty,
+    Value<int>? rowid,
+  }) {
+    return LigneInventairesCompanion(
+      id: id ?? this.id,
+      establishmentId: establishmentId ?? this.establishmentId,
+      inventaireId: inventaireId ?? this.inventaireId,
+      produitId: produitId ?? this.produitId,
+      libelle: libelle ?? this.libelle,
+      stockTheorique: stockTheorique ?? this.stockTheorique,
+      stockCompte: stockCompte ?? this.stockCompte,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      isDeleted: isDeleted ?? this.isDeleted,
+      isDirty: isDirty ?? this.isDirty,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (establishmentId.present) {
+      map['establishment_id'] = Variable<String>(establishmentId.value);
+    }
+    if (inventaireId.present) {
+      map['inventaire_id'] = Variable<String>(inventaireId.value);
+    }
+    if (produitId.present) {
+      map['produit_id'] = Variable<String>(produitId.value);
+    }
+    if (libelle.present) {
+      map['libelle'] = Variable<String>(libelle.value);
+    }
+    if (stockTheorique.present) {
+      map['stock_theorique'] = Variable<int>(stockTheorique.value);
+    }
+    if (stockCompte.present) {
+      map['stock_compte'] = Variable<int>(stockCompte.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (isDeleted.present) {
+      map['is_deleted'] = Variable<bool>(isDeleted.value);
+    }
+    if (isDirty.present) {
+      map['is_dirty'] = Variable<bool>(isDirty.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LigneInventairesCompanion(')
+          ..write('id: $id, ')
+          ..write('establishmentId: $establishmentId, ')
+          ..write('inventaireId: $inventaireId, ')
+          ..write('produitId: $produitId, ')
+          ..write('libelle: $libelle, ')
+          ..write('stockTheorique: $stockTheorique, ')
+          ..write('stockCompte: $stockCompte, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('isDeleted: $isDeleted, ')
+          ..write('isDirty: $isDirty, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $PrestationsTable extends Prestations
     with TableInfo<$PrestationsTable, Prestation> {
   @override
@@ -10829,6 +12122,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $LigneCommandesTable ligneCommandes = $LigneCommandesTable(this);
   late final $FacturesTable factures = $FacturesTable(this);
   late final $PaiementsTable paiements = $PaiementsTable(this);
+  late final $InventairesTable inventaires = $InventairesTable(this);
+  late final $LigneInventairesTable ligneInventaires = $LigneInventairesTable(
+    this,
+  );
   late final $PrestationsTable prestations = $PrestationsTable(this);
   late final $LignePrestationsTable lignePrestations = $LignePrestationsTable(
     this,
@@ -10855,6 +12152,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     ligneCommandes,
     factures,
     paiements,
+    inventaires,
+    ligneInventaires,
     prestations,
     lignePrestations,
     jetons,
@@ -13770,6 +15069,29 @@ final class $$ProduitsTableReferences
     );
   }
 
+  static MultiTypedResultKey<$LigneInventairesTable, List<LigneInventaire>>
+  _ligneInventairesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.ligneInventaires,
+    aliasName: $_aliasNameGenerator(
+      db.produits.id,
+      db.ligneInventaires.produitId,
+    ),
+  );
+
+  $$LigneInventairesTableProcessedTableManager get ligneInventairesRefs {
+    final manager = $$LigneInventairesTableTableManager(
+      $_db,
+      $_db.ligneInventaires,
+    ).filter((f) => f.produitId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _ligneInventairesRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
   static MultiTypedResultKey<$LignePrestationsTable, List<LignePrestation>>
   _lignePrestationsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.lignePrestations,
@@ -13892,6 +15214,31 @@ class $$ProduitsTableFilterComposer
           }) => $$LigneCommandesTableFilterComposer(
             $db: $db,
             $table: $db.ligneCommandes,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> ligneInventairesRefs(
+    Expression<bool> Function($$LigneInventairesTableFilterComposer f) f,
+  ) {
+    final $$LigneInventairesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.ligneInventaires,
+      getReferencedColumn: (t) => t.produitId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LigneInventairesTableFilterComposer(
+            $db: $db,
+            $table: $db.ligneInventaires,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -14100,6 +15447,31 @@ class $$ProduitsTableAnnotationComposer
     return f(composer);
   }
 
+  Expression<T> ligneInventairesRefs<T extends Object>(
+    Expression<T> Function($$LigneInventairesTableAnnotationComposer a) f,
+  ) {
+    final $$LigneInventairesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.ligneInventaires,
+      getReferencedColumn: (t) => t.produitId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LigneInventairesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.ligneInventaires,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
   Expression<T> lignePrestationsRefs<T extends Object>(
     Expression<T> Function($$LignePrestationsTableAnnotationComposer a) f,
   ) {
@@ -14142,6 +15514,7 @@ class $$ProduitsTableTableManager
           PrefetchHooks Function({
             bool categorieId,
             bool ligneCommandesRefs,
+            bool ligneInventairesRefs,
             bool lignePrestationsRefs,
           })
         > {
@@ -14224,12 +15597,14 @@ class $$ProduitsTableTableManager
               ({
                 categorieId = false,
                 ligneCommandesRefs = false,
+                ligneInventairesRefs = false,
                 lignePrestationsRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
                     if (ligneCommandesRefs) db.ligneCommandes,
+                    if (ligneInventairesRefs) db.ligneInventaires,
                     if (lignePrestationsRefs) db.lignePrestations,
                   ],
                   addJoins:
@@ -14287,6 +15662,27 @@ class $$ProduitsTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (ligneInventairesRefs)
+                        await $_getPrefetchedData<
+                          Produit,
+                          $ProduitsTable,
+                          LigneInventaire
+                        >(
+                          currentTable: table,
+                          referencedTable: $$ProduitsTableReferences
+                              ._ligneInventairesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ProduitsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).ligneInventairesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.produitId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                       if (lignePrestationsRefs)
                         await $_getPrefetchedData<
                           Produit,
@@ -14331,6 +15727,7 @@ typedef $$ProduitsTableProcessedTableManager =
       PrefetchHooks Function({
         bool categorieId,
         bool ligneCommandesRefs,
+        bool ligneInventairesRefs,
         bool lignePrestationsRefs,
       })
     >;
@@ -16246,6 +17643,954 @@ typedef $$PaiementsTableProcessedTableManager =
       (Paiement, $$PaiementsTableReferences),
       Paiement,
       PrefetchHooks Function({bool factureId})
+    >;
+typedef $$InventairesTableCreateCompanionBuilder =
+    InventairesCompanion Function({
+      required String id,
+      Value<String> establishmentId,
+      required String reference,
+      Value<String> statut,
+      required DateTime startedAt,
+      Value<DateTime?> closedAt,
+      required DateTime createdAt,
+      required DateTime updatedAt,
+      Value<bool> isDeleted,
+      Value<bool> isDirty,
+      Value<int> rowid,
+    });
+typedef $$InventairesTableUpdateCompanionBuilder =
+    InventairesCompanion Function({
+      Value<String> id,
+      Value<String> establishmentId,
+      Value<String> reference,
+      Value<String> statut,
+      Value<DateTime> startedAt,
+      Value<DateTime?> closedAt,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<bool> isDeleted,
+      Value<bool> isDirty,
+      Value<int> rowid,
+    });
+
+final class $$InventairesTableReferences
+    extends BaseReferences<_$AppDatabase, $InventairesTable, Inventaire> {
+  $$InventairesTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$LigneInventairesTable, List<LigneInventaire>>
+  _ligneInventairesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.ligneInventaires,
+    aliasName: $_aliasNameGenerator(
+      db.inventaires.id,
+      db.ligneInventaires.inventaireId,
+    ),
+  );
+
+  $$LigneInventairesTableProcessedTableManager get ligneInventairesRefs {
+    final manager = $$LigneInventairesTableTableManager(
+      $_db,
+      $_db.ligneInventaires,
+    ).filter((f) => f.inventaireId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _ligneInventairesRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$InventairesTableFilterComposer
+    extends Composer<_$AppDatabase, $InventairesTable> {
+  $$InventairesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get establishmentId => $composableBuilder(
+    column: $table.establishmentId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reference => $composableBuilder(
+    column: $table.reference,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get statut => $composableBuilder(
+    column: $table.statut,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get startedAt => $composableBuilder(
+    column: $table.startedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get closedAt => $composableBuilder(
+    column: $table.closedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isDirty => $composableBuilder(
+    column: $table.isDirty,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> ligneInventairesRefs(
+    Expression<bool> Function($$LigneInventairesTableFilterComposer f) f,
+  ) {
+    final $$LigneInventairesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.ligneInventaires,
+      getReferencedColumn: (t) => t.inventaireId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LigneInventairesTableFilterComposer(
+            $db: $db,
+            $table: $db.ligneInventaires,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$InventairesTableOrderingComposer
+    extends Composer<_$AppDatabase, $InventairesTable> {
+  $$InventairesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get establishmentId => $composableBuilder(
+    column: $table.establishmentId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reference => $composableBuilder(
+    column: $table.reference,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get statut => $composableBuilder(
+    column: $table.statut,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get startedAt => $composableBuilder(
+    column: $table.startedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get closedAt => $composableBuilder(
+    column: $table.closedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isDirty => $composableBuilder(
+    column: $table.isDirty,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$InventairesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $InventairesTable> {
+  $$InventairesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get establishmentId => $composableBuilder(
+    column: $table.establishmentId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get reference =>
+      $composableBuilder(column: $table.reference, builder: (column) => column);
+
+  GeneratedColumn<String> get statut =>
+      $composableBuilder(column: $table.statut, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get startedAt =>
+      $composableBuilder(column: $table.startedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get closedAt =>
+      $composableBuilder(column: $table.closedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get isDeleted =>
+      $composableBuilder(column: $table.isDeleted, builder: (column) => column);
+
+  GeneratedColumn<bool> get isDirty =>
+      $composableBuilder(column: $table.isDirty, builder: (column) => column);
+
+  Expression<T> ligneInventairesRefs<T extends Object>(
+    Expression<T> Function($$LigneInventairesTableAnnotationComposer a) f,
+  ) {
+    final $$LigneInventairesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.ligneInventaires,
+      getReferencedColumn: (t) => t.inventaireId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LigneInventairesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.ligneInventaires,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$InventairesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $InventairesTable,
+          Inventaire,
+          $$InventairesTableFilterComposer,
+          $$InventairesTableOrderingComposer,
+          $$InventairesTableAnnotationComposer,
+          $$InventairesTableCreateCompanionBuilder,
+          $$InventairesTableUpdateCompanionBuilder,
+          (Inventaire, $$InventairesTableReferences),
+          Inventaire,
+          PrefetchHooks Function({bool ligneInventairesRefs})
+        > {
+  $$InventairesTableTableManager(_$AppDatabase db, $InventairesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$InventairesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$InventairesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$InventairesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> establishmentId = const Value.absent(),
+                Value<String> reference = const Value.absent(),
+                Value<String> statut = const Value.absent(),
+                Value<DateTime> startedAt = const Value.absent(),
+                Value<DateTime?> closedAt = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<bool> isDeleted = const Value.absent(),
+                Value<bool> isDirty = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => InventairesCompanion(
+                id: id,
+                establishmentId: establishmentId,
+                reference: reference,
+                statut: statut,
+                startedAt: startedAt,
+                closedAt: closedAt,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                isDeleted: isDeleted,
+                isDirty: isDirty,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                Value<String> establishmentId = const Value.absent(),
+                required String reference,
+                Value<String> statut = const Value.absent(),
+                required DateTime startedAt,
+                Value<DateTime?> closedAt = const Value.absent(),
+                required DateTime createdAt,
+                required DateTime updatedAt,
+                Value<bool> isDeleted = const Value.absent(),
+                Value<bool> isDirty = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => InventairesCompanion.insert(
+                id: id,
+                establishmentId: establishmentId,
+                reference: reference,
+                statut: statut,
+                startedAt: startedAt,
+                closedAt: closedAt,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                isDeleted: isDeleted,
+                isDirty: isDirty,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$InventairesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({ligneInventairesRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (ligneInventairesRefs) db.ligneInventaires,
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (ligneInventairesRefs)
+                    await $_getPrefetchedData<
+                      Inventaire,
+                      $InventairesTable,
+                      LigneInventaire
+                    >(
+                      currentTable: table,
+                      referencedTable: $$InventairesTableReferences
+                          ._ligneInventairesRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$InventairesTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).ligneInventairesRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where(
+                            (e) => e.inventaireId == item.id,
+                          ),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$InventairesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $InventairesTable,
+      Inventaire,
+      $$InventairesTableFilterComposer,
+      $$InventairesTableOrderingComposer,
+      $$InventairesTableAnnotationComposer,
+      $$InventairesTableCreateCompanionBuilder,
+      $$InventairesTableUpdateCompanionBuilder,
+      (Inventaire, $$InventairesTableReferences),
+      Inventaire,
+      PrefetchHooks Function({bool ligneInventairesRefs})
+    >;
+typedef $$LigneInventairesTableCreateCompanionBuilder =
+    LigneInventairesCompanion Function({
+      required String id,
+      Value<String> establishmentId,
+      required String inventaireId,
+      required String produitId,
+      required String libelle,
+      required int stockTheorique,
+      Value<int?> stockCompte,
+      required DateTime createdAt,
+      required DateTime updatedAt,
+      Value<bool> isDeleted,
+      Value<bool> isDirty,
+      Value<int> rowid,
+    });
+typedef $$LigneInventairesTableUpdateCompanionBuilder =
+    LigneInventairesCompanion Function({
+      Value<String> id,
+      Value<String> establishmentId,
+      Value<String> inventaireId,
+      Value<String> produitId,
+      Value<String> libelle,
+      Value<int> stockTheorique,
+      Value<int?> stockCompte,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<bool> isDeleted,
+      Value<bool> isDirty,
+      Value<int> rowid,
+    });
+
+final class $$LigneInventairesTableReferences
+    extends
+        BaseReferences<_$AppDatabase, $LigneInventairesTable, LigneInventaire> {
+  $$LigneInventairesTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $InventairesTable _inventaireIdTable(_$AppDatabase db) =>
+      db.inventaires.createAlias(
+        $_aliasNameGenerator(
+          db.ligneInventaires.inventaireId,
+          db.inventaires.id,
+        ),
+      );
+
+  $$InventairesTableProcessedTableManager get inventaireId {
+    final $_column = $_itemColumn<String>('inventaire_id')!;
+
+    final manager = $$InventairesTableTableManager(
+      $_db,
+      $_db.inventaires,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_inventaireIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $ProduitsTable _produitIdTable(_$AppDatabase db) =>
+      db.produits.createAlias(
+        $_aliasNameGenerator(db.ligneInventaires.produitId, db.produits.id),
+      );
+
+  $$ProduitsTableProcessedTableManager get produitId {
+    final $_column = $_itemColumn<String>('produit_id')!;
+
+    final manager = $$ProduitsTableTableManager(
+      $_db,
+      $_db.produits,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_produitIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$LigneInventairesTableFilterComposer
+    extends Composer<_$AppDatabase, $LigneInventairesTable> {
+  $$LigneInventairesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get establishmentId => $composableBuilder(
+    column: $table.establishmentId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get libelle => $composableBuilder(
+    column: $table.libelle,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get stockTheorique => $composableBuilder(
+    column: $table.stockTheorique,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get stockCompte => $composableBuilder(
+    column: $table.stockCompte,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isDirty => $composableBuilder(
+    column: $table.isDirty,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$InventairesTableFilterComposer get inventaireId {
+    final $$InventairesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.inventaireId,
+      referencedTable: $db.inventaires,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$InventairesTableFilterComposer(
+            $db: $db,
+            $table: $db.inventaires,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ProduitsTableFilterComposer get produitId {
+    final $$ProduitsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.produitId,
+      referencedTable: $db.produits,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProduitsTableFilterComposer(
+            $db: $db,
+            $table: $db.produits,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$LigneInventairesTableOrderingComposer
+    extends Composer<_$AppDatabase, $LigneInventairesTable> {
+  $$LigneInventairesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get establishmentId => $composableBuilder(
+    column: $table.establishmentId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get libelle => $composableBuilder(
+    column: $table.libelle,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get stockTheorique => $composableBuilder(
+    column: $table.stockTheorique,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get stockCompte => $composableBuilder(
+    column: $table.stockCompte,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isDirty => $composableBuilder(
+    column: $table.isDirty,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$InventairesTableOrderingComposer get inventaireId {
+    final $$InventairesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.inventaireId,
+      referencedTable: $db.inventaires,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$InventairesTableOrderingComposer(
+            $db: $db,
+            $table: $db.inventaires,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ProduitsTableOrderingComposer get produitId {
+    final $$ProduitsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.produitId,
+      referencedTable: $db.produits,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProduitsTableOrderingComposer(
+            $db: $db,
+            $table: $db.produits,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$LigneInventairesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LigneInventairesTable> {
+  $$LigneInventairesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get establishmentId => $composableBuilder(
+    column: $table.establishmentId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get libelle =>
+      $composableBuilder(column: $table.libelle, builder: (column) => column);
+
+  GeneratedColumn<int> get stockTheorique => $composableBuilder(
+    column: $table.stockTheorique,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get stockCompte => $composableBuilder(
+    column: $table.stockCompte,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get isDeleted =>
+      $composableBuilder(column: $table.isDeleted, builder: (column) => column);
+
+  GeneratedColumn<bool> get isDirty =>
+      $composableBuilder(column: $table.isDirty, builder: (column) => column);
+
+  $$InventairesTableAnnotationComposer get inventaireId {
+    final $$InventairesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.inventaireId,
+      referencedTable: $db.inventaires,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$InventairesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.inventaires,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ProduitsTableAnnotationComposer get produitId {
+    final $$ProduitsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.produitId,
+      referencedTable: $db.produits,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProduitsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.produits,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$LigneInventairesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LigneInventairesTable,
+          LigneInventaire,
+          $$LigneInventairesTableFilterComposer,
+          $$LigneInventairesTableOrderingComposer,
+          $$LigneInventairesTableAnnotationComposer,
+          $$LigneInventairesTableCreateCompanionBuilder,
+          $$LigneInventairesTableUpdateCompanionBuilder,
+          (LigneInventaire, $$LigneInventairesTableReferences),
+          LigneInventaire,
+          PrefetchHooks Function({bool inventaireId, bool produitId})
+        > {
+  $$LigneInventairesTableTableManager(
+    _$AppDatabase db,
+    $LigneInventairesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LigneInventairesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LigneInventairesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LigneInventairesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> establishmentId = const Value.absent(),
+                Value<String> inventaireId = const Value.absent(),
+                Value<String> produitId = const Value.absent(),
+                Value<String> libelle = const Value.absent(),
+                Value<int> stockTheorique = const Value.absent(),
+                Value<int?> stockCompte = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<bool> isDeleted = const Value.absent(),
+                Value<bool> isDirty = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LigneInventairesCompanion(
+                id: id,
+                establishmentId: establishmentId,
+                inventaireId: inventaireId,
+                produitId: produitId,
+                libelle: libelle,
+                stockTheorique: stockTheorique,
+                stockCompte: stockCompte,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                isDeleted: isDeleted,
+                isDirty: isDirty,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                Value<String> establishmentId = const Value.absent(),
+                required String inventaireId,
+                required String produitId,
+                required String libelle,
+                required int stockTheorique,
+                Value<int?> stockCompte = const Value.absent(),
+                required DateTime createdAt,
+                required DateTime updatedAt,
+                Value<bool> isDeleted = const Value.absent(),
+                Value<bool> isDirty = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LigneInventairesCompanion.insert(
+                id: id,
+                establishmentId: establishmentId,
+                inventaireId: inventaireId,
+                produitId: produitId,
+                libelle: libelle,
+                stockTheorique: stockTheorique,
+                stockCompte: stockCompte,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                isDeleted: isDeleted,
+                isDirty: isDirty,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$LigneInventairesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({inventaireId = false, produitId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (inventaireId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.inventaireId,
+                                referencedTable:
+                                    $$LigneInventairesTableReferences
+                                        ._inventaireIdTable(db),
+                                referencedColumn:
+                                    $$LigneInventairesTableReferences
+                                        ._inventaireIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+                    if (produitId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.produitId,
+                                referencedTable:
+                                    $$LigneInventairesTableReferences
+                                        ._produitIdTable(db),
+                                referencedColumn:
+                                    $$LigneInventairesTableReferences
+                                        ._produitIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$LigneInventairesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LigneInventairesTable,
+      LigneInventaire,
+      $$LigneInventairesTableFilterComposer,
+      $$LigneInventairesTableOrderingComposer,
+      $$LigneInventairesTableAnnotationComposer,
+      $$LigneInventairesTableCreateCompanionBuilder,
+      $$LigneInventairesTableUpdateCompanionBuilder,
+      (LigneInventaire, $$LigneInventairesTableReferences),
+      LigneInventaire,
+      PrefetchHooks Function({bool inventaireId, bool produitId})
     >;
 typedef $$PrestationsTableCreateCompanionBuilder =
     PrestationsCompanion Function({
@@ -19483,6 +21828,10 @@ class $AppDatabaseManager {
       $$FacturesTableTableManager(_db, _db.factures);
   $$PaiementsTableTableManager get paiements =>
       $$PaiementsTableTableManager(_db, _db.paiements);
+  $$InventairesTableTableManager get inventaires =>
+      $$InventairesTableTableManager(_db, _db.inventaires);
+  $$LigneInventairesTableTableManager get ligneInventaires =>
+      $$LigneInventairesTableTableManager(_db, _db.ligneInventaires);
   $$PrestationsTableTableManager get prestations =>
       $$PrestationsTableTableManager(_db, _db.prestations);
   $$LignePrestationsTableTableManager get lignePrestations =>

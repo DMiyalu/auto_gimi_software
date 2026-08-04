@@ -10,8 +10,10 @@ import 'tables/categories_table.dart';
 import 'tables/clients_table.dart';
 import 'tables/commandes_table.dart';
 import 'tables/factures_table.dart';
+import 'tables/inventaires_table.dart';
 import 'tables/jetons_table.dart';
 import 'tables/ligne_commandes_table.dart';
+import 'tables/ligne_inventaires_table.dart';
 import 'tables/ligne_prestations_table.dart';
 import 'tables/notification_queue_table.dart';
 import 'tables/paiements_table.dart';
@@ -35,6 +37,8 @@ part 'app_database.g.dart';
     LigneCommandes,
     Factures,
     Paiements,
+    Inventaires,
+    LigneInventaires,
     Prestations,
     LignePrestations,
     Jetons,
@@ -49,7 +53,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -80,6 +84,9 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 11) {
         await _createBillingTables(m);
+      }
+      if (from < 12) {
+        await _createInventoryTables(m);
       }
     },
     beforeOpen: (details) async {
@@ -228,6 +235,11 @@ class AppDatabase extends _$AppDatabase {
   Future<void> _createBillingTables(Migrator m) async {
     await m.createTable(factures);
     await m.createTable(paiements);
+  }
+
+  Future<void> _createInventoryTables(Migrator m) async {
+    await m.createTable(inventaires);
+    await m.createTable(ligneInventaires);
   }
 }
 
