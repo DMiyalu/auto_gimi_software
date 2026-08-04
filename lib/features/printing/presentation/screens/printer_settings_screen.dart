@@ -329,7 +329,7 @@ class _PrinterTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 5),
                 Text(
-                  device.address,
+                  '${device.source} • ${device.address}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(

@@ -4,6 +4,9 @@ import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothClass
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.le.ScanCallback
+import android.bluetooth.le.ScanResult
+import android.bluetooth.le.ScanSettings
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -130,6 +133,7 @@ class MainActivity : FlutterActivity() {
             mapOf(
                 "name" to (device.name ?: "Appareil Bluetooth"),
                 "address" to device.address,
+                "source" to "Appairée",
                 "isLikelyPrinter" to isLikelyPrinter(device),
                 "isConnected" to isConnected(device),
             )
@@ -144,11 +148,12 @@ class MainActivity : FlutterActivity() {
             throw IllegalStateException("Activez le Bluetooth du device pour détecter l'imprimante.")
         }
 
-        val devices = linkedMapOf<String, BluetoothDevice>()
-        adapter.bondedDevices.forEach { devices[it.address] = it }
+        val devices = linkedMapOf<String, Map<String, Any?>>()
+        adapter.bondedDevices.forEach { devices[it.address] = deviceToMap(it, "Appairée") }
 
         var completed = false
         lateinit var receiver: BroadcastReceiver
+        var bleCallback: ScanCallback? = null
 
         fun finish() {
             if (completed) return
@@ -161,7 +166,11 @@ class MainActivity : FlutterActivity() {
                 if (adapter.isDiscovering) adapter.cancelDiscovery()
             } catch (_: SecurityException) {
             }
-            result.success(devices.values.map { deviceToMap(it) })
+            try {
+                bleCallback?.let { adapter.bluetoothLeScanner?.stopScan(it) }
+            } catch (_: Exception) {
+            }
+            result.success(devices.values.toList())
         }
 
         receiver = object : BroadcastReceiver() {
@@ -177,7 +186,9 @@ class MainActivity : FlutterActivity() {
                             @Suppress("DEPRECATION")
                             intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
                         }
-                        if (device?.address != null) devices[device.address] = device
+                        if (device?.address != null) {
+                            devices[device.address] = deviceToMap(device, "Bluetooth classique")
+                        }
                     }
                     BluetoothAdapter.ACTION_DISCOVERY_FINISHED -> finish()
                 }
@@ -195,18 +206,58 @@ class MainActivity : FlutterActivity() {
         }
 
         if (adapter.isDiscovering) adapter.cancelDiscovery()
-        if (!adapter.startDiscovery()) {
+        val classicStarted = adapter.startDiscovery()
+        val bleStarted = startBleScan(adapter, devices) { bleCallback = it }
+
+        if (!classicStarted && !bleStarted) {
             finish()
             return
         }
 
-        Handler(Looper.getMainLooper()).postDelayed({ finish() }, 10000)
+        Handler(Looper.getMainLooper()).postDelayed({ finish() }, 12000)
     }
 
-    private fun deviceToMap(device: BluetoothDevice): Map<String, Any?> {
+    private fun startBleScan(
+        adapter: BluetoothAdapter,
+        devices: MutableMap<String, Map<String, Any?>>,
+        onCallback: (ScanCallback) -> Unit,
+    ): Boolean {
+        val scanner = adapter.bluetoothLeScanner ?: return false
+        val callback = object : ScanCallback() {
+            override fun onScanResult(callbackType: Int, result: ScanResult) {
+                val device = result.device ?: return
+                if (device.address != null) {
+                    devices[device.address] = deviceToMap(device, "BLE")
+                }
+            }
+
+            override fun onBatchScanResults(results: MutableList<ScanResult>) {
+                results.forEach { scanResult ->
+                    val device = scanResult.device ?: return@forEach
+                    if (device.address != null) {
+                        devices[device.address] = deviceToMap(device, "BLE")
+                    }
+                }
+            }
+        }
+
+        return try {
+            val settings = ScanSettings.Builder()
+                .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+                .build()
+            scanner.startScan(null, settings, callback)
+            onCallback(callback)
+            true
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    private fun deviceToMap(device: BluetoothDevice, source: String): Map<String, Any?> {
         return mapOf(
             "name" to (device.name ?: "Appareil Bluetooth"),
             "address" to device.address,
+            "source" to source,
             "isLikelyPrinter" to isLikelyPrinter(device),
             "isConnected" to isConnected(device),
         )
