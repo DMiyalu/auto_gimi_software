@@ -16,7 +16,8 @@ final filteredProduitsProvider = Provider<List<ProduitEntity>>((ref) {
 
     if (filter == null) return true;
     if (filter == produitOutOfStockFilterValue) {
-      return produit.stockStatus == ProductStockStatus.outOfStock;
+      return produit.stockTrackingEnabled &&
+          produit.stockStatus == ProductStockStatus.outOfStock;
     }
     return produit.categoryId == filter;
   }).toList();

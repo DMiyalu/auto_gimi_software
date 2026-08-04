@@ -216,6 +216,7 @@ class ProduitRepositoryImpl implements ProduitRepository {
     required double price,
     required AppCurrency currency,
     int stock = 0,
+    bool stockTrackingEnabled = true,
   }) async {
     final trimmedName = _requireName(name, 'produit');
     _requirePrice(price);
@@ -238,6 +239,7 @@ class ProduitRepositoryImpl implements ProduitRepository {
             prix: price,
             devise: Value(currency.code),
             stock: Value(stock),
+            stockTrackingEnabled: Value(stockTrackingEnabled),
             createdAt: now,
             updatedAt: now,
           ),
@@ -251,6 +253,7 @@ class ProduitRepositoryImpl implements ProduitRepository {
       price: price,
       currency: currency,
       stock: stock,
+      stockTrackingEnabled: stockTrackingEnabled,
       createdAt: now,
       updatedAt: now,
     );
@@ -265,6 +268,7 @@ class ProduitRepositoryImpl implements ProduitRepository {
     required double price,
     required AppCurrency currency,
     int stock = 0,
+    bool stockTrackingEnabled = true,
   }) async {
     final trimmedName = _requireName(name, 'produit');
     _requirePrice(price);
@@ -286,6 +290,7 @@ class ProduitRepositoryImpl implements ProduitRepository {
             prix: Value(price),
             devise: Value(currency.code),
             stock: Value(stock),
+            stockTrackingEnabled: Value(stockTrackingEnabled),
             updatedAt: Value(now),
             isDirty: const Value(true),
           ),
@@ -299,6 +304,7 @@ class ProduitRepositoryImpl implements ProduitRepository {
       price: price,
       currency: currency,
       stock: stock,
+      stockTrackingEnabled: stockTrackingEnabled,
       createdAt: existing.createdAt,
       updatedAt: now,
     );
@@ -382,6 +388,7 @@ class ProduitRepositoryImpl implements ProduitRepository {
       price: row.prix,
       currency: AppCurrency.fromCode(row.devise),
       stock: row.stock,
+      stockTrackingEnabled: row.stockTrackingEnabled,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     );

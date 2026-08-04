@@ -65,6 +65,43 @@ void main() {
     },
   );
 
+  test(
+    'ajoute un produit non suivi en stock sans bloquer la commande',
+    () async {
+      final produit = await produitRepository.createProduit(
+        establishmentId: 'est-1',
+        name: 'Menu du jour',
+        price: 15,
+        currency: AppCurrency.usd,
+        stock: 0,
+        stockTrackingEnabled: false,
+      );
+      final commande = await commandeRepository.createCommande(
+        establishmentId: 'est-1',
+      );
+
+      await commandeRepository.addProduitLine(
+        establishmentId: 'est-1',
+        commandeId: commande.id,
+        produitId: produit.id,
+        quantity: 2,
+      );
+
+      final lignes = await commandeRepository
+          .watchLignes(establishmentId: 'est-1', commandeId: commande.id)
+          .first;
+      expect(lignes.single.quantity, 2);
+      expect(lignes.single.lineAmount, 30);
+
+      final updatedProduit = await produitRepository.getProduit(
+        establishmentId: 'est-1',
+        id: produit.id,
+      );
+      expect(updatedProduit!.stock, 0);
+      expect(updatedProduit.stockTrackingEnabled, isFalse);
+    },
+  );
+
   test('observe une commande et persiste le changement de statut', () async {
     final commande = await commandeRepository.createCommande(
       establishmentId: 'est-1',

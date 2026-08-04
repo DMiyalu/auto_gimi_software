@@ -120,7 +120,9 @@ class CommandeRepositoryImpl implements CommandeRepository {
             ))
             .getSingleOrNull();
     if (produit == null) throw StateError('Produit introuvable.');
-    if (produit.stock < quantity) throw StateError('Stock insuffisant.');
+    if (produit.stockTrackingEnabled && produit.stock < quantity) {
+      throw StateError('Stock insuffisant.');
+    }
 
     final now = DateTime.now();
     final lineAmount = produit.prix * quantity;
@@ -171,18 +173,20 @@ class CommandeRepositoryImpl implements CommandeRepository {
             );
       }
 
-      await (_database.update(_database.produits)..where(
-            (p) =>
-                p.establishmentId.equals(establishmentId) &
-                p.id.equals(produitId),
-          ))
-          .write(
-            ProduitsCompanion(
-              stock: Value(produit.stock - quantity),
-              updatedAt: Value(now),
-              isDirty: const Value(true),
-            ),
-          );
+      if (produit.stockTrackingEnabled) {
+        await (_database.update(_database.produits)..where(
+              (p) =>
+                  p.establishmentId.equals(establishmentId) &
+                  p.id.equals(produitId),
+            ))
+            .write(
+              ProduitsCompanion(
+                stock: Value(produit.stock - quantity),
+                updatedAt: Value(now),
+                isDirty: const Value(true),
+              ),
+            );
+      }
 
       await _recalculateTotal(establishmentId, commandeId, now);
     });
@@ -228,18 +232,20 @@ class CommandeRepositoryImpl implements CommandeRepository {
             ),
           );
 
-      await (_database.update(_database.produits)..where(
-            (p) =>
-                p.establishmentId.equals(establishmentId) &
-                p.id.equals(line.produitId),
-          ))
-          .write(
-            ProduitsCompanion(
-              stock: Value(produit.stock + line.quantite),
-              updatedAt: Value(now),
-              isDirty: const Value(true),
-            ),
-          );
+      if (produit.stockTrackingEnabled) {
+        await (_database.update(_database.produits)..where(
+              (p) =>
+                  p.establishmentId.equals(establishmentId) &
+                  p.id.equals(line.produitId),
+            ))
+            .write(
+              ProduitsCompanion(
+                stock: Value(produit.stock + line.quantite),
+                updatedAt: Value(now),
+                isDirty: const Value(true),
+              ),
+            );
+      }
 
       await _recalculateTotal(establishmentId, line.commandeId, now);
     });
@@ -291,18 +297,20 @@ class CommandeRepositoryImpl implements CommandeRepository {
             ),
           );
 
-      await (_database.update(_database.produits)..where(
-            (p) =>
-                p.establishmentId.equals(establishmentId) &
-                p.id.equals(line.produitId),
-          ))
-          .write(
-            ProduitsCompanion(
-              stock: Value(produit.stock + 1),
-              updatedAt: Value(now),
-              isDirty: const Value(true),
-            ),
-          );
+      if (produit.stockTrackingEnabled) {
+        await (_database.update(_database.produits)..where(
+              (p) =>
+                  p.establishmentId.equals(establishmentId) &
+                  p.id.equals(line.produitId),
+            ))
+            .write(
+              ProduitsCompanion(
+                stock: Value(produit.stock + 1),
+                updatedAt: Value(now),
+                isDirty: const Value(true),
+              ),
+            );
+      }
 
       await _recalculateTotal(establishmentId, line.commandeId, now);
     });
@@ -336,7 +344,7 @@ class CommandeRepositoryImpl implements CommandeRepository {
                 ))
                 .getSingleOrNull();
 
-        if (produit != null) {
+        if (produit != null && produit.stockTrackingEnabled) {
           await (_database.update(_database.produits)..where(
                 (p) =>
                     p.establishmentId.equals(establishmentId) &

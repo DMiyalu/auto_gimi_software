@@ -133,6 +133,7 @@ class ProduitController extends AsyncNotifier<void> {
     required double price,
     required AppCurrency currency,
     int stock = 0,
+    bool stockTrackingEnabled = true,
   }) async {
     final establishmentId = _establishmentId;
     state = const AsyncLoading();
@@ -147,6 +148,7 @@ class ProduitController extends AsyncNotifier<void> {
             price: price,
             currency: currency,
             stock: stock,
+            stockTrackingEnabled: stockTrackingEnabled,
           );
       _schedulePush();
     });
@@ -159,6 +161,7 @@ class ProduitController extends AsyncNotifier<void> {
     required double price,
     required AppCurrency currency,
     int stock = 0,
+    bool stockTrackingEnabled = true,
   }) async {
     final establishmentId = _establishmentId;
     state = const AsyncLoading();
@@ -174,6 +177,7 @@ class ProduitController extends AsyncNotifier<void> {
             price: price,
             currency: currency,
             stock: stock,
+            stockTrackingEnabled: stockTrackingEnabled,
           );
       _schedulePush();
     });

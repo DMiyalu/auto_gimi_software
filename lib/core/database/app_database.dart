@@ -53,7 +53,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 12;
+  int get schemaVersion => 13;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -87,6 +87,9 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 12) {
         await _createInventoryTables(m);
+      }
+      if (from < 13) {
+        await _addProductStockTrackingColumn(m);
       }
     },
     beforeOpen: (details) async {
@@ -208,6 +211,12 @@ class AppDatabase extends _$AppDatabase {
   /// `0`, aucun backfill nécessaire.
   Future<void> _addProductStockColumn(Migrator m) async {
     await m.addColumn(produits, produits.stock);
+  }
+
+  /// Active le suivi de stock par défaut pour préserver le comportement des
+  /// produits existants, puis laisse chaque produit désactiver ce contrôle.
+  Future<void> _addProductStockTrackingColumn(Migrator m) async {
+    await m.addColumn(produits, produits.stockTrackingEnabled);
   }
 
   /// Ajoute le scope tenant local. Les anciennes lignes restent avec une

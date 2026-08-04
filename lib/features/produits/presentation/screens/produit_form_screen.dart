@@ -25,6 +25,7 @@ class _ProduitFormScreenState extends ConsumerState<ProduitFormScreen> {
   final _stockController = TextEditingController(text: '0');
   String? _categoryId;
   AppCurrency _currency = AppCurrency.usd;
+  bool _stockTrackingEnabled = false;
   var _initialized = false;
 
   bool get _isEditing => widget.produitId != null;
@@ -47,6 +48,7 @@ class _ProduitFormScreenState extends ConsumerState<ProduitFormScreen> {
       _stockController.text = produit.stock.toString();
       _categoryId = produit.categoryId;
       _currency = produit.currency;
+      _stockTrackingEnabled = produit.stockTrackingEnabled;
       _initialized = true;
       setState(() {});
     });
@@ -68,6 +70,7 @@ class _ProduitFormScreenState extends ConsumerState<ProduitFormScreen> {
         price: price,
         currency: _currency,
         stock: stock,
+        stockTrackingEnabled: _stockTrackingEnabled,
       );
     } else {
       await controller.createProduit(
@@ -76,6 +79,7 @@ class _ProduitFormScreenState extends ConsumerState<ProduitFormScreen> {
         price: price,
         currency: _currency,
         stock: stock,
+        stockTrackingEnabled: _stockTrackingEnabled,
       );
     }
 
@@ -253,6 +257,60 @@ class _ProduitFormScreenState extends ConsumerState<ProduitFormScreen> {
                                 setState(() => _currency = value);
                               }
                             },
+                    ),
+                    const SizedBox(height: 16),
+                    SwitchListTile.adaptive(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('Gestion du stock'),
+                      subtitle: Text(
+                        _stockTrackingEnabled
+                            ? 'La quantité sera contrôlée à la commande.'
+                            : 'Le produit pourra être commandé sans limite de stock.',
+                      ),
+                      value: _stockTrackingEnabled,
+                      onChanged: formState.isLoading
+                          ? null
+                          : (value) =>
+                                setState(() => _stockTrackingEnabled = value),
+                    ),
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 220),
+                      switchInCurve: Curves.easeOutCubic,
+                      switchOutCurve: Curves.easeInCubic,
+                      child: _stockTrackingEnabled
+                          ? Padding(
+                              key: const ValueKey('tracked_stock_field'),
+                              padding: const EdgeInsets.only(top: 16),
+                              child: TextFormField(
+                                controller: _stockController,
+                                decoration: const InputDecoration(
+                                  labelText: 'Quantité en stock',
+                                ),
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                ],
+                                enabled: !formState.isLoading,
+                                validator: (value) {
+                                  final parsed = int.tryParse(value ?? '');
+                                  if (parsed == null || parsed < 0) {
+                                    return 'Quantité invalide';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            )
+                          : const Padding(
+                              key: ValueKey('untracked_stock_hint'),
+                              padding: EdgeInsets.only(top: 12),
+                              child: Text(
+                                'Stock non suivi pour ce produit.',
+                                style: TextStyle(
+                                  color: Color(0xFF707792),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
                     ),
                     const SizedBox(height: 32),
                     FilledButton(

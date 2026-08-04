@@ -71,7 +71,8 @@ class InventoryRepositoryImpl implements InventoryRepository {
         await (_database.select(_database.produits)..where(
               (p) =>
                   p.establishmentId.equals(establishmentId) &
-                  p.isDeleted.equals(false),
+                  p.isDeleted.equals(false) &
+                  p.stockTrackingEnabled.equals(true),
             ))
             .get();
     if (products.isEmpty) {

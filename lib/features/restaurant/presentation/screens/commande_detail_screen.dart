@@ -25,15 +25,7 @@ class CommandeDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _CommandeDetailScreenState extends ConsumerState<CommandeDetailScreen> {
-  final _searchController = TextEditingController();
-  String _query = '';
   int _tabIndex = 0;
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,8 +53,6 @@ class _CommandeDetailScreenState extends ConsumerState<CommandeDetailScreen> {
         }
 
         final isCanceled = item.statusKey == 'annulees';
-        final filteredLines = _filteredLines(lines);
-
         return Scaffold(
           extendBody: true,
           backgroundColor: Colors.white,
@@ -91,14 +81,10 @@ class _CommandeDetailScreenState extends ConsumerState<CommandeDetailScreen> {
                     index: _tabIndex,
                     children: [
                       _ProductsTab(
-                        lines: filteredLines,
+                        lines: lines,
                         totalLineCount: lines.length,
-                        searchController: _searchController,
-                        query: _query,
                         isCanceled: isCanceled,
                         isLoading: state.isLoading,
-                        onQueryChanged: (value) =>
-                            setState(() => _query = value),
                         onAddProduct: isCanceled
                             ? null
                             : () => _showAddProductSheet(context),
@@ -143,14 +129,6 @@ class _CommandeDetailScreenState extends ConsumerState<CommandeDetailScreen> {
         body: Center(child: Text(error.toString())),
       ),
     );
-  }
-
-  List<LigneCommandeEntity> _filteredLines(List<LigneCommandeEntity> lines) {
-    final query = _query.trim().toLowerCase();
-    if (query.isEmpty) return lines;
-    return lines
-        .where((line) => line.label.toLowerCase().contains(query))
-        .toList();
   }
 
   void _showAddProductSheet(BuildContext context) {
@@ -384,11 +362,8 @@ class _ProductsTab extends StatelessWidget {
   const _ProductsTab({
     required this.lines,
     required this.totalLineCount,
-    required this.searchController,
-    required this.query,
     required this.isCanceled,
     required this.isLoading,
-    required this.onQueryChanged,
     required this.onAddProduct,
     required this.onIncrement,
     required this.onDecrement,
@@ -397,11 +372,8 @@ class _ProductsTab extends StatelessWidget {
 
   final List<LigneCommandeEntity> lines;
   final int totalLineCount;
-  final TextEditingController searchController;
-  final String query;
   final bool isCanceled;
   final bool isLoading;
-  final ValueChanged<String> onQueryChanged;
   final VoidCallback? onAddProduct;
   final ValueChanged<LigneCommandeEntity> onIncrement;
   final ValueChanged<LigneCommandeEntity> onDecrement;
@@ -412,67 +384,6 @@ class _ProductsTab extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(18, 30, 18, 230),
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: SizedBox(
-                height: 58,
-                child: TextField(
-                  controller: searchController,
-                  onChanged: onQueryChanged,
-                  decoration: InputDecoration(
-                    hintText: 'Rechercher un produit...',
-                    hintStyle: const TextStyle(
-                      color: Color(0xFF7B819B),
-                      fontSize: 17,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    prefixIcon: const Icon(
-                      Icons.search_rounded,
-                      color: Color(0xFF707792),
-                      size: 30,
-                    ),
-                    filled: true,
-                    fillColor: Colors.white,
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Color(0xFFE6E8EF)),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(
-                        color: AppColors.violetPrincipal,
-                      ),
-                    ),
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 14),
-            SizedBox(
-              height: 58,
-              child: OutlinedButton.icon(
-                onPressed: () {},
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFF101529),
-                  side: const BorderSide(color: Color(0xFFE6E8EF)),
-                  padding: const EdgeInsets.symmetric(horizontal: 18),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  textStyle: const TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                icon: const Icon(Icons.grid_view_rounded, size: 25),
-                label: const Text('Catégories'),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 28),
         const Text(
           'Lignes',
           style: TextStyle(fontSize: 1, color: Colors.transparent),
@@ -556,13 +467,9 @@ class _ProductsTab extends StatelessWidget {
           onRemove: onRemove,
         ),
         const SizedBox(height: 86),
-        _EmptyProductsHint(
-          title: lines.isEmpty && query.isNotEmpty
-              ? 'Aucun produit trouvé'
-              : 'Ajoutez des produits à la commande',
-          subtitle: lines.isEmpty && query.isNotEmpty
-              ? 'Essayez une autre recherche'
-              : 'Les articles apparaîtront ici',
+        const _EmptyProductsHint(
+          title: 'Ajoutez des produits à la commande',
+          subtitle: 'Les articles apparaîtront ici',
         ),
       ],
     );
@@ -1052,7 +959,6 @@ class _AddProductSheetState extends ConsumerState<_AddProductSheet> {
     final categories = _categoriesFor(produits);
     final activeCategory = _activeCategory(categories);
     final filtered = _filteredProducts(produits, activeCategory);
-    final popular = filtered.take(4).toList();
     final selectedCount = _selectedQuantities.values.fold<int>(
       0,
       (sum, quantity) => sum + quantity,
@@ -1184,23 +1090,6 @@ class _AddProductSheetState extends ConsumerState<_AddProductSheet> {
                       ),
                     ),
                     const SizedBox(height: 28),
-                    _SectionHeader(
-                      title: 'Produits populaires',
-                      trailing: filtered.length > popular.length
-                          ? 'Voir tout'
-                          : null,
-                    ),
-                    const SizedBox(height: 14),
-                    if (popular.isEmpty)
-                      _NoProductsMessage(hasQuery: _query.trim().isNotEmpty)
-                    else
-                      _PopularProductsGrid(
-                        products: popular,
-                        selectedQuantities: _selectedQuantities,
-                        disabled: state.isLoading,
-                        onAdd: _incrementProduct,
-                      ),
-                    const SizedBox(height: 28),
                     const _SectionHeader(title: 'Tous les produits'),
                     const SizedBox(height: 12),
                     _AllProductsCard(
@@ -1225,12 +1114,10 @@ class _AddProductSheetState extends ConsumerState<_AddProductSheet> {
   }
 
   void _incrementProduct(ProduitEntity produit) {
-    if (produit.stock <= 0) return;
     setState(() {
       final current = _selectedQuantities[produit.id] ?? 0;
-      if (current < produit.stock) {
-        _selectedQuantities[produit.id] = current + 1;
-      }
+      if (produit.stockTrackingEnabled && current >= produit.stock) return;
+      _selectedQuantities[produit.id] = current + 1;
     });
   }
 
@@ -1322,10 +1209,9 @@ class _CategoryFilterChip extends StatelessWidget {
 }
 
 class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.title, this.trailing});
+  const _SectionHeader({required this.title});
 
   final String title;
-  final String? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -1339,130 +1225,7 @@ class _SectionHeader extends StatelessWidget {
             fontWeight: FontWeight.w900,
           ),
         ),
-        const Spacer(),
-        if (trailing != null)
-          Text(
-            trailing!,
-            style: const TextStyle(
-              color: AppColors.violetPrincipal,
-              fontSize: 16,
-              fontWeight: FontWeight.w900,
-            ),
-          ),
       ],
-    );
-  }
-}
-
-class _PopularProductsGrid extends StatelessWidget {
-  const _PopularProductsGrid({
-    required this.products,
-    required this.selectedQuantities,
-    required this.disabled,
-    required this.onAdd,
-  });
-
-  final List<ProduitEntity> products;
-  final Map<String, int> selectedQuantities;
-  final bool disabled;
-  final ValueChanged<ProduitEntity> onAdd;
-
-  @override
-  Widget build(BuildContext context) {
-    return GridView.builder(
-      itemCount: products.length,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        mainAxisExtent: 96,
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
-      ),
-      itemBuilder: (context, index) {
-        final product = products[index];
-        return _PopularProductCard(
-          product: product,
-          quantity: selectedQuantities[product.id] ?? 0,
-          disabled: disabled,
-          onAdd: () => onAdd(product),
-        );
-      },
-    );
-  }
-}
-
-class _PopularProductCard extends StatelessWidget {
-  const _PopularProductCard({
-    required this.product,
-    required this.quantity,
-    required this.disabled,
-    required this.onAdd,
-  });
-
-  final ProduitEntity product;
-  final int quantity;
-  final bool disabled;
-  final VoidCallback onAdd;
-
-  static final _amountFormat = NumberFormat('#,##0', 'fr');
-
-  @override
-  Widget build(BuildContext context) {
-    final canAdd = !disabled && product.stock > 0 && quantity < product.stock;
-
-    return Container(
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE6E8EF)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.035),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          _ProductThumb(label: product.name),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  product.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: Color(0xFF101529),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '${_amountFormat.format(product.price)} FC',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: product.stock > 0
-                        ? AppColors.violetPrincipal
-                        : const Color(0xFF9AA0B7),
-                    fontSize: 15,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          _RoundAddButton(enabled: canAdd, onTap: onAdd, quantity: quantity),
-        ],
-      ),
     );
   }
 }
@@ -1527,7 +1290,12 @@ class _CatalogProductTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final canAdd = !disabled && product.stock > 0 && quantity < product.stock;
+    final canAdd =
+        !disabled &&
+        (!product.stockTrackingEnabled || quantity < product.stock);
+    final stockLabel = product.stockTrackingEnabled
+        ? 'Stock ${product.stock}'
+        : 'Stock non suivi';
 
     return SizedBox(
       height: 92,
@@ -1554,7 +1322,7 @@ class _CatalogProductTile extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    product.categoryName ?? 'Stock ${product.stock}',
+                    product.categoryName ?? stockLabel,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
@@ -1569,7 +1337,7 @@ class _CatalogProductTile extends StatelessWidget {
             Text(
               '${_amountFormat.format(product.price)} FC',
               style: TextStyle(
-                color: product.stock > 0
+                color: !product.stockTrackingEnabled || product.stock > 0
                     ? AppColors.violetPrincipal
                     : const Color(0xFF9AA0B7),
                 fontSize: 16,
@@ -1598,27 +1366,29 @@ class _RoundAddButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      customBorder: const CircleBorder(),
-      onTap: enabled ? onTap : null,
-      child: Container(
-        width: 42,
-        height: 42,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: quantity > 0
+    return SizedBox(
+      width: 46,
+      height: 46,
+      child: IconButton(
+        tooltip: 'Ajouter',
+        onPressed: enabled ? onTap : null,
+        style: IconButton.styleFrom(
+          backgroundColor: quantity > 0
               ? AppColors.violetPrincipal
-              : enabled
+              : Colors.white,
+          disabledBackgroundColor: const Color(0xFFF4F5F9),
+          foregroundColor: quantity > 0
               ? Colors.white
-              : const Color(0xFFF4F5F9),
-          shape: BoxShape.circle,
-          border: Border.all(
+              : AppColors.violetPrincipal,
+          disabledForegroundColor: const Color(0xFFB8BECF),
+          side: BorderSide(
             color: quantity > 0
                 ? AppColors.violetPrincipal
                 : const Color(0xFFDDE2EA),
           ),
+          shape: const CircleBorder(),
         ),
-        child: quantity > 0
+        icon: quantity > 0
             ? Text(
                 '$quantity',
                 style: const TextStyle(
@@ -1626,13 +1396,7 @@ class _RoundAddButton extends StatelessWidget {
                   fontWeight: FontWeight.w900,
                 ),
               )
-            : Icon(
-                Icons.add_rounded,
-                color: enabled
-                    ? AppColors.violetPrincipal
-                    : const Color(0xFFB8BECF),
-                size: 28,
-              ),
+            : const Icon(Icons.add_rounded, size: 28),
       ),
     );
   }

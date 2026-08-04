@@ -42,6 +42,7 @@ abstract class ProduitRepository {
     required double price,
     required AppCurrency currency,
     int stock = 0,
+    bool stockTrackingEnabled = true,
   });
 
   Future<ProduitEntity> updateProduit({
@@ -52,6 +53,7 @@ abstract class ProduitRepository {
     required double price,
     required AppCurrency currency,
     int stock = 0,
+    bool stockTrackingEnabled = true,
   });
 
   Future<void> deleteProduit({

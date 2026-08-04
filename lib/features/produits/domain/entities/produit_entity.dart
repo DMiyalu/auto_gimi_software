@@ -10,6 +10,7 @@ class ProduitEntity {
     required this.price,
     required this.currency,
     required this.stock,
+    required this.stockTrackingEnabled,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -21,16 +22,20 @@ class ProduitEntity {
   final double price;
   final AppCurrency currency;
   final int stock;
+  final bool stockTrackingEnabled;
   final DateTime createdAt;
   final DateTime updatedAt;
 
-  ProductStockStatus get stockStatus => ProductStockStatus.of(stock);
+  ProductStockStatus get stockStatus => stockTrackingEnabled
+      ? ProductStockStatus.of(stock)
+      : ProductStockStatus.notTracked;
 }
 
 /// Seuils d'affichage du badge de stock sur la carte produit et du filtre
 /// "En rupture" — pas de configuration métier pour l'instant, un seuil fixe
 /// suffit tant qu'aucun établissement ne demande de le personnaliser.
 enum ProductStockStatus {
+  notTracked,
   outOfStock,
   low,
   inStock;
