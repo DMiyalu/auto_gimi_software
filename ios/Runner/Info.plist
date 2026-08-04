@@ -45,5 +45,7 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>Zolana utilise Bluetooth pour détecter les imprimantes thermiques associées au device.</string>
 </dict>
 </plist>

@@ -26,6 +26,7 @@ import '../../features/primary_module/screens/primary_module_screen.dart';
 import '../../features/produits/presentation/screens/product_category_form_screen.dart';
 import '../../features/produits/presentation/screens/produit_form_screen.dart';
 import '../../features/produits/presentation/screens/produits_screen.dart';
+import '../../features/printing/presentation/screens/printer_settings_screen.dart';
 import '../../features/reporting/presentation/screens/dashboard_screen.dart';
 import '../../features/restaurant/presentation/screens/commande_detail_screen.dart';
 import '../../features/restaurant/presentation/screens/new_commande_screen.dart';
@@ -263,6 +264,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: Routes.settings,
             builder: (_, __) => const SettingsScreen(),
+          ),
+          GoRoute(
+            path: Routes.printerSettings,
+            builder: (context, state) => const PrinterSettingsScreen(),
           ),
         ],
       ),

@@ -47,6 +47,7 @@ abstract final class Routes {
   static const jetonScan = '/jetons/scan';
   static const alertes = '/alertes';
   static const settings = '/settings';
+  static const printerSettings = '/settings/printer';
   static const reports = '/rapports';
   static const more = '/plus';
   static const activityDetail = '/activity/:id';

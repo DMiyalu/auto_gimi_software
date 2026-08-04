@@ -53,6 +53,11 @@ class MoreMenuContent extends ConsumerWidget {
           onTap: () => context.push(Routes.invitations),
         ),
         ListTile(
+          leading: const Icon(Icons.print_outlined),
+          title: const Text('Configuration imprimante'),
+          onTap: () => context.push(Routes.printerSettings),
+        ),
+        ListTile(
           leading: const Icon(Icons.settings_outlined),
           title: Text(l10n.settings),
           onTap: () => context.push(Routes.settings),
