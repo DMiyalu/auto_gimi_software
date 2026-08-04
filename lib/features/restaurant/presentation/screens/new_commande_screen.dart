@@ -3,8 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/auth/auth_error_mapper.dart';
+import '../../../../core/routing/routes.dart';
+import '../../../../core/theme/app_spacing.dart';
 import '../../../establishment/presentation/providers/establishment_providers.dart';
-import '../../../produits/presentation/providers/produit_providers.dart';
 import '../providers/commande_providers.dart';
 
 class NewCommandeScreen extends ConsumerStatefulWidget {
@@ -15,43 +16,34 @@ class NewCommandeScreen extends ConsumerStatefulWidget {
 }
 
 class _NewCommandeScreenState extends ConsumerState<NewCommandeScreen> {
-  final _contextController = TextEditingController();
-  final _quantityController = TextEditingController(text: '1');
-  String? _selectedProduitId;
+  final _tableController = TextEditingController();
 
   @override
   void dispose() {
-    _contextController.dispose();
-    _quantityController.dispose();
+    _tableController.dispose();
     super.dispose();
   }
 
   Future<void> _submit() async {
-    final produits = ref.read(produitsProvider).valueOrNull ?? [];
-    final produit = produits
-        .where((item) => item.id == _selectedProduitId)
-        .firstOrNull;
-    if (produit == null) return;
-    final quantity = int.tryParse(_quantityController.text.trim()) ?? 1;
-
     final controller = ref.read(commandeControllerProvider.notifier);
     final commandeId = await controller.createCommande(
-      context: _contextController.text,
-    );
-    await controller.addProduitLine(
-      commandeId: commandeId,
-      produitId: produit.id,
-      quantity: quantity,
+      context: _contextFromTable(_tableController.text),
     );
 
     if (!mounted) return;
     final state = ref.read(commandeControllerProvider);
-    if (!state.hasError) context.pop();
+    if (!state.hasError) context.go(Routes.commandeDetailPath(commandeId));
+  }
+
+  String? _contextFromTable(String value) {
+    final trimmed = value.trim();
+    if (trimmed.isEmpty) return null;
+    final hasTablePrefix = trimmed.toLowerCase().startsWith('table');
+    return hasTablePrefix ? trimmed : 'Table $trimmed';
   }
 
   @override
   Widget build(BuildContext context) {
-    final produits = ref.watch(produitsProvider).valueOrNull ?? [];
     final state = ref.watch(commandeControllerProvider);
     final canCreateActivities = ref.watch(canCreateActivitiesProvider);
 
@@ -79,7 +71,12 @@ class _NewCommandeScreenState extends ConsumerState<NewCommandeScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Nouvelle commande')),
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: const Text('Nouvelle commande'),
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
+      ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -89,60 +86,50 @@ class _NewCommandeScreenState extends ConsumerState<NewCommandeScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  Icon(
+                    Icons.table_restaurant_outlined,
+                    size: 64,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    'Créer une commande',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    'Le numéro de table est optionnel. Vous pourrez ajouter les produits et le client ensuite.',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: const Color(0xFF707792),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
                   TextField(
-                    controller: _contextController,
+                    controller: _tableController,
                     enabled: !state.isLoading,
                     decoration: const InputDecoration(
-                      labelText: 'Table, livraison ou contexte',
+                      labelText: 'Numéro de table',
+                      hintText: 'Ex. 12',
+                      prefixIcon: Icon(Icons.table_restaurant_outlined),
                     ),
-                    textCapitalization: TextCapitalization.sentences,
-                  ),
-                  const SizedBox(height: 16),
-                  DropdownButtonFormField<String>(
-                    initialValue: _selectedProduitId,
-                    isExpanded: true,
-                    decoration: const InputDecoration(labelText: 'Produit'),
-                    items: [
-                      for (final produit in produits)
-                        DropdownMenuItem(
-                          value: produit.id,
-                          child: Text(
-                            '${produit.name} • ${produit.price.toStringAsFixed(2)} ${produit.currency.code} • Stock ${produit.stock}',
-                          ),
-                        ),
-                    ],
-                    onChanged: state.isLoading
-                        ? null
-                        : (value) => setState(() => _selectedProduitId = value),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: _quantityController,
-                    enabled: !state.isLoading,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(labelText: 'Quantité'),
                   ),
                   const SizedBox(height: 24),
                   FilledButton.icon(
-                    onPressed: state.isLoading || produits.isEmpty
-                        ? null
-                        : _submit,
+                    onPressed: state.isLoading ? null : _submit,
                     icon: state.isLoading
                         ? const SizedBox(
                             height: 18,
                             width: 18,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Icon(Icons.add_shopping_cart_outlined),
-                    label: const Text('Créer la commande'),
+                        : const Icon(Icons.arrow_forward_rounded),
+                    label: const Text('Continuer'),
                   ),
-                  if (produits.isEmpty) ...[
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Ajoutez d’abord des produits au catalogue pour créer une commande.',
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
                 ],
               ),
             ),

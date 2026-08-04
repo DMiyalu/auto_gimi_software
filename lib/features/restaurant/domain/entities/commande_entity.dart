@@ -37,10 +37,10 @@ String commandeStatusLabel(String key) {
 
 Color commandeStatusColor(String key) {
   return switch (key) {
-    'en_attente' => Colors.amber.shade700,
-    'en_preparation' => Colors.deepOrange.shade500,
-    'pretes' => Colors.green.shade600,
-    'livraison' => Colors.blue.shade600,
+    'en_attente' => const Color(0xFFEF2E2E),
+    'en_preparation' => const Color(0xFF006B43),
+    'pretes' => const Color(0xFF1FA85B),
+    'livraison' => const Color(0xFF1E88E5),
     'annulees' => Colors.grey.shade500,
     _ => Colors.blueGrey.shade500,
   };
