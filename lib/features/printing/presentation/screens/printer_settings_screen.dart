@@ -19,7 +19,22 @@ class _PrinterSettingsScreenState extends ConsumerState<PrinterSettingsScreen> {
   var _devices = const <BluetoothPrinterDevice>[];
   var _isSearching = false;
   var _hasSearched = false;
+  String? _selectedAddress;
   String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSelectedPrinter();
+  }
+
+  Future<void> _loadSelectedPrinter() async {
+    final address = await ref
+        .read(bluetoothPrinterServiceProvider)
+        .selectedPrinterAddress();
+    if (!mounted) return;
+    setState(() => _selectedAddress = address);
+  }
 
   Future<void> _searchPrinters() async {
     if (_isSearching) return;
@@ -58,6 +73,114 @@ class _PrinterSettingsScreenState extends ConsumerState<PrinterSettingsScreen> {
 
   Future<void> _openBluetoothSettings() {
     return ref.read(bluetoothPrinterServiceProvider).openBluetoothSettings();
+  }
+
+  Future<void> _loadPairedPrinters() async {
+    if (_isSearching) return;
+    setState(() {
+      _isSearching = true;
+      _hasSearched = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final devices = await ref
+          .read(bluetoothPrinterServiceProvider)
+          .pairedDevices()
+          .timeout(
+            const Duration(seconds: 8),
+            onTimeout: () {
+              throw TimeoutException(
+                'La lecture des appareils appairés prend trop de temps. Ouvrez Bluetooth, associez le MP210, puis revenez ici.',
+              );
+            },
+          );
+      if (!mounted) return;
+      setState(() {
+        _devices = _sortDevices(devices);
+        _isSearching = false;
+      });
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _errorMessage = error.toString();
+        _isSearching = false;
+      });
+    }
+  }
+
+  Future<void> _selectPrinter(BluetoothPrinterDevice device) async {
+    await ref.read(bluetoothPrinterServiceProvider).saveSelectedPrinter(device);
+    if (!mounted) return;
+    setState(() => _selectedAddress = device.address);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('${device.name} sélectionnée pour les factures.')),
+    );
+  }
+
+  Future<void> _showManualPrinterDialog() async {
+    final nameController = TextEditingController(text: 'MP210');
+    final addressController = TextEditingController();
+    final device = await showDialog<BluetoothPrinterDevice>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Ajouter une imprimante'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: const InputDecoration(labelText: 'Nom'),
+              textCapitalization: TextCapitalization.characters,
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: addressController,
+              decoration: const InputDecoration(
+                labelText: 'Adresse MAC',
+                hintText: '00:11:22:AA:BB:CC',
+              ),
+              textCapitalization: TextCapitalization.characters,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Annuler'),
+          ),
+          FilledButton(
+            onPressed: () {
+              final address = addressController.text.trim().toUpperCase();
+              if (address.isEmpty) return;
+              Navigator.pop(
+                context,
+                BluetoothPrinterDevice(
+                  name: nameController.text.trim().isEmpty
+                      ? 'MP210'
+                      : nameController.text.trim(),
+                  address: address,
+                  source: 'Manuelle',
+                  isLikelyPrinter: true,
+                  isConnected: false,
+                ),
+              );
+            },
+            child: const Text('Ajouter'),
+          ),
+        ],
+      ),
+    );
+    nameController.dispose();
+    addressController.dispose();
+    if (device == null) return;
+
+    final merged = {
+      for (final item in _devices) item.address: item,
+      device.address: device,
+    }.values.toList();
+    setState(() => _devices = _sortDevices(merged));
+    await _selectPrinter(device);
   }
 
   List<BluetoothPrinterDevice> _sortDevices(
@@ -108,7 +231,29 @@ class _PrinterSettingsScreenState extends ConsumerState<PrinterSettingsScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: [
+                  OutlinedButton.icon(
+                    onPressed: _isSearching ? null : _loadPairedPrinters,
+                    icon: const Icon(Icons.bluetooth_connected_outlined),
+                    label: const Text('Appareils appairés'),
+                  ),
+                  OutlinedButton.icon(
+                    onPressed: _isSearching ? null : _openBluetoothSettings,
+                    icon: const Icon(Icons.settings_bluetooth_outlined),
+                    label: const Text('Ouvrir Bluetooth'),
+                  ),
+                  OutlinedButton.icon(
+                    onPressed: _isSearching ? null : _showManualPrinterDialog,
+                    icon: const Icon(Icons.edit_outlined),
+                    label: const Text('Ajouter manuellement'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 240),
                 switchInCurve: Curves.easeOutCubic,
@@ -121,8 +266,12 @@ class _PrinterSettingsScreenState extends ConsumerState<PrinterSettingsScreen> {
                   isSearching: _isSearching,
                   errorMessage: _errorMessage,
                   devices: _devices,
+                  selectedAddress: _selectedAddress,
                   onRetry: _searchPrinters,
+                  onLoadPaired: _loadPairedPrinters,
                   onOpenBluetoothSettings: _openBluetoothSettings,
+                  onManualAdd: _showManualPrinterDialog,
+                  onSelect: _selectPrinter,
                 ),
               ),
             ],
@@ -140,16 +289,24 @@ class _PrinterSearchResult extends StatelessWidget {
     required this.isSearching,
     required this.errorMessage,
     required this.devices,
+    required this.selectedAddress,
     required this.onRetry,
+    required this.onLoadPaired,
     required this.onOpenBluetoothSettings,
+    required this.onManualAdd,
+    required this.onSelect,
   });
 
   final bool hasSearched;
   final bool isSearching;
   final String? errorMessage;
   final List<BluetoothPrinterDevice> devices;
+  final String? selectedAddress;
   final VoidCallback onRetry;
+  final VoidCallback onLoadPaired;
   final VoidCallback onOpenBluetoothSettings;
+  final VoidCallback onManualAdd;
+  final ValueChanged<BluetoothPrinterDevice> onSelect;
 
   @override
   Widget build(BuildContext context) {
@@ -162,24 +319,44 @@ class _PrinterSearchResult extends StatelessWidget {
       );
     }
     if (!hasSearched) {
-      return const _MessagePanel(
+      return _MessagePanel(
         icon: Icons.bluetooth_searching_rounded,
         title: 'Prêt à rechercher',
         message:
             'Touchez Rechercher pour demander les autorisations Bluetooth et détecter les imprimantes proches.',
+        primaryActionLabel: 'Rechercher',
+        onPrimaryAction: onRetry,
+        secondaryActions: [
+          _MessageAction(
+            label: 'Appairer MP210',
+            icon: Icons.settings_bluetooth_outlined,
+            onTap: onOpenBluetoothSettings,
+          ),
+          _MessageAction(
+            label: 'Ajouter manuellement',
+            icon: Icons.edit_outlined,
+            onTap: onManualAdd,
+          ),
+        ],
       );
     }
     if (devices.isEmpty) {
       return _NoPrinterFound(
         onRetry: onRetry,
+        onLoadPaired: onLoadPaired,
         onOpenBluetoothSettings: onOpenBluetoothSettings,
+        onManualAdd: onManualAdd,
       );
     }
 
     return Column(
       children: [
         for (final device in devices) ...[
-          _PrinterTile(device: device),
+          _PrinterTile(
+            device: device,
+            selected: device.address == selectedAddress,
+            onSelect: () => onSelect(device),
+          ),
           const SizedBox(height: 10),
         ],
       ],
@@ -276,9 +453,15 @@ class _GuideStep extends StatelessWidget {
 }
 
 class _PrinterTile extends StatelessWidget {
-  const _PrinterTile({required this.device});
+  const _PrinterTile({
+    required this.device,
+    required this.selected,
+    required this.onSelect,
+  });
 
   final BluetoothPrinterDevice device;
+  final bool selected;
+  final VoidCallback onSelect;
 
   @override
   Widget build(BuildContext context) {
@@ -343,8 +526,13 @@ class _PrinterTile extends StatelessWidget {
           ),
           const SizedBox(width: 10),
           _StatusBadge(
-            label: device.isConnected ? 'Connectée' : 'Appairée',
-            active: device.isConnected,
+            label: selected
+                ? 'Sélectionnée'
+                : device.isConnected
+                ? 'Connectée'
+                : 'Choisir',
+            active: selected || device.isConnected,
+            onTap: selected ? null : onSelect,
           ),
         ],
       ),
@@ -353,28 +541,35 @@ class _PrinterTile extends StatelessWidget {
 }
 
 class _StatusBadge extends StatelessWidget {
-  const _StatusBadge({required this.label, required this.active});
+  const _StatusBadge({required this.label, required this.active, this.onTap});
 
   final String label;
   final bool active;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: active
-            ? AppColors.violetPrincipal.withValues(alpha: 0.12)
-            : const Color(0xFFF4F5F9),
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: active ? AppColors.violetPrincipal : const Color(0xFF707792),
-            fontSize: 12,
-            fontWeight: FontWeight.w900,
+    return InkWell(
+      borderRadius: BorderRadius.circular(999),
+      onTap: onTap,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: active
+              ? AppColors.violetPrincipal.withValues(alpha: 0.12)
+              : const Color(0xFFF4F5F9),
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: active
+                  ? AppColors.violetPrincipal
+                  : const Color(0xFF707792),
+              fontSize: 12,
+              fontWeight: FontWeight.w900,
+            ),
           ),
         ),
       ),
@@ -424,11 +619,15 @@ class _SearchingPrinters extends StatelessWidget {
 class _NoPrinterFound extends StatelessWidget {
   const _NoPrinterFound({
     required this.onRetry,
+    required this.onLoadPaired,
     required this.onOpenBluetoothSettings,
+    required this.onManualAdd,
   });
 
   final VoidCallback onRetry;
+  final VoidCallback onLoadPaired;
   final VoidCallback onOpenBluetoothSettings;
+  final VoidCallback onManualAdd;
 
   @override
   Widget build(BuildContext context) {
@@ -436,11 +635,26 @@ class _NoPrinterFound extends StatelessWidget {
       icon: Icons.print_disabled_outlined,
       title: 'Aucune imprimante détectée',
       message:
-          'Associez une imprimante thermique dans les paramètres Bluetooth, puis relancez la recherche.',
+          'Le MP210 peut être visible uniquement après appairage. Ouvrez Bluetooth, associez-le, puis revenez lire les appareils appairés.',
       primaryActionLabel: 'Rechercher encore',
       onPrimaryAction: onRetry,
-      secondaryActionLabel: 'Ouvrir Bluetooth',
-      onSecondaryAction: onOpenBluetoothSettings,
+      secondaryActions: [
+        _MessageAction(
+          label: 'Appareils appairés',
+          icon: Icons.bluetooth_connected_outlined,
+          onTap: onLoadPaired,
+        ),
+        _MessageAction(
+          label: 'Ouvrir Bluetooth',
+          icon: Icons.settings_bluetooth_outlined,
+          onTap: onOpenBluetoothSettings,
+        ),
+        _MessageAction(
+          label: 'Ajouter MP210',
+          icon: Icons.edit_outlined,
+          onTap: onManualAdd,
+        ),
+      ],
     );
   }
 }
@@ -479,6 +693,7 @@ class _MessagePanel extends StatelessWidget {
     this.onPrimaryAction,
     this.secondaryActionLabel,
     this.onSecondaryAction,
+    this.secondaryActions = const [],
   });
 
   final IconData icon;
@@ -488,6 +703,7 @@ class _MessagePanel extends StatelessWidget {
   final VoidCallback? onPrimaryAction;
   final String? secondaryActionLabel;
   final VoidCallback? onSecondaryAction;
+  final List<_MessageAction> secondaryActions;
 
   @override
   Widget build(BuildContext context) {
@@ -522,7 +738,9 @@ class _MessagePanel extends StatelessWidget {
               height: 1.35,
             ),
           ),
-          if (primaryActionLabel != null || secondaryActionLabel != null) ...[
+          if (primaryActionLabel != null ||
+              secondaryActionLabel != null ||
+              secondaryActions.isNotEmpty) ...[
             const SizedBox(height: 16),
             Wrap(
               alignment: WrapAlignment.center,
@@ -534,6 +752,12 @@ class _MessagePanel extends StatelessWidget {
                     onPressed: onSecondaryAction,
                     icon: const Icon(Icons.settings_bluetooth_outlined),
                     label: Text(secondaryActionLabel!),
+                  ),
+                for (final action in secondaryActions)
+                  OutlinedButton.icon(
+                    onPressed: action.onTap,
+                    icon: Icon(action.icon),
+                    label: Text(action.label),
                   ),
                 if (primaryActionLabel != null)
                   FilledButton.icon(
@@ -548,4 +772,16 @@ class _MessagePanel extends StatelessWidget {
       ),
     );
   }
+}
+
+class _MessageAction {
+  const _MessageAction({
+    required this.label,
+    required this.icon,
+    required this.onTap,
+  });
+
+  final String label;
+  final IconData icon;
+  final VoidCallback onTap;
 }
