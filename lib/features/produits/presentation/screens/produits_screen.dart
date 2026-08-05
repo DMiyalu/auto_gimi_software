@@ -3,12 +3,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/l10n/app_localizations.dart';
+import '../../../../core/presentation/widgets/domain_card.dart';
+import '../../../../core/presentation/widgets/module_list_header.dart';
 import '../../../../core/routing/routes.dart';
-import '../../../../core/utils/currency_formatter.dart';
+import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/utils/domain_accent_colors.dart';
 import '../../../establishment/presentation/providers/establishment_providers.dart';
 import '../../../primary_module/controllers/primary_module_providers.dart';
 import '../../../shell/presentation/widgets/primary_scaffold.dart';
+import '../providers/produit_list_view_providers.dart';
 import '../providers/produit_providers.dart';
+import '../widgets/produit_card.dart';
+import '../widgets/produit_filters.dart';
+import '../widgets/produit_search_bar.dart';
 
 class ProduitsScreen extends ConsumerStatefulWidget {
   const ProduitsScreen({super.key});
@@ -53,6 +60,7 @@ class _ProduitsScreenState extends ConsumerState<ProduitsScreen>
             Tab(text: l10n.productCategories),
           ],
         ),
+        const SizedBox(height: AppSpacing.xs),
         Expanded(
           child: TabBarView(
             controller: _tabController,
@@ -107,34 +115,101 @@ class _ProduitsListTab extends ConsumerWidget {
           );
         }
 
-        return ListView.separated(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          itemCount: produits.length,
-          separatorBuilder: (_, _) => const Divider(height: 1),
-          itemBuilder: (context, index) {
-            final produit = produits[index];
-            return ListTile(
-              leading: CircleAvatar(
-                child: Icon(
-                  Icons.inventory_2_outlined,
-                  color: Theme.of(context).colorScheme.onPrimaryContainer,
-                ),
+        return Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Expanded(child: ProduitSearchBar()),
+                  const SizedBox(width: AppSpacing.xs),
+                  const _FiltersButton(),
+                ],
               ),
-              title: Text(produit.name),
-              subtitle: Text(produit.categoryName ?? l10n.noCategory),
-              trailing: Text(
-                CurrencyFormatter.formatWithCode(
-                  produit.price,
-                  currency: produit.currency,
-                ),
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-              onTap: canManageCatalog
-                  ? () => context.push(Routes.produitEditPath(produit.id))
-                  : null,
-            );
-          },
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            const ProduitFilters(),
+            const SizedBox(height: AppSpacing.sm),
+            Expanded(
+              child: _ProduitListView(canManageCatalog: canManageCatalog),
+            ),
+          ],
         );
+      },
+    );
+  }
+}
+
+class _FiltersButton extends StatelessWidget {
+  const _FiltersButton();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
+    return OutlinedButton.icon(
+      style: OutlinedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm,
+          vertical: 16,
+        ),
+      ),
+      onPressed: () {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.comingSoon)));
+      },
+      icon: const Icon(Icons.tune, size: 18),
+      label: Text(l10n.filters),
+    );
+  }
+}
+
+class _ProduitListView extends ConsumerWidget {
+  const _ProduitListView({required this.canManageCatalog});
+
+  final bool canManageCatalog;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final produits = ref.watch(filteredProduitsProvider);
+
+    if (produits.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: Text(
+            l10n.noProductsMatchFilter,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+      );
+    }
+
+    return ListView.separated(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.sm,
+        0,
+        AppSpacing.sm,
+        AppSpacing.sm,
+      ),
+      itemCount: produits.length + 1,
+      separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.xs),
+      itemBuilder: (context, index) {
+        if (index == 0) {
+          return ModuleListHeader(
+            title: l10n.productsListTitle,
+            countLabel: l10n.productsCount(produits.length),
+          );
+        }
+
+        final produit = produits[index - 1];
+        return ProduitCard(produit: produit, canManage: canManageCatalog);
       },
     );
   }
@@ -171,21 +246,65 @@ class _ProductCategoriesTab extends ConsumerWidget {
         }
 
         return ListView.separated(
-          padding: const EdgeInsets.symmetric(vertical: 8),
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.sm,
+            AppSpacing.sm,
+            AppSpacing.sm,
+            AppSpacing.sm,
+          ),
           itemCount: categories.length,
-          separatorBuilder: (_, _) => const Divider(height: 1),
+          separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.xs),
           itemBuilder: (context, index) {
             final category = categories[index];
             final count = counts[category.id] ?? 0;
-            return ListTile(
-              leading: const CircleAvatar(child: Icon(Icons.folder_outlined)),
-              title: Text(category.name),
-              subtitle: Text(l10n.productsCount(count)),
+            final accent = DomainAccentColors.forId(category.id);
+
+            return DomainCard(
+              accentColor: accent,
               onTap: canManageCatalog
                   ? () => context.push(
                       Routes.productCategoryEditPath(category.id),
                     )
                   : null,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  CircleAvatar(
+                    radius: 24,
+                    backgroundColor: accent.withValues(alpha: 0.12),
+                    child: Icon(Icons.folder_outlined, color: accent),
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          category.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.w700),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          l10n.productsCount(count),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    Icons.chevron_right,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ],
+              ),
             );
           },
         );
