@@ -5,6 +5,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../shell/presentation/widgets/primary_scaffold.dart';
 import '../theme/report_colors.dart';
 import '../widgets/report_date_range_selector.dart';
+import '../widgets/restaurant_report_kpi_grid.dart';
 
 /// Écran Rapports — établissement Restaurant (maquette).
 class RestaurantReportsScreen extends ConsumerWidget {
@@ -42,7 +43,9 @@ class RestaurantReportsScreen extends ConsumerWidget {
             ),
             const SizedBox(height: AppSpacing.sm),
             const ReportDateRangeSelector(),
-            // Étapes suivantes : KPI grid, graphique CA, répartition ventes.
+            const SizedBox(height: AppSpacing.sm),
+            const RestaurantReportKpiGrid(),
+            // Étapes suivantes : graphique CA, répartition ventes.
           ],
         ),
       ),
