@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/auth/auth_error_mapper.dart';
 import '../../../core/domain/business_category.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/routing/routes.dart';
@@ -14,11 +15,7 @@ import '../../establishment/domain/models/user_profile.dart';
 import '../../establishment/presentation/providers/establishment_providers.dart';
 import '../controllers/primary_module_providers.dart';
 
-/// En-tête réutilisable pour tous les métiers : menu hamburger (ouvre le
-/// Drawer de navigation globale), identité de l'établissement, sélecteur
-/// d'établissement, notifications et avatar
-/// utilisateur. Doit être monté à l'intérieur d'un [Scaffold] qui définit
-/// `drawer:` (ex. [PrimaryScaffold]).
+/// En-tête commun : identité établissement (switcher) + avatar profil utilisateur.
 class BusinessHeader extends ConsumerWidget {
   const BusinessHeader({super.key});
 
@@ -26,7 +23,6 @@ class BusinessHeader extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final establishment = ref.watch(currentEstablishmentProvider).valueOrNull;
     final config = ref.watch(primaryModuleConfigProvider);
-    final l10n = AppLocalizations.of(context);
     final role = ref.watch(activeEstablishmentRoleProvider);
     final establishments = ref.watch(userEstablishmentsProvider).valueOrNull;
     final memberships =
@@ -39,54 +35,25 @@ class BusinessHeader extends ConsumerWidget {
       if (next.hasError) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('${next.error}')));
+        ).showSnackBar(
+          SnackBar(content: Text(AuthErrorMapper.message(next.error!))),
+        );
       }
     });
 
     final name = establishment?.name ?? '…';
-    final initials = (establishment?.managerName.isNotEmpty ?? false)
-        ? establishment!.managerName[0].toUpperCase()
-        : '?';
+    final userName = profile?.fullName.trim() ?? '';
+    final initials = userName.isNotEmpty ? userName[0].toUpperCase() : '?';
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
-        isRestaurant ? 18 : AppSpacing.xs,
+        isRestaurant ? 18 : AppSpacing.sm,
         isRestaurant ? (hasSystemTopInset ? 22 : 8) : AppSpacing.xs,
         isRestaurant ? 18 : AppSpacing.sm,
         isRestaurant ? 16 : AppSpacing.xs,
       ),
       child: Row(
         children: [
-          _HeaderCircleButton(
-            onPressed: () => Scaffold.of(context).openDrawer(),
-            size: isRestaurant ? 56 : 48,
-            backgroundColor: isRestaurant
-                ? const Color(0xFFF4F5F9)
-                : Colors.transparent,
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Icon(
-                  Icons.menu_rounded,
-                  size: isRestaurant ? 34 : 24,
-                  color: const Color(0xFF101529),
-                ),
-                if (isRestaurant)
-                  const Positioned(
-                    right: -2,
-                    top: -2,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: Color(0xFF7D56FF),
-                        shape: BoxShape.circle,
-                      ),
-                      child: SizedBox(width: 9, height: 9),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          SizedBox(width: isRestaurant ? 18 : AppSpacing.xs),
           CircleAvatar(
             radius: isRestaurant ? 32 : 22,
             backgroundColor: isRestaurant
@@ -112,58 +79,40 @@ class BusinessHeader extends ConsumerWidget {
               ),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Flexible(
-                          child: Text(
-                            name,
-                            style: Theme.of(context).textTheme.titleLarge
-                                ?.copyWith(
-                                  fontSize: isRestaurant ? 23 : null,
-                                  fontWeight: FontWeight.w800,
-                                  color: const Color(0xFF101529),
-                                  height: 1.05,
-                                ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                    Flexible(
+                      child: Text(
+                        name,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontSize: isRestaurant ? 23 : null,
+                          fontWeight: FontWeight.w800,
+                          color: const Color(0xFF101529),
+                          height: 1.05,
                         ),
-                        const SizedBox(width: 2),
-                        const Icon(
-                          Icons.keyboard_arrow_down_rounded,
-                          size: 22,
-                          color: Color(0xFF101529),
-                        ),
-                      ],
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                    if (establishment != null)
-                      Text(
-                        establishment.category.label(l10n),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontSize: isRestaurant ? 16 : null,
-                          color: const Color(0xFF7B819B),
-                        ),
-                      ),
-                    if (role != null && !isRestaurant)
-                      Text(
-                        role.label,
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ),
+                    const SizedBox(width: 2),
+                    const Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      size: 22,
+                      color: Color(0xFF101529),
+                    ),
                   ],
                 ),
               ),
             ),
           ),
-          const _NotificationBell(),
-          SizedBox(width: isRestaurant ? 14 : AppSpacing.xs),
           GestureDetector(
-            onTap: () => context.go(Routes.settings),
+            onTap: () => _showUserProfileSheet(
+              context,
+              ref,
+              profile: profile,
+              establishment: establishment,
+              role: role,
+            ),
             child: CircleAvatar(
               radius: isRestaurant ? 28 : 20,
               backgroundColor: const Color(0xFFEFF1F5),
@@ -178,6 +127,27 @@ class BusinessHeader extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+
+  void _showUserProfileSheet(
+    BuildContext context,
+    WidgetRef ref, {
+    required UserProfile? profile,
+    required Establishment? establishment,
+    required EstablishmentRole? role,
+  }) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(borderRadius: AppRadius.sheetRadius),
+      builder: (sheetContext) {
+        return _UserProfileSheet(
+          profile: profile,
+          establishment: establishment,
+          role: role,
+        );
+      },
     );
   }
 
@@ -213,8 +183,7 @@ class BusinessHeader extends ConsumerWidget {
                     leading: CircleAvatar(child: Icon(item.category.icon)),
                     title: Text(item.name),
                     subtitle: Text(
-                      '${item.category.label(l10n)} • '
-                      '${_roleFor(item.id, memberships, profile).label}',
+                      _roleFor(item.id, memberships, profile).label,
                     ),
                     trailing: item.id == activeId
                         ? Icon(
@@ -268,80 +237,176 @@ class BusinessHeader extends ConsumerWidget {
   }
 }
 
-class _NotificationBell extends StatelessWidget {
-  const _NotificationBell();
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        IconButton(
-          icon: const Icon(
-            Icons.notifications_none_rounded,
-            size: 34,
-            color: Color(0xFF101529),
-          ),
-          onPressed: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Notifications — bientôt disponible'),
-              ),
-            );
-          },
-        ),
-        Positioned(
-          right: 6,
-          top: 4,
-          child: Container(
-            padding: const EdgeInsets.all(5),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.error,
-              shape: BoxShape.circle,
-            ),
-            constraints: const BoxConstraints(minWidth: 20, minHeight: 20),
-            child: const Text(
-              '3',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 11,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _HeaderCircleButton extends StatelessWidget {
-  const _HeaderCircleButton({
-    required this.child,
-    required this.onPressed,
-    required this.size,
-    required this.backgroundColor,
+class _UserProfileSheet extends ConsumerStatefulWidget {
+  const _UserProfileSheet({
+    required this.profile,
+    required this.establishment,
+    required this.role,
   });
 
-  final Widget child;
-  final VoidCallback onPressed;
-  final double size;
-  final Color backgroundColor;
+  final UserProfile? profile;
+  final Establishment? establishment;
+  final EstablishmentRole? role;
+
+  @override
+  ConsumerState<_UserProfileSheet> createState() => _UserProfileSheetState();
+}
+
+class _UserProfileSheetState extends ConsumerState<_UserProfileSheet> {
+  late final TextEditingController _nameController;
+  var _editing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(
+      text: widget.profile?.fullName ?? '',
+    );
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _saveName() async {
+    final name = _nameController.text.trim();
+    if (name.isEmpty) return;
+
+    await ref
+        .read(establishmentControllerProvider.notifier)
+        .updateUserFullName(name);
+    if (!mounted) return;
+    final state = ref.read(establishmentControllerProvider);
+    if (!state.hasError) {
+      setState(() => _editing = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Nom mis à jour.')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: backgroundColor,
-      shape: const CircleBorder(),
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        onTap: onPressed,
-        child: SizedBox(
-          width: size,
-          height: size,
-          child: Center(child: child),
-        ),
+    final profile = ref.watch(userProfileProvider).valueOrNull ?? widget.profile;
+    final establishment =
+        ref.watch(currentEstablishmentProvider).valueOrNull ??
+        widget.establishment;
+    final role =
+        ref.watch(activeEstablishmentRoleProvider) ?? widget.role;
+    final loading = ref.watch(establishmentControllerProvider).isLoading;
+    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(20, 12, 20, 20 + bottomInset),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: const Color(0xFFD5D8E2),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Mon profil',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 16),
+          if (_editing) ...[
+            TextField(
+              controller: _nameController,
+              enabled: !loading,
+              autofocus: true,
+              textCapitalization: TextCapitalization.words,
+              decoration: const InputDecoration(
+                labelText: 'Nom d’utilisateur',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: loading
+                        ? null
+                        : () {
+                            _nameController.text = profile?.fullName ?? '';
+                            setState(() => _editing = false);
+                          },
+                    child: const Text('Annuler'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: FilledButton(
+                    onPressed: loading ? null : _saveName,
+                    child: loading
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Text('Enregistrer'),
+                  ),
+                ),
+              ],
+            ),
+          ] else ...[
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: CircleAvatar(
+                child: Text(
+                  (profile?.fullName.trim().isNotEmpty ?? false)
+                      ? profile!.fullName.trim()[0].toUpperCase()
+                      : '?',
+                ),
+              ),
+              title: Text(
+                profile?.fullName.trim().isNotEmpty == true
+                    ? profile!.fullName
+                    : 'Utilisateur',
+                style: const TextStyle(fontWeight: FontWeight.w700),
+              ),
+              subtitle: Text(profile?.phone ?? '—'),
+              trailing: IconButton(
+                tooltip: 'Modifier le nom',
+                onPressed: () => setState(() => _editing = true),
+                icon: const Icon(Icons.edit_outlined),
+              ),
+            ),
+          ],
+          const Divider(height: 28),
+          Text(
+            'Établissement en cours',
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+              color: const Color(0xFF7B819B),
+            ),
+          ),
+          const SizedBox(height: 8),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const CircleAvatar(
+              child: Icon(Icons.storefront_outlined),
+            ),
+            title: Text(establishment?.name ?? '—'),
+            subtitle: Text(
+              role?.label ?? 'Rôle non défini',
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
       ),
     );
   }

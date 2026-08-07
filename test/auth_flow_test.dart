@@ -111,7 +111,7 @@ void main() {
   });
 
   testWidgets(
-    'login : landing avec établissements si un établissement existe',
+    'login : reprise directe de l’activité si un établissement actif existe',
     (tester) async {
       authRepository.setUser(user);
       establishmentRepository.setProfile(verifiedProfileWithEstablishment());
@@ -123,10 +123,9 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Mes établissements'), findsOneWidget);
-      expect(find.text('Garage Test'), findsOneWidget);
+      expect(find.text('Prestations'), findsWidgets);
       expect(find.text('Phone verification'), findsNothing);
-      expect(find.text('Prestations'), findsNothing);
+      expect(find.text('Mes établissements'), findsNothing);
     },
   );
 

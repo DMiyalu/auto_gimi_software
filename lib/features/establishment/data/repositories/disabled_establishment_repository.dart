@@ -85,4 +85,10 @@ class DisabledEstablishmentRepository implements EstablishmentRepository {
     required String uid,
     required String establishmentId,
   }) async => _disabled();
+
+  @override
+  Future<void> updateUserFullName({
+    required String uid,
+    required String fullName,
+  }) async => _disabled();
 }

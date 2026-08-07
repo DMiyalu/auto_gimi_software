@@ -15,7 +15,26 @@ class RestaurantReportsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final hasSystemTopInset = MediaQuery.paddingOf(context).top > 0;
+
     return PrimaryScaffold(
+      header: Padding(
+        padding: EdgeInsets.fromLTRB(
+          18,
+          hasSystemTopInset ? 22 : 8,
+          18,
+          8,
+        ),
+        child: const Text(
+          'Rapports',
+          style: TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.w800,
+            color: ReportColors.textPrimary,
+            height: 1.15,
+          ),
+        ),
+      ),
       body: ColoredBox(
         color: ReportColors.pageBackground,
         child: ListView(
@@ -25,32 +44,14 @@ class RestaurantReportsScreen extends ConsumerWidget {
             AppSpacing.sm,
             120,
           ),
-          children: [
-            const Text(
-              'Rapports',
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.w800,
-                color: ReportColors.textPrimary,
-                height: 1.15,
-              ),
-            ),
-            const SizedBox(height: 4),
-            const Text(
-              'Aperçu de votre activité',
-              style: TextStyle(
-                fontSize: 14,
-                color: ReportColors.textMuted,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            const ReportDateRangeSelector(),
-            const SizedBox(height: AppSpacing.sm),
-            const RestaurantReportKpiGrid(),
-            const SizedBox(height: AppSpacing.sm),
-            const RevenueEvolutionChart(),
-            const SizedBox(height: AppSpacing.sm),
-            const ProductSalesBreakdownCard(),
+          children: const [
+            ReportDateRangeSelector(),
+            SizedBox(height: AppSpacing.sm),
+            RestaurantReportKpiGrid(),
+            SizedBox(height: AppSpacing.sm),
+            RevenueEvolutionChart(),
+            SizedBox(height: AppSpacing.sm),
+            ProductSalesBreakdownCard(),
           ],
         ),
       ),

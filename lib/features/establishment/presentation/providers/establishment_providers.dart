@@ -219,4 +219,16 @@ class EstablishmentController extends AsyncNotifier<void> {
           .refuseInvitation(uid: user.uid, invitation: invitation);
     });
   }
+
+  Future<void> updateUserFullName(String fullName) async {
+    final user = ref.read(authStateProvider).valueOrNull;
+    if (user == null) return;
+
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      await ref
+          .read(establishmentRepositoryProvider)
+          .updateUserFullName(uid: user.uid, fullName: fullName);
+    });
+  }
 }

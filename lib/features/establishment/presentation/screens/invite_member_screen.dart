@@ -36,13 +36,9 @@ class _InviteMemberScreenState extends ConsumerState<InviteMemberScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return MemberManagementPermissionGate(builder: _buildForm);
-  }
-
-  Widget _buildForm(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
+    // watch/listen doivent rester dans build() de ce Consumer —
+    // pas dans le builder du gate (sinon assert Riverpod debugDoingBuild).
     final state = ref.watch(establishmentControllerProvider);
-
     ref.listen(establishmentControllerProvider, (_, next) {
       if (next.hasError && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -50,6 +46,14 @@ class _InviteMemberScreenState extends ConsumerState<InviteMemberScreen> {
         );
       }
     });
+
+    return MemberManagementPermissionGate(
+      builder: (context) => _buildForm(context, state),
+    );
+  }
+
+  Widget _buildForm(BuildContext context, AsyncValue<void> state) {
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Inviter un membre')),

@@ -176,9 +176,9 @@ void main() {
 
       await _pump(tester, database);
 
-      // 1. Écran restaurant (pas le stub garage).
+      // 1. Écran restaurant (pas le stub garage) — titre header, sans sous-titre.
       expect(find.text('Rapports'), findsWidgets);
-      expect(find.text('Aperçu de votre activité'), findsOneWidget);
+      expect(find.text('Aperçu de votre activité'), findsNothing);
       expect(find.byType(RestaurantReportKpiGrid), findsOneWidget);
       expect(find.byType(RevenueEvolutionChart), findsOneWidget);
       expect(find.byType(ProductSalesBreakdownCard), findsOneWidget);

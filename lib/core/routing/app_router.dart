@@ -48,7 +48,7 @@ final routerProvider = Provider<GoRouter>((ref) {
   ref.listen(signupOtpPendingProvider, (_, __) => refresh.value++);
 
   return GoRouter(
-    initialLocation: Routes.establishmentOnboarding,
+    initialLocation: Routes.dashboard,
     refreshListenable: refresh,
     redirect: (context, state) {
       final auth = ref.read(authStateProvider);
@@ -93,13 +93,15 @@ final routerProvider = Provider<GoRouter>((ref) {
       final hasActiveEstablishment =
           (loadedProfile?.activeEstablishmentId ?? '').isNotEmpty;
 
-      // Post-auth : hub landing (établissements + invitations).
-      if (onAuthScreen) return Routes.establishmentOnboarding;
-
-      // Activité métier : besoin d'au moins un établissement + un actif.
-      if (!onHub && (!hasEstablishment || !hasActiveEstablishment)) {
-        return Routes.establishmentOnboarding;
+      // Session déjà configurée : reprise directe sur le dernier établissement.
+      if (hasEstablishment && hasActiveEstablishment) {
+        if (onAuthScreen || onLanding) return Routes.dashboard;
+        return null;
       }
+
+      // Première connexion / pas d'actif : landing (créer, invitations, choisir).
+      if (onAuthScreen) return Routes.establishmentOnboarding;
+      if (!onHub) return Routes.establishmentOnboarding;
 
       return null;
     },

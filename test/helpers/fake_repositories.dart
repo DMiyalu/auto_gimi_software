@@ -357,4 +357,27 @@ class FakeEstablishmentRepository implements EstablishmentRepository {
     );
     _profileController.add(profile);
   }
+
+  @override
+  Future<void> updateUserFullName({
+    required String uid,
+    required String fullName,
+  }) async {
+    final current = profile;
+    if (current == null) return;
+    setProfile(
+      UserProfile(
+        uid: current.uid,
+        phone: current.phone,
+        fullName: fullName.trim(),
+        establishmentId: current.establishmentId,
+        role: current.role,
+        phoneVerified: current.phoneVerified,
+        createdAt: current.createdAt,
+        establishmentIds: current.establishmentIds,
+        activeEstablishmentId: current.activeEstablishmentId,
+        rolesByEstablishment: current.rolesByEstablishment,
+      ),
+    );
+  }
 }

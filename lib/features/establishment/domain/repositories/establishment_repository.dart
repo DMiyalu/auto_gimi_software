@@ -66,4 +66,9 @@ abstract class EstablishmentRepository {
     required String uid,
     required String establishmentId,
   });
+
+  Future<void> updateUserFullName({
+    required String uid,
+    required String fullName,
+  });
 }

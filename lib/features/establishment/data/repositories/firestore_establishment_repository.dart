@@ -395,6 +395,21 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
     });
   }
 
+  @override
+  Future<void> updateUserFullName({
+    required String uid,
+    required String fullName,
+  }) async {
+    final trimmed = fullName.trim();
+    if (trimmed.isEmpty) {
+      throw ArgumentError('Le nom ne peut pas être vide.');
+    }
+    await _users.doc(uid).update({
+      'fullName': trimmed,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
   Future<EstablishmentMember?> _readTeamOrMember({
     required String establishmentId,
     required String uid,
