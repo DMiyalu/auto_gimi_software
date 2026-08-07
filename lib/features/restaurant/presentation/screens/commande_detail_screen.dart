@@ -131,9 +131,8 @@ class _CommandeDetailScreenState extends ConsumerState<CommandeDetailScreen> {
                             totalLineCount: lines.length,
                             isCanceled: isCanceled,
                             isLoading: state.isLoading,
-                            onAddProduct: isCanceled
-                                ? null
-                                : () => _showAddProductSheet(context),
+                            onAddProduct: () =>
+                                _onAddProductPressed(context, item),
                             onIncrement: (line) => ref
                                 .read(commandeControllerProvider.notifier)
                                 .addProduitLine(
@@ -189,6 +188,26 @@ class _CommandeDetailScreenState extends ConsumerState<CommandeDetailScreen> {
         body: Center(child: Text(error.toString())),
       ),
     );
+  }
+
+  void _onAddProductPressed(BuildContext context, CommandeEntity commande) {
+    if (commande.isEditable) {
+      _showAddProductSheet(context);
+      return;
+    }
+
+    final message = switch (commande.statusKey) {
+      CommandeStatus.cloturee =>
+        'Cette commande est déjà clôturée et payée.',
+      CommandeStatus.annulees => 'Cette commande est déjà annulée.',
+      CommandeStatus.aPayer =>
+        'Cette commande est à payer et ne peut plus être modifiée.',
+      _ => 'Cette commande ne peut plus être modifiée.',
+    };
+
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
   }
 
   void _showAddProductSheet(BuildContext context) {
@@ -541,7 +560,7 @@ class _ProductsTab extends StatelessWidget {
   final int totalLineCount;
   final bool isCanceled;
   final bool isLoading;
-  final VoidCallback? onAddProduct;
+  final VoidCallback onAddProduct;
   final ValueChanged<LigneCommandeEntity> onIncrement;
   final ValueChanged<LigneCommandeEntity> onDecrement;
   final ValueChanged<LigneCommandeEntity> onRemove;

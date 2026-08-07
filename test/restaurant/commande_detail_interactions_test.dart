@@ -267,4 +267,53 @@ void main() {
       await _disposeTree(tester);
     },
   );
+
+  testWidgets(
+    'Ajouter un produit sur commande clôturée notifie sans ouvrir le sheet',
+    (tester) async {
+      final fixture = await _seed();
+      addTearDown(fixture.database.close);
+      await CommandeRepositoryImpl(database: fixture.database).registerPayment(
+        establishmentId: 'etab-1',
+        commandeId: fixture.commandeId,
+      );
+
+      await _pump(tester, fixture);
+
+      await tester.tap(find.text('Ajouter un produit'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(
+        find.text('Cette commande est déjà clôturée et payée.'),
+        findsOneWidget,
+      );
+      expect(find.text('Sélectionnez un produit à ajouter'), findsNothing);
+
+      await _disposeTree(tester);
+    },
+  );
+
+  testWidgets(
+    'Ajouter un produit sur commande annulée notifie sans ouvrir le sheet',
+    (tester) async {
+      final fixture = await _seed();
+      addTearDown(fixture.database.close);
+      await CommandeRepositoryImpl(database: fixture.database).cancelCommande(
+        establishmentId: 'etab-1',
+        commandeId: fixture.commandeId,
+      );
+
+      await _pump(tester, fixture);
+
+      await tester.tap(find.text('Ajouter un produit'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(find.text('Cette commande est déjà annulée.'), findsOneWidget);
+      expect(find.text('Sélectionnez un produit à ajouter'), findsNothing);
+
+      await _disposeTree(tester);
+    },
+  );
 }
