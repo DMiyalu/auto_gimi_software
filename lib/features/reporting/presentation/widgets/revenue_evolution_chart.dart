@@ -48,7 +48,7 @@ class RevenueEvolutionChart extends ConsumerWidget {
             height: 220,
             child: evolutionAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (_, __) => const Center(
+              error: (_, _) => const Center(
                 child: Text(
                   'Impossible de charger le graphique.',
                   style: TextStyle(color: ReportColors.textMuted),

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../shell/presentation/widgets/primary_scaffold.dart';
 import '../theme/report_colors.dart';
+import '../widgets/product_sales_breakdown_card.dart';
 import '../widgets/report_date_range_selector.dart';
 import '../widgets/restaurant_report_kpi_grid.dart';
 import '../widgets/revenue_evolution_chart.dart';
@@ -48,7 +49,8 @@ class RestaurantReportsScreen extends ConsumerWidget {
             const RestaurantReportKpiGrid(),
             const SizedBox(height: AppSpacing.sm),
             const RevenueEvolutionChart(),
-            // Étape suivante : répartition ventes par catégorie.
+            const SizedBox(height: AppSpacing.sm),
+            const ProductSalesBreakdownCard(),
           ],
         ),
       ),
