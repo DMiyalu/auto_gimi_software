@@ -1,19 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/domain/business_category.dart';
 import '../../../../core/l10n/app_localizations.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/currency_formatter.dart';
+import '../../../primary_module/controllers/primary_module_providers.dart';
 import '../../../shell/presentation/widgets/primary_scaffold.dart';
+import 'restaurant_reports_screen.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final category = ref.watch(activeBusinessCategoryProvider);
+    if (category == BusinessCategory.restaurant) {
+      return const RestaurantReportsScreen();
+    }
+
     final l10n = AppLocalizations.of(context);
 
-    // TODO: brancher sur reporting repository (stats du jour).
+    // Stub multi-métier (hors restaurant) — stats jour à brancher plus tard.
     const prestationsCount = 0;
     const revenue = 0.0;
 
