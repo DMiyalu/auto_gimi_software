@@ -43,18 +43,9 @@ class ClientsListScreen extends ConsumerWidget {
 
           return Column(
             children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.sm,
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const Expanded(child: ClientSearchBar()),
-                    const SizedBox(width: AppSpacing.xs),
-                    const _FiltersButton(),
-                  ],
-                ),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                child: ClientSearchBar(),
               ),
               const SizedBox(height: AppSpacing.sm),
               const ClientFilters(),
@@ -64,31 +55,6 @@ class ClientsListScreen extends ConsumerWidget {
           );
         },
       ),
-    );
-  }
-}
-
-class _FiltersButton extends StatelessWidget {
-  const _FiltersButton();
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-
-    return OutlinedButton.icon(
-      style: OutlinedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.sm,
-          vertical: 16,
-        ),
-      ),
-      onPressed: () {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(l10n.comingSoon)));
-      },
-      icon: const Icon(Icons.tune, size: 18),
-      label: Text(l10n.filters),
     );
   }
 }

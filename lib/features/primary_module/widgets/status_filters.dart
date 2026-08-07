@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/domain/business_category.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_spacing.dart';
 import '../controllers/primary_module_providers.dart';
 
 /// Liste horizontale scrollable de filtres rapides — les options viennent
-/// entièrement de la configuration métier active.
+/// entièrement de la configuration métier active. Même chip, mêmes couleurs
+/// sur tous les écrans de l'app (Clients, Produits inclus).
 class StatusFilters extends ConsumerWidget {
   const StatusFilters({super.key});
 
@@ -16,16 +15,14 @@ class StatusFilters extends ConsumerWidget {
     final config = ref.watch(primaryModuleConfigProvider);
     final items = ref.watch(activityListProvider);
     final selected = ref.watch(moduleSelectedFilterProvider);
-    final isRestaurant = config.category == BusinessCategory.restaurant;
 
     return SizedBox(
-      height: isRestaurant ? 48 : 40,
+      height: 48,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: EdgeInsets.symmetric(horizontal: isRestaurant ? 18 : 16),
+        padding: const EdgeInsets.symmetric(horizontal: 18),
         itemCount: config.statusFilters.length,
-        separatorBuilder: (_, _) =>
-            SizedBox(width: isRestaurant ? 8 : AppSpacing.xs),
+        separatorBuilder: (_, _) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
           final option = config.statusFilters[index];
           final isSelected = option.key == selected;
@@ -40,71 +37,41 @@ class StatusFilters extends ConsumerWidget {
             _ => config.primaryColor,
           };
 
-          if (isRestaurant) {
-            return FilterChip(
-              selected: isSelected,
-              showCheckmark: false,
-              onSelected: (_) =>
-                  ref.read(moduleSelectedFilterProvider.notifier).state =
-                      option.key,
-              labelPadding: const EdgeInsets.symmetric(horizontal: 6),
-              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 12),
-              backgroundColor: const Color(0xFFF4F5F9),
-              selectedColor: config.primaryColor,
-              shape: const StadiumBorder(side: BorderSide.none),
-              label: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    option.label,
-                    style: TextStyle(
-                      color: isSelected
-                          ? Colors.white
-                          : const Color(0xFF101529),
-                      fontSize: 15,
-                      fontWeight: isSelected
-                          ? FontWeight.w800
-                          : FontWeight.w600,
-                    ),
-                  ),
-                  if (hasItems && option.key != 'all') ...[
-                    const SizedBox(width: 8),
-                    Container(
-                      width: 7,
-                      height: 7,
-                      decoration: BoxDecoration(
-                        color: dotColor,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            );
-          }
-
-          return ChoiceChip(
+          return FilterChip(
+            selected: isSelected,
+            showCheckmark: false,
+            onSelected: (_) =>
+                ref.read(moduleSelectedFilterProvider.notifier).state =
+                    option.key,
+            labelPadding: const EdgeInsets.symmetric(horizontal: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 12),
+            backgroundColor: AppColors.chipBackground,
+            selectedColor: config.primaryColor,
+            shape: const StadiumBorder(side: BorderSide.none),
             label: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(option.label),
+                Text(
+                  option.label,
+                  style: TextStyle(
+                    color: isSelected ? Colors.white : AppColors.textPrimary,
+                    fontSize: 15,
+                    fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                  ),
+                ),
                 if (hasItems && option.key != 'all') ...[
-                  const SizedBox(width: 6),
+                  const SizedBox(width: 8),
                   Container(
-                    width: 6,
-                    height: 6,
+                    width: 7,
+                    height: 7,
                     decoration: BoxDecoration(
-                      color: isSelected ? Colors.white : config.primaryColor,
+                      color: dotColor,
                       shape: BoxShape.circle,
                     ),
                   ),
                 ],
               ],
             ),
-            selected: isSelected,
-            onSelected: (_) =>
-                ref.read(moduleSelectedFilterProvider.notifier).state =
-                    option.key,
           );
         },
       ),

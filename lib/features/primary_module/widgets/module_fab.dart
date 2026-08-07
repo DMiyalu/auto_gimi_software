@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/domain/business_category.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../config/business_module_config.dart';
@@ -12,7 +11,7 @@ import '../controllers/primary_module_providers.dart';
 /// composant (forme, radius, feuille d'actions) pour tous les écrans, seules
 /// les actions proposées changent. Sans override, les actions viennent de la
 /// configuration métier active (écran principal) ; un écran commun comme
-/// Clients peut fournir sa propre liste d'actions.
+/// Clients ou Produits peut fournir sa propre liste d'actions.
 class ModuleFab extends ConsumerWidget {
   const ModuleFab({super.key, this.actions, this.color});
 
@@ -24,28 +23,21 @@ class ModuleFab extends ConsumerWidget {
     final config = ref.watch(primaryModuleConfigProvider);
     final resolvedColor = color ?? config.primaryColor;
     final resolvedActions = actions ?? config.fabActions;
-    final isRestaurant = config.category == BusinessCategory.restaurant;
 
     return SizedBox(
-      width: isRestaurant ? 74 : null,
-      height: isRestaurant ? 74 : null,
+      width: 74,
+      height: 74,
       child: FloatingActionButton(
         backgroundColor: resolvedColor,
-        elevation: isRestaurant ? 12 : null,
-        highlightElevation: isRestaurant ? 14 : null,
+        elevation: 12,
+        highlightElevation: 14,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(
-            isRestaurant ? AppRadius.chip : AppRadius.button,
-          ),
+          borderRadius: BorderRadius.circular(AppRadius.chip),
         ),
         mini: false,
         onPressed: () =>
             _openActionsSheet(context, resolvedActions, resolvedColor),
-        child: Icon(
-          Icons.add_rounded,
-          color: Colors.white,
-          size: isRestaurant ? 42 : 28,
-        ),
+        child: const Icon(Icons.add_rounded, color: Colors.white, size: 42),
       ),
     );
   }
