@@ -94,15 +94,24 @@ final establishmentMembersProvider = StreamProvider<List<EstablishmentMember>>((
       .watchEstablishmentMembers(establishmentId);
 });
 
+/// Claim des pending par téléphone puis écoute de l'inbox utilisateur.
 final pendingInvitationsProvider =
-    StreamProvider<List<EstablishmentInvitation>>((ref) {
+    StreamProvider<List<EstablishmentInvitation>>((ref) async* {
+      final user = ref.watch(authStateProvider).valueOrNull;
       final profile = ref.watch(userProfileProvider).valueOrNull;
-      if (profile == null || profile.phone.isEmpty) {
-        return Stream.value(const []);
+      if (user == null || profile == null || profile.phone.isEmpty) {
+        yield const [];
+        return;
       }
-      return ref
-          .watch(establishmentRepositoryProvider)
-          .watchPendingInvitationsForPhone(profile.phone);
+
+      final repo = ref.watch(establishmentRepositoryProvider);
+      try {
+        await repo.claimPendingInvitations(uid: user.uid, phone: profile.phone);
+      } catch (_) {
+        // L'inbox reste consultable même si le claim échoue (réseau / rules).
+      }
+
+      yield* repo.watchPendingInvitations(user.uid);
     });
 
 final establishmentControllerProvider =
@@ -196,6 +205,18 @@ class EstablishmentController extends AsyncNotifier<void> {
             phone: profile.phone,
             invitation: invitation,
           );
+    });
+  }
+
+  Future<void> refuseInvitation(EstablishmentInvitation invitation) async {
+    final user = ref.read(authStateProvider).valueOrNull;
+    if (user == null) return;
+
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      await ref
+          .read(establishmentRepositoryProvider)
+          .refuseInvitation(uid: user.uid, invitation: invitation);
     });
   }
 }

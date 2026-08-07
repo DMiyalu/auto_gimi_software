@@ -29,6 +29,9 @@ class InvitationsScreen extends ConsumerWidget {
                 onAccept: () => ref
                     .read(establishmentControllerProvider.notifier)
                     .acceptInvitation(items[index]),
+                onRefuse: () => ref
+                    .read(establishmentControllerProvider.notifier)
+                    .refuseInvitation(items[index]),
               );
             },
           );
@@ -45,11 +48,13 @@ class _InvitationTile extends StatelessWidget {
     required this.invitation,
     required this.loading,
     required this.onAccept,
+    required this.onRefuse,
   });
 
   final EstablishmentInvitation invitation;
   final bool loading;
   final VoidCallback onAccept;
+  final VoidCallback onRefuse;
 
   @override
   Widget build(BuildContext context) {
@@ -61,9 +66,18 @@ class _InvitationTile extends StatelessWidget {
       leading: const CircleAvatar(child: Icon(Icons.mail_outline)),
       title: Text(invitation.establishmentName),
       subtitle: Text('$invitedBy vous invite comme ${invitation.role.label}'),
-      trailing: FilledButton(
-        onPressed: loading ? null : onAccept,
-        child: const Text('Accepter'),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextButton(
+            onPressed: loading ? null : onRefuse,
+            child: const Text('Refuser'),
+          ),
+          FilledButton(
+            onPressed: loading ? null : onAccept,
+            child: const Text('Accepter'),
+          ),
+        ],
       ),
     );
   }

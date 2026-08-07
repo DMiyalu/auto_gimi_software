@@ -10,16 +10,14 @@ service cloud.firestore {
       return get(/databases/$(database)/documents/users/$(request.auth.uid));
     }
 
-    function userEstablishmentId() {
-      return userDoc().data.establishmentId;
-    }
-
     function userPhone() {
       return userDoc().data.phone;
     }
 
     function userEstablishmentIds() {
-      return userDoc().data.establishmentIds;
+      return userDoc().data.keys().hasAny(['establishments'])
+        ? userDoc().data.establishments
+        : userDoc().data.establishmentIds;
     }
 
     function hasLegacyEstablishment(establishmentId) {
@@ -27,23 +25,41 @@ service cloud.firestore {
     }
 
     function hasMultiEstablishment(establishmentId) {
-      return userDoc().data.establishmentIds is list
+      return userEstablishmentIds() is list
         && establishmentId in userEstablishmentIds();
+    }
+
+    function teamExists(establishmentId) {
+      return exists(
+        /databases/$(database)/documents/establishments/$(establishmentId)/team/$(request.auth.uid)
+      );
+    }
+
+    function memberExists(establishmentId) {
+      return exists(
+        /databases/$(database)/documents/establishments/$(establishmentId)/members/$(request.auth.uid)
+      );
     }
 
     function isEstablishmentMember(establishmentId) {
       return isSignedIn()
         && (hasLegacyEstablishment(establishmentId)
           || hasMultiEstablishment(establishmentId))
-        && exists(
-          /databases/$(database)/documents/establishments/$(establishmentId)/members/$(request.auth.uid)
-        );
+        && (teamExists(establishmentId) || memberExists(establishmentId));
+    }
+
+    function teamRole(establishmentId) {
+      return get(
+        /databases/$(database)/documents/establishments/$(establishmentId)/team/$(request.auth.uid)
+      ).data.roleId;
     }
 
     function memberRole(establishmentId) {
-      return get(
-        /databases/$(database)/documents/establishments/$(establishmentId)/members/$(request.auth.uid)
-      ).data.role;
+      return teamExists(establishmentId)
+        ? teamRole(establishmentId)
+        : get(
+            /databases/$(database)/documents/establishments/$(establishmentId)/members/$(request.auth.uid)
+          ).data.role;
     }
 
     function hasEstablishmentRole(establishmentId, roles) {
@@ -55,13 +71,13 @@ service cloud.firestore {
       return hasEstablishmentRole(establishmentId, ['owner', 'manager']);
     }
 
-    // --- Inscription SaaS : tout utilisateur authentifié peut créer son tenant ---
     function isValidUserSignup() {
       return isSignedIn()
         && request.resource.data.phoneVerified == false
         && request.resource.data.fullName is string
         && request.resource.data.phone is string
-        && request.resource.data.establishmentIds is list
+        && (request.resource.data.establishments is list
+          || request.resource.data.establishmentIds is list)
         && request.resource.data.rolesByEstablishment is map
         && request.resource.data.role is string;
     }
@@ -76,6 +92,14 @@ service cloud.firestore {
         && request.resource.data.phone is string;
     }
 
+    function isValidTeamOwnerCreate(memberId) {
+      return isSignedIn()
+        && request.auth.uid == memberId
+        && request.resource.data.userId == memberId
+        && request.resource.data.roleId == 'owner'
+        && request.resource.data.phoneVerified == false;
+    }
+
     function isValidMemberSignup(memberId) {
       return isSignedIn()
         && request.auth.uid == memberId
@@ -85,17 +109,26 @@ service cloud.firestore {
         && request.resource.data.phoneVerified == false;
     }
 
-    function invitationDoc(establishmentId, invitationId) {
+    function userInvitationDoc(invitationId) {
       return get(
-        /databases/$(database)/documents/establishments/$(establishmentId)/invitations/$(invitationId)
+        /databases/$(database)/documents/users/$(request.auth.uid)/invitations/$(invitationId)
       );
     }
 
+    function isValidInvitedTeamCreate(establishmentId, memberId) {
+      let invitation = userInvitationDoc(request.resource.data.sourceInvitationId);
+      return isSignedIn()
+        && request.auth.uid == memberId
+        && request.resource.data.userId == memberId
+        && request.resource.data.roleId in ['manager', 'agent']
+        && invitation.data.status == 'pending'
+        && invitation.data.invitedPhone == userPhone()
+        && (invitation.data.roleId == request.resource.data.roleId
+          || invitation.data.role == request.resource.data.roleId);
+    }
+
     function isValidInvitedMemberCreate(establishmentId, memberId) {
-      let invitation = invitationDoc(
-        establishmentId,
-        request.resource.data.sourceInvitationId
-      );
+      let invitation = userInvitationDoc(request.resource.data.sourceInvitationId);
       return isSignedIn()
         && request.auth.uid == memberId
         && request.resource.data.uid == memberId
@@ -104,36 +137,58 @@ service cloud.firestore {
         && request.resource.data.role in ['manager', 'agent']
         && invitation.data.status == 'pending'
         && invitation.data.invitedPhone == userPhone()
-        && invitation.data.role == request.resource.data.role;
-    }
-
-    function isValidInvitationCreate(establishmentId) {
-      return canManageEstablishment(establishmentId)
-        && request.resource.data.establishmentId == establishmentId
-        && request.resource.data.invitedPhone is string
-        && request.resource.data.role in ['manager', 'agent']
-        && request.resource.data.status == 'pending'
-        && request.resource.data.invitedBy == request.auth.uid;
-    }
-
-    function isInvitationForCurrentUser() {
-      return isSignedIn() && resource.data.invitedPhone == userPhone();
-    }
-
-    function isValidInvitationAccept() {
-      return isInvitationForCurrentUser()
-        && resource.data.status == 'pending'
-        && request.resource.data.status == 'accepted'
-        && request.resource.data.acceptedBy == request.auth.uid
-        && request.resource.data.invitedPhone == resource.data.invitedPhone
-        && request.resource.data.role == resource.data.role
-        && request.resource.data.establishmentId == resource.data.establishmentId;
+        && (invitation.data.roleId == request.resource.data.role
+          || invitation.data.role == request.resource.data.role);
     }
 
     match /users/{userId} {
       allow read: if isSignedIn() && request.auth.uid == userId;
       allow create: if request.auth.uid == userId && isValidUserSignup();
       allow update: if isSignedIn() && request.auth.uid == userId;
+
+      match /invitations/{invitationId} {
+        allow read: if isSignedIn() && request.auth.uid == userId;
+        // Manager invite un user déjà inscrit (écrit dans l'inbox du destinataire)
+        allow create: if isSignedIn()
+          && request.resource.data.invitedBy == request.auth.uid
+          && request.resource.data.status == 'pending'
+          && request.resource.data.roleId in ['manager', 'agent']
+          && canManageEstablishment(request.resource.data.establishmentId);
+        // Claim : le destinataire copie une pendingInvitation dans son inbox
+        allow create: if isSignedIn()
+          && request.auth.uid == userId
+          && request.resource.data.invitedPhone == userPhone()
+          && request.resource.data.status == 'pending'
+          && request.resource.data.roleId in ['manager', 'agent'];
+        // Accept / refuse par le destinataire
+        allow update: if isSignedIn()
+          && request.auth.uid == userId
+          && resource.data.status == 'pending'
+          && request.resource.data.status in ['accepted', 'revoked']
+          && request.resource.data.establishmentId == resource.data.establishmentId;
+      }
+    }
+
+    match /phoneIndex/{phone} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn()
+        && request.resource.data.uid == request.auth.uid;
+    }
+
+    match /pendingInvitations/{invitationId} {
+      allow read: if isSignedIn()
+        && resource.data.invitedPhone == userPhone();
+      allow create: if isSignedIn()
+        && request.resource.data.invitedBy == request.auth.uid
+        && request.resource.data.status == 'pending'
+        && request.resource.data.roleId in ['manager', 'agent']
+        && canManageEstablishment(request.resource.data.establishmentId);
+      // Claim : destinataire marque claimed après copie inbox
+      allow update: if isSignedIn()
+        && resource.data.invitedPhone == userPhone()
+        && resource.data.status == 'pending'
+        && request.resource.data.status == 'claimed'
+        && request.resource.data.claimedBy == request.auth.uid;
     }
 
     match /phone_verifications/{userId} {
@@ -141,12 +196,20 @@ service cloud.firestore {
     }
 
     match /establishments/{establishmentId} {
-      // Lecture : propriétaire juste après inscription (profil pas encore lu)
       allow read: if isSignedIn() && resource.data.ownerId == request.auth.uid;
       allow read: if isEstablishmentMember(establishmentId);
       allow create: if isValidEstablishmentSignup();
       allow update: if canManageEstablishment(establishmentId);
 
+      match /team/{memberId} {
+        allow read: if isEstablishmentMember(establishmentId);
+        allow read: if isSignedIn() && request.auth.uid == memberId;
+        allow create: if isValidTeamOwnerCreate(memberId)
+          || isValidInvitedTeamCreate(establishmentId, memberId);
+        allow update, delete: if canManageEstablishment(establishmentId);
+      }
+
+      // Legacy — lecture/écriture pendant migration douce
       match /members/{memberId} {
         allow read: if isEstablishmentMember(establishmentId);
         allow read: if isSignedIn() && request.auth.uid == memberId;
@@ -157,21 +220,20 @@ service cloud.firestore {
 
       match /invitations/{invitationId} {
         allow read: if canManageEstablishment(establishmentId);
-        allow read: if isInvitationForCurrentUser();
-        allow create: if isValidInvitationCreate(establishmentId);
-        allow update: if canManageEstablishment(establishmentId)
-          || isValidInvitationAccept();
+        allow read: if isSignedIn() && resource.data.invitedPhone == userPhone();
+        allow create: if canManageEstablishment(establishmentId);
+        allow update: if canManageEstablishment(establishmentId);
         allow delete: if canManageEstablishment(establishmentId);
       }
 
-      // Données métier — isolation stricte par établissement (tenant SaaS)
       match /{collection}/{docId} {
         allow read, write: if isEstablishmentMember(establishmentId)
           && collection in [
             'clients', 'vehicules', 'categories', 'services',
             'product_categories', 'produits',
             'prestations', 'ventes', 'jetons',
-            'alertes', 'notifications'
+            'alertes', 'notifications',
+            'commandes', 'ligne_commandes', 'factures', 'paiements'
           ];
       }
     }

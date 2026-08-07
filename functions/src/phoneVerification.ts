@@ -125,6 +125,10 @@ export async function verifyPhoneCode(params: {
   }
 
   const establishmentId = userSnapshot.get("establishmentId") as string | undefined;
+  const establishments =
+    (userSnapshot.get("establishments") as string[] | undefined) ??
+    (userSnapshot.get("establishmentIds") as string[] | undefined) ??
+    [];
   const batch = params.db.batch();
 
   batch.update(userRef, {
@@ -133,18 +137,43 @@ export async function verifyPhoneCode(params: {
     updatedAt: FieldValue.serverTimestamp(),
   });
 
-  if (establishmentId) {
-    const establishmentRef = params.db.collection("establishments").doc(establishmentId);
+  // Index téléphone → uid pour résoudre les invitations.
+  const digitsPhone = phone.replace(/\D/g, "");
+  batch.set(
+    params.db.collection("phoneIndex").doc(digitsPhone),
+    {
+      uid: params.uid,
+      updatedAt: FieldValue.serverTimestamp(),
+    },
+    { merge: true },
+  );
+
+  const targetEstablishmentIds = new Set<string>(
+    [...establishments, establishmentId].filter(
+      (id): id is string => typeof id === "string" && id.length > 0,
+    ),
+  );
+
+  for (const id of targetEstablishmentIds) {
+    const establishmentRef = params.db.collection("establishments").doc(id);
     batch.update(establishmentRef, {
       phoneVerified: true,
       phone,
       updatedAt: FieldValue.serverTimestamp(),
     });
-    batch.update(establishmentRef.collection("members").doc(params.uid), {
+    const teamPayload = {
       phoneVerified: true,
       phone,
       updatedAt: FieldValue.serverTimestamp(),
+    };
+    batch.set(establishmentRef.collection("team").doc(params.uid), teamPayload, {
+      merge: true,
     });
+    batch.set(
+      establishmentRef.collection("members").doc(params.uid),
+      teamPayload,
+      { merge: true },
+    );
   }
 
   batch.delete(verificationRef);

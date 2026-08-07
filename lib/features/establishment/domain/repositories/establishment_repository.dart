@@ -32,9 +32,14 @@ abstract class EstablishmentRepository {
     String establishmentId,
   );
 
-  Stream<List<EstablishmentInvitation>> watchPendingInvitationsForPhone(
-    String phone,
-  );
+  /// Invitations pending dans l'inbox `users/{uid}/invitations`.
+  Stream<List<EstablishmentInvitation>> watchPendingInvitations(String uid);
+
+  /// Copie `pendingInvitations` (par téléphone) vers l'inbox utilisateur.
+  Future<void> claimPendingInvitations({
+    required String uid,
+    required String phone,
+  });
 
   Future<void> createInvitation({
     required String establishmentId,
@@ -49,6 +54,11 @@ abstract class EstablishmentRepository {
     required String uid,
     required String fullName,
     required String phone,
+    required EstablishmentInvitation invitation,
+  });
+
+  Future<void> refuseInvitation({
+    required String uid,
     required EstablishmentInvitation invitation,
   });
 

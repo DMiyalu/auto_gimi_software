@@ -6,15 +6,18 @@ import '../../../../core/auth/auth_error_mapper.dart';
 import '../../../../core/routing/routes.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
+import '../../domain/models/establishment.dart';
 import '../../domain/models/establishment_invitation.dart';
 import '../providers/establishment_providers.dart';
 
+/// Landing post-auth : établissements accessibles + invitations en attente.
 class EstablishmentOnboardingScreen extends ConsumerWidget {
   const EstablishmentOnboardingScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final invitations = ref.watch(pendingInvitationsProvider);
+    final establishments = ref.watch(userEstablishmentsProvider);
     final profile = ref.watch(userProfileProvider).valueOrNull;
     final controllerState = ref.watch(establishmentControllerProvider);
 
@@ -52,6 +55,36 @@ class EstablishmentOnboardingScreen extends ConsumerWidget {
                     children: [
                       _LandingIntro(fullName: profile?.fullName),
                       const SizedBox(height: AppSpacing.lg),
+                      establishments.when(
+                        data: (items) => _EstablishmentsSection(
+                          establishments: items,
+                          loading: controllerState.isLoading,
+                          onOpen: (establishment) async {
+                            await ref
+                                .read(establishmentControllerProvider.notifier)
+                                .switchEstablishment(establishment.id);
+                            if (!context.mounted) return;
+                            final state = ref.read(
+                              establishmentControllerProvider,
+                            );
+                            if (!state.hasError) {
+                              context.go(Routes.dashboard);
+                            }
+                          },
+                        ),
+                        loading: () => const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(AppSpacing.md),
+                            child: CircularProgressIndicator(),
+                          ),
+                        ),
+                        error: (error, _) => _InfoRow(
+                          icon: Icons.error_outline,
+                          title: 'Établissements indisponibles',
+                          subtitle: AuthErrorMapper.message(error),
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
                       invitations.when(
                         data: (items) => _InvitationSection(
                           invitations: items,
@@ -60,11 +93,11 @@ class EstablishmentOnboardingScreen extends ConsumerWidget {
                             await ref
                                 .read(establishmentControllerProvider.notifier)
                                 .acceptInvitation(invitation);
-                            if (!context.mounted) return;
-                            final state = ref.read(
-                              establishmentControllerProvider,
-                            );
-                            if (!state.hasError) context.go(Routes.dashboard);
+                          },
+                          onRefuse: (invitation) async {
+                            await ref
+                                .read(establishmentControllerProvider.notifier)
+                                .refuseInvitation(invitation);
                           },
                         ),
                         loading: () => const Center(
@@ -121,11 +154,57 @@ class _LandingIntro extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.xs),
         Text(
-          'ZOLANA centralise commandes, prestations, clients, catalogue et rapports pour chaque établissement que vous gérez.',
+          'Choisissez un établissement pour démarrer, ou acceptez une invitation.',
           style: theme.textTheme.bodyLarge?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
+      ],
+    );
+  }
+}
+
+class _EstablishmentsSection extends StatelessWidget {
+  const _EstablishmentsSection({
+    required this.establishments,
+    required this.loading,
+    required this.onOpen,
+  });
+
+  final List<Establishment> establishments;
+  final bool loading;
+  final Future<void> Function(Establishment establishment) onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    if (establishments.isEmpty) {
+      return const _InfoRow(
+        icon: Icons.storefront_outlined,
+        title: 'Aucun établissement pour l’instant',
+        subtitle:
+            'Créez le vôtre ou attendez qu’on vous invite dans une équipe.',
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'Mes établissements',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        for (final establishment in establishments)
+          Card(
+            child: ListTile(
+              key: Key('open_establishment_${establishment.id}'),
+              leading: CircleAvatar(child: Icon(establishment.category.icon)),
+              title: Text(establishment.name),
+              subtitle: Text(establishment.managerName),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: loading ? null : () => onOpen(establishment),
+            ),
+          ),
       ],
     );
   }
@@ -136,11 +215,13 @@ class _InvitationSection extends StatelessWidget {
     required this.invitations,
     required this.loading,
     required this.onAccept,
+    required this.onRefuse,
   });
 
   final List<EstablishmentInvitation> invitations;
   final bool loading;
   final Future<void> Function(EstablishmentInvitation invitation) onAccept;
+  final Future<void> Function(EstablishmentInvitation invitation) onRefuse;
 
   @override
   Widget build(BuildContext context) {
@@ -163,20 +244,51 @@ class _InvitationSection extends StatelessWidget {
         const SizedBox(height: AppSpacing.xs),
         for (final invitation in invitations)
           Card(
-            child: ListTile(
-              leading: const CircleAvatar(child: Icon(Icons.mail_outline)),
-              title: Text(invitation.establishmentName),
-              subtitle: Text('Rôle proposé : ${invitation.role.label}'),
-              trailing: FilledButton(
-                key: Key('accept_invitation_${invitation.id}'),
-                onPressed: loading ? null : () => onAccept(invitation),
-                child: loading
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Text('Accepter'),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const CircleAvatar(
+                      child: Icon(Icons.mail_outline),
+                    ),
+                    title: Text(invitation.establishmentName),
+                    subtitle: Text(
+                      '${invitation.invitedByName.trim().isEmpty ? 'Un membre' : invitation.invitedByName}'
+                      ' vous invite comme ${invitation.role.label}',
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        key: Key('refuse_invitation_${invitation.id}'),
+                        onPressed: loading
+                            ? null
+                            : () => onRefuse(invitation),
+                        child: const Text('Refuser'),
+                      ),
+                      const SizedBox(width: 8),
+                      FilledButton(
+                        key: Key('accept_invitation_${invitation.id}'),
+                        onPressed: loading
+                            ? null
+                            : () => onAccept(invitation),
+                        child: loading
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Text('Accepter'),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ),

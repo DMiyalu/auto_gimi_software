@@ -173,23 +173,30 @@ class FakeEstablishmentRepository implements EstablishmentRepository {
   }
 
   @override
-  Stream<List<EstablishmentInvitation>> watchPendingInvitationsForPhone(
-    String phone,
+  Stream<List<EstablishmentInvitation>> watchPendingInvitations(
+    String uid,
   ) async* {
-    List<EstablishmentInvitation> pendingForPhone(
+    List<EstablishmentInvitation> pending(
       List<EstablishmentInvitation> items,
     ) {
       return items
           .where(
             (invitation) =>
-                invitation.invitedPhone == phone &&
                 invitation.status == EstablishmentInvitationStatus.pending,
           )
           .toList();
     }
 
-    yield pendingForPhone(invitations);
-    yield* _invitationsController.stream.map(pendingForPhone);
+    yield pending(invitations);
+    yield* _invitationsController.stream.map(pending);
+  }
+
+  @override
+  Future<void> claimPendingInvitations({
+    required String uid,
+    required String phone,
+  }) async {
+    // No-op : les fakes alimentent déjà l'inbox via setInvitations.
   }
 
   @override
@@ -277,10 +284,6 @@ class FakeEstablishmentRepository implements EstablishmentRepository {
         else
           item,
     ]);
-    await setActiveEstablishment(
-      uid: uid,
-      establishmentId: invitation.establishmentId,
-    );
     final current = profile;
     if (current != null) {
       setProfile(
@@ -288,14 +291,16 @@ class FakeEstablishmentRepository implements EstablishmentRepository {
           uid: current.uid,
           phone: phone,
           fullName: fullName,
-          establishmentId: invitation.establishmentId,
+          establishmentId: current.establishmentId.isEmpty
+              ? invitation.establishmentId
+              : current.establishmentId,
           role: invitation.role.firestoreValue,
           phoneVerified: true,
           createdAt: current.createdAt,
           establishmentIds: [
             ...{...current.establishmentIds, invitation.establishmentId},
           ],
-          activeEstablishmentId: invitation.establishmentId,
+          activeEstablishmentId: current.activeEstablishmentId,
           rolesByEstablishment: {
             ...current.rolesByEstablishment,
             invitation.establishmentId: invitation.role.firestoreValue,
@@ -303,6 +308,32 @@ class FakeEstablishmentRepository implements EstablishmentRepository {
         ),
       );
     }
+  }
+
+  @override
+  Future<void> refuseInvitation({
+    required String uid,
+    required EstablishmentInvitation invitation,
+  }) async {
+    setInvitations([
+      for (final item in invitations)
+        if (item.id == invitation.id)
+          EstablishmentInvitation(
+            id: item.id,
+            establishmentId: item.establishmentId,
+            establishmentName: item.establishmentName,
+            invitedPhone: item.invitedPhone,
+            role: item.role,
+            status: EstablishmentInvitationStatus.revoked,
+            invitedBy: item.invitedBy,
+            invitedByName: item.invitedByName,
+            createdAt: item.createdAt,
+            acceptedBy: item.acceptedBy,
+            acceptedAt: item.acceptedAt,
+          )
+        else
+          item,
+    ]);
   }
 
   @override

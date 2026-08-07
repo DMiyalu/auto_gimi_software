@@ -48,7 +48,7 @@ final routerProvider = Provider<GoRouter>((ref) {
   ref.listen(signupOtpPendingProvider, (_, __) => refresh.value++);
 
   return GoRouter(
-    initialLocation: Routes.dashboard,
+    initialLocation: Routes.establishmentOnboarding,
     refreshListenable: refresh,
     redirect: (context, state) {
       final auth = ref.read(authStateProvider);
@@ -63,8 +63,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       final onSignUp = location == Routes.signUp;
       final onVerify = location == Routes.verifyPhone;
       final onAuthScreen = onLogin || onSignUp || onVerify;
-      final onEstablishmentSetup =
-          location == Routes.establishmentOnboarding ||
+      final onLanding = location == Routes.establishmentOnboarding;
+      final onHub =
+          onLanding ||
           location == Routes.establishmentNew ||
           location == Routes.invitations ||
           location == Routes.settings;
@@ -89,16 +90,17 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       final hasEstablishment =
           (establishments.valueOrNull ?? const []).isNotEmpty;
-      if (!hasEstablishment) {
-        if (onAuthScreen || location == Routes.dashboard) {
-          return Routes.establishmentOnboarding;
-        }
-        if (!onEstablishmentSetup) return Routes.establishmentOnboarding;
-        return null;
+      final hasActiveEstablishment =
+          (loadedProfile?.activeEstablishmentId ?? '').isNotEmpty;
+
+      // Post-auth : hub landing (établissements + invitations).
+      if (onAuthScreen) return Routes.establishmentOnboarding;
+
+      // Activité métier : besoin d'au moins un établissement + un actif.
+      if (!onHub && (!hasEstablishment || !hasActiveEstablishment)) {
+        return Routes.establishmentOnboarding;
       }
 
-      if (location == Routes.establishmentOnboarding) return Routes.dashboard;
-      if (onAuthScreen) return Routes.dashboard;
       return null;
     },
     routes: [

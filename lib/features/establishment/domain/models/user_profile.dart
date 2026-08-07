@@ -1,4 +1,4 @@
-/// Profil utilisateur lié à un établissement (multi-tenant).
+/// Profil utilisateur multi-tenant (collection `users`).
 class UserProfile {
   const UserProfile({
     required this.uid,
@@ -18,17 +18,23 @@ class UserProfile {
   final String fullName;
 
   /// Champ historique : premier établissement créé/rejoint.
-  ///
-  /// Conservé pendant la migration vers [establishmentIds].
   final String establishmentId;
 
   /// Champ historique : rôle sur [establishmentId].
   final String role;
   final bool phoneVerified;
   final DateTime createdAt;
+
+  /// IDs des établissements accessibles.
+  ///
+  /// Persisté Firestore sous `establishments` (et alias legacy
+  /// `establishmentIds` pendant la migration).
   final List<String> establishmentIds;
   final String? activeEstablishmentId;
   final Map<String, String> rolesByEstablishment;
+
+  /// Alias métier du plan (`users.establishments[]`).
+  List<String> get establishments => establishmentIds;
 
   String get currentEstablishmentId => activeEstablishmentId ?? establishmentId;
 

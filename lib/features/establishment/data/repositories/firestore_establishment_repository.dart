@@ -23,6 +23,12 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
   CollectionReference<Map<String, dynamic>> get _users =>
       _firestore.collection('users');
 
+  CollectionReference<Map<String, dynamic>> get _pendingInvitations =>
+      _firestore.collection('pendingInvitations');
+
+  CollectionReference<Map<String, dynamic>> get _phoneIndex =>
+      _firestore.collection('phoneIndex');
+
   @override
   Future<void> createUserProfile({
     required String uid,
@@ -30,10 +36,14 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
     required String phone,
   }) async {
     final normalizedPhone = PhoneAuthMapper.normalize(phone);
-    await _users.doc(uid).set({
+    final batch = _firestore.batch();
+    final userRef = _users.doc(uid);
+
+    batch.set(userRef, {
       'phone': normalizedPhone,
       'fullName': fullName.trim(),
       'establishmentId': '',
+      'establishments': const <String>[],
       'establishmentIds': const <String>[],
       'activeEstablishmentId': null,
       'role': 'agent',
@@ -42,6 +52,12 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
       'createdAt': FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),
     });
+    batch.set(_phoneIndex.doc(normalizedPhone), {
+      'uid': uid,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+
+    await batch.commit();
   }
 
   @override
@@ -78,6 +94,7 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
       batch.update(userRef, {
         if (currentLegacyId == null || currentLegacyId.isEmpty)
           'establishmentId': establishmentId,
+        'establishments': FieldValue.arrayUnion([establishmentId]),
         'establishmentIds': FieldValue.arrayUnion([establishmentId]),
         'activeEstablishmentId': establishmentId,
         'rolesByEstablishment.$establishmentId': 'owner',
@@ -88,6 +105,7 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
         'phone': normalizedPhone,
         'fullName': managerName.trim(),
         'establishmentId': establishmentId,
+        'establishments': [establishmentId],
         'establishmentIds': [establishmentId],
         'activeEstablishmentId': establishmentId,
         'role': 'owner',
@@ -96,9 +114,15 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
         'createdAt': now,
         'updatedAt': now,
       });
+      batch.set(_phoneIndex.doc(normalizedPhone), {
+        'uid': ownerId,
+        'updatedAt': now,
+      });
     }
 
-    batch.set(establishmentRef.collection('members').doc(ownerId), {
+    final teamPayload = {
+      'userId': ownerId,
+      'roleId': 'owner',
       'uid': ownerId,
       'establishmentId': establishmentId,
       'phone': normalizedPhone,
@@ -106,7 +130,10 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
       'role': 'owner',
       'phoneVerified': false,
       'joinedAt': now,
-    });
+    };
+    batch.set(establishmentRef.collection('team').doc(ownerId), teamPayload);
+    // Migration douce : miroir legacy `members`.
+    batch.set(establishmentRef.collection('members').doc(ownerId), teamPayload);
 
     await batch.commit();
 
@@ -135,10 +162,9 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
     return watchUserProfile(uid).asyncMap((profile) async {
       if (profile == null) return const <Establishment>[];
 
-      final ids = profile.establishmentIds.isEmpty
-          ? [profile.establishmentId]
-          : profile.establishmentIds;
-      final validIds = ids.where((id) => id.isNotEmpty).toList();
+      final validIds = profile.establishments
+          .where((id) => id.isNotEmpty)
+          .toList();
       if (validIds.isEmpty) return const <Establishment>[];
 
       final snapshots = await Future.wait(
@@ -157,22 +183,17 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
     return watchUserProfile(uid).asyncMap((profile) async {
       if (profile == null) return const <EstablishmentMember>[];
 
-      final ids = profile.establishmentIds.isEmpty
-          ? [profile.establishmentId]
-          : profile.establishmentIds;
-      final validIds = ids.where((id) => id.isNotEmpty).toList();
+      final validIds = profile.establishments
+          .where((id) => id.isNotEmpty)
+          .toList();
       if (validIds.isEmpty) return const <EstablishmentMember>[];
 
-      final snapshots = await Future.wait(
-        validIds.map(
-          (id) => _establishments.doc(id).collection('members').doc(uid).get(),
-        ),
-      );
-
-      return snapshots
-          .where((snapshot) => snapshot.exists)
-          .map(_memberFromSnapshot)
-          .toList();
+      final members = <EstablishmentMember>[];
+      for (final id in validIds) {
+        final member = await _readTeamOrMember(establishmentId: id, uid: uid);
+        if (member != null) members.add(member);
+      }
+      return members;
     });
   }
 
@@ -180,27 +201,71 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
   Stream<List<EstablishmentMember>> watchEstablishmentMembers(
     String establishmentId,
   ) {
-    return _establishments
+    final teamStream = _establishments
         .doc(establishmentId)
-        .collection('members')
-        .snapshots()
-        .map((snapshot) => snapshot.docs.map(_memberFromSnapshot).toList());
+        .collection('team')
+        .snapshots();
+
+    return teamStream.asyncMap((teamSnapshot) async {
+      if (teamSnapshot.docs.isNotEmpty) {
+        return teamSnapshot.docs.map(_memberFromSnapshot).toList();
+      }
+
+      // Fallback legacy `members` pendant la migration.
+      final membersSnapshot = await _establishments
+          .doc(establishmentId)
+          .collection('members')
+          .get();
+      return membersSnapshot.docs.map(_memberFromSnapshot).toList();
+    });
   }
 
   @override
-  Stream<List<EstablishmentInvitation>> watchPendingInvitationsForPhone(
-    String phone,
-  ) {
-    final normalizedPhone = PhoneAuthMapper.normalize(phone);
-    return _firestore
-        .collectionGroup('invitations')
-        .where('invitedPhone', isEqualTo: normalizedPhone)
+  Stream<List<EstablishmentInvitation>> watchPendingInvitations(String uid) {
+    return _users
+        .doc(uid)
+        .collection('invitations')
         .where(
           'status',
           isEqualTo: EstablishmentInvitationStatus.pending.firestoreValue,
         )
         .snapshots()
         .map((snapshot) => snapshot.docs.map(_invitationFromSnapshot).toList());
+  }
+
+  @override
+  Future<void> claimPendingInvitations({
+    required String uid,
+    required String phone,
+  }) async {
+    final normalizedPhone = PhoneAuthMapper.normalize(phone);
+    final pending = await _pendingInvitations
+        .where('invitedPhone', isEqualTo: normalizedPhone)
+        .where(
+          'status',
+          isEqualTo: EstablishmentInvitationStatus.pending.firestoreValue,
+        )
+        .get();
+
+    if (pending.docs.isEmpty) return;
+
+    final batch = _firestore.batch();
+    for (final doc in pending.docs) {
+      final data = doc.data();
+      final inboxRef = _users.doc(uid).collection('invitations').doc(doc.id);
+      batch.set(inboxRef, {
+        ...data,
+        'claimedFromPending': true,
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+      batch.update(doc.reference, {
+        'status': 'claimed',
+        'claimedBy': uid,
+        'claimedAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    }
+    await batch.commit();
   }
 
   @override
@@ -212,23 +277,38 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
     required String invitedBy,
     required String invitedByName,
   }) async {
+    if (role == EstablishmentRole.owner) {
+      throw StateError('Impossible d’inviter avec le rôle propriétaire.');
+    }
+
     final normalizedPhone = PhoneAuthMapper.normalize(invitedPhone);
     final invitationId = _uuid.v4();
-    await _establishments
-        .doc(establishmentId)
-        .collection('invitations')
-        .doc(invitationId)
-        .set({
-          'establishmentId': establishmentId,
-          'establishmentName': establishmentName,
-          'invitedPhone': normalizedPhone,
-          'role': role.firestoreValue,
-          'status': EstablishmentInvitationStatus.pending.firestoreValue,
-          'invitedBy': invitedBy,
-          'invitedByName': invitedByName.trim(),
-          'createdAt': FieldValue.serverTimestamp(),
-          'updatedAt': FieldValue.serverTimestamp(),
-        });
+    final payload = {
+      'establishmentId': establishmentId,
+      'establishmentName': establishmentName,
+      'invitedPhone': normalizedPhone,
+      'roleId': role.firestoreValue,
+      'role': role.firestoreValue,
+      'status': EstablishmentInvitationStatus.pending.firestoreValue,
+      'invitedBy': invitedBy,
+      'invitedByName': invitedByName.trim(),
+      'createdAt': FieldValue.serverTimestamp(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    };
+
+    final phoneLookup = await _phoneIndex.doc(normalizedPhone).get();
+    final existingUid = phoneLookup.data()?['uid'] as String?;
+
+    if (existingUid != null && existingUid.isNotEmpty) {
+      await _users
+          .doc(existingUid)
+          .collection('invitations')
+          .doc(invitationId)
+          .set(payload);
+      return;
+    }
+
+    await _pendingInvitations.doc(invitationId).set(payload);
   }
 
   @override
@@ -243,12 +323,15 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
     final batch = _firestore.batch();
     final userRef = _users.doc(uid);
     final establishmentRef = _establishments.doc(invitation.establishmentId);
-    final invitationRef = establishmentRef
+    final invitationRef = userRef
         .collection('invitations')
         .doc(invitation.id);
-    final memberRef = establishmentRef.collection('members').doc(uid);
+    final teamRef = establishmentRef.collection('team').doc(uid);
+    final membersRef = establishmentRef.collection('members').doc(uid);
 
-    batch.set(memberRef, {
+    final teamPayload = {
+      'userId': uid,
+      'roleId': invitation.role.firestoreValue,
       'uid': uid,
       'establishmentId': invitation.establishmentId,
       'phone': normalizedPhone,
@@ -257,18 +340,26 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
       'sourceInvitationId': invitation.id,
       'phoneVerified': true,
       'joinedAt': now,
-    }, SetOptions(merge: true));
+    };
+
+    batch.set(teamRef, teamPayload, SetOptions(merge: true));
+    batch.set(membersRef, teamPayload, SetOptions(merge: true));
 
     batch.set(userRef, {
       'phone': normalizedPhone,
       'fullName': fullName.trim(),
       'establishmentId': invitation.establishmentId,
+      'establishments': FieldValue.arrayUnion([invitation.establishmentId]),
       'establishmentIds': FieldValue.arrayUnion([invitation.establishmentId]),
-      'activeEstablishmentId': invitation.establishmentId,
-      'role': invitation.role.firestoreValue,
+      // Ne force pas l'entrée dans l'activité : la landing gère le switch.
       'rolesByEstablishment.${invitation.establishmentId}':
           invitation.role.firestoreValue,
       'phoneVerified': true,
+      'updatedAt': now,
+    }, SetOptions(merge: true));
+
+    batch.set(_phoneIndex.doc(normalizedPhone), {
+      'uid': uid,
       'updatedAt': now,
     }, SetOptions(merge: true));
 
@@ -283,6 +374,17 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
   }
 
   @override
+  Future<void> refuseInvitation({
+    required String uid,
+    required EstablishmentInvitation invitation,
+  }) async {
+    await _users.doc(uid).collection('invitations').doc(invitation.id).update({
+      'status': EstablishmentInvitationStatus.revoked.firestoreValue,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  @override
   Future<void> setActiveEstablishment({
     required String uid,
     required String establishmentId,
@@ -291,6 +393,26 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
       'activeEstablishmentId': establishmentId,
       'updatedAt': FieldValue.serverTimestamp(),
     });
+  }
+
+  Future<EstablishmentMember?> _readTeamOrMember({
+    required String establishmentId,
+    required String uid,
+  }) async {
+    final teamSnap = await _establishments
+        .doc(establishmentId)
+        .collection('team')
+        .doc(uid)
+        .get();
+    if (teamSnap.exists) return _memberFromSnapshot(teamSnap);
+
+    final memberSnap = await _establishments
+        .doc(establishmentId)
+        .collection('members')
+        .doc(uid)
+        .get();
+    if (memberSnap.exists) return _memberFromSnapshot(memberSnap);
+    return null;
   }
 
   Establishment _establishmentFromSnapshot(
@@ -314,7 +436,11 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
   ) {
     final data = snapshot.data()!;
     final legacyEstablishmentId = data['establishmentId'] as String? ?? '';
+    final establishments = _stringList(data['establishments']);
     final establishmentIds = _stringList(data['establishmentIds']);
+    final resolvedIds = establishments.isNotEmpty
+        ? establishments
+        : establishmentIds;
     final rolesByEstablishment = _stringMap(data['rolesByEstablishment']);
     final activeEstablishmentId = data['activeEstablishmentId'] as String?;
 
@@ -327,9 +453,9 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
       phoneVerified: data['phoneVerified'] as bool? ?? false,
       createdAt: _timestampToDateTime(data['createdAt']),
       establishmentIds:
-          establishmentIds.isEmpty && legacyEstablishmentId.isNotEmpty
+          resolvedIds.isEmpty && legacyEstablishmentId.isNotEmpty
           ? [legacyEstablishmentId]
-          : establishmentIds,
+          : resolvedIds,
       activeEstablishmentId: activeEstablishmentId,
       rolesByEstablishment: rolesByEstablishment,
     );
@@ -344,11 +470,13 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
         snapshot.reference.parent.parent?.id ??
         '';
     return EstablishmentMember(
-      uid: data['uid'] as String? ?? snapshot.id,
+      uid: data['userId'] as String? ?? data['uid'] as String? ?? snapshot.id,
       establishmentId: establishmentId,
       phone: data['phone'] as String? ?? '',
       fullName: data['fullName'] as String? ?? '',
-      role: EstablishmentRole.fromFirestore(data['role'] as String?),
+      role: EstablishmentRole.fromFirestore(
+        data['roleId'] as String? ?? data['role'] as String?,
+      ),
       phoneVerified: data['phoneVerified'] as bool? ?? false,
       joinedAt: _timestampToDateTime(data['joinedAt']),
     );
@@ -358,16 +486,14 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
     QueryDocumentSnapshot<Map<String, dynamic>> snapshot,
   ) {
     final data = snapshot.data();
-    final establishmentId =
-        data['establishmentId'] as String? ??
-        snapshot.reference.parent.parent?.id ??
-        '';
     return EstablishmentInvitation(
       id: snapshot.id,
-      establishmentId: establishmentId,
+      establishmentId: data['establishmentId'] as String? ?? '',
       establishmentName: data['establishmentName'] as String? ?? '',
       invitedPhone: data['invitedPhone'] as String? ?? '',
-      role: EstablishmentRole.fromFirestore(data['role'] as String?),
+      role: EstablishmentRole.fromFirestore(
+        data['roleId'] as String? ?? data['role'] as String?,
+      ),
       status: EstablishmentInvitationStatus.fromFirestore(
         data['status'] as String?,
       ),

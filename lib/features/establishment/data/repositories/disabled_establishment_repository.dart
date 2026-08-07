@@ -7,14 +7,15 @@ import '../../domain/models/user_profile.dart';
 import '../../domain/repositories/establishment_repository.dart';
 
 class DisabledEstablishmentRepository implements EstablishmentRepository {
+  Never _disabled() =>
+      throw StateError('Firebase non configuré. Exécutez: flutterfire configure');
+
   @override
   Future<void> createUserProfile({
     required String uid,
     required String fullName,
     required String phone,
-  }) async {
-    throw StateError('Firebase non configuré. Exécutez: flutterfire configure');
-  }
+  }) async => _disabled();
 
   @override
   Future<Establishment> createOwnedEstablishment({
@@ -23,9 +24,7 @@ class DisabledEstablishmentRepository implements EstablishmentRepository {
     required String establishmentName,
     required String managerName,
     required String phone,
-  }) async {
-    throw StateError('Firebase non configuré. Exécutez: flutterfire configure');
-  }
+  }) async => _disabled();
 
   @override
   Stream<UserProfile?> watchUserProfile(String uid) => Stream.value(null);
@@ -48,9 +47,14 @@ class DisabledEstablishmentRepository implements EstablishmentRepository {
   ) => Stream.value(const []);
 
   @override
-  Stream<List<EstablishmentInvitation>> watchPendingInvitationsForPhone(
-    String phone,
-  ) => Stream.value(const []);
+  Stream<List<EstablishmentInvitation>> watchPendingInvitations(String uid) =>
+      Stream.value(const []);
+
+  @override
+  Future<void> claimPendingInvitations({
+    required String uid,
+    required String phone,
+  }) async => _disabled();
 
   @override
   Future<void> createInvitation({
@@ -60,9 +64,7 @@ class DisabledEstablishmentRepository implements EstablishmentRepository {
     required EstablishmentRole role,
     required String invitedBy,
     required String invitedByName,
-  }) async {
-    throw StateError('Firebase non configuré. Exécutez: flutterfire configure');
-  }
+  }) async => _disabled();
 
   @override
   Future<void> acceptInvitation({
@@ -70,15 +72,17 @@ class DisabledEstablishmentRepository implements EstablishmentRepository {
     required String fullName,
     required String phone,
     required EstablishmentInvitation invitation,
-  }) async {
-    throw StateError('Firebase non configuré. Exécutez: flutterfire configure');
-  }
+  }) async => _disabled();
+
+  @override
+  Future<void> refuseInvitation({
+    required String uid,
+    required EstablishmentInvitation invitation,
+  }) async => _disabled();
 
   @override
   Future<void> setActiveEstablishment({
     required String uid,
     required String establishmentId,
-  }) async {
-    throw StateError('Firebase non configuré. Exécutez: flutterfire configure');
-  }
+  }) async => _disabled();
 }
