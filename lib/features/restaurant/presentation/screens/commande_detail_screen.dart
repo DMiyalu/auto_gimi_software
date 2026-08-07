@@ -111,7 +111,9 @@ class _CommandeDetailScreenState extends ConsumerState<CommandeDetailScreen> {
                   children: [
                     _DetailHeader(
                       commande: item,
-                      onBack: () => context.pop(),
+                      onBack: () => context.canPop()
+                          ? context.pop()
+                          : context.go(Routes.dashboard),
                       onMore: () => _showActionsSheet(context, item),
                       onPrint: () => _printInvoice(item),
                       onCollectPayment: () => _collectPayment(item),
