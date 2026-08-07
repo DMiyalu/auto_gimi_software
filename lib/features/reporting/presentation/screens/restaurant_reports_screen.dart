@@ -23,7 +23,7 @@ class RestaurantReportsScreen extends ConsumerWidget {
             AppSpacing.sm,
             AppSpacing.xs,
             AppSpacing.sm,
-            AppSpacing.lg,
+            120,
           ),
           children: [
             const Text(
