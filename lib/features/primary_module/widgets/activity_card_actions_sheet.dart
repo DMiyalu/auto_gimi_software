@@ -73,7 +73,9 @@ void showActivityCardActions(
               ),
               title: Text(
                 l10n.cancel,
-                style: TextStyle(color: Theme.of(sheetContext).colorScheme.error),
+                style: TextStyle(
+                  color: Theme.of(sheetContext).colorScheme.error,
+                ),
               ),
               onTap: () {
                 ref.read(activityListProvider.notifier).cancel(item.id);

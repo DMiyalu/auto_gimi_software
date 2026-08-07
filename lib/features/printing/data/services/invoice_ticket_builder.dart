@@ -39,7 +39,10 @@ class InvoiceTicketBuilder {
 
     bytes.addAll(generator.hr());
     bytes.addAll(
-      generator.text('Facture ${data.reference}', styles: const PosStyles(bold: true)),
+      generator.text(
+        'Facture ${data.reference}',
+        styles: const PosStyles(bold: true),
+      ),
     );
     bytes.addAll(generator.text(_dateFormat.format(data.date)));
     if (data.clientName != null && data.clientName!.isNotEmpty) {
@@ -54,7 +57,9 @@ class InvoiceTicketBuilder {
     bytes.addAll(generator.hr());
 
     for (final line in data.lines) {
-      bytes.addAll(generator.text(line.label, styles: const PosStyles(bold: true)));
+      bytes.addAll(
+        generator.text(line.label, styles: const PosStyles(bold: true)),
+      );
       final qtyPrice = line.quantity > 1
           ? '${line.quantity} x ${_amountFormat.format(line.unitPrice)}'
           : _amountFormat.format(line.unitPrice);
@@ -62,7 +67,8 @@ class InvoiceTicketBuilder {
         generator.row([
           PosColumn(text: qtyPrice, width: 6),
           PosColumn(
-            text: '${_amountFormat.format(line.lineAmount)} ${data.currency.symbol}',
+            text:
+                '${_amountFormat.format(line.lineAmount)} ${data.currency.symbol}',
             width: 6,
             styles: const PosStyles(align: PosAlign.right),
           ),
@@ -79,7 +85,8 @@ class InvoiceTicketBuilder {
           styles: const PosStyles(bold: true, height: PosTextSize.size2),
         ),
         PosColumn(
-          text: '${_amountFormat.format(data.totalAmount)} ${data.currency.symbol}',
+          text:
+              '${_amountFormat.format(data.totalAmount)} ${data.currency.symbol}',
           width: 6,
           styles: const PosStyles(
             align: PosAlign.right,
@@ -95,7 +102,8 @@ class InvoiceTicketBuilder {
         generator.row([
           PosColumn(text: 'Payé', width: 6),
           PosColumn(
-            text: '${_amountFormat.format(data.paidAmount)} ${data.currency.symbol}',
+            text:
+                '${_amountFormat.format(data.paidAmount)} ${data.currency.symbol}',
             width: 6,
             styles: const PosStyles(align: PosAlign.right),
           ),
@@ -105,9 +113,14 @@ class InvoiceTicketBuilder {
     if (data.balanceDue != null) {
       bytes.addAll(
         generator.row([
-          PosColumn(text: 'Solde', width: 6, styles: const PosStyles(bold: true)),
           PosColumn(
-            text: '${_amountFormat.format(data.balanceDue)} ${data.currency.symbol}',
+            text: 'Solde',
+            width: 6,
+            styles: const PosStyles(bold: true),
+          ),
+          PosColumn(
+            text:
+                '${_amountFormat.format(data.balanceDue)} ${data.currency.symbol}',
             width: 6,
             styles: const PosStyles(align: PosAlign.right, bold: true),
           ),

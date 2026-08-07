@@ -82,6 +82,7 @@ class CommandeRepositoryImpl implements CommandeRepository {
             establishmentId: Value(establishmentId),
             clientId: Value(clientId),
             reference: reference,
+            statut: const Value(CommandeStatus.enCours),
             contexte: Value(_blankToNull(context)),
             createdAt: now,
             updatedAt: now,
@@ -92,8 +93,8 @@ class CommandeRepositoryImpl implements CommandeRepository {
       id: id,
       clientId: clientId,
       reference: reference,
-      statusKey: 'en_attente',
-      statusLabel: commandeStatusLabel('en_attente'),
+      statusKey: CommandeStatus.enCours,
+      statusLabel: commandeStatusLabel(CommandeStatus.enCours),
       context: _blankToNull(context),
       totalAmount: 0,
       createdAt: now,
@@ -109,7 +110,7 @@ class CommandeRepositoryImpl implements CommandeRepository {
     int quantity = 1,
   }) async {
     if (quantity <= 0) throw ArgumentError('La quantité doit être positive.');
-    await _requireMutableCommande(establishmentId, commandeId);
+    await _requireEditableCommande(establishmentId, commandeId);
 
     final produit =
         await (_database.select(_database.produits)..where(
@@ -206,7 +207,7 @@ class CommandeRepositoryImpl implements CommandeRepository {
             ))
             .getSingleOrNull();
     if (line == null) throw StateError('Ligne de commande introuvable.');
-    await _requireMutableCommande(establishmentId, line.commandeId);
+    await _requireEditableCommande(establishmentId, line.commandeId);
 
     final produit =
         await (_database.select(_database.produits)..where(
@@ -269,7 +270,7 @@ class CommandeRepositoryImpl implements CommandeRepository {
       await removeLine(establishmentId: establishmentId, lineId: lineId);
       return;
     }
-    await _requireMutableCommande(establishmentId, line.commandeId);
+    await _requireEditableCommande(establishmentId, line.commandeId);
 
     final produit =
         await (_database.select(_database.produits)..where(
@@ -321,7 +322,7 @@ class CommandeRepositoryImpl implements CommandeRepository {
     required String establishmentId,
     required String commandeId,
   }) async {
-    await _requireMutableCommande(establishmentId, commandeId);
+    await _requireCancelableCommande(establishmentId, commandeId);
     final now = DateTime.now();
 
     await _database.transaction(() async {
@@ -380,7 +381,7 @@ class CommandeRepositoryImpl implements CommandeRepository {
           ))
           .write(
             CommandesCompanion(
-              statut: const Value('annulees'),
+              statut: const Value(CommandeStatus.annulees),
               montantTotal: const Value(0),
               updatedAt: Value(now),
               isDirty: const Value(true),
@@ -390,19 +391,22 @@ class CommandeRepositoryImpl implements CommandeRepository {
   }
 
   @override
-  Future<void> setStatus({
+  Future<void> markAwaitingPayment({
     required String establishmentId,
     required String commandeId,
-    required String statusKey,
   }) async {
-    if (statusKey == 'annulees') {
-      await cancelCommande(
-        establishmentId: establishmentId,
-        commandeId: commandeId,
-      );
-      return;
+    final commande = await _requireExistingCommande(
+      establishmentId,
+      commandeId,
+    );
+    if (commande.statut == CommandeStatus.aPayer) return; // idempotent
+    if (commande.statut == CommandeStatus.cloturee) {
+      throw StateError('Cette commande est clôturée.');
     }
-    await _requireMutableCommande(establishmentId, commandeId);
+    if (commande.statut == CommandeStatus.annulees) {
+      throw StateError('Cette commande est annulée.');
+    }
+
     final now = DateTime.now();
     await (_database.update(_database.commandes)..where(
           (c) =>
@@ -411,7 +415,36 @@ class CommandeRepositoryImpl implements CommandeRepository {
         ))
         .write(
           CommandesCompanion(
-            statut: Value(statusKey),
+            statut: const Value(CommandeStatus.aPayer),
+            updatedAt: Value(now),
+            isDirty: const Value(true),
+          ),
+        );
+  }
+
+  @override
+  Future<void> registerPayment({
+    required String establishmentId,
+    required String commandeId,
+  }) async {
+    final commande = await _requireExistingCommande(
+      establishmentId,
+      commandeId,
+    );
+    if (commande.statut == CommandeStatus.cloturee) return; // idempotent
+    if (commande.statut == CommandeStatus.annulees) {
+      throw StateError('Cette commande est annulée.');
+    }
+
+    final now = DateTime.now();
+    await (_database.update(_database.commandes)..where(
+          (c) =>
+              c.establishmentId.equals(establishmentId) &
+              c.id.equals(commandeId),
+        ))
+        .write(
+          CommandesCompanion(
+            statut: const Value(CommandeStatus.cloturee),
             updatedAt: Value(now),
             isDirty: const Value(true),
           ),
@@ -424,7 +457,7 @@ class CommandeRepositoryImpl implements CommandeRepository {
     required String commandeId,
     required String clientId,
   }) async {
-    await _requireMutableCommande(establishmentId, commandeId);
+    await _requireEditableCommande(establishmentId, commandeId);
     final now = DateTime.now();
     await (_database.update(_database.commandes)..where(
           (c) =>
@@ -445,7 +478,7 @@ class CommandeRepositoryImpl implements CommandeRepository {
     required String establishmentId,
     required String commandeId,
   }) async {
-    await _requireMutableCommande(establishmentId, commandeId);
+    await _requireEditableCommande(establishmentId, commandeId);
     final now = DateTime.now();
     await (_database.update(_database.commandes)..where(
           (c) =>
@@ -461,7 +494,7 @@ class CommandeRepositoryImpl implements CommandeRepository {
         );
   }
 
-  Future<Commande> _requireMutableCommande(
+  Future<Commande> _requireExistingCommande(
     String establishmentId,
     String commandeId,
   ) async {
@@ -474,10 +507,52 @@ class CommandeRepositoryImpl implements CommandeRepository {
             ))
             .getSingleOrNull();
     if (commande == null) throw StateError('Commande introuvable.');
-    if (commande.statut == 'annulees') {
-      throw StateError('Cette commande est annulée.');
+    return commande;
+  }
+
+  /// Seul le statut en_cours autorise les modifications (lignes, client).
+  Future<Commande> _requireEditableCommande(
+    String establishmentId,
+    String commandeId,
+  ) async {
+    final commande = await _requireExistingCommande(
+      establishmentId,
+      commandeId,
+    );
+    if (commande.statut != CommandeStatus.enCours) {
+      throw StateError(_lockedMessage(commande.statut));
     }
     return commande;
+  }
+
+  /// en_cours et à_payer autorisent l'annulation ; clôturée et annulée non.
+  Future<Commande> _requireCancelableCommande(
+    String establishmentId,
+    String commandeId,
+  ) async {
+    final commande = await _requireExistingCommande(
+      establishmentId,
+      commandeId,
+    );
+    if (commande.statut == CommandeStatus.cloturee) {
+      throw StateError(
+        'Cette commande est clôturée : impossible de l’annuler.',
+      );
+    }
+    if (commande.statut == CommandeStatus.annulees) {
+      throw StateError('Cette commande est déjà annulée.');
+    }
+    return commande;
+  }
+
+  String _lockedMessage(String statut) {
+    return switch (statut) {
+      CommandeStatus.cloturee => 'Cette commande est clôturée.',
+      CommandeStatus.annulees => 'Cette commande est annulée.',
+      CommandeStatus.aPayer =>
+        'La facture a été émise : la commande n’est plus modifiable.',
+      _ => 'Cette commande n’est plus modifiable.',
+    };
   }
 
   Future<void> _recalculateTotal(

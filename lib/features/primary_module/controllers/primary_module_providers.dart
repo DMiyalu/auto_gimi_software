@@ -127,8 +127,8 @@ Color _statusColorFor(String key) {
     'en_cours' ||
     'diagnostic' ||
     'planifiees' => AppColors.violetPrincipal,
-    'pretes' || 'terminees' => AppColors.bleuRoyal,
-    'livraison' => AppColors.cyan,
+    'pretes' || 'terminees' || 'cloturee' => AppColors.bleuRoyal,
+    'livraison' || 'a_payer' => AppColors.cyan,
     'annulees' => Colors.grey,
     _ => Colors.blueGrey,
   };

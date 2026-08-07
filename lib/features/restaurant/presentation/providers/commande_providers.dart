@@ -152,10 +152,8 @@ class CommandeController extends AsyncNotifier<void> {
     });
   }
 
-  Future<void> setStatus({
-    required String commandeId,
-    required String statusKey,
-  }) async {
+  /// Déclenché par l'impression réussie d'une facture : en_cours → à_payer.
+  Future<void> markAwaitingPayment({required String commandeId}) async {
     final establishmentId = _requireEstablishmentId();
 
     state = const AsyncLoading();
@@ -163,10 +161,27 @@ class CommandeController extends AsyncNotifier<void> {
       _ensureCanCreateActivities();
       await ref
           .read(commandeRepositoryProvider)
-          .setStatus(
+          .markAwaitingPayment(
             establishmentId: establishmentId,
             commandeId: commandeId,
-            statusKey: statusKey,
+          );
+      ref.read(autoSyncCoordinatorProvider).schedulePush();
+    });
+  }
+
+  /// Déclenché par l'encaissement du paiement : (en_cours ou à_payer) →
+  /// clôturée.
+  Future<void> registerPayment({required String commandeId}) async {
+    final establishmentId = _requireEstablishmentId();
+
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      _ensureCanCreateActivities();
+      await ref
+          .read(commandeRepositoryProvider)
+          .registerPayment(
+            establishmentId: establishmentId,
+            commandeId: commandeId,
           );
       ref.read(autoSyncCoordinatorProvider).schedulePush();
     });
@@ -200,7 +215,10 @@ class CommandeController extends AsyncNotifier<void> {
       _ensureCanCreateActivities();
       await ref
           .read(commandeRepositoryProvider)
-          .detachClient(establishmentId: establishmentId, commandeId: commandeId);
+          .detachClient(
+            establishmentId: establishmentId,
+            commandeId: commandeId,
+          );
       ref.read(autoSyncCoordinatorProvider).schedulePush();
     });
   }

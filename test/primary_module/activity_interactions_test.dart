@@ -135,14 +135,14 @@ void main() {
     await tester.tap(find.text('Changer le statut'));
     await tester.pumpAndSettle();
 
-    // "Prêtes" apparaît déjà comme chip de filtre sous la feuille ouverte ;
+    // "À payer" apparaît déjà comme chip de filtre sous la feuille ouverte ;
     // on cible précisément l'option du sélecteur de statut.
-    final statusOption = find.widgetWithText(ListTile, 'Prêtes');
+    final statusOption = find.widgetWithText(ListTile, 'À payer');
     expect(statusOption, findsOneWidget);
     await tester.tap(statusOption);
     await tester.pumpAndSettle();
 
-    expect(find.text('Prêtes'), findsWidgets);
+    expect(find.text('À payer'), findsWidgets);
 
     await _disposeTree(tester);
   });

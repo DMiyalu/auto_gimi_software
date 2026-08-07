@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:audioplayers/audioplayers.dart';
+import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -40,6 +42,24 @@ class CommandeDetailScreen extends ConsumerStatefulWidget {
 
 class _CommandeDetailScreenState extends ConsumerState<CommandeDetailScreen> {
   int _tabIndex = 0;
+  late final ConfettiController _confettiController;
+  late final AudioPlayer _paymentSoundPlayer;
+
+  @override
+  void initState() {
+    super.initState();
+    _confettiController = ConfettiController(
+      duration: const Duration(milliseconds: 2200),
+    );
+    _paymentSoundPlayer = AudioPlayer();
+  }
+
+  @override
+  void dispose() {
+    _confettiController.dispose();
+    _paymentSoundPlayer.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,71 +86,96 @@ class _CommandeDetailScreenState extends ConsumerState<CommandeDetailScreen> {
           );
         }
 
-        final isCanceled = item.statusKey == 'annulees';
-        return Scaffold(
-          extendBody: true,
-          backgroundColor: Colors.white,
-          bottomNavigationBar: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (_tabIndex == 0 && !isCanceled)
-                _TotalBar(totalAmount: item.totalAmount),
-              if (_tabIndex == 1) _PrintInvoiceBar(onPrint: () => _printInvoice(item)),
-              const PrimaryBottomNavigation(location: Routes.dashboard),
-            ],
-          ),
-          body: SafeArea(
-            bottom: false,
-            child: Column(
-              children: [
-                _DetailHeader(
-                  commande: item,
-                  onBack: () => context.pop(),
-                  onMore: () => _showActionsSheet(context, item),
-                  onPrint: () => _printInvoice(item),
-                ),
-                _SegmentedTabs(
-                  selectedIndex: _tabIndex,
-                  onChanged: (index) => setState(() => _tabIndex = index),
-                ),
-                Expanded(
-                  child: IndexedStack(
-                    index: _tabIndex,
-                    children: [
-                      _ProductsTab(
-                        lines: lines,
-                        totalLineCount: lines.length,
-                        isCanceled: isCanceled,
-                        isLoading: state.isLoading,
-                        onAddProduct: isCanceled
-                            ? null
-                            : () => _showAddProductSheet(context),
-                        onIncrement: (line) => ref
-                            .read(commandeControllerProvider.notifier)
-                            .addProduitLine(
-                              commandeId: widget.commandeId,
-                              produitId: line.produitId,
-                            ),
-                        onDecrement: (line) => ref
-                            .read(commandeControllerProvider.notifier)
-                            .decrementLine(lineId: line.id),
-                        onRemove: (line) => ref
-                            .read(commandeControllerProvider.notifier)
-                            .removeLine(lineId: line.id),
+        final isCanceled = item.isCanceled;
+        return Stack(
+          alignment: Alignment.topCenter,
+          children: [
+            Scaffold(
+              extendBody: true,
+              backgroundColor: Colors.white,
+              bottomNavigationBar: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (!isCanceled)
+                    _ActionsBar(
+                      commande: item,
+                      onPrint: () => _printInvoice(item),
+                      onCollectPayment: () => _collectPayment(item),
+                    ),
+                  const PrimaryBottomNavigation(location: Routes.dashboard),
+                ],
+              ),
+              body: SafeArea(
+                bottom: false,
+                child: Column(
+                  children: [
+                    _DetailHeader(
+                      commande: item,
+                      onBack: () => context.pop(),
+                      onMore: () => _showActionsSheet(context, item),
+                      onPrint: () => _printInvoice(item),
+                      onCollectPayment: () => _collectPayment(item),
+                    ),
+                    _SegmentedTabs(
+                      selectedIndex: _tabIndex,
+                      onChanged: (index) => setState(() => _tabIndex = index),
+                    ),
+                    Expanded(
+                      child: IndexedStack(
+                        index: _tabIndex,
+                        children: [
+                          _ProductsTab(
+                            lines: lines,
+                            totalLineCount: lines.length,
+                            isCanceled: isCanceled,
+                            isLoading: state.isLoading,
+                            onAddProduct: isCanceled
+                                ? null
+                                : () => _showAddProductSheet(context),
+                            onIncrement: (line) => ref
+                                .read(commandeControllerProvider.notifier)
+                                .addProduitLine(
+                                  commandeId: widget.commandeId,
+                                  produitId: line.produitId,
+                                ),
+                            onDecrement: (line) => ref
+                                .read(commandeControllerProvider.notifier)
+                                .decrementLine(lineId: line.id),
+                            onRemove: (line) => ref
+                                .read(commandeControllerProvider.notifier)
+                                .removeLine(lineId: line.id),
+                          ),
+                          _DetailsTab(
+                            commande: item,
+                            lines: lines,
+                            isCanceled: isCanceled,
+                            onViewProducts: () => setState(() => _tabIndex = 0),
+                          ),
+                        ],
                       ),
-                      _DetailsTab(
-                        commande: item,
-                        lines: lines,
-                        isCanceled: isCanceled,
-                        onViewProducts: () =>
-                            setState(() => _tabIndex = 0),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
+            IgnorePointer(
+              child: ConfettiWidget(
+                confettiController: _confettiController,
+                blastDirectionality: BlastDirectionality.explosive,
+                shouldLoop: false,
+                numberOfParticles: 24,
+                maxBlastForce: 22,
+                minBlastForce: 8,
+                gravity: 0.4,
+                colors: const [
+                  AppColors.violetPrincipal,
+                  AppColors.bleuRoyal,
+                  AppColors.cyan,
+                  AppColors.violetClair,
+                ],
+              ),
+            ),
+          ],
         );
       },
       loading: () => Scaffold(
@@ -155,6 +200,9 @@ class _CommandeDetailScreenState extends ConsumerState<CommandeDetailScreen> {
   }
 
   Future<void> _printInvoice(CommandeEntity commande) async {
+    final confirmed = await confirmPrintInvoice(context, ref);
+    if (!confirmed || !mounted) return;
+
     final establishment = await ref.read(currentEstablishmentProvider.future);
     final lines = await ref.read(commandeLinesProvider(commande.id).future);
     final client = commande.clientId != null
@@ -162,10 +210,7 @@ class _CommandeDetailScreenState extends ConsumerState<CommandeDetailScreen> {
         : null;
     final facture = await ref.read(
       factureForActivityProvider(
-        BillingActivityRef(
-          type: BillingActivityType.commande,
-          id: commande.id,
-        ),
+        BillingActivityRef(type: BillingActivityType.commande, id: commande.id),
       ).future,
     );
 
@@ -194,11 +239,48 @@ class _CommandeDetailScreenState extends ConsumerState<CommandeDetailScreen> {
       statusLabel: facture?.status.label ?? commande.statusLabel,
     );
 
-    await printInvoiceTicket(context, ref, data);
+    final success = await printInvoiceTicket(context, ref, data);
+    if (success && commande.isEditable) {
+      await ref
+          .read(commandeControllerProvider.notifier)
+          .markAwaitingPayment(commandeId: commande.id);
+    }
+  }
+
+  Future<void> _collectPayment(CommandeEntity commande) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) =>
+          _PaymentConfirmationDialog(totalAmount: commande.totalAmount),
+    );
+    if (confirmed != true || !mounted) return;
+
+    await ref
+        .read(commandeControllerProvider.notifier)
+        .registerPayment(commandeId: commande.id);
+    if (!mounted) return;
+    if (ref.read(commandeControllerProvider).hasError) return;
+
+    await _celebratePayment();
+  }
+
+  Future<void> _celebratePayment() async {
+    HapticFeedback.mediumImpact();
+    _confettiController.play();
+    // Best-effort : un souci de plugin audio (plateforme, permissions,
+    // sortie audio indisponible) ne doit jamais faire échouer le paiement.
+    unawaited(
+      _paymentSoundPlayer
+          .play(AssetSource('audio/cash_success.wav'))
+          .catchError((_) {}),
+    );
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Paiement encaissé — commande clôturée.')),
+    );
   }
 
   void _showActionsSheet(BuildContext context, CommandeEntity commande) {
-    final isCanceled = commande.statusKey == 'annulees';
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: Colors.white,
@@ -218,7 +300,16 @@ class _CommandeDetailScreenState extends ConsumerState<CommandeDetailScreen> {
                     _printInvoice(commande);
                   },
                 ),
-                if (!isCanceled)
+                if (commande.canCollectPayment)
+                  ListTile(
+                    leading: const Icon(Icons.payments_outlined),
+                    title: const Text('Encaisser le paiement'),
+                    onTap: () {
+                      Navigator.of(sheetContext).pop();
+                      _collectPayment(commande);
+                    },
+                  ),
+                if (commande.canBeCanceled)
                   ListTile(
                     leading: const Icon(
                       Icons.cancel_outlined,
@@ -247,12 +338,14 @@ class _DetailHeader extends StatelessWidget {
     required this.onBack,
     required this.onMore,
     required this.onPrint,
+    required this.onCollectPayment,
   });
 
   final CommandeEntity commande;
   final VoidCallback onBack;
   final VoidCallback onMore;
   final VoidCallback onPrint;
+  final VoidCallback onCollectPayment;
 
   @override
   Widget build(BuildContext context) {
@@ -312,6 +405,14 @@ class _DetailHeader extends StatelessWidget {
             onTap: onPrint,
             iconSize: 30,
           ),
+          if (commande.canCollectPayment) ...[
+            const SizedBox(width: 14),
+            _CircleActionButton(
+              icon: Icons.payments_outlined,
+              onTap: onCollectPayment,
+              iconSize: 30,
+            ),
+          ],
           const SizedBox(width: 14),
           _CircleActionButton(
             icon: Icons.more_horiz_rounded,
@@ -406,11 +507,14 @@ class _TabButton extends StatelessWidget {
                 ),
               ),
             ),
-            AnimatedContainer(
+            AnimatedOpacity(
               duration: const Duration(milliseconds: 160),
-              height: 3,
-              width: selected ? double.infinity : 0,
-              color: AppColors.violetPrincipal,
+              opacity: selected ? 1 : 0,
+              child: Container(
+                height: 3,
+                width: double.infinity,
+                color: AppColors.violetPrincipal,
+              ),
             ),
           ],
         ),
@@ -844,10 +948,19 @@ class _EmptyProductsHint extends StatelessWidget {
   }
 }
 
-class _TotalBar extends StatelessWidget {
-  const _TotalBar({required this.totalAmount});
+/// Barre d'actions du bas, commune aux deux onglets ("Produits" et
+/// "Détails") : total de la commande, impression de la facture et
+/// encaissement du paiement.
+class _ActionsBar extends StatelessWidget {
+  const _ActionsBar({
+    required this.commande,
+    required this.onPrint,
+    required this.onCollectPayment,
+  });
 
-  final double totalAmount;
+  final CommandeEntity commande;
+  final VoidCallback onPrint;
+  final VoidCallback onCollectPayment;
 
   static final _amountFormat = NumberFormat('#,##0', 'fr');
 
@@ -858,8 +971,7 @@ class _TotalBar extends StatelessWidget {
       bottom: false,
       minimum: const EdgeInsets.fromLTRB(18, 0, 18, 10),
       child: Container(
-        height: 112,
-        padding: const EdgeInsets.fromLTRB(32, 16, 32, 16),
+        padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
         decoration: BoxDecoration(
           color: Colors.white,
           border: Border.all(color: const Color(0xFFE6E8EF)),
@@ -872,51 +984,83 @@ class _TotalBar extends StatelessWidget {
             ),
           ],
         ),
-        child: Row(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
+            Row(
               children: [
                 const Text(
                   'Total',
                   style: TextStyle(
                     color: Color(0xFF707792),
-                    fontSize: 18,
+                    fontSize: 15,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(width: 10),
                 Text(
-                  '${_amountFormat.format(totalAmount)} FC',
+                  '${_amountFormat.format(commande.totalAmount)} FC',
                   style: const TextStyle(
                     color: Color(0xFF101529),
-                    fontSize: 28,
+                    fontSize: 22,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
+                if (commande.isClosed) ...[const Spacer(), const _PaidBadge()],
               ],
             ),
-            const Spacer(),
-            SizedBox(
-              height: 58,
-              child: FilledButton.icon(
-                onPressed: () {},
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.violetPrincipal,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 32),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  textStyle: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w900,
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    height: 54,
+                    child: OutlinedButton.icon(
+                      onPressed: onPrint,
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.violetPrincipal,
+                        side: const BorderSide(
+                          color: AppColors.violetPrincipal,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        textStyle: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      icon: const Icon(Icons.print_outlined, size: 22),
+                      label: const Text('Imprimer facture'),
+                    ),
                   ),
                 ),
-                icon: const Icon(Icons.save_outlined, size: 30),
-                label: const Text('Enregistrer la commande'),
-              ),
+                if (commande.canCollectPayment) ...[
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: SizedBox(
+                      height: 54,
+                      child: FilledButton.icon(
+                        onPressed: onCollectPayment,
+                        style: FilledButton.styleFrom(
+                          backgroundColor: AppColors.vertPrincipal,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          textStyle: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        icon: const Icon(Icons.payments_outlined, size: 22),
+                        label: const Text('Encaisser paiement'),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
             ),
           ],
         ),
@@ -925,36 +1069,86 @@ class _TotalBar extends StatelessWidget {
   }
 }
 
-class _PrintInvoiceBar extends StatelessWidget {
-  const _PrintInvoiceBar({required this.onPrint});
-
-  final VoidCallback onPrint;
+class _PaidBadge extends StatelessWidget {
+  const _PaidBadge();
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      top: false,
-      bottom: false,
-      minimum: const EdgeInsets.fromLTRB(18, 0, 18, 10),
-      child: SizedBox(
-        height: 64,
-        child: FilledButton.icon(
-          onPressed: onPrint,
-          style: FilledButton.styleFrom(
-            backgroundColor: AppColors.vertPrincipal,
-            foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: AppColors.vertPrincipal.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: const Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.check_circle_rounded,
+            color: AppColors.vertPrincipal,
+            size: 15,
+          ),
+          SizedBox(width: 5),
+          Text(
+            'Payée',
+            style: TextStyle(
+              color: AppColors.vertPrincipal,
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
             ),
-            textStyle: const TextStyle(
-              fontSize: 18,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PaymentConfirmationDialog extends StatelessWidget {
+  const _PaymentConfirmationDialog({required this.totalAmount});
+
+  final double totalAmount;
+
+  static final _amountFormat = NumberFormat('#,##0', 'fr');
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      title: const Text('Encaisser le paiement'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Le total à encaisser est :',
+            style: TextStyle(color: Color(0xFF707792), fontSize: 14),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '${_amountFormat.format(totalAmount)} FC',
+            style: const TextStyle(
+              color: Color(0xFF101529),
+              fontSize: 30,
               fontWeight: FontWeight.w900,
             ),
           ),
-          icon: const Icon(Icons.print_outlined, size: 26),
-          label: const Text('Imprimer facture'),
-        ),
+        ],
       ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: const Text('Annuler'),
+        ),
+        FilledButton.icon(
+          style: FilledButton.styleFrom(
+            backgroundColor: AppColors.vertPrincipal,
+            foregroundColor: Colors.white,
+          ),
+          onPressed: () => Navigator.of(context).pop(true),
+          icon: const Icon(Icons.payments_outlined),
+          label: const Text('Argent encaissé'),
+        ),
+      ],
     );
   }
 }
@@ -983,59 +1177,21 @@ class _DetailsTabState extends ConsumerState<_DetailsTab> {
 
   late CountryDialCode _country = _defaultCountry;
   final _localController = TextEditingController();
-  Timer? _debounce;
-  bool _searching = false;
-  bool _notFound = false;
 
   @override
   void dispose() {
-    _debounce?.cancel();
     _localController.dispose();
     super.dispose();
   }
 
-  void _handlePhoneChanged(String _) {
-    setState(() => _notFound = false);
-    _debounce?.cancel();
-    final digits = PhoneAuthMapper.normalize(_localController.text);
-    if (digits.length < 8) return;
-    _debounce = Timer(const Duration(milliseconds: 450), _lookupPhone);
-  }
-
-  Future<void> _lookupPhone() async {
-    final establishment = ref.read(currentEstablishmentProvider).valueOrNull;
-    if (establishment == null) return;
-    final fullPhone = PhoneAuthMapper.combine(
-      dialCode: _country.dialCode,
-      localNumber: _localController.text,
-    );
-
-    setState(() => _searching = true);
-    final client = await ref
-        .read(clientRepositoryProvider)
-        .findByPhone(establishmentId: establishment.id, phone: fullPhone);
+  Future<void> _selectClient(ClientEntity client) async {
+    await ref
+        .read(commandeControllerProvider.notifier)
+        .attachClient(commandeId: widget.commande.id, clientId: client.id);
     if (!mounted) return;
-    setState(() {
-      _searching = false;
-      _notFound = client == null;
-    });
-
-    if (client != null) {
-      await ref
-          .read(commandeControllerProvider.notifier)
-          .attachClient(commandeId: widget.commande.id, clientId: client.id);
-      if (mounted) _localController.clear();
+    if (!ref.read(commandeControllerProvider).hasError) {
+      setState(_localController.clear);
     }
-  }
-
-  void _openClientPicker() {
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(borderRadius: AppRadius.sheetRadius),
-      builder: (_) => _ClientPickerSheet(commandeId: widget.commande.id),
-    );
   }
 
   @override
@@ -1045,6 +1201,12 @@ class _DetailsTabState extends ConsumerState<_DetailsTab> {
         ? null
         : ref.watch(clientByIdProvider(clientId));
     final enabled = !widget.isCanceled;
+    final digits = PhoneAuthMapper.normalize(_localController.text);
+    final suggestions = digits.isEmpty
+        ? const <ClientEntity>[]
+        : (ref.watch(clientsProvider).valueOrNull ?? const <ClientEntity>[])
+              .where((client) => client.whatsappPhone.contains(digits))
+              .toList();
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(18, 30, 18, 230),
@@ -1063,23 +1225,15 @@ class _DetailsTabState extends ConsumerState<_DetailsTab> {
           controller: _localController,
           enabled: enabled,
           onCountryChanged: (country) => setState(() => _country = country),
-          onChanged: _handlePhoneChanged,
+          onChanged: (_) => setState(() {}),
         ),
-        if (_searching || _notFound) ...[
-          const SizedBox(height: 8),
-          Text(
-            _searching
-                ? 'Recherche en cours…'
-                : 'Aucun client trouvé avec ce numéro.',
-            style: const TextStyle(
-              color: Color(0xFF707792),
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-            ),
+        if (enabled && digits.isNotEmpty) ...[
+          const SizedBox(height: 10),
+          _ClientSuggestionsPanel(
+            clients: suggestions,
+            onSelect: _selectClient,
           ),
         ],
-        const SizedBox(height: 14),
-        _ClientSearchTrigger(enabled: enabled, onTap: _openClientPicker),
         if (clientAsync != null) ...[
           const SizedBox(height: 18),
           clientAsync.when(
@@ -1149,7 +1303,10 @@ class _DetailsTabState extends ConsumerState<_DetailsTab> {
           const Text(
             'Commande annulée : les produits ont été remis en stock.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: Color(0xFF707792), fontWeight: FontWeight.w600),
+            style: TextStyle(
+              color: Color(0xFF707792),
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ],
       ],
@@ -1199,7 +1356,10 @@ class _PhoneEntryField extends StatelessWidget {
                       (c) => Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(c.flagEmoji, style: const TextStyle(fontSize: 18)),
+                          Text(
+                            c.flagEmoji,
+                            style: const TextStyle(fontSize: 18),
+                          ),
                           const SizedBox(width: 6),
                           Text(
                             c.displayCode,
@@ -1260,48 +1420,139 @@ class _PhoneEntryField extends StatelessWidget {
   }
 }
 
-class _ClientSearchTrigger extends StatelessWidget {
-  const _ClientSearchTrigger({required this.enabled, required this.onTap});
+/// Résultats affichés en direct sous le champ téléphone, au fil de la
+/// saisie — même traitement visuel que `_TablePickerSheet` (carte
+/// arrondie, fond gris clair) pour une expérience cohérente entre la
+/// sélection de table et celle du client.
+class _ClientSuggestionsPanel extends StatelessWidget {
+  const _ClientSuggestionsPanel({
+    required this.clients,
+    required this.onSelect,
+  });
 
-  final bool enabled;
+  final List<ClientEntity> clients;
+  final ValueChanged<ClientEntity> onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: const BoxConstraints(maxHeight: 260),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8F9FC),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFE6E8EF)),
+      ),
+      child: clients.isEmpty
+          ? const Padding(
+              padding: EdgeInsets.symmetric(vertical: 22, horizontal: 16),
+              child: Text(
+                'Aucun client trouvé avec ce numéro.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Color(0xFF707792),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            )
+          : ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: ListView.separated(
+                padding: const EdgeInsets.all(8),
+                shrinkWrap: true,
+                physics: const BouncingScrollPhysics(),
+                itemCount: clients.length,
+                separatorBuilder: (_, _) => const SizedBox(height: 6),
+                itemBuilder: (context, index) {
+                  final client = clients[index];
+                  return _ClientSuggestionTile(
+                    client: client,
+                    index: index,
+                    onTap: () => onSelect(client),
+                  );
+                },
+              ),
+            ),
+    );
+  }
+}
+
+class _ClientSuggestionTile extends StatelessWidget {
+  const _ClientSuggestionTile({
+    required this.client,
+    required this.index,
+    required this.onTap,
+  });
+
+  final ClientEntity client;
+  final int index;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: enabled ? onTap : null,
-        child: Container(
-          height: 64,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          decoration: BoxDecoration(
-            border: Border.all(color: const Color(0xFFE6E8EF)),
-            borderRadius: BorderRadius.circular(16),
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: Duration(milliseconds: 160 + (index.clamp(0, 5) * 30)),
+      curve: Curves.easeOutCubic,
+      builder: (context, value, child) {
+        return Opacity(
+          opacity: value,
+          child: Transform.translate(
+            offset: Offset(0, (1 - value) * 8),
+            child: child,
           ),
-          child: Row(
-            children: [
-              const Icon(
-                Icons.search_rounded,
-                color: Color(0xFF707792),
-                size: 26,
-              ),
-              const SizedBox(width: 12),
-              const Expanded(
-                child: Text(
-                  'Rechercher un client par téléphone',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: Color(0xFF9AA0B7),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
+        );
+      },
+      child: Material(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: onTap,
+          child: SizedBox(
+            height: 58,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              child: Row(
+                children: [
+                  ClientAvatar(client: client),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          client.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Color(0xFF101529),
+                            fontSize: 15,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          client.displayPhone,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Color(0xFF707792),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
+                  const Icon(
+                    Icons.chevron_right_rounded,
+                    color: AppColors.violetPrincipal,
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
@@ -1488,226 +1739,6 @@ class _ArticlesSummaryCard extends StatelessWidget {
             ],
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _ClientPickerSheet extends ConsumerStatefulWidget {
-  const _ClientPickerSheet({required this.commandeId});
-
-  final String commandeId;
-
-  @override
-  ConsumerState<_ClientPickerSheet> createState() =>
-      _ClientPickerSheetState();
-}
-
-class _ClientPickerSheetState extends ConsumerState<_ClientPickerSheet> {
-  final _searchController = TextEditingController();
-  String _query = '';
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _select(ClientEntity client) async {
-    await ref
-        .read(commandeControllerProvider.notifier)
-        .attachClient(commandeId: widget.commandeId, clientId: client.id);
-    if (!mounted) return;
-    final state = ref.read(commandeControllerProvider);
-    if (!state.hasError) Navigator.of(context).pop();
-  }
-
-  List<ClientEntity> _filter(List<ClientEntity> clients) {
-    final query = _query.trim().toLowerCase();
-    if (query.isEmpty) return clients;
-    final digits = PhoneAuthMapper.normalize(query);
-    return clients.where((client) {
-      final matchesName = client.name.toLowerCase().contains(query);
-      final matchesPhone =
-          digits.isNotEmpty && client.whatsappPhone.contains(digits);
-      return matchesName || matchesPhone;
-    }).toList();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final clients = ref.watch(clientsProvider).valueOrNull ?? [];
-    final filtered = _filter(clients);
-    final state = ref.watch(commandeControllerProvider);
-
-    return SafeArea(
-      top: false,
-      child: FractionallySizedBox(
-        heightFactor: 0.85,
-        alignment: Alignment.bottomCenter,
-        child: Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-          ),
-          child: Column(
-            children: [
-              const SizedBox(height: 12),
-              Center(
-                child: Container(
-                  width: 48,
-                  height: 5,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFD7DAE5),
-                    borderRadius: BorderRadius.circular(100),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(18, 18, 18, 12),
-                child: Row(
-                  children: [
-                    _CircleActionButton(
-                      icon: Icons.close_rounded,
-                      onTap: () => Navigator.of(context).pop(),
-                      iconSize: 26,
-                    ),
-                    const SizedBox(width: 16),
-                    const Expanded(
-                      child: Text(
-                        'Choisir un client',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Color(0xFF101529),
-                          fontSize: 20,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 60),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 18),
-                child: SizedBox(
-                  height: 56,
-                  child: TextField(
-                    controller: _searchController,
-                    autofocus: true,
-                    onChanged: (value) => setState(() => _query = value),
-                    decoration: InputDecoration(
-                      hintText: 'Rechercher un client par téléphone',
-                      hintStyle: const TextStyle(
-                        color: Color(0xFF9AA0B7),
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      prefixIcon: const Icon(
-                        Icons.search_rounded,
-                        color: Color(0xFF707792),
-                      ),
-                      filled: true,
-                      fillColor: Colors.white,
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(
-                          color: Color(0xFFE6E8EF),
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(
-                          color: AppColors.violetPrincipal,
-                        ),
-                      ),
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              Expanded(
-                child: filtered.isEmpty
-                    ? const Center(
-                        child: Text(
-                          'Aucun client trouvé.',
-                          style: TextStyle(
-                            color: Color(0xFF707792),
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      )
-                    : ListView.separated(
-                        padding: const EdgeInsets.fromLTRB(18, 0, 18, 18),
-                        itemCount: filtered.length,
-                        separatorBuilder: (_, _) => const SizedBox(height: 8),
-                        itemBuilder: (context, index) {
-                          final client = filtered[index];
-                          return Material(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(14),
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(14),
-                              onTap: state.isLoading
-                                  ? null
-                                  : () => _select(client),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 14,
-                                  vertical: 12,
-                                ),
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                    color: const Color(0xFFE6E8EF),
-                                  ),
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                                child: Row(
-                                  children: [
-                                    ClientAvatar(client: client),
-                                    const SizedBox(width: 14),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            client.name,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                              color: Color(0xFF101529),
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w800,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 3),
-                                          Text(
-                                            client.displayPhone,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                              color: Color(0xFF707792),
-                                              fontSize: 13,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

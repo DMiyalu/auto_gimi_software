@@ -84,10 +84,9 @@ abstract final class BusinessModuleConfigs {
     activityIcon: Icons.restaurant_outlined,
     statusFilters: const [
       StatusFilterOption(key: 'all', label: 'Toutes'),
-      StatusFilterOption(key: 'en_attente', label: 'En attente'),
-      StatusFilterOption(key: 'en_preparation', label: 'En préparation'),
-      StatusFilterOption(key: 'pretes', label: 'Prêtes'),
-      StatusFilterOption(key: 'livraison', label: 'Livraison'),
+      StatusFilterOption(key: 'en_cours', label: 'En cours'),
+      StatusFilterOption(key: 'a_payer', label: 'À payer'),
+      StatusFilterOption(key: 'cloturee', label: 'Clôturées'),
       StatusFilterOption(key: 'annulees', label: 'Annulées'),
     ],
     catalogTab: const CatalogTabConfig(

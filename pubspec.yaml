@@ -32,6 +32,8 @@ dependencies:
   flutter_slidable: ^4.0.3
   print_bluetooth_thermal: ^1.2.1
   esc_pos_utils_plus: ^2.0.4
+  confetti: ^0.8.0
+  audioplayers: ^6.7.1
 
 dev_dependencies:
   flutter_test:
@@ -48,3 +50,4 @@ flutter:
   assets:
     - public/images/logo.png
     - public/images/icon.png
+    - public/audio/cash_success.wav

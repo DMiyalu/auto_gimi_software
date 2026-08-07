@@ -16,11 +16,7 @@ class StatusFilterOption {
 /// action, l'UI affiche un message "bientôt disponible" au lieu de naviguer
 /// vers du code mort.
 class FabActionConfig {
-  const FabActionConfig({
-    required this.label,
-    required this.icon,
-    this.route,
-  });
+  const FabActionConfig({required this.label, required this.icon, this.route});
 
   final String label;
   final IconData icon;

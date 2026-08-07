@@ -3984,7 +3984,7 @@ class $CommandesTable extends Commandes
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: false,
-    defaultValue: const Constant('en_attente'),
+    defaultValue: const Constant('en_cours'),
   );
   static const VerificationMeta _contexteMeta = const VerificationMeta(
     'contexte',

@@ -102,25 +102,208 @@ void main() {
     },
   );
 
-  test('observe une commande et persiste le changement de statut', () async {
+  test('une commande nait au statut en_cours', () async {
     final commande = await commandeRepository.createCommande(
       establishmentId: 'est-1',
-      context: 'Livraison',
     );
 
-    await commandeRepository.setStatus(
+    expect(commande.statusKey, 'en_cours');
+    expect(commande.statusLabel, 'En cours');
+  });
+
+  test(
+    'imprimer la facture (markAwaitingPayment) fait passer en_cours -> a_payer',
+    () async {
+      final commande = await commandeRepository.createCommande(
+        establishmentId: 'est-1',
+        context: 'Livraison',
+      );
+
+      await commandeRepository.markAwaitingPayment(
+        establishmentId: 'est-1',
+        commandeId: commande.id,
+      );
+
+      final updated = await commandeRepository
+          .watchCommande(establishmentId: 'est-1', id: commande.id)
+          .first;
+
+      expect(updated!.statusKey, 'a_payer');
+      expect(updated.statusLabel, 'À payer');
+    },
+  );
+
+  test('markAwaitingPayment est idempotent quand deja a_payer', () async {
+    final commande = await commandeRepository.createCommande(
+      establishmentId: 'est-1',
+    );
+    await commandeRepository.markAwaitingPayment(
       establishmentId: 'est-1',
       commandeId: commande.id,
-      statusKey: 'en_preparation',
+    );
+
+    await commandeRepository.markAwaitingPayment(
+      establishmentId: 'est-1',
+      commandeId: commande.id,
     );
 
     final updated = await commandeRepository
         .watchCommande(establishmentId: 'est-1', id: commande.id)
         .first;
-
-    expect(updated!.statusKey, 'en_preparation');
-    expect(updated.statusLabel, 'En préparation');
+    expect(updated!.statusKey, 'a_payer');
   });
+
+  test(
+    'encaisser le paiement (registerPayment) depuis a_payer cloture la commande',
+    () async {
+      final commande = await commandeRepository.createCommande(
+        establishmentId: 'est-1',
+      );
+      await commandeRepository.markAwaitingPayment(
+        establishmentId: 'est-1',
+        commandeId: commande.id,
+      );
+
+      await commandeRepository.registerPayment(
+        establishmentId: 'est-1',
+        commandeId: commande.id,
+      );
+
+      final updated = await commandeRepository
+          .watchCommande(establishmentId: 'est-1', id: commande.id)
+          .first;
+      expect(updated!.statusKey, 'cloturee');
+      expect(updated.statusLabel, 'Clôturée');
+    },
+  );
+
+  test(
+    'encaisser le paiement sans facture imprimee cloture directement depuis en_cours',
+    () async {
+      final commande = await commandeRepository.createCommande(
+        establishmentId: 'est-1',
+      );
+
+      await commandeRepository.registerPayment(
+        establishmentId: 'est-1',
+        commandeId: commande.id,
+      );
+
+      final updated = await commandeRepository
+          .watchCommande(establishmentId: 'est-1', id: commande.id)
+          .first;
+      expect(updated!.statusKey, 'cloturee');
+    },
+  );
+
+  test('registerPayment est idempotent quand deja cloturee', () async {
+    final commande = await commandeRepository.createCommande(
+      establishmentId: 'est-1',
+    );
+    await commandeRepository.registerPayment(
+      establishmentId: 'est-1',
+      commandeId: commande.id,
+    );
+
+    await commandeRepository.registerPayment(
+      establishmentId: 'est-1',
+      commandeId: commande.id,
+    );
+
+    final updated = await commandeRepository
+        .watchCommande(establishmentId: 'est-1', id: commande.id)
+        .first;
+    expect(updated!.statusKey, 'cloturee');
+  });
+
+  test(
+    'une commande cloturee ne peut plus etre modifiee ni annulee, mais reste imprimable',
+    () async {
+      final produit = await produitRepository.createProduit(
+        establishmentId: 'est-1',
+        name: 'Poulet braisé',
+        price: 10,
+        currency: AppCurrency.usd,
+        stock: 5,
+      );
+      final commande = await commandeRepository.createCommande(
+        establishmentId: 'est-1',
+      );
+      await commandeRepository.registerPayment(
+        establishmentId: 'est-1',
+        commandeId: commande.id,
+      );
+
+      await expectLater(
+        commandeRepository.addProduitLine(
+          establishmentId: 'est-1',
+          commandeId: commande.id,
+          produitId: produit.id,
+        ),
+        throwsA(isA<StateError>()),
+      );
+      await expectLater(
+        commandeRepository.cancelCommande(
+          establishmentId: 'est-1',
+          commandeId: commande.id,
+        ),
+        throwsA(isA<StateError>()),
+      );
+      await expectLater(
+        commandeRepository.markAwaitingPayment(
+          establishmentId: 'est-1',
+          commandeId: commande.id,
+        ),
+        throwsA(isA<StateError>()),
+      );
+
+      // L'impression (relecture de la facture) reste possible : aucune
+      // exception à la simple lecture de la commande clôturée.
+      final stillReadable = await commandeRepository
+          .watchCommande(establishmentId: 'est-1', id: commande.id)
+          .first;
+      expect(stillReadable!.statusKey, 'cloturee');
+    },
+  );
+
+  test(
+    'une commande a_payer peut encore etre annulee mais plus modifiee',
+    () async {
+      final produit = await produitRepository.createProduit(
+        establishmentId: 'est-1',
+        name: 'Jus de gingembre',
+        price: 4,
+        currency: AppCurrency.usd,
+        stock: 5,
+      );
+      final commande = await commandeRepository.createCommande(
+        establishmentId: 'est-1',
+      );
+      await commandeRepository.markAwaitingPayment(
+        establishmentId: 'est-1',
+        commandeId: commande.id,
+      );
+
+      await expectLater(
+        commandeRepository.addProduitLine(
+          establishmentId: 'est-1',
+          commandeId: commande.id,
+          produitId: produit.id,
+        ),
+        throwsA(isA<StateError>()),
+      );
+
+      await commandeRepository.cancelCommande(
+        establishmentId: 'est-1',
+        commandeId: commande.id,
+      );
+
+      final updated = await commandeRepository
+          .watchCommande(establishmentId: 'est-1', id: commande.id)
+          .first;
+      expect(updated!.statusKey, 'annulees');
+    },
+  );
 
   test('fusionne deux ajouts du meme produit sur une commande', () async {
     final produit = await produitRepository.createProduit(
@@ -295,10 +478,17 @@ void main() {
     );
 
     await expectLater(
-      commandeRepository.setStatus(
+      commandeRepository.markAwaitingPayment(
         establishmentId: 'est-1',
         commandeId: commande.id,
-        statusKey: 'en_preparation',
+      ),
+      throwsA(isA<StateError>()),
+    );
+
+    await expectLater(
+      commandeRepository.registerPayment(
+        establishmentId: 'est-1',
+        commandeId: commande.id,
       ),
       throwsA(isA<StateError>()),
     );

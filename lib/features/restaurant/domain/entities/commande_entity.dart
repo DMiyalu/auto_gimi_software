@@ -24,26 +24,51 @@ class CommandeEntity {
   final double totalAmount;
   final DateTime createdAt;
   final DateTime updatedAt;
+
+  /// En cours : seul statut où les lignes et le client peuvent être modifiés.
+  bool get isEditable => statusKey == CommandeStatus.enCours;
+
+  /// En cours ou à payer : la commande peut encore être annulée.
+  bool get canBeCanceled =>
+      statusKey == CommandeStatus.enCours || statusKey == CommandeStatus.aPayer;
+
+  /// En cours ou à payer : de l'argent peut encore être encaissé.
+  bool get canCollectPayment =>
+      statusKey == CommandeStatus.enCours || statusKey == CommandeStatus.aPayer;
+
+  bool get isClosed => statusKey == CommandeStatus.cloturee;
+
+  bool get isCanceled => statusKey == CommandeStatus.annulees;
+}
+
+/// Clés de statut d'une commande — seule source de vérité pour éviter les
+/// chaînes magiques dupliquées entre repository, controller et UI.
+///
+/// Cycle de vie : [enCours] → [aPayer] → [cloturee]. [annulees] est un
+/// statut exceptionnel atteignable depuis [enCours] ou [aPayer] uniquement.
+abstract final class CommandeStatus {
+  static const enCours = 'en_cours';
+  static const aPayer = 'a_payer';
+  static const cloturee = 'cloturee';
+  static const annulees = 'annulees';
 }
 
 String commandeStatusLabel(String key) {
   return switch (key) {
-    'en_attente' => 'En attente',
-    'en_preparation' => 'En préparation',
-    'pretes' => 'Prête',
-    'livraison' => 'Livraison',
-    'annulees' => 'Annulée',
+    CommandeStatus.enCours => 'En cours',
+    CommandeStatus.aPayer => 'À payer',
+    CommandeStatus.cloturee => 'Clôturée',
+    CommandeStatus.annulees => 'Annulée',
     _ => key,
   };
 }
 
 Color commandeStatusColor(String key) {
   return switch (key) {
-    'en_attente' => AppColors.violetClair,
-    'en_preparation' => AppColors.violetPrincipal,
-    'pretes' => AppColors.bleuRoyal,
-    'livraison' => AppColors.cyan,
-    'annulees' => Colors.grey.shade500,
+    CommandeStatus.enCours => AppColors.violetClair,
+    CommandeStatus.aPayer => AppColors.violetPrincipal,
+    CommandeStatus.cloturee => AppColors.bleuRoyal,
+    CommandeStatus.annulees => Colors.grey.shade500,
     _ => Colors.blueGrey.shade500,
   };
 }

@@ -17,9 +17,7 @@ class ActivityDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final item = this.item;
     if (item == null) {
-      return const Scaffold(
-        body: Center(child: Text('Activité introuvable')),
-      );
+      return const Scaffold(body: Center(child: Text('Activité introuvable')));
     }
 
     final colorScheme = Theme.of(context).colorScheme;
@@ -34,19 +32,26 @@ class ActivityDetailScreen extends StatelessWidget {
               CircleAvatar(
                 radius: 28,
                 backgroundColor: item.statusColor.withValues(alpha: 0.12),
-                child: Icon(item.leadingIcon, color: item.statusColor, size: 28),
+                child: Icon(
+                  item.leadingIcon,
+                  color: item.statusColor,
+                  size: 28,
+                ),
               ),
               const SizedBox(width: AppSpacing.xs),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(item.title, style: Theme.of(context).textTheme.titleLarge),
+                    Text(
+                      item.title,
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
                     Text(
                       DateFormat.yMMMd('fr').add_Hm().format(item.time),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                          ),
+                        color: colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   ],
                 ),
@@ -63,9 +68,9 @@ class ActivityDetailScreen extends StatelessWidget {
                 child: Text(
                   item.statusLabel,
                   style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: item.statusColor,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    color: item.statusColor,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],
@@ -76,7 +81,11 @@ class ActivityDetailScreen extends StatelessWidget {
             const SizedBox(height: AppSpacing.xs),
             Row(
               children: [
-                Icon(Icons.place_outlined, size: 18, color: colorScheme.onSurfaceVariant),
+                Icon(
+                  Icons.place_outlined,
+                  size: 18,
+                  color: colorScheme.onSurfaceVariant,
+                ),
                 const SizedBox(width: 6),
                 Text(item.metaLabel!),
               ],
@@ -86,9 +95,9 @@ class ActivityDetailScreen extends StatelessWidget {
             const SizedBox(height: AppSpacing.md),
             Text(
               '${NumberFormat('#,##0', 'fr').format(item.amount)} FC',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
           ],
         ],

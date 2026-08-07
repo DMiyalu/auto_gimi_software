@@ -152,7 +152,9 @@ class _PrinterSettingsScreenState extends ConsumerState<PrinterSettingsScreen> {
       if (!mounted) return;
       setState(() => _verifiedAddress = address);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${name ?? "Imprimante"} connectée avec succès.')),
+        SnackBar(
+          content: Text('${name ?? "Imprimante"} connectée avec succès.'),
+        ),
       );
     } catch (error) {
       if (!mounted) return;

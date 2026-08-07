@@ -110,7 +110,7 @@ void main() {
 
     await _pump(tester, BusinessCategory.restaurant, database: database);
 
-    expect(find.text('Livraison'), findsOneWidget);
+    expect(find.text('À payer'), findsOneWidget);
     expect(
       find.text('Votre salle est prête à accueillir sa première commande'),
       findsOneWidget,
@@ -238,14 +238,13 @@ void main() {
     final database = AppDatabase(NativeDatabase.memory());
     addTearDown(database.close);
     final repository = CommandeRepositoryImpl(database: database);
-    final prete = await repository.createCommande(
+    final aPayer = await repository.createCommande(
       establishmentId: 'etab-1',
-      context: 'Table prête',
+      context: 'Table à payer',
     );
-    await repository.setStatus(
+    await repository.markAwaitingPayment(
       establishmentId: 'etab-1',
-      commandeId: prete.id,
-      statusKey: 'pretes',
+      commandeId: aPayer.id,
     );
     await repository.createCommande(
       establishmentId: 'etab-1',
@@ -254,10 +253,12 @@ void main() {
 
     await _pump(tester, BusinessCategory.restaurant, database: database);
 
-    await tester.tap(find.text('Prêtes'));
+    // Le badge de statut de la carte affiche aussi "À payer" : on cible
+    // précisément le FilterChip pour éviter l'ambiguïté avec ce badge.
+    await tester.tap(find.widgetWithText(FilterChip, 'À payer'));
     await tester.pump(const Duration(milliseconds: 300));
 
-    expect(find.text('Table prête'), findsOneWidget);
+    expect(find.text('Table à payer'), findsOneWidget);
     expect(find.text('Table 12'), findsNothing);
 
     await tester.pumpWidget(const SizedBox());
