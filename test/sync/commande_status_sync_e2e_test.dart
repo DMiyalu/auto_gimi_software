@@ -20,7 +20,7 @@ import '../helpers/pump_test_app.dart';
 
 class MockFirebaseUser extends Mock implements User {}
 
-const _establishmentId = 'est-test';
+const _establishmentId = 'est-restaurant-test';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -40,8 +40,8 @@ void main() {
     establishmentRepository = FakeEstablishmentRepository()
       ..establishment = Establishment(
         id: _establishmentId,
-        name: 'Garage Test',
-        category: BusinessCategory.garageAuto,
+        name: 'Le Goût Parfait',
+        category: BusinessCategory.restaurant,
         ownerId: 'uid-test',
         managerName: 'Test Manager',
         phone: '221771234567',
@@ -70,8 +70,8 @@ void main() {
   });
 
   testWidgets(
-      'flux e2e : création client hors-ligne, visible immédiatement, '
-      'puis synchronisé automatiquement au retour du réseau', (tester) async {
+      'flux e2e : création de commande synchronisée, puis chaque changement '
+      'de statut re-synchronisé automatiquement', (tester) async {
     database = await pumpTestApp(
       tester,
       overrides: [
@@ -85,67 +85,70 @@ void main() {
         signupOtpPendingProvider.overrideWith((ref) => false),
         // Un Firestore de test pour toute la chaîne de synchro :
         // AutoSyncCoordinator (câblé dans AppShellScreen) l'utilise à la
-        // fois pour le push débouncé déclenché après l'écriture locale
-        // (via syncEngineProvider) et pour ses écouteurs temps réel.
+        // fois pour le push débouncé déclenché après chaque écriture
+        // locale (schedulePush, via syncEngineProvider) et pour ses
+        // écouteurs temps réel.
         firestoreProvider.overrideWithValue(firestore),
       ],
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Prestations'), findsWidgets);
+    expect(find.text('Commandes'), findsWidgets);
 
-    await tester.tap(find.text('Clients'));
-    await tester.pumpAndSettle();
+    final remoteCommandes = firestore.collection(
+      'establishments/$_establishmentId/commandes',
+    );
 
+    // 1. Création d'une commande (sans table, pour rester simple) via le
+    // vrai flux UI.
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Add client'));
+    await tester.tap(find.widgetWithText(ListTile, 'Nouvelle commande'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Continuer'));
     await tester.pumpAndSettle();
 
-    await tester.enterText(
-      find.byKey(const Key('client_name_field')),
-      'Amadou Diallo',
-    );
-    await tester.enterText(
-      find.byKey(const Key('client_whatsapp_local_field')),
-      '771234567',
-    );
-    await tester.ensureVisible(find.byKey(const Key('client_submit_button')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('client_submit_button')));
-    await tester.pumpAndSettle();
+    // Visible localement tout de suite, sans attendre le réseau.
+    expect(find.text('Ajoutez des produits à la commande'), findsOneWidget);
+    expect((await remoteCommandes.get()).docs, isEmpty);
 
-    // Retour sur la liste : le client créé "hors-ligne" est visible tout de
-    // suite, l'écriture locale n'attend jamais le réseau.
-    expect(find.text('Amadou Diallo'), findsOneWidget);
-
-    final remoteClients =
-        firestore.collection('establishments/$_establishmentId/clients');
-    expect((await remoteClients.get()).docs, isEmpty);
-
-    // Le push est débouncé (~1.5s) après l'écriture locale : on avance le
-    // temps pour simuler le retour du réseau sans quitter l'écran.
+    // Le push est débouncé (~1.5s) après l'écriture locale.
     await tester.pump(const Duration(milliseconds: 1600));
     await tester.pumpAndSettle();
 
-    final synced = await remoteClients.get();
+    var synced = await remoteCommandes.get();
     expect(synced.docs, hasLength(1));
-    expect(synced.docs.single.data()['name'], 'Amadou Diallo');
+    expect(synced.docs.single.data()['statut'], 'en_cours');
+    final commandeId = synced.docs.single.id;
 
-    // L'écran n'a jamais été interrompu par la synchro : le client est
-    // toujours affiché.
-    expect(find.text('Amadou Diallo'), findsOneWidget);
+    // 2. Encaissement direct (sans facture imprimée) : en_cours -> clôturée.
+    await tester.tap(find.text('Encaisser paiement'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Argent encaissé'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
 
-    final localRow = await (database.select(database.clients)
-          ..where((c) => c.nom.equals('Amadou Diallo')))
-        .getSingle();
+    expect(find.text('Payée'), findsOneWidget);
+
+    // Le nouveau changement de statut doit lui aussi se re-synchroniser
+    // automatiquement, sans action manuelle. On évite pumpAndSettle ici :
+    // les confettis animent en continu pendant toute leur durée (par
+    // design) et ne "se stabilisent" jamais au sens strict attendu par
+    // pumpAndSettle.
+    await tester.pump(const Duration(milliseconds: 1600));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    synced = await remoteCommandes.get();
+    expect(synced.docs, hasLength(1));
+    expect(synced.docs.single.id, commandeId);
+    expect(synced.docs.single.data()['statut'], 'cloturee');
+
+    final localRow = await (database.select(
+      database.commandes,
+    )..where((c) => c.id.equals(commandeId))).getSingle();
     expect(localRow.isDirty, isFalse);
 
-    // Démonte explicitement l'arbre de widgets (au lieu de laisser le
-    // framework le faire après la fin du test) : la fermeture des flux
-    // Drift .watch() actifs programme un timer interne de nettoyage à
-    // durée nulle, qu'il faut laisser s'exécuter avant la fin du test pour
-    // éviter l'assertion "Timer still pending" du framework de test.
     await tester.pumpWidget(const SizedBox());
     await tester.pump(const Duration(milliseconds: 1));
     await tester.pump(const Duration(milliseconds: 1));

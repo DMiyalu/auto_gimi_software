@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -7,6 +8,7 @@ import '../../features/establishment/domain/models/establishment.dart';
 import '../../features/establishment/presentation/providers/establishment_providers.dart';
 import 'connectivity_service.dart';
 import 'sync_engine.dart';
+import 'sync_registry.dart';
 
 final autoSyncCoordinatorProvider =
     Provider.autoDispose<AutoSyncCoordinator>((ref) {
@@ -17,8 +19,10 @@ final autoSyncCoordinatorProvider =
 
 /// Câble les déclencheurs de synchro automatique vers [SyncEngine.runSync] :
 /// résolution de l'établissement (login / changement d'appareil), retour de
-/// connectivité, retour au premier plan de l'app, minuterie de secours, et
-/// écritures locales (via [schedulePush], appelé par les contrôleurs).
+/// connectivité, retour au premier plan de l'app, minuterie de secours,
+/// écritures locales (via [schedulePush], appelé par les contrôleurs), et
+/// changements distants détectés en direct (autre appareil du même
+/// établissement — plusieurs serveurs en salle, par exemple).
 ///
 /// Vit tant que `AppShellScreen` (routes authentifiées) est monté — un seul
 /// cycle de synchro à la fois est garanti par `SyncEngine` lui-même, ce
@@ -33,6 +37,7 @@ class AutoSyncCoordinator {
     ) {
       final id = next.valueOrNull?.id;
       if (id != null && id != previous?.valueOrNull?.id) {
+        _listenRealtime(id);
         _trigger();
       }
     });
@@ -52,11 +57,14 @@ class AutoSyncCoordinator {
       if (_lastOnline) _trigger();
     });
 
+    final initialId = _ref.read(currentEstablishmentProvider).valueOrNull?.id;
+    if (initialId != null) _listenRealtime(initialId);
     _trigger();
   }
 
   static const _pushDebounce = Duration(milliseconds: 1500);
   static const _connectivityDebounce = Duration(seconds: 2);
+  static const _realtimeDebounce = Duration(seconds: 1);
   static const _baseBackoff = Duration(seconds: 5);
   static const _maxBackoff = Duration(minutes: 5);
 
@@ -67,9 +75,12 @@ class AutoSyncCoordinator {
   Timer? _safetyNetTimer;
   Timer? _pushDebounceTimer;
   Timer? _connectivityDebounceTimer;
+  Timer? _realtimeDebounceTimer;
   Timer? _backoffTimer;
   Duration _backoff = _baseBackoff;
   bool _lastOnline = false;
+  final List<StreamSubscription<QuerySnapshot<Object?>>> _realtimeSubs = [];
+  String? _realtimeEstablishmentId;
 
   /// À appeler par les contrôleurs après une écriture locale réussie :
   /// planifie un cycle de synchro, en regroupant les écritures rapprochées.
@@ -83,6 +94,72 @@ class AutoSyncCoordinator {
     if (!online) return;
     _connectivityDebounceTimer?.cancel();
     _connectivityDebounceTimer = Timer(_connectivityDebounce, _trigger);
+  }
+
+  /// Écoute en direct chaque collection Firestore de l'établissement, pour
+  /// détecter en quelques secondes un changement fait par un *autre*
+  /// appareil (plusieurs serveurs en salle, chacun avec l'app) — sans
+  /// attendre le filet de sécurité (5 min). La requête (`limit(1)` sur le
+  /// document le plus récemment modifié) sert uniquement de signal de
+  /// réveil : c'est toujours [SyncEngine] qui effectue le pull typé et
+  /// incrémental via le curseur `sync_state`.
+  void _listenRealtime(String establishmentId) {
+    if (_realtimeEstablishmentId == establishmentId) return;
+    _cancelRealtimeListeners();
+    _realtimeEstablishmentId = establishmentId;
+
+    // Best-effort : appelé synchronement depuis le constructeur (et donc
+    // depuis n'importe quel schedulePush() d'un contrôleur métier), ceci ne
+    // doit jamais faire échouer l'écriture locale qui l'a déclenché — par
+    // exemple si Firebase n'est pas encore initialisé à cet instant précis.
+    try {
+      final firestore = _ref.read(firestoreProvider);
+      if (firestore == null) return;
+
+      final establishmentRef = firestore
+          .collection('establishments')
+          .doc(establishmentId);
+
+      for (final adapter in defaultSyncAdapters) {
+        final sub = establishmentRef
+            .collection(adapter.firestoreCollection)
+            .orderBy('updatedAt', descending: true)
+            .limit(1)
+            .snapshots()
+            .listen(
+              (snapshot) {
+                // Un instantané encore local (écriture optimiste de cet
+                // appareil, pas confirmée serveur) ne justifie pas de
+                // réveiller un cycle : celui déclenché par schedulePush()
+                // suffit déjà. On ne réagit qu'aux changements confirmés,
+                // potentiellement faits par un autre appareil.
+                if (snapshot.metadata.hasPendingWrites) return;
+                _scheduleRealtimeTrigger();
+              },
+              onError: (_) {},
+            );
+        _realtimeSubs.add(sub);
+      }
+    } catch (error) {
+      // Best-effort et récupérable (retenté au prochain trigger réussi) :
+      // ne pas remonter via FlutterError.reportError, réservé aux erreurs
+      // réellement inattendues.
+      debugPrint(
+        '[Sync] Écoute temps réel indisponible pour $establishmentId : $error',
+      );
+    }
+  }
+
+  void _scheduleRealtimeTrigger() {
+    _realtimeDebounceTimer?.cancel();
+    _realtimeDebounceTimer = Timer(_realtimeDebounce, _trigger);
+  }
+
+  void _cancelRealtimeListeners() {
+    for (final sub in _realtimeSubs) {
+      sub.cancel();
+    }
+    _realtimeSubs.clear();
   }
 
   void _trigger() {
@@ -100,7 +177,13 @@ class AutoSyncCoordinator {
           .read(syncEngineProvider)
           .runSync(establishmentId: establishmentId);
       _backoff = _baseBackoff;
-    } catch (_) {
+    } catch (error) {
+      // Ne jamais échouer silencieusement : un cycle de synchro cassé (règles
+      // Firestore, index manquant, erreur réseau…) doit rester diagnosticable
+      // à distance plutôt que de simplement laisser l'app sembler vide. Reste
+      // en debugPrint (pas FlutterError.reportError) : récupérable via
+      // _scheduleRetry, ce n'est pas une erreur fatale inattendue.
+      debugPrint('[Sync] Échec du cycle pour $establishmentId : $error');
       _scheduleRetry();
     }
   }
@@ -123,6 +206,8 @@ class AutoSyncCoordinator {
     _safetyNetTimer?.cancel();
     _pushDebounceTimer?.cancel();
     _connectivityDebounceTimer?.cancel();
+    _realtimeDebounceTimer?.cancel();
     _backoffTimer?.cancel();
+    _cancelRealtimeListeners();
   }
 }

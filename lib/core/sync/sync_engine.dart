@@ -7,10 +7,18 @@ import '../providers/database_provider.dart';
 import 'sync_adapter.dart';
 import 'sync_registry.dart';
 
+/// Source unique de l'instance Firestore utilisée pour la synchro — à
+/// surcharger dans les tests (un seul override couvre alors aussi bien
+/// [syncEngineProvider] que les écouteurs temps réel de
+/// `AutoSyncCoordinator`, qui en dépendent tous les deux).
+final firestoreProvider = Provider<FirebaseFirestore?>((ref) {
+  return isFirebaseConfigured ? FirebaseFirestore.instance : null;
+});
+
 final syncEngineProvider = Provider<SyncEngine>((ref) {
   return SyncEngine(
     database: ref.watch(databaseProvider),
-    firestore: isFirebaseConfigured ? FirebaseFirestore.instance : null,
+    firestore: ref.watch(firestoreProvider),
   );
 });
 
