@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/l10n/app_localizations.dart';
-import '../../../../core/presentation/widgets/module_list_header.dart';
 import '../../../../core/routing/routes.dart';
-import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../establishment/presentation/providers/establishment_providers.dart';
 import '../../../primary_module/config/business_module_config.dart';
 import '../../../primary_module/controllers/primary_module_providers.dart';
@@ -28,31 +27,37 @@ class ProduitsScreen extends ConsumerWidget {
 
     final fab = canManageCatalog
         ? ModuleFab(
+            color: AppColors.zuriRed,
             actions: [
               FabActionConfig(
                 label: l10n.addProduct,
-                icon: Icons.add,
+                icon: Icons.inventory_2_outlined,
                 route: Routes.produitNew,
               ),
               FabActionConfig(
                 label: l10n.addProductCategory,
-                icon: Icons.create_new_folder_outlined,
+                icon: Icons.sell_outlined,
                 route: Routes.productCategoryNew,
               ),
             ],
           )
         : null;
 
+    final produitsAsync = ref.watch(produitsProvider);
+    final hasProducts = produitsAsync.valueOrNull?.isNotEmpty ?? false;
+
     final body = Column(
       children: [
         const Padding(
-          padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+          padding: EdgeInsets.symmetric(horizontal: 18),
           child: ProduitSearchBar(),
         ),
-        const SizedBox(height: AppSpacing.sm),
-        const ProduitFilters(),
-        const SizedBox(height: AppSpacing.sm),
-        Expanded(child: _ProduitListView(canManageCatalog: canManageCatalog)),
+        if (hasProducts) ...[
+          const SizedBox(height: 14),
+          const ProduitFilters(),
+          const SizedBox(height: 14),
+        ],
+        const Expanded(child: _ProduitListView()),
       ],
     );
 
@@ -68,13 +73,12 @@ class ProduitsScreen extends ConsumerWidget {
 }
 
 class _ProduitListView extends ConsumerWidget {
-  const _ProduitListView({required this.canManageCatalog});
-
-  final bool canManageCatalog;
+  const _ProduitListView();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    final canManageCatalog = ref.watch(canManageCatalogProvider);
     final produitsAsync = ref.watch(produitsProvider);
 
     return produitsAsync.when(
@@ -93,12 +97,13 @@ class _ProduitListView extends ConsumerWidget {
         if (filtered.isEmpty) {
           return Center(
             child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
+              padding: const EdgeInsets.all(24),
               child: Text(
                 l10n.noProductsMatchFilter,
                 textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                style: const TextStyle(
+                  color: Color(0xFF8A90A5),
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
@@ -106,24 +111,43 @@ class _ProduitListView extends ConsumerWidget {
         }
 
         return ListView.separated(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.sm,
-            0,
-            AppSpacing.sm,
-            AppSpacing.sm,
-          ),
+          padding: const EdgeInsets.fromLTRB(18, 0, 18, 120),
           itemCount: filtered.length + 1,
-          separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.xs),
+          separatorBuilder: (_, _) => const SizedBox(height: 10),
           itemBuilder: (context, index) {
             if (index == 0) {
-              return ModuleListHeader(
-                title: l10n.productsListTitle,
-                countLabel: l10n.productsCount(filtered.length),
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        l10n.productsListTitle,
+                        style: const TextStyle(
+                          color: AppColors.zuriNavy,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      l10n.productsCount(filtered.length),
+                      style: const TextStyle(
+                        color: Color(0xFF8A90A5),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
               );
             }
 
             final produit = filtered[index - 1];
-            return ProduitCard(produit: produit, canManage: canManageCatalog);
+            return ProduitCard(
+              produit: produit,
+              canManage: canManageCatalog,
+            );
           },
         );
       },
@@ -144,30 +168,52 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 64, color: Theme.of(context).colorScheme.outline),
-            const SizedBox(height: 16),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              hint,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight - 48),
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 76,
+                    height: 76,
+                    decoration: BoxDecoration(
+                      color: AppColors.zuriPink.withValues(alpha: 0.12),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(icon, size: 38, color: AppColors.zuriRed),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    title,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: AppColors.zuriNavy,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    hint,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Color(0xFF8A90A5),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      height: 1.35,
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

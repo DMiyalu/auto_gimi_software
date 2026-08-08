@@ -162,7 +162,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noServicesMatchFilter => 'No service matches this filter.';
 
   @override
-  String get productsListTitle => 'Product list';
+  String get productsListTitle => 'All products';
+
+  @override
+  String get productFilterAll => 'All';
+
+  @override
+  String get productInStockShort => 'In stock';
+
+  @override
+  String get productStockLowShort => 'Low stock';
 
   @override
   String get servicesListTitle => 'Service list';

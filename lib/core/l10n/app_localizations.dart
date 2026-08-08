@@ -395,8 +395,26 @@ abstract class AppLocalizations {
   /// No description provided for @productsListTitle.
   ///
   /// In en, this message translates to:
-  /// **'Product list'**
+  /// **'All products'**
   String get productsListTitle;
+
+  /// No description provided for @productFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get productFilterAll;
+
+  /// No description provided for @productInStockShort.
+  ///
+  /// In en, this message translates to:
+  /// **'In stock'**
+  String get productInStockShort;
+
+  /// No description provided for @productStockLowShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Low stock'**
+  String get productStockLowShort;
 
   /// No description provided for @servicesListTitle.
   ///

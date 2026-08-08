@@ -165,7 +165,16 @@ class AppLocalizationsFr extends AppLocalizations {
       'Aucun service ne correspond à ce filtre.';
 
   @override
-  String get productsListTitle => 'Liste des produits';
+  String get productsListTitle => 'Tous les produits';
+
+  @override
+  String get productFilterAll => 'Toutes';
+
+  @override
+  String get productInStockShort => 'En stock';
+
+  @override
+  String get productStockLowShort => 'Stock bas';
 
   @override
   String get servicesListTitle => 'Liste des services';
