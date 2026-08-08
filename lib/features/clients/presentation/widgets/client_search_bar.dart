@@ -3,12 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/l10n/app_localizations.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_spacing.dart' show AppRadius;
-import '../../../primary_module/controllers/primary_module_providers.dart';
 import '../providers/client_providers.dart';
 
-/// Barre de recherche de l'écran Clients — même forme, taille et couleurs
-/// que la barre de recherche de l'écran principal (ModuleSearchBar).
+/// Barre de recherche Clients — style Zuri (coins 16, accent rouge).
 class ClientSearchBar extends ConsumerStatefulWidget {
   const ClientSearchBar({super.key});
 
@@ -33,26 +30,25 @@ class _ClientSearchBarState extends ConsumerState<ClientSearchBar> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final primaryColor = ref.watch(primaryModuleConfigProvider).primaryColor;
 
     return SizedBox(
-      height: 56,
+      height: 52,
       child: TextField(
         controller: _controller,
         onChanged: (value) =>
             ref.read(clientSearchQueryProvider.notifier).state = value,
-        style: const TextStyle(fontSize: 16, color: AppColors.textPrimary),
+        style: const TextStyle(fontSize: 15, color: AppColors.zuriNavy),
         decoration: InputDecoration(
           hintText: l10n.searchClientPlaceholder,
           hintStyle: const TextStyle(
             color: AppColors.textMuted,
-            fontSize: 16,
+            fontSize: 15,
             fontWeight: FontWeight.w500,
           ),
           prefixIcon: const Icon(
             Icons.search_rounded,
             color: AppColors.textMuted,
-            size: 28,
+            size: 24,
           ),
           suffixIcon: ValueListenableBuilder<TextEditingValue>(
             valueListenable: _controller,
@@ -65,14 +61,14 @@ class _ClientSearchBarState extends ConsumerState<ClientSearchBar> {
             },
           ),
           filled: true,
-          fillColor: Colors.white,
+          fillColor: AppColors.zuriWhite,
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppRadius.chip),
+            borderRadius: BorderRadius.circular(16),
             borderSide: const BorderSide(color: AppColors.borderSubtle),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppRadius.chip),
-            borderSide: BorderSide(color: primaryColor),
+            borderRadius: BorderRadius.circular(16),
+            borderSide: const BorderSide(color: AppColors.zuriRed, width: 1.4),
           ),
           contentPadding: const EdgeInsets.symmetric(vertical: 0),
         ),

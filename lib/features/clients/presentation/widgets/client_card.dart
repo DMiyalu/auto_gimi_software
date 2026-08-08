@@ -1,184 +1,126 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
-import '../../../../core/domain/client_tier.dart';
 import '../../../../core/l10n/app_localizations.dart';
-import '../../../../core/presentation/widgets/domain_card.dart';
 import '../../../../core/routing/routes.dart';
-import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../garage/domain/entities/client_order_stats.dart';
 import '../../domain/entities/client_entity.dart';
 import 'client_avatar.dart';
 
-/// Carte client de la liste — même ossature que les cartes d'activité de
-/// l'écran principal (liseré coloré, coins arrondis, ombre douce), avec un
-/// contenu propre aux clients (palier de fidélité, stats de commandes).
+/// Carte client — maquette Zuri : avatar, identité, dernière commande, chevron.
 class ClientCard extends StatelessWidget {
   const ClientCard({super.key, required this.client, required this.stats});
 
   final ClientEntity client;
   final ClientOrderStats? stats;
 
-  static final _dateFormat = DateFormat('dd/MM');
-  static final _amountFormat = NumberFormat.decimalPattern();
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
-    final tier = ClientTier.forPoints(client.loyaltyPoints);
+    final lastOrderLabel = stats == null
+        ? l10n.noOrdersYet
+        : l10n.lastOrderAgo(_relativeWhen(l10n, stats!.lastOrderAt));
 
-    return DomainCard(
-      accentColor: _accentColor(tier),
-      onTap: () => context.push(Routes.clientDetailPath(client.id)),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          ClientAvatar(client: client),
-          const SizedBox(width: AppSpacing.xs),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return Material(
+      color: AppColors.zuriWhite,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () => context.push(Routes.clientDetailPath(client.id)),
+        child: Ink(
+          decoration: BoxDecoration(
+            color: AppColors.zuriWhite,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFEDEFF5)),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.zuriNavy.withValues(alpha: 0.05),
+                blurRadius: 14,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+            child: Row(
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
+                ClientAvatar(client: client),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
                         client.name,
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(fontWeight: FontWeight.w600),
+                        maxLines: 1,
                         overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: AppColors.zuriNavy,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                          height: 1.15,
+                        ),
                       ),
-                    ),
-                    if (tier != ClientTier.none) ...[
-                      const SizedBox(width: 6),
-                      _TierBadge(tier: tier),
+                      const SizedBox(height: 3),
+                      Text(
+                        client.displayPhone,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: AppColors.zuriNavy,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.calendar_today_outlined,
+                            size: 13,
+                            color: Color(0xFF8A90A5),
+                          ),
+                          const SizedBox(width: 5),
+                          Expanded(
+                            child: Text(
+                              lastOrderLabel,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Color(0xFF8A90A5),
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
-                  ],
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  client.displayPhone,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
                   ),
                 ),
-                const SizedBox(height: AppSpacing.xs),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: _StatLine(
-                        label: l10n.totalOrderedAmount,
-                        value:
-                            '${_amountFormat.format(stats?.totalSpent ?? 0)} FC',
-                      ),
-                    ),
-                    Expanded(
-                      child: _StatLine(
-                        label: l10n.lastOrderLabel,
-                        value: stats == null
-                            ? l10n.noOrdersYet
-                            : '${_dateFormat.format(stats!.lastOrderAt)}, '
-                                  '${stats!.lastOrderContext}',
-                        alignEnd: true,
-                      ),
-                    ),
-                  ],
+                const SizedBox(width: 8),
+                const Icon(
+                  Icons.chevron_right_rounded,
+                  color: AppColors.zuriRed,
+                  size: 26,
                 ),
               ],
             ),
           ),
-          Icon(Icons.chevron_right, color: colorScheme.onSurfaceVariant),
-        ],
+        ),
       ),
     );
   }
 
-  Color _accentColor(ClientTier tier) {
-    if (tier == ClientTier.gold) return Colors.amber.shade700;
-    final lastOrderAt = stats?.lastOrderAt;
+  String _relativeWhen(AppLocalizations l10n, DateTime date) {
     final now = DateTime.now();
-    final activeThisMonth =
-        lastOrderAt != null &&
-        lastOrderAt.year == now.year &&
-        lastOrderAt.month == now.month;
-    return activeThisMonth ? Colors.green.shade600 : Colors.red.shade400;
-  }
-}
-
-class _TierBadge extends StatelessWidget {
-  const _TierBadge({required this.tier});
-
-  final ClientTier tier;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final label = tier == ClientTier.gold
-        ? l10n.clientTierGold
-        : l10n.clientTierLoyal;
-    final color = tier == ClientTier.gold
-        ? Colors.amber.shade700
-        : Theme.of(context).colorScheme.primary;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(AppRadius.chip),
-      ),
-      child: Text(
-        label,
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-          color: color,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-}
-
-class _StatLine extends StatelessWidget {
-  const _StatLine({
-    required this.label,
-    required this.value,
-    this.alignEnd = false,
-  });
-
-  final String label;
-  final String value;
-  final bool alignEnd;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final crossAxis = alignEnd
-        ? CrossAxisAlignment.end
-        : CrossAxisAlignment.start;
-    final textAlign = alignEnd ? TextAlign.end : TextAlign.start;
-
-    return Column(
-      crossAxisAlignment: crossAxis,
-      children: [
-        Text(
-          label,
-          textAlign: textAlign,
-          style: Theme.of(
-            context,
-          ).textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
-        ),
-        Text(
-          value,
-          textAlign: textAlign,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: Theme.of(
-            context,
-          ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
-        ),
-      ],
-    );
+    final today = DateTime(now.year, now.month, now.day);
+    final day = DateTime(date.year, date.month, date.day);
+    final diff = today.difference(day).inDays;
+    if (diff <= 0) return l10n.relativeToday;
+    if (diff == 1) return l10n.relativeYesterday;
+    if (diff < 14) return l10n.relativeDaysAgo(diff);
+    return l10n.relativeWeeksAgo((diff / 7).floor().clamp(1, 99));
   }
 }

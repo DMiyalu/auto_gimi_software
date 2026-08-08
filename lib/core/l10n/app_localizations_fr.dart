@@ -608,6 +608,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get clientsListTitle => 'Liste des clients';
 
   @override
+  String get recentClientsTitle => 'Clients récents';
+
+  @override
   String clientsCount(int count) {
     return '$count clients';
   }
@@ -626,6 +629,27 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get lastOrderLabel => 'Dernière commande';
+
+  @override
+  String lastOrderAgo(String when) {
+    return 'Dernière commande : $when';
+  }
+
+  @override
+  String get relativeToday => 'aujourd’hui';
+
+  @override
+  String get relativeYesterday => 'hier';
+
+  @override
+  String relativeDaysAgo(int days) {
+    return 'il y a $days jours';
+  }
+
+  @override
+  String relativeWeeksAgo(int weeks) {
+    return 'il y a $weeks sem.';
+  }
 
   @override
   String get noOrdersYet => 'Aucune commande';

@@ -24,17 +24,18 @@ class ModuleFab extends ConsumerWidget {
     final config = ref.watch(primaryModuleConfigProvider);
     final resolvedColor = color ?? config.primaryColor;
     final resolvedActions = actions ?? config.fabActions;
-    final isRestaurant = config.category == BusinessCategory.restaurant;
-    final size = isRestaurant ? 64.0 : 74.0;
+    final useCircle =
+        config.category == BusinessCategory.restaurant || color != null;
+    final size = useCircle ? 64.0 : 74.0;
 
     return SizedBox(
       width: size,
       height: size,
       child: FloatingActionButton(
         backgroundColor: resolvedColor,
-        elevation: isRestaurant ? 8 : 12,
-        highlightElevation: isRestaurant ? 10 : 14,
-        shape: isRestaurant
+        elevation: useCircle ? 8 : 12,
+        highlightElevation: useCircle ? 10 : 14,
+        shape: useCircle
             ? const CircleBorder()
             : RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppRadius.chip),
@@ -45,7 +46,7 @@ class ModuleFab extends ConsumerWidget {
         child: Icon(
           Icons.add_rounded,
           color: Colors.white,
-          size: isRestaurant ? 34 : 42,
+          size: useCircle ? 34 : 42,
         ),
       ),
     );

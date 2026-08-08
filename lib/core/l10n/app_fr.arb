@@ -244,6 +244,7 @@
   "clientFilterInactive": "Inactifs",
   "noClientsMatchFilter": "Aucun client ne correspond à ce filtre.",
   "clientsListTitle": "Liste des clients",
+  "recentClientsTitle": "Clients récents",
   "clientsCount": "{count} clients",
   "@clientsCount": {
     "placeholders": {
@@ -257,5 +258,31 @@
   "clientTierLoyal": "Fidèle",
   "totalOrderedAmount": "Total commandé",
   "lastOrderLabel": "Dernière commande",
+  "lastOrderAgo": "Dernière commande : {when}",
+  "@lastOrderAgo": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "relativeToday": "aujourd’hui",
+  "relativeYesterday": "hier",
+  "relativeDaysAgo": "il y a {days} jours",
+  "@relativeDaysAgo": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "relativeWeeksAgo": "il y a {weeks} sem.",
+  "@relativeWeeksAgo": {
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
   "noOrdersYet": "Aucune commande"
 }

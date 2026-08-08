@@ -128,16 +128,16 @@ void main() {
     await tester.pump();
   });
 
-  testWidgets('la carte client affiche les stats de commandes et le chevron', (
+  testWidgets('la carte client affiche dernière commande et chevron Zuri', (
     tester,
   ) async {
     final database = await _pump(tester);
 
-    expect(find.text('Total commandé'), findsOneWidget);
     expect(find.text('Aucune commande'), findsOneWidget);
-    expect(find.byIcon(Icons.chevron_right), findsOneWidget);
-    expect(find.text('Liste des clients'), findsOneWidget);
-    expect(find.text('1 clients'), findsOneWidget);
+    expect(find.byIcon(Icons.chevron_right_rounded), findsOneWidget);
+    expect(find.text('Clients récents'), findsOneWidget);
+    expect(find.text('Patrick Mbala'), findsOneWidget);
+    expect(find.text('+243812345678'), findsOneWidget);
 
     await database.close();
     await tester.pump();

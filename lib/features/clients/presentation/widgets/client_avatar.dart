@@ -1,25 +1,27 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/utils/avatar_colors.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../domain/entities/client_entity.dart';
 
-/// Avatar à initiales — l'app ne stocke pas de photo client, la couleur de
-/// fond varie par client (stable) pour distinguer les lignes de la liste.
+/// Avatar à initiales — l'app ne stocke pas de photo client.
 class ClientAvatar extends StatelessWidget {
-  const ClientAvatar({super.key, required this.client, this.radius = 22});
+  const ClientAvatar({super.key, required this.client, this.radius = 24});
 
   final ClientEntity client;
   final double radius;
 
   @override
   Widget build(BuildContext context) {
-    final color = AvatarColors.forId(client.id);
     return CircleAvatar(
       radius: radius,
-      backgroundColor: color.withValues(alpha: 0.12),
+      backgroundColor: AppColors.zuriPink.withValues(alpha: 0.14),
       child: Text(
         _initials(client.name),
-        style: TextStyle(color: color, fontWeight: FontWeight.w600),
+        style: TextStyle(
+          color: AppColors.zuriRed,
+          fontWeight: FontWeight.w800,
+          fontSize: radius * 0.72,
+        ),
       ),
     );
   }

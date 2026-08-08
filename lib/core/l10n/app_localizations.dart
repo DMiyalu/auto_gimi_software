@@ -1226,6 +1226,12 @@ abstract class AppLocalizations {
   /// **'Client list'**
   String get clientsListTitle;
 
+  /// No description provided for @recentClientsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent clients'**
+  String get recentClientsTitle;
+
   /// No description provided for @clientsCount.
   ///
   /// In en, this message translates to:
@@ -1261,6 +1267,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Last order'**
   String get lastOrderLabel;
+
+  /// No description provided for @lastOrderAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'Last order: {when}'**
+  String lastOrderAgo(String when);
+
+  /// No description provided for @relativeToday.
+  ///
+  /// In en, this message translates to:
+  /// **'today'**
+  String get relativeToday;
+
+  /// No description provided for @relativeYesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'yesterday'**
+  String get relativeYesterday;
+
+  /// No description provided for @relativeDaysAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days ago'**
+  String relativeDaysAgo(int days);
+
+  /// No description provided for @relativeWeeksAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{weeks} wk ago'**
+  String relativeWeeksAgo(int weeks);
 
   /// No description provided for @noOrdersYet.
   ///
