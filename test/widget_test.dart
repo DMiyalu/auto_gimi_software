@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -27,7 +28,7 @@ void main() {
     await database.close();
   });
 
-  testWidgets('App démarre avec le titre Zuri Business', (tester) async {
+  testWidgets('App démarre sur l’écran de connexion', (tester) async {
     final prefs = await SharedPreferences.getInstance();
     final authRepository = FakeAuthRepository();
     final establishmentRepository = FakeEstablishmentRepository();
@@ -51,6 +52,7 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    expect(find.text('Zuri Business'), findsOneWidget);
+    expect(find.text('Welcome!'), findsOneWidget);
+    expect(find.byKey(const Key('login_submit_button')), findsOneWidget);
   });
 }

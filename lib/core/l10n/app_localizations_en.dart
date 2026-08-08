@@ -15,7 +15,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get login => 'Sign in';
 
   @override
-  String get loginSubtitle => 'Manage your sales and services in one place.';
+  String get loginSubtitle => 'Manage all your establishments from one place.';
+
+  @override
+  String get loginWelcome => 'Welcome!';
+
+  @override
+  String get loginWelcomeSubtitle => 'Sign in to your account';
+
+  @override
+  String get forgotPassword => 'Forgot password?';
+
+  @override
+  String get continueWith => 'or continue with';
+
+  @override
+  String get continueWithGoogle => 'Google';
+
+  @override
+  String get continueWithMicrosoft => 'Microsoft';
+
+  @override
+  String get continueWithApple => 'Apple';
+
+  @override
+  String get loginCreateAccount => 'Create an account';
+
+  @override
+  String get secureAndConfidential => 'Secure and confidential';
 
   @override
   String get email => 'Email';
@@ -321,7 +348,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get createAccount => 'Create my account';
 
   @override
-  String get noAccountYet => 'Don\'t have an account? Sign up';
+  String get noAccountYet => 'Don\'t have an account?';
 
   @override
   String get alreadyHaveAccount => 'Already have an account? Sign in';

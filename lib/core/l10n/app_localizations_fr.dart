@@ -12,11 +12,38 @@ class AppLocalizationsFr extends AppLocalizations {
   String get appTitle => 'Zuri Business';
 
   @override
-  String get login => 'Connexion';
+  String get login => 'Se connecter';
 
   @override
   String get loginSubtitle =>
-      'Gérez vos ventes et prestations en un seul endroit.';
+      'Gérez tous vos établissements, depuis un seul endroit.';
+
+  @override
+  String get loginWelcome => 'Bienvenue !';
+
+  @override
+  String get loginWelcomeSubtitle => 'Connectez-vous à votre compte';
+
+  @override
+  String get forgotPassword => 'Mot de passe oublié ?';
+
+  @override
+  String get continueWith => 'ou continuer avec';
+
+  @override
+  String get continueWithGoogle => 'Google';
+
+  @override
+  String get continueWithMicrosoft => 'Microsoft';
+
+  @override
+  String get continueWithApple => 'Apple';
+
+  @override
+  String get loginCreateAccount => 'Créer un compte';
+
+  @override
+  String get secureAndConfidential => 'Sécurisé et confidentiel';
 
   @override
   String get email => 'E-mail';
@@ -324,7 +351,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get createAccount => 'Créer mon compte';
 
   @override
-  String get noAccountYet => 'Pas encore de compte ? S\'inscrire';
+  String get noAccountYet => 'Vous n\'avez pas de compte ?';
 
   @override
   String get alreadyHaveAccount => 'Déjà un compte ? Se connecter';

@@ -113,8 +113,62 @@ abstract class AppLocalizations {
   /// No description provided for @loginSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Manage your sales and services in one place.'**
+  /// **'Manage all your establishments from one place.'**
   String get loginSubtitle;
+
+  /// No description provided for @loginWelcome.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome!'**
+  String get loginWelcome;
+
+  /// No description provided for @loginWelcomeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to your account'**
+  String get loginWelcomeSubtitle;
+
+  /// No description provided for @forgotPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot password?'**
+  String get forgotPassword;
+
+  /// No description provided for @continueWith.
+  ///
+  /// In en, this message translates to:
+  /// **'or continue with'**
+  String get continueWith;
+
+  /// No description provided for @continueWithGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'Google'**
+  String get continueWithGoogle;
+
+  /// No description provided for @continueWithMicrosoft.
+  ///
+  /// In en, this message translates to:
+  /// **'Microsoft'**
+  String get continueWithMicrosoft;
+
+  /// No description provided for @continueWithApple.
+  ///
+  /// In en, this message translates to:
+  /// **'Apple'**
+  String get continueWithApple;
+
+  /// No description provided for @loginCreateAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Create an account'**
+  String get loginCreateAccount;
+
+  /// No description provided for @secureAndConfidential.
+  ///
+  /// In en, this message translates to:
+  /// **'Secure and confidential'**
+  String get secureAndConfidential;
 
   /// No description provided for @email.
   ///
@@ -689,7 +743,7 @@ abstract class AppLocalizations {
   /// No description provided for @noAccountYet.
   ///
   /// In en, this message translates to:
-  /// **'Don\'t have an account? Sign up'**
+  /// **'Don\'t have an account?'**
   String get noAccountYet;
 
   /// No description provided for @alreadyHaveAccount.

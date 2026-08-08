@@ -105,9 +105,10 @@ void main() {
     database = await pumpTestApp(tester, overrides: testOverrides());
     await tester.pumpAndSettle();
 
-    expect(find.text('Zuri Business'), findsOneWidget);
+    expect(find.text('Welcome!'), findsOneWidget);
     expect(find.byKey(const Key('login_submit_button')), findsOneWidget);
-    expect(find.text("Don't have an account? Sign up"), findsOneWidget);
+    expect(find.text("Don't have an account?"), findsOneWidget);
+    expect(find.text('Create an account'), findsOneWidget);
   });
 
   testWidgets(
