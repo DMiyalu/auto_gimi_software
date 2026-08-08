@@ -23,12 +23,12 @@ class ProductSalesBreakdownCard extends ConsumerWidget {
       decoration: BoxDecoration(
         color: ReportColors.cardBackground,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE8EAF0)),
+        border: Border.all(color: ReportColors.border),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+            color: ReportColors.textPrimary.withValues(alpha: 0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
@@ -207,6 +207,7 @@ class _CategoryPickerChip extends ConsumerWidget {
                   'Catégorie',
                   style: Theme.of(sheetContext).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
+                    color: ReportColors.textPrimary,
                   ),
                 ),
               ),

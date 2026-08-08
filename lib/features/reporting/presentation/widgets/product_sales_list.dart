@@ -52,27 +52,16 @@ class _ProductSalesRow extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        SizedBox(
-          width: 18,
-          child: Text(
-            '${item.rank}',
-            style: const TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-              color: ReportColors.textMuted,
-            ),
-          ),
-        ),
         Container(
           width: 40,
           height: 40,
           decoration: BoxDecoration(
             color: ReportColors.accentSoft,
-            borderRadius: BorderRadius.circular(10),
+            shape: BoxShape.circle,
           ),
           child: const Icon(
             Icons.restaurant_menu_rounded,
-            size: 20,
+            size: 18,
             color: ReportColors.accent,
           ),
         ),
@@ -81,15 +70,29 @@ class _ProductSalesRow extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                item.label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: ReportColors.textPrimary,
-                ),
+              Row(
+                children: [
+                  Text(
+                    '${item.rank}. ',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: ReportColors.textPrimary,
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      item.label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: ReportColors.textPrimary,
+                      ),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 6),
               ClipRRect(

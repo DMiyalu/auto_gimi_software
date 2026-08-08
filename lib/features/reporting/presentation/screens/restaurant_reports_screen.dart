@@ -11,13 +11,12 @@ import '../widgets/report_date_range_selector.dart';
 import '../widgets/restaurant_report_kpi_grid.dart';
 import '../widgets/revenue_evolution_chart.dart';
 
-/// Écran Rapports — établissement Restaurant (maquette).
+/// Écran Rapports — établissement Restaurant (maquette Zuri).
 class RestaurantReportsScreen extends ConsumerWidget {
   const RestaurantReportsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final hasSystemTopInset = MediaQuery.paddingOf(context).top > 0;
     final sending = ref.watch(sendRestaurantReportProvider).isLoading;
 
     ref.listen(sendRestaurantReportProvider, (prev, next) {
@@ -36,72 +35,64 @@ class RestaurantReportsScreen extends ConsumerWidget {
     });
 
     return PrimaryScaffold(
-      header: Padding(
-        padding: EdgeInsets.fromLTRB(
-          18,
-          hasSystemTopInset ? 22 : 8,
-          18,
-          8,
-        ),
-        child: Row(
-          children: [
-            const Expanded(
-              child: Text(
-                'Rapports',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w800,
-                  color: ReportColors.textPrimary,
-                  height: 1.15,
-                ),
-              ),
-            ),
-            FilledButton.icon(
-              key: const Key('send_report_button'),
-              onPressed: sending
-                  ? null
-                  : () => _onSendPressed(context, ref),
-              icon: sending
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : const Icon(Icons.send_outlined, size: 18),
-              label: Text(sending ? 'Envoi…' : 'Envoyer'),
-              style: FilledButton.styleFrom(
-                backgroundColor: ReportColors.accent,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 10,
-                ),
-                textStyle: const TextStyle(fontWeight: FontWeight.w700),
-              ),
-            ),
-          ],
-        ),
-      ),
       body: ColoredBox(
         color: ReportColors.pageBackground,
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.sm,
-            AppSpacing.xs,
-            AppSpacing.sm,
-            120,
-          ),
-          children: const [
-            ReportDateRangeSelector(),
-            SizedBox(height: AppSpacing.sm),
-            RestaurantReportKpiGrid(),
-            SizedBox(height: AppSpacing.sm),
-            RevenueEvolutionChart(),
-            SizedBox(height: AppSpacing.sm),
-            ProductSalesBreakdownCard(),
+          padding: const EdgeInsets.fromLTRB(18, 4, 18, 120),
+          children: [
+            Row(
+              children: [
+                const Expanded(
+                  child: Text(
+                    'Aperçu des activités',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                      color: ReportColors.textPrimary,
+                      height: 1.2,
+                    ),
+                  ),
+                ),
+                FilledButton.icon(
+                  key: const Key('send_report_button'),
+                  onPressed: sending
+                      ? null
+                      : () => _onSendPressed(context, ref),
+                  icon: sending
+                      ? const SizedBox(
+                          width: 14,
+                          height: 14,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Icon(Icons.send_outlined, size: 16),
+                  label: Text(sending ? 'Envoi…' : 'Envoyer'),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: ReportColors.accent,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    visualDensity: VisualDensity.compact,
+                    textStyle: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            const ReportDateRangeSelector(),
+            const SizedBox(height: AppSpacing.sm),
+            const RestaurantReportKpiGrid(),
+            const SizedBox(height: AppSpacing.sm),
+            const RevenueEvolutionChart(),
+            const SizedBox(height: AppSpacing.sm),
+            const ProductSalesBreakdownCard(),
           ],
         ),
       ),
@@ -137,6 +128,7 @@ class RestaurantReportsScreen extends ConsumerWidget {
                   'Envoyer le rapport',
                   style: Theme.of(sheetContext).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w800,
+                    color: ReportColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -147,14 +139,20 @@ class RestaurantReportsScreen extends ConsumerWidget {
                 const SizedBox(height: 12),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.today_outlined),
+                  leading: const Icon(
+                    Icons.today_outlined,
+                    color: ReportColors.accent,
+                  ),
                   title: const Text('Rapport du jour'),
                   subtitle: const Text('Aujourd’hui'),
                   onTap: () => Navigator.of(sheetContext).pop('daily'),
                 ),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.date_range_outlined),
+                  leading: const Icon(
+                    Icons.date_range_outlined,
+                    color: ReportColors.accent,
+                  ),
                   title: const Text('Rapport hebdo semaine en cours'),
                   subtitle: const Text('Du lundi à aujourd’hui'),
                   onTap: () =>
@@ -162,7 +160,10 @@ class RestaurantReportsScreen extends ConsumerWidget {
                 ),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.history_outlined),
+                  leading: const Icon(
+                    Icons.history_outlined,
+                    color: ReportColors.accent,
+                  ),
                   title: const Text(
                     'Rapport hebdo de la semaine précédente',
                   ),
@@ -171,7 +172,10 @@ class RestaurantReportsScreen extends ConsumerWidget {
                 ),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.calendar_month_outlined),
+                  leading: const Icon(
+                    Icons.calendar_month_outlined,
+                    color: ReportColors.accent,
+                  ),
                   title: const Text(
                     'Rapport mensuel du mois précédent',
                   ),

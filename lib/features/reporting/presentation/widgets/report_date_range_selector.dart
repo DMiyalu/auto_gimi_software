@@ -20,38 +20,30 @@ class ReportDateRangeSelector extends ConsumerWidget {
 
     return Material(
       color: ReportColors.cardBackground,
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(16),
       elevation: 0,
       child: InkWell(
         onTap: () => _openPeriodSheet(context, ref),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: const Color(0xFFE8EAF0)),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: ReportColors.border),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.04),
-                blurRadius: 10,
-                offset: const Offset(0, 2),
+                color: ReportColors.textPrimary.withValues(alpha: 0.04),
+                blurRadius: 12,
+                offset: const Offset(0, 3),
               ),
             ],
           ),
           child: Row(
             children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: ReportColors.accentSoft,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(
-                  Icons.calendar_today_rounded,
-                  size: 18,
-                  color: ReportColors.accent,
-                ),
+              const Icon(
+                Icons.calendar_today_rounded,
+                size: 18,
+                color: ReportColors.accent,
               ),
               const SizedBox(width: 10),
               Text(
@@ -59,14 +51,14 @@ class ReportDateRangeSelector extends ConsumerWidget {
                 style: const TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 14,
-                  color: ReportColors.textPrimary,
+                  color: ReportColors.accent,
                 ),
               ),
               Container(
                 width: 1,
                 height: 22,
-                margin: const EdgeInsets.symmetric(horizontal: 10),
-                color: const Color(0xFFE0E3EB),
+                margin: const EdgeInsets.symmetric(horizontal: 12),
+                color: ReportColors.border,
               ),
               Expanded(
                 child: Text(
@@ -75,6 +67,7 @@ class ReportDateRangeSelector extends ConsumerWidget {
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontSize: 13,
+                    fontWeight: FontWeight.w500,
                     color: ReportColors.textMuted,
                   ),
                 ),
@@ -123,6 +116,7 @@ class ReportDateRangeSelector extends ConsumerWidget {
                   'Période',
                   style: Theme.of(sheetContext).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
+                    color: ReportColors.textPrimary,
                   ),
                 ),
               ),

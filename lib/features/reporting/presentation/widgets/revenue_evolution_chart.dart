@@ -23,25 +23,32 @@ class RevenueEvolutionChart extends ConsumerWidget {
       decoration: BoxDecoration(
         color: ReportColors.cardBackground,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE8EAF0)),
+        border: Border.all(color: ReportColors.border),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+            color: ReportColors.textPrimary.withValues(alpha: 0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            "Évolution du chiffre d'affaires",
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
-              color: ReportColors.textPrimary,
-            ),
+          const Row(
+            children: [
+              Expanded(
+                child: Text(
+                  "Évolution du chiffre d'affaires",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: ReportColors.textPrimary,
+                  ),
+                ),
+              ),
+              _GranularityChip(),
+            ],
           ),
           const SizedBox(height: AppSpacing.sm),
           SizedBox(
@@ -94,6 +101,40 @@ class RevenueEvolutionChart extends ConsumerWidget {
   }
 }
 
+class _GranularityChip extends StatelessWidget {
+  const _GranularityChip();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: ReportColors.accentSoft,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: const Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'Par jour',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: ReportColors.accent,
+            ),
+          ),
+          SizedBox(width: 2),
+          Icon(
+            Icons.keyboard_arrow_down_rounded,
+            size: 16,
+            color: ReportColors.accent,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _RevenueBarChart extends StatelessWidget {
   const _RevenueBarChart({required this.points});
 
@@ -129,7 +170,7 @@ class _RevenueBarChart extends StatelessWidget {
           drawVerticalLine: false,
           horizontalInterval: maxY / 5,
           getDrawingHorizontalLine: (_) => const FlLine(
-            color: Color(0xFFE8EAF0),
+            color: ReportColors.border,
             strokeWidth: 1,
           ),
         ),
@@ -206,7 +247,7 @@ class _RevenueBarChart extends StatelessWidget {
                     begin: Alignment.bottomCenter,
                     end: Alignment.topCenter,
                     colors: [
-                      Color(0xFFEF5350),
+                      ReportColors.accentGradientEnd,
                       ReportColors.accent,
                     ],
                   ),

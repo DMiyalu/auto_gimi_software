@@ -77,6 +77,7 @@ class _KpiGrid extends StatelessWidget {
               child: _KpiCard(
                 icon: Icons.show_chart_rounded,
                 iconColor: ReportColors.kpiRevenue,
+                iconBackground: ReportColors.kpiRevenueSoft,
                 value: RestaurantReportKpiGrid.formatAmount(kpis.revenue),
                 label: "Chiffre d'affaires",
                 trend: RestaurantReportKpiGrid.formatPercent(
@@ -92,6 +93,7 @@ class _KpiGrid extends StatelessWidget {
               child: _KpiCard(
                 icon: Icons.shopping_bag_outlined,
                 iconColor: ReportColors.kpiOrders,
+                iconBackground: ReportColors.kpiOrdersSoft,
                 value: '${kpis.ordersCount}',
                 label: 'Commandes',
                 trend: RestaurantReportKpiGrid.formatPercent(
@@ -111,6 +113,7 @@ class _KpiGrid extends StatelessWidget {
               child: _KpiCard(
                 icon: Icons.shopping_basket_outlined,
                 iconColor: ReportColors.kpiBasket,
+                iconBackground: ReportColors.kpiBasketSoft,
                 value: RestaurantReportKpiGrid.formatAmount(kpis.averageBasket),
                 label: 'Panier moyen',
                 trend: RestaurantReportKpiGrid.formatPercent(
@@ -126,6 +129,7 @@ class _KpiGrid extends StatelessWidget {
               child: _KpiCard(
                 icon: Icons.people_alt_outlined,
                 iconColor: ReportColors.kpiClients,
+                iconBackground: ReportColors.kpiClientsSoft,
                 value: '${kpis.clientsServed}',
                 label: 'Clients servis',
                 trend: RestaurantReportKpiGrid.formatPercent(
@@ -147,6 +151,7 @@ class _KpiCard extends StatelessWidget {
   const _KpiCard({
     required this.icon,
     required this.iconColor,
+    required this.iconBackground,
     required this.value,
     required this.label,
     required this.trend,
@@ -156,6 +161,7 @@ class _KpiCard extends StatelessWidget {
 
   final IconData icon;
   final Color iconColor;
+  final Color iconBackground;
   final String value;
   final String label;
   final String trend;
@@ -173,12 +179,12 @@ class _KpiCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: ReportColors.cardBackground,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE8EAF0)),
+        border: Border.all(color: ReportColors.border),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+            color: ReportColors.textPrimary.withValues(alpha: 0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
@@ -186,13 +192,13 @@ class _KpiCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 36,
-            height: 36,
+            width: 38,
+            height: 38,
             decoration: BoxDecoration(
-              color: iconColor,
+              color: iconBackground,
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: Colors.white, size: 18),
+            child: Icon(icon, color: iconColor, size: 20),
           ),
           const SizedBox(height: 12),
           Text(
@@ -211,6 +217,7 @@ class _KpiCard extends StatelessWidget {
             label,
             style: const TextStyle(
               fontSize: 12,
+              fontWeight: FontWeight.w500,
               color: ReportColors.textMuted,
             ),
           ),
@@ -239,7 +246,7 @@ class _KpiGridSkeleton extends StatelessWidget {
     Widget box() => Container(
       height: 140,
       decoration: BoxDecoration(
-        color: const Color(0xFFEDEFF5),
+        color: const Color(0xFFF2F3F7),
         borderRadius: BorderRadius.circular(16),
       ),
     );
