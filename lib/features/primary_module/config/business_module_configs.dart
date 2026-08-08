@@ -106,7 +106,7 @@ abstract final class BusinessModuleConfigs {
     moreMenuItems: const [
       MoreMenuItemConfig(
         label: 'Inventaires',
-        icon: Icons.fact_check_outlined,
+        icon: Icons.inventory_2_outlined,
         route: Routes.inventories,
       ),
       MoreMenuItemConfig(
