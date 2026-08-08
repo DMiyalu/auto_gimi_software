@@ -65,9 +65,9 @@ String commandeStatusLabel(String key) {
 
 Color commandeStatusColor(String key) {
   return switch (key) {
-    CommandeStatus.enCours => AppColors.violetClair,
-    CommandeStatus.aPayer => AppColors.violetPrincipal,
-    CommandeStatus.cloturee => AppColors.bleuRoyal,
+    CommandeStatus.enCours => const Color(0xFFFF8A00),
+    CommandeStatus.aPayer => AppColors.zuriRed,
+    CommandeStatus.cloturee => const Color(0xFF16A34A),
     CommandeStatus.annulees => Colors.grey.shade500,
     _ => Colors.blueGrey.shade500,
   };

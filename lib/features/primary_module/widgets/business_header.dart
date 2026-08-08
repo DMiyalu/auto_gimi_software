@@ -54,17 +54,26 @@ class BusinessHeader extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: isRestaurant ? 32 : 22,
-            backgroundColor: isRestaurant
-                ? AppColors.violetPrincipal
-                : config.primaryColor.withValues(alpha: 0.12),
-            child: Icon(
-              isRestaurant ? Icons.room_service_outlined : config.activityIcon,
-              color: isRestaurant ? AppColors.cyanClair : config.primaryColor,
-              size: isRestaurant ? 34 : 24,
+          if (isRestaurant)
+            ClipRRect(
+              borderRadius: BorderRadius.circular(14),
+              child: Image.asset(
+                'public/images/logo.png',
+                width: 48,
+                height: 48,
+                fit: BoxFit.cover,
+              ),
+            )
+          else
+            CircleAvatar(
+              radius: 22,
+              backgroundColor: config.primaryColor.withValues(alpha: 0.12),
+              child: Icon(
+                config.activityIcon,
+                color: config.primaryColor,
+                size: 24,
+              ),
             ),
-          ),
           SizedBox(width: isRestaurant ? 14 : AppSpacing.xs),
           Expanded(
             child: InkWell(
@@ -86,19 +95,23 @@ class BusinessHeader extends ConsumerWidget {
                       child: Text(
                         name,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontSize: isRestaurant ? 23 : null,
+                          fontSize: isRestaurant ? 20 : null,
                           fontWeight: FontWeight.w800,
-                          color: const Color(0xFF101529),
+                          color: isRestaurant
+                              ? AppColors.zuriNavy
+                              : const Color(0xFF101529),
                           height: 1.05,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     const SizedBox(width: 2),
-                    const Icon(
+                    Icon(
                       Icons.keyboard_arrow_down_rounded,
                       size: 22,
-                      color: Color(0xFF101529),
+                      color: isRestaurant
+                          ? AppColors.zuriNavy
+                          : const Color(0xFF101529),
                     ),
                   ],
                 ),
@@ -115,12 +128,12 @@ class BusinessHeader extends ConsumerWidget {
               role: role,
             ),
             child: CircleAvatar(
-              radius: isRestaurant ? 28 : 20,
+              radius: isRestaurant ? 24 : 20,
               backgroundColor: const Color(0xFFEFF1F5),
               child: Text(
                 initials,
                 style: TextStyle(
-                  color: isRestaurant ? const Color(0xFF101529) : null,
+                  color: isRestaurant ? AppColors.zuriNavy : null,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -184,7 +197,8 @@ class BusinessHeader extends ConsumerWidget {
                     leading: CircleAvatar(child: Icon(item.category.icon)),
                     title: Text(item.name),
                     subtitle: Text(
-                      _roleFor(item.id, memberships, profile).label,
+                      '${item.category.label(l10n)} • '
+                      '${_roleFor(item.id, memberships, profile).label}',
                     ),
                     trailing: item.id == activeId
                         ? Icon(

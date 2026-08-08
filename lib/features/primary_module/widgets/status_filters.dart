@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/domain/business_category.dart';
 import '../../../core/theme/app_colors.dart';
 import '../controllers/primary_module_providers.dart';
 
 /// Liste horizontale scrollable de filtres rapides — les options viennent
-/// entièrement de la configuration métier active. Même chip, mêmes couleurs
-/// sur tous les écrans de l'app (Clients, Produits inclus).
+/// entièrement de la configuration métier active.
 class StatusFilters extends ConsumerWidget {
   const StatusFilters({super.key});
 
@@ -15,14 +15,15 @@ class StatusFilters extends ConsumerWidget {
     final config = ref.watch(primaryModuleConfigProvider);
     final items = ref.watch(activityListProvider);
     final selected = ref.watch(moduleSelectedFilterProvider);
+    final isRestaurant = config.category == BusinessCategory.restaurant;
 
     return SizedBox(
-      height: 48,
+      height: isRestaurant ? 44 : 48,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 18),
         itemCount: config.statusFilters.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 8),
+        separatorBuilder: (_, _) => SizedBox(width: isRestaurant ? 8 : 8),
         itemBuilder: (context, index) {
           final option = config.statusFilters[index];
           final isSelected = option.key == selected;
@@ -31,11 +32,79 @@ class StatusFilters extends ConsumerWidget {
               : items.any((item) => item.statusKey == option.key);
 
           final dotColor = switch (option.key) {
-            'en_attente' => AppColors.violetClair,
-            'en_preparation' => AppColors.violetPrincipal,
-            'pretes' => AppColors.bleuRoyal,
+            'en_cours' || 'en_attente' => const Color(0xFFFF8A00),
+            'a_payer' || 'en_preparation' => AppColors.zuriRed,
+            'cloturee' || 'pretes' || 'terminees' => const Color(0xFF16A34A),
+            'annulees' => Colors.grey,
+            'livraison' => AppColors.zuriMagenta,
             _ => config.primaryColor,
           };
+
+          if (isRestaurant) {
+            return Material(
+              key: Key('status_filter_${option.key}'),
+              color: isSelected ? AppColors.zuriRed : AppColors.zuriWhite,
+              borderRadius: BorderRadius.circular(22),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(22),
+                onTap: () => ref
+                    .read(moduleSelectedFilterProvider.notifier)
+                    .state = option.key,
+                child: Ink(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(22),
+                    border: Border.all(
+                      color: isSelected
+                          ? AppColors.zuriRed
+                          : const Color(0xFFE6E8EF),
+                    ),
+                    boxShadow: isSelected
+                        ? null
+                        : [
+                            BoxShadow(
+                              color: AppColors.zuriNavy.withValues(alpha: 0.04),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 10,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          option.label,
+                          style: TextStyle(
+                            color: isSelected
+                                ? AppColors.zuriWhite
+                                : AppColors.zuriNavy,
+                            fontSize: 14,
+                            fontWeight:
+                                isSelected ? FontWeight.w800 : FontWeight.w600,
+                          ),
+                        ),
+                        if (hasItems && option.key != 'all') ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            width: 7,
+                            height: 7,
+                            decoration: BoxDecoration(
+                              color: isSelected ? Colors.white : dotColor,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }
 
           return FilterChip(
             selected: isSelected,

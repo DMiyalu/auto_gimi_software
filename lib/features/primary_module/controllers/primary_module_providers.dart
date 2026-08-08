@@ -77,17 +77,43 @@ class ActivityListNotifier extends Notifier<List<ActivityItem>> {
   }
 
   ActivityItem _fromCommande(CommandeEntity commande) {
+    final contextLabel = commande.context?.trim();
+    final hasContext = contextLabel != null && contextLabel.isNotEmpty;
+    final visual = _commandeVisualFor(contextLabel);
+
     return ActivityItem(
       id: commande.id,
-      title: commande.reference,
-      subtitle: commande.context ?? 'Commande restaurant',
+      title: hasContext ? contextLabel : commande.reference,
+      subtitle: hasContext ? commande.reference : 'Commande restaurant',
       time: commande.createdAt,
       statusKey: commande.statusKey,
       statusLabel: commande.statusLabel,
       statusColor: commandeStatusColor(commande.statusKey),
-      leadingIcon: Icons.restaurant_outlined,
+      leadingIcon: visual.icon,
+      accentColor: visual.accent,
       amount: commande.totalAmount,
       metaLabel: commande.clientId == null ? null : 'Client lié',
+    );
+  }
+
+  ({IconData icon, Color accent}) _commandeVisualFor(String? context) {
+    final lower = (context ?? '').toLowerCase();
+    if (lower.contains('livraison')) {
+      return (
+        icon: Icons.delivery_dining_outlined,
+        accent: AppColors.zuriRed,
+      );
+    }
+    if (lower.contains('emporter')) {
+      return (
+        icon: Icons.shopping_bag_outlined,
+        accent: const Color(0xFF22C55E),
+      );
+    }
+    // Table / salle par défaut
+    return (
+      icon: Icons.table_restaurant_outlined,
+      accent: const Color(0xFF16A34A),
     );
   }
 
@@ -122,13 +148,11 @@ class ActivityListNotifier extends Notifier<List<ActivityItem>> {
 
 Color _statusColorFor(String key) {
   return switch (key) {
-    'en_attente' => AppColors.violetClair,
-    'en_preparation' ||
-    'en_cours' ||
-    'diagnostic' ||
-    'planifiees' => AppColors.violetPrincipal,
-    'pretes' || 'terminees' || 'cloturee' => AppColors.bleuRoyal,
-    'livraison' || 'a_payer' => AppColors.cyan,
+    'en_attente' => const Color(0xFFFF8A00),
+    'en_preparation' || 'en_cours' || 'diagnostic' || 'planifiees' =>
+      AppColors.zuriRed,
+    'pretes' || 'terminees' || 'cloturee' => const Color(0xFF16A34A),
+    'livraison' || 'a_payer' => AppColors.zuriMagenta,
     'annulees' => Colors.grey,
     _ => Colors.blueGrey,
   };

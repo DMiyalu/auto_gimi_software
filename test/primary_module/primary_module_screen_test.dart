@@ -254,8 +254,8 @@ void main() {
     await _pump(tester, BusinessCategory.restaurant, database: database);
 
     // Le badge de statut de la carte affiche aussi "À payer" : on cible
-    // précisément le FilterChip pour éviter l'ambiguïté avec ce badge.
-    await tester.tap(find.widgetWithText(FilterChip, 'À payer'));
+    // précisément le chip de filtre pour éviter l'ambiguïté avec ce badge.
+    await tester.tap(find.byKey(const Key('status_filter_a_payer')));
     await tester.pump(const Duration(milliseconds: 300));
 
     expect(find.text('Table à payer'), findsOneWidget);

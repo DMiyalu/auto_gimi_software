@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/domain/business_category.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../controllers/primary_module_providers.dart';
 
 /// Barre de recherche instantanée. Le placeholder vient entièrement de la
-/// configuration métier active — jamais codé en dur ici. Même forme, taille
-/// et couleurs sur tous les écrans de l'app (Clients, Produits inclus).
+/// configuration métier active — jamais codé en dur ici.
 class ModuleSearchBar extends ConsumerStatefulWidget {
   const ModuleSearchBar({super.key});
 
@@ -32,27 +32,32 @@ class _ModuleSearchBarState extends ConsumerState<ModuleSearchBar> {
   @override
   Widget build(BuildContext context) {
     final config = ref.watch(primaryModuleConfigProvider);
+    final isRestaurant = config.category == BusinessCategory.restaurant;
+    final radius = isRestaurant ? 16.0 : AppRadius.chip;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 18),
       child: SizedBox(
-        height: 56,
+        height: isRestaurant ? 52 : 56,
         child: TextField(
           controller: _controller,
           onChanged: (value) =>
               ref.read(moduleSearchQueryProvider.notifier).state = value,
-          style: const TextStyle(fontSize: 16, color: AppColors.textPrimary),
+          style: TextStyle(
+            fontSize: 16,
+            color: isRestaurant ? AppColors.zuriNavy : AppColors.textPrimary,
+          ),
           decoration: InputDecoration(
             hintText: config.searchPlaceholder,
-            hintStyle: const TextStyle(
+            hintStyle: TextStyle(
               color: AppColors.textMuted,
-              fontSize: 16,
+              fontSize: isRestaurant ? 15 : 16,
               fontWeight: FontWeight.w500,
             ),
-            prefixIcon: const Icon(
+            prefixIcon: Icon(
               Icons.search_rounded,
-              color: AppColors.textMuted,
-              size: 28,
+              color: isRestaurant ? AppColors.textMuted : AppColors.textMuted,
+              size: isRestaurant ? 24 : 28,
             ),
             suffixIcon: ValueListenableBuilder<TextEditingValue>(
               valueListenable: _controller,
@@ -67,12 +72,12 @@ class _ModuleSearchBarState extends ConsumerState<ModuleSearchBar> {
             filled: true,
             fillColor: Colors.white,
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppRadius.chip),
+              borderRadius: BorderRadius.circular(radius),
               borderSide: const BorderSide(color: AppColors.borderSubtle),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppRadius.chip),
-              borderSide: BorderSide(color: config.primaryColor),
+              borderRadius: BorderRadius.circular(radius),
+              borderSide: BorderSide(color: config.primaryColor, width: 1.4),
             ),
             contentPadding: const EdgeInsets.symmetric(vertical: 0),
           ),

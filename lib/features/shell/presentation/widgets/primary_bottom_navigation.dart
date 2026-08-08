@@ -132,7 +132,7 @@ class _RestaurantNavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final itemColor = selected ? color : const Color(0xFF7B819B);
+    final itemColor = selected ? color : const Color(0xFF8A90A5);
 
     return InkWell(
       borderRadius: BorderRadius.circular(18),
@@ -140,28 +140,19 @@ class _RestaurantNavItem extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 160),
-            width: 42,
-            height: 36,
-            decoration: BoxDecoration(
-              color: selected ? color : Colors.transparent,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(
-              icon,
-              size: 27,
-              color: selected ? Colors.white : itemColor,
-            ),
+          Icon(
+            icon,
+            size: 26,
+            color: itemColor,
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 4),
           Text(
             label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               color: itemColor,
-              fontSize: 14,
+              fontSize: 12,
               fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
             ),
           ),

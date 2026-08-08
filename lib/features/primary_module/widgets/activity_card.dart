@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../../../core/domain/business_category.dart';
 import '../../../core/presentation/widgets/domain_card.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../controllers/primary_module_providers.dart';
 import '../models/activity_item.dart';
@@ -215,39 +216,43 @@ class _RestaurantActivityCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final accent = item.accentColor ?? item.statusColor;
-    final statusFill = item.statusColor.withValues(alpha: 0.14);
+    final statusFill = item.statusColor.withValues(alpha: 0.12);
     final metaIsPlace = item.leadingIcon == Icons.delivery_dining_outlined;
 
     return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(18),
+      color: AppColors.zuriWhite,
+      borderRadius: BorderRadius.circular(16),
       child: InkWell(
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(16),
         onTap: onTap,
         onLongPress: onLongPress,
         child: Container(
           constraints: const BoxConstraints(minHeight: 88),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(18),
-            border: Border(left: BorderSide(color: accent, width: 4)),
+            color: AppColors.zuriWhite,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFEDEFF5)),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.055),
-                blurRadius: 18,
-                offset: const Offset(0, 6),
+                color: AppColors.zuriNavy.withValues(alpha: 0.05),
+                blurRadius: 16,
+                offset: const Offset(0, 5),
               ),
             ],
           ),
-          padding: const EdgeInsets.fromLTRB(16, 8, 22, 8),
+          foregroundDecoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border(left: BorderSide(color: accent, width: 4)),
+          ),
+          padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
           child: Row(
             children: [
               CircleAvatar(
-                radius: 29,
+                radius: 24,
                 backgroundColor: accent.withValues(alpha: 0.12),
-                child: Icon(item.leadingIcon, color: accent, size: 32),
+                child: Icon(item.leadingIcon, color: accent, size: 24),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -262,9 +267,9 @@ class _RestaurantActivityCard extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                             style: Theme.of(context).textTheme.titleMedium
                                 ?.copyWith(
-                                  color: const Color(0xFF101529),
-                                  fontSize: 19,
-                                  height: 1.05,
+                                  color: AppColors.zuriNavy,
+                                  fontSize: 16,
+                                  height: 1.1,
                                   fontWeight: FontWeight.w800,
                                 ),
                           ),
@@ -274,35 +279,35 @@ class _RestaurantActivityCard extends StatelessWidget {
                           const Icon(
                             Icons.push_pin,
                             size: 14,
-                            color: Color(0xFF707792),
+                            color: Color(0xFF8A90A5),
                           ),
                         ],
                       ],
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 4),
                     Text(
                       item.subtitle,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: const Color(0xFF101529),
-                        fontSize: 15,
-                        height: 1.1,
+                        color: const Color(0xFF8A90A5),
+                        fontSize: 13.5,
+                        height: 1.2,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                     if (item.metaLabel != null) ...[
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 6),
                       Row(
                         children: [
                           Icon(
                             metaIsPlace
-                                ? Icons.location_on
+                                ? Icons.location_on_outlined
                                 : Icons.person_outline,
-                            size: 18,
-                            color: const Color(0xFF707792),
+                            size: 15,
+                            color: const Color(0xFF8A90A5),
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: 4),
                           Expanded(
                             child: Text(
                               item.metaLabel!,
@@ -310,8 +315,8 @@ class _RestaurantActivityCard extends StatelessWidget {
                               overflow: TextOverflow.ellipsis,
                               style: Theme.of(context).textTheme.bodySmall
                                   ?.copyWith(
-                                    color: const Color(0xFF707792),
-                                    fontSize: 14,
+                                    color: const Color(0xFF8A90A5),
+                                    fontSize: 12.5,
                                     fontWeight: FontWeight.w600,
                                   ),
                             ),
@@ -322,85 +327,79 @@ class _RestaurantActivityCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: 12),
-              SizedBox(
-                width: 142,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      _timeFormat.format(item.time),
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: const Color(0xFF707792),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
+              const SizedBox(width: 10),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    _timeFormat.format(item.time),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: const Color(0xFF8A90A5),
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
                     ),
-                    const SizedBox(height: 5),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Flexible(
-                          child: Text(
-                            '${_amountFormat.format(item.amount ?? 0)} FC',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.titleMedium
-                                ?.copyWith(
-                                  color: const Color(0xFF101529),
-                                  fontSize: 21,
-                                  height: 1,
-                                  fontWeight: FontWeight.w900,
-                                ),
-                          ),
-                        ),
-                        if (item.badgeCount != null &&
-                            item.badgeCount! > 0) ...[
-                          const SizedBox(width: 12),
-                          Container(
-                            width: 28,
-                            height: 28,
-                            alignment: Alignment.center,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFFEF2E2E),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Text(
-                              '${item.badgeCount}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 15,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                    const SizedBox(height: 5),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: statusFill,
-                        borderRadius: BorderRadius.circular(AppRadius.chip),
-                      ),
-                      child: Text(
-                        item.statusLabel,
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '${_amountFormat.format(item.amount ?? 0)} FC',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: item.statusColor,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w800,
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              color: AppColors.zuriNavy,
+                              fontSize: 16,
+                              height: 1,
+                              fontWeight: FontWeight.w900,
+                            ),
+                      ),
+                      if (item.badgeCount != null && item.badgeCount! > 0) ...[
+                        const SizedBox(width: 8),
+                        Container(
+                          width: 22,
+                          height: 22,
+                          alignment: Alignment.center,
+                          decoration: const BoxDecoration(
+                            color: AppColors.zuriRed,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Text(
+                            '${item.badgeCount}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
                         ),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: statusFill,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      item.statusLabel,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: item.statusColor,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ],
           ),

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/domain/business_category.dart';
 import '../../../core/routing/routes.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../controllers/primary_module_providers.dart';
 import '../models/activity_item.dart';
@@ -95,24 +96,24 @@ class ActivityList extends ConsumerWidget {
           children: [
             if (isRestaurant)
               Padding(
-                padding: const EdgeInsets.fromLTRB(18, 0, 18, 18),
+                padding: const EdgeInsets.fromLTRB(18, 0, 18, 14),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
                       "Aujourd'hui",
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: const Color(0xFF101C4A),
-                        fontSize: 21,
+                        color: AppColors.zuriNavy,
+                        fontSize: 20,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
                     Text(
-                      '28 commandes',
+                      '${items.length} commande${items.length > 1 ? 's' : ''}',
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: const Color(0xFF7B819B),
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
+                        color: AppColors.zuriRed,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ],

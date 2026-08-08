@@ -57,8 +57,23 @@ void main() {
           role: 'owner',
           phoneVerified: true,
           createdAt: DateTime(2026, 1, 1),
+          establishmentIds: const [_establishmentId],
+          activeEstablishmentId: _establishmentId,
+          rolesByEstablishment: const {_establishmentId: 'owner'},
         ),
-      );
+      )
+      ..setEstablishments([
+        Establishment(
+          id: _establishmentId,
+          name: 'Le Goût Parfait',
+          category: BusinessCategory.restaurant,
+          ownerId: 'uid-test',
+          managerName: 'Test Manager',
+          phone: '221771234567',
+          phoneVerified: true,
+          createdAt: DateTime(2026, 1, 1),
+        ),
+      ]);
     phoneVerificationRepository = FakePhoneVerificationRepository(
       onVerified: () {},
     );
