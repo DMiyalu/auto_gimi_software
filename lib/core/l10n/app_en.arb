@@ -135,7 +135,19 @@
   "comingSoon": "Coming soon",
   "signUpTitle": "Create your account",
   "signUpSubtitle": "Verify your phone, then create or join an establishment.",
+  "signUpBrandTagline": "One account to manage all your establishments.",
+  "signUpFormSubtitle": "Enter your name and phone number to get started.",
+  "signUpStepInfos": "Info",
+  "signUpStepVerification": "Verification",
+  "signUpStepDone": "Done",
+  "signUpOtpInfo": "A verification code (OTP) will be sent by WhatsApp or SMS to confirm your number.",
+  "signUpDataSecurity": "Your data is secure and will never be shared.",
+  "signUpDataSecurityShort": "Your data is secure",
+  "continueLabel": "Continue",
+  "alreadyHaveAccountShort": "Already have an account?",
   "fullName": "Full name",
+  "fullNameHint": "E.g. Dieudonné Miyalu",
+  "phoneShort": "Phone",
   "businessCategory": "Business category",
   "establishmentName": "Establishment name",
   "managerName": "Manager / owner full name",
@@ -153,7 +165,7 @@
   "categorySanitation": "Sanitation service",
   "categoryGym": "Gym",
   "categoryPharmacy": "Pharmacy",
-  "verificationTitle": "Phone verification",
+  "verificationTitle": "Verify your number",
   "verificationSubtitle": "A 6-digit code was sent to {phone}.",
   "@verificationSubtitle": {
     "placeholders": {
@@ -162,9 +174,24 @@
       }
     }
   },
+  "verificationSubtitlePrefix": "We sent a verification code (OTP) to ",
+  "verificationSubtitleSuffix": " via WhatsApp.",
   "verificationCode": "Verification code",
   "verificationCodeInvalid": "6-digit code required",
   "verificationCodeSent": "Code sent via SMS",
+  "verificationCodeExpiresIn": "Code expires in {time}",
+  "@verificationCodeExpiresIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "verificationNoCode": "Didn't receive the code?",
+  "verificationSecurityDetail": "Your information is protected and will never be shared with third parties.",
+  "verifyAndContinue": "Verify and continue",
+  "needHelp": "Need help?",
+  "contactUs": "Contact us",
   "verifyCode": "Verify",
   "resendCode": "Resend code",
   "resendCodeIn": "Resend in {seconds}s",
@@ -175,6 +202,14 @@
       }
     }
   },
+  "signUpSuccessTitle": "Registration successful!",
+  "signUpSuccessSubtitle": "Your account was created successfully. You can get started now.",
+  "signUpAccessSpace": "Go to my workspace",
+  "signUpNextStepsTitle": "What can you do now?",
+  "signUpNextStepEstablishments": "Add your establishments",
+  "signUpNextStepActivities": "Track your activities",
+  "signUpNextStepReports": "View your reports",
+  "signUpNextStepTeam": "Manage your team",
   "clientName": "Client name",
   "whatsappNumber": "WhatsApp number",
   "addClient": "Add client",

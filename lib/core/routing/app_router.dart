@@ -3,10 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/providers/signup_otp_pending_provider.dart';
+import '../../features/auth/presentation/providers/signup_success_pending_provider.dart';
 import '../../features/auth/presentation/providers/auth_state_provider.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/phone_verification_screen.dart';
 import '../../features/auth/presentation/screens/signup_screen.dart';
+import '../../features/auth/presentation/screens/signup_success_screen.dart';
 import '../../features/establishment/presentation/screens/establishment_form_screen.dart';
 import '../../features/establishment/presentation/providers/establishment_providers.dart';
 import '../../features/establishment/presentation/screens/establishment_onboarding_screen.dart';
@@ -46,6 +48,7 @@ final routerProvider = Provider<GoRouter>((ref) {
   ref.listen(userProfileProvider, (_, __) => refresh.value++);
   ref.listen(userEstablishmentsProvider, (_, __) => refresh.value++);
   ref.listen(signupOtpPendingProvider, (_, __) => refresh.value++);
+  ref.listen(signupSuccessPendingProvider, (_, __) => refresh.value++);
 
   return GoRouter(
     initialLocation: Routes.dashboard,
@@ -62,7 +65,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       final onLogin = location == Routes.login;
       final onSignUp = location == Routes.signUp;
       final onVerify = location == Routes.verifyPhone;
-      final onAuthScreen = onLogin || onSignUp || onVerify;
+      final onSignUpSuccess = location == Routes.signUpSuccess;
+      final onAuthScreen =
+          onLogin || onSignUp || onVerify || onSignUpSuccess;
       final onLanding = location == Routes.establishmentOnboarding;
       final onHub =
           onLanding ||
@@ -80,10 +85,16 @@ final routerProvider = Provider<GoRouter>((ref) {
       final loadedProfile = profile.valueOrNull;
       final phoneVerified = loadedProfile?.phoneVerified ?? false;
       final otpPending = ref.read(signupOtpPendingProvider);
+      final signupSuccessPending = ref.read(signupSuccessPendingProvider);
 
       if (loadedProfile != null && (otpPending || !phoneVerified)) {
         if (onVerify) return null;
         return Routes.verifyPhone;
+      }
+
+      if (signupSuccessPending && phoneVerified) {
+        if (onSignUpSuccess) return null;
+        return Routes.signUpSuccess;
       }
 
       if (establishments.isLoading) return null;
@@ -111,6 +122,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: Routes.verifyPhone,
         builder: (_, __) => const PhoneVerificationScreen(),
+      ),
+      GoRoute(
+        path: Routes.signUpSuccess,
+        builder: (_, __) => const SignUpSuccessScreen(),
       ),
       ShellRoute(
         builder: (context, state, child) => AppShellScreen(child: child),

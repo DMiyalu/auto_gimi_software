@@ -3,6 +3,7 @@ abstract final class Routes {
   static const login = '/login';
   static const signUp = '/signup';
   static const verifyPhone = '/verify-phone';
+  static const signUpSuccess = '/signup/success';
   static const dashboard = '/';
   static const establishmentOnboarding = '/establishments/onboarding';
   static const establishmentNew = '/establishments/new';

@@ -330,7 +330,47 @@ class AppLocalizationsFr extends AppLocalizations {
       'Vérifiez votre numéro, puis créez ou rejoignez un établissement.';
 
   @override
+  String get signUpBrandTagline =>
+      'Un seul compte pour gérer tous vos établissements.';
+
+  @override
+  String get signUpFormSubtitle =>
+      'Renseignez votre nom et votre numéro de téléphone pour commencer.';
+
+  @override
+  String get signUpStepInfos => 'Infos';
+
+  @override
+  String get signUpStepVerification => 'Vérification';
+
+  @override
+  String get signUpStepDone => 'Terminé';
+
+  @override
+  String get signUpOtpInfo =>
+      'Un code de vérification (OTP) vous sera envoyé par WhatsApp ou SMS pour confirmer votre numéro.';
+
+  @override
+  String get signUpDataSecurity =>
+      'Vos données sont sécurisées et ne seront jamais partagées.';
+
+  @override
+  String get signUpDataSecurityShort => 'Vos données sont sécurisées';
+
+  @override
+  String get continueLabel => 'Continuer';
+
+  @override
+  String get alreadyHaveAccountShort => 'Déjà un compte ?';
+
+  @override
   String get fullName => 'Nom complet';
+
+  @override
+  String get fullNameHint => 'Ex. : Dieudonné Miyalu';
+
+  @override
+  String get phoneShort => 'Téléphone';
 
   @override
   String get businessCategory => 'Catégorie d\'activité';
@@ -384,12 +424,19 @@ class AppLocalizationsFr extends AppLocalizations {
   String get categoryPharmacy => 'Pharmacie';
 
   @override
-  String get verificationTitle => 'Vérification du numéro';
+  String get verificationTitle => 'Vérifiez votre numéro';
 
   @override
   String verificationSubtitle(String phone) {
     return 'Un code à 6 chiffres a été envoyé au $phone.';
   }
+
+  @override
+  String get verificationSubtitlePrefix =>
+      'Nous avons envoyé un code de vérification (OTP) au ';
+
+  @override
+  String get verificationSubtitleSuffix => ' via WhatsApp.';
 
   @override
   String get verificationCode => 'Code de vérification';
@@ -401,6 +448,27 @@ class AppLocalizationsFr extends AppLocalizations {
   String get verificationCodeSent => 'Code envoyé par SMS';
 
   @override
+  String verificationCodeExpiresIn(String time) {
+    return 'Le code expire dans $time';
+  }
+
+  @override
+  String get verificationNoCode => 'Vous n’avez pas reçu le code ?';
+
+  @override
+  String get verificationSecurityDetail =>
+      'Vos informations sont protégées et ne seront jamais partagées avec des tiers.';
+
+  @override
+  String get verifyAndContinue => 'Vérifier et continuer';
+
+  @override
+  String get needHelp => 'Besoin d’aide ?';
+
+  @override
+  String get contactUs => 'Contactez-nous';
+
+  @override
   String get verifyCode => 'Vérifier';
 
   @override
@@ -410,6 +478,31 @@ class AppLocalizationsFr extends AppLocalizations {
   String resendCodeIn(int seconds) {
     return 'Renvoyer dans ${seconds}s';
   }
+
+  @override
+  String get signUpSuccessTitle => 'Inscription réussie !';
+
+  @override
+  String get signUpSuccessSubtitle =>
+      'Votre compte a été créé avec succès. Vous pouvez maintenant commencer.';
+
+  @override
+  String get signUpAccessSpace => 'Accéder à mon espace';
+
+  @override
+  String get signUpNextStepsTitle => 'Que pouvez-vous faire maintenant ?';
+
+  @override
+  String get signUpNextStepEstablishments => 'Ajouter vos établissements';
+
+  @override
+  String get signUpNextStepActivities => 'Suivre vos activités';
+
+  @override
+  String get signUpNextStepReports => 'Consulter vos rapports';
+
+  @override
+  String get signUpNextStepTeam => 'Gérer votre équipe';
 
   @override
   String get clientName => 'Nom du client';

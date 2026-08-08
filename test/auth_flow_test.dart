@@ -140,7 +140,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Phone verification'), findsOneWidget);
+    expect(find.text('Verify your number'), findsOneWidget);
     expect(find.byKey(const Key('verify_code_field')), findsOneWidget);
   });
 
@@ -156,13 +156,23 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Phone verification'), findsOneWidget);
+    expect(find.text('Verify your number'), findsOneWidget);
 
     await tester.enterText(
       find.byKey(const Key('verify_code_field')),
       FakePhoneVerificationRepository.testCode,
     );
+    await tester.ensureVisible(find.byKey(const Key('verify_submit_button')));
     await tester.tap(find.byKey(const Key('verify_submit_button')));
+    // Timers OTP : éviter pumpAndSettle infini.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.text('Registration successful!'), findsOneWidget);
+    await tester.ensureVisible(
+      find.byKey(const Key('signup_success_continue_button')),
+    );
+    await tester.tap(find.byKey(const Key('signup_success_continue_button')));
     await tester.pumpAndSettle();
 
     expect(find.text('Créer un établissement'), findsOneWidget);
@@ -183,7 +193,7 @@ void main() {
         find.byKey(const Key('onboarding_create_establishment_button')),
         findsOneWidget,
       );
-      expect(find.text('Phone verification'), findsNothing);
+      expect(find.text('Verify your number'), findsNothing);
     },
   );
 

@@ -698,11 +698,83 @@ abstract class AppLocalizations {
   /// **'Verify your phone, then create or join an establishment.'**
   String get signUpSubtitle;
 
+  /// No description provided for @signUpBrandTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'One account to manage all your establishments.'**
+  String get signUpBrandTagline;
+
+  /// No description provided for @signUpFormSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your name and phone number to get started.'**
+  String get signUpFormSubtitle;
+
+  /// No description provided for @signUpStepInfos.
+  ///
+  /// In en, this message translates to:
+  /// **'Info'**
+  String get signUpStepInfos;
+
+  /// No description provided for @signUpStepVerification.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification'**
+  String get signUpStepVerification;
+
+  /// No description provided for @signUpStepDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get signUpStepDone;
+
+  /// No description provided for @signUpOtpInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'A verification code (OTP) will be sent by WhatsApp or SMS to confirm your number.'**
+  String get signUpOtpInfo;
+
+  /// No description provided for @signUpDataSecurity.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data is secure and will never be shared.'**
+  String get signUpDataSecurity;
+
+  /// No description provided for @signUpDataSecurityShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data is secure'**
+  String get signUpDataSecurityShort;
+
+  /// No description provided for @continueLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get continueLabel;
+
+  /// No description provided for @alreadyHaveAccountShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Already have an account?'**
+  String get alreadyHaveAccountShort;
+
   /// No description provided for @fullName.
   ///
   /// In en, this message translates to:
   /// **'Full name'**
   String get fullName;
+
+  /// No description provided for @fullNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'E.g. Dieudonné Miyalu'**
+  String get fullNameHint;
+
+  /// No description provided for @phoneShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get phoneShort;
 
   /// No description provided for @businessCategory.
   ///
@@ -809,7 +881,7 @@ abstract class AppLocalizations {
   /// No description provided for @verificationTitle.
   ///
   /// In en, this message translates to:
-  /// **'Phone verification'**
+  /// **'Verify your number'**
   String get verificationTitle;
 
   /// No description provided for @verificationSubtitle.
@@ -817,6 +889,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'A 6-digit code was sent to {phone}.'**
   String verificationSubtitle(String phone);
+
+  /// No description provided for @verificationSubtitlePrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'We sent a verification code (OTP) to '**
+  String get verificationSubtitlePrefix;
+
+  /// No description provided for @verificationSubtitleSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **' via WhatsApp.'**
+  String get verificationSubtitleSuffix;
 
   /// No description provided for @verificationCode.
   ///
@@ -836,6 +920,42 @@ abstract class AppLocalizations {
   /// **'Code sent via SMS'**
   String get verificationCodeSent;
 
+  /// No description provided for @verificationCodeExpiresIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Code expires in {time}'**
+  String verificationCodeExpiresIn(String time);
+
+  /// No description provided for @verificationNoCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Didn\'t receive the code?'**
+  String get verificationNoCode;
+
+  /// No description provided for @verificationSecurityDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Your information is protected and will never be shared with third parties.'**
+  String get verificationSecurityDetail;
+
+  /// No description provided for @verifyAndContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify and continue'**
+  String get verifyAndContinue;
+
+  /// No description provided for @needHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Need help?'**
+  String get needHelp;
+
+  /// No description provided for @contactUs.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact us'**
+  String get contactUs;
+
   /// No description provided for @verifyCode.
   ///
   /// In en, this message translates to:
@@ -853,6 +973,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Resend in {seconds}s'**
   String resendCodeIn(int seconds);
+
+  /// No description provided for @signUpSuccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Registration successful!'**
+  String get signUpSuccessTitle;
+
+  /// No description provided for @signUpSuccessSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account was created successfully. You can get started now.'**
+  String get signUpSuccessSubtitle;
+
+  /// No description provided for @signUpAccessSpace.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to my workspace'**
+  String get signUpAccessSpace;
+
+  /// No description provided for @signUpNextStepsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What can you do now?'**
+  String get signUpNextStepsTitle;
+
+  /// No description provided for @signUpNextStepEstablishments.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your establishments'**
+  String get signUpNextStepEstablishments;
+
+  /// No description provided for @signUpNextStepActivities.
+  ///
+  /// In en, this message translates to:
+  /// **'Track your activities'**
+  String get signUpNextStepActivities;
+
+  /// No description provided for @signUpNextStepReports.
+  ///
+  /// In en, this message translates to:
+  /// **'View your reports'**
+  String get signUpNextStepReports;
+
+  /// No description provided for @signUpNextStepTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage your team'**
+  String get signUpNextStepTeam;
 
   /// No description provided for @clientName.
   ///

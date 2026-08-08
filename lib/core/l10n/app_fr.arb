@@ -135,7 +135,19 @@
   "comingSoon": "Bientôt disponible",
   "signUpTitle": "Créer votre compte",
   "signUpSubtitle": "Vérifiez votre numéro, puis créez ou rejoignez un établissement.",
+  "signUpBrandTagline": "Un seul compte pour gérer tous vos établissements.",
+  "signUpFormSubtitle": "Renseignez votre nom et votre numéro de téléphone pour commencer.",
+  "signUpStepInfos": "Infos",
+  "signUpStepVerification": "Vérification",
+  "signUpStepDone": "Terminé",
+  "signUpOtpInfo": "Un code de vérification (OTP) vous sera envoyé par WhatsApp ou SMS pour confirmer votre numéro.",
+  "signUpDataSecurity": "Vos données sont sécurisées et ne seront jamais partagées.",
+  "signUpDataSecurityShort": "Vos données sont sécurisées",
+  "continueLabel": "Continuer",
+  "alreadyHaveAccountShort": "Déjà un compte ?",
   "fullName": "Nom complet",
+  "fullNameHint": "Ex. : Dieudonné Miyalu",
+  "phoneShort": "Téléphone",
   "businessCategory": "Catégorie d'activité",
   "establishmentName": "Nom de l'établissement",
   "managerName": "Nom complet du gestionnaire / propriétaire",
@@ -153,7 +165,7 @@
   "categorySanitation": "Service Assainissement",
   "categoryGym": "Salle de sport",
   "categoryPharmacy": "Pharmacie",
-  "verificationTitle": "Vérification du numéro",
+  "verificationTitle": "Vérifiez votre numéro",
   "verificationSubtitle": "Un code à 6 chiffres a été envoyé au {phone}.",
   "@verificationSubtitle": {
     "placeholders": {
@@ -162,9 +174,24 @@
       }
     }
   },
+  "verificationSubtitlePrefix": "Nous avons envoyé un code de vérification (OTP) au ",
+  "verificationSubtitleSuffix": " via WhatsApp.",
   "verificationCode": "Code de vérification",
   "verificationCodeInvalid": "Code à 6 chiffres requis",
   "verificationCodeSent": "Code envoyé par SMS",
+  "verificationCodeExpiresIn": "Le code expire dans {time}",
+  "@verificationCodeExpiresIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "verificationNoCode": "Vous n’avez pas reçu le code ?",
+  "verificationSecurityDetail": "Vos informations sont protégées et ne seront jamais partagées avec des tiers.",
+  "verifyAndContinue": "Vérifier et continuer",
+  "needHelp": "Besoin d’aide ?",
+  "contactUs": "Contactez-nous",
   "verifyCode": "Vérifier",
   "resendCode": "Renvoyer le code",
   "resendCodeIn": "Renvoyer dans {seconds}s",
@@ -175,6 +202,14 @@
       }
     }
   },
+  "signUpSuccessTitle": "Inscription réussie !",
+  "signUpSuccessSubtitle": "Votre compte a été créé avec succès. Vous pouvez maintenant commencer.",
+  "signUpAccessSpace": "Accéder à mon espace",
+  "signUpNextStepsTitle": "Que pouvez-vous faire maintenant ?",
+  "signUpNextStepEstablishments": "Ajouter vos établissements",
+  "signUpNextStepActivities": "Suivre vos activités",
+  "signUpNextStepReports": "Consulter vos rapports",
+  "signUpNextStepTeam": "Gérer votre équipe",
   "clientName": "Nom du client",
   "whatsappNumber": "Numéro WhatsApp",
   "addClient": "Ajouter un client",
