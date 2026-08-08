@@ -169,10 +169,10 @@ class _CommandeDetailScreenState extends ConsumerState<CommandeDetailScreen> {
                 minBlastForce: 8,
                 gravity: 0.4,
                 colors: const [
-                  AppColors.violetPrincipal,
-                  AppColors.bleuRoyal,
-                  AppColors.cyan,
-                  AppColors.violetClair,
+                  AppColors.zuriRed,
+                  AppColors.zuriPink,
+                  AppColors.zuriMagenta,
+                  AppColors.zuriNavy,
                 ],
               ),
             ),
@@ -337,7 +337,7 @@ class _CommandeDetailScreenState extends ConsumerState<CommandeDetailScreen> {
                   ListTile(
                     leading: const Icon(
                       Icons.cancel_outlined,
-                      color: Color(0xFFEF2E2E),
+                      color: AppColors.zuriRed,
                     ),
                     title: const Text('Annuler la commande'),
                     onTap: () {
@@ -401,7 +401,7 @@ class _DetailHeader extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: const Color(0xFF101529),
+                    color: AppColors.zuriNavy,
                     fontSize: 25,
                     fontWeight: FontWeight.w900,
                     height: 1.05,
@@ -414,7 +414,7 @@ class _DetailHeader extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      color: Color(0xFF707792),
+                      color: Color(0xFF8A90A5),
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                     ),
@@ -457,9 +457,9 @@ class _DetailHeader extends StatelessWidget {
 
   static Color _accentForTitle(String title) {
     final lower = title.toLowerCase();
-    if (lower.contains('livraison')) return AppColors.cyan;
-    if (lower.contains('emporter')) return AppColors.bleuRoyal;
-    return AppColors.violetPrincipal;
+    if (lower.contains('livraison')) return AppColors.zuriMagenta;
+    if (lower.contains('emporter')) return AppColors.zuriPink;
+    return AppColors.zuriRed;
   }
 }
 
@@ -477,7 +477,7 @@ class _SegmentedTabs extends StatelessWidget {
         height: 78,
         decoration: BoxDecoration(
           color: Colors.white,
-          border: Border.all(color: const Color(0xFFE6E8EF)),
+          border: Border.all(color: AppColors.borderSubtle),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
@@ -524,8 +524,8 @@ class _TabButton extends StatelessWidget {
                 label,
                 style: TextStyle(
                   color: selected
-                      ? AppColors.violetPrincipal
-                      : const Color(0xFF707792),
+                      ? AppColors.zuriRed
+                      : const Color(0xFF8A90A5),
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
                 ),
@@ -537,7 +537,7 @@ class _TabButton extends StatelessWidget {
               child: Container(
                 height: 3,
                 width: double.infinity,
-                color: AppColors.violetPrincipal,
+                color: AppColors.zuriRed,
               ),
             ),
           ],
@@ -585,7 +585,7 @@ class _ProductsTab extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: const Color(0xFF101529),
+                  color: AppColors.zuriNavy,
                   fontSize: 22,
                   fontWeight: FontWeight.w900,
                 ),
@@ -595,13 +595,13 @@ class _ProductsTab extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 5),
               decoration: BoxDecoration(
-                border: Border.all(color: const Color(0xFFE6E8EF)),
+                border: Border.all(color: AppColors.borderSubtle),
                 borderRadius: BorderRadius.circular(AppRadius.chip),
               ),
               child: Text(
                 '$totalLineCount',
                 style: const TextStyle(
-                  color: Color(0xFF707792),
+                  color: Color(0xFF8A90A5),
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
                 ),
@@ -614,8 +614,8 @@ class _ProductsTab extends StatelessWidget {
                 child: OutlinedButton.icon(
                   onPressed: onAddProduct,
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.violetPrincipal,
-                    side: const BorderSide(color: Color(0xFFE6E8EF)),
+                    foregroundColor: AppColors.zuriRed,
+                    side: const BorderSide(color: AppColors.borderSubtle),
                     padding: const EdgeInsets.symmetric(
                       horizontal: 14,
                       vertical: 16,
@@ -687,7 +687,7 @@ class _LineListCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border.all(color: const Color(0xFFE6E8EF)),
+        border: Border.all(color: AppColors.borderSubtle),
         borderRadius: BorderRadius.circular(18),
       ),
       child: Column(
@@ -705,7 +705,7 @@ class _LineListCard extends StatelessWidget {
                 onRemove: () => onRemove(lines[index]),
               ),
               if (index < lines.length - 1)
-                const Divider(height: 1, color: Color(0xFFE6E8EF)),
+                const Divider(height: 1, color: AppColors.borderSubtle),
             ],
         ],
       ),
@@ -752,7 +752,7 @@ class _ProductLineTile extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      color: Color(0xFF101529),
+                      color: AppColors.zuriNavy,
                       fontSize: 19,
                       fontWeight: FontWeight.w900,
                     ),
@@ -762,7 +762,7 @@ class _ProductLineTile extends StatelessWidget {
                     Text(
                       '${line.quantity} x ${_amountFormat.format(line.unitPrice)} FC',
                       style: const TextStyle(
-                        color: Color(0xFF707792),
+                        color: Color(0xFF8A90A5),
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                       ),
@@ -771,7 +771,7 @@ class _ProductLineTile extends StatelessWidget {
                     Text(
                       '${_amountFormat.format(line.unitPrice)} FC',
                       style: const TextStyle(
-                        color: Color(0xFF707792),
+                        color: Color(0xFF8A90A5),
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                       ),
@@ -794,7 +794,7 @@ class _ProductLineTile extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
-                  color: Color(0xFF101529),
+                  color: AppColors.zuriNavy,
                   fontSize: 20,
                   fontWeight: FontWeight.w900,
                 ),
@@ -807,7 +807,7 @@ class _ProductLineTile extends StatelessWidget {
                 onPressed: isLoading ? null : onRemove,
                 icon: const Icon(
                   Icons.delete_outline,
-                  color: Color(0xFFFF1616),
+                  color: AppColors.zuriRed,
                   size: 28,
                 ),
               ),
@@ -835,7 +835,7 @@ class _ProductThumb extends StatelessWidget {
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE6E8EF)),
+        border: Border.all(color: AppColors.borderSubtle),
       ),
       child: Center(
         child: isDrink
@@ -853,11 +853,11 @@ class _ProductThumb extends StatelessWidget {
   }
 
   static Color _colorFor(String label) {
-    if (label.contains('poulet')) return AppColors.violetPrincipal;
-    if (label.contains('riz')) return AppColors.violetClair;
-    if (label.contains('alloco')) return AppColors.bleuRoyal;
-    if (label.contains('coca')) return AppColors.cyan;
-    return AppColors.bleuSaas;
+    if (label.contains('poulet')) return AppColors.zuriRed;
+    if (label.contains('riz')) return AppColors.zuriPink;
+    if (label.contains('alloco')) return AppColors.zuriMagenta;
+    if (label.contains('coca')) return const Color(0xFFFF6B9D);
+    return AppColors.zuriPink;
   }
 }
 
@@ -880,7 +880,7 @@ class _QuantityStepper extends StatelessWidget {
       width: 138,
       height: 56,
       decoration: BoxDecoration(
-        border: Border.all(color: const Color(0xFFE6E8EF)),
+        border: Border.all(color: AppColors.borderSubtle),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -889,20 +889,20 @@ class _QuantityStepper extends StatelessWidget {
             icon: Icons.remove_rounded,
             onTap: disabled ? null : onDecrement,
           ),
-          Container(width: 1, color: const Color(0xFFE6E8EF)),
+          Container(width: 1, color: AppColors.borderSubtle),
           Expanded(
             child: Center(
               child: Text(
                 '$quantity',
                 style: const TextStyle(
-                  color: Color(0xFF101529),
+                  color: AppColors.zuriNavy,
                   fontSize: 18,
                   fontWeight: FontWeight.w900,
                 ),
               ),
             ),
           ),
-          Container(width: 1, color: const Color(0xFFE6E8EF)),
+          Container(width: 1, color: AppColors.borderSubtle),
           _StepperButton(
             icon: Icons.add_rounded,
             onTap: disabled ? null : onIncrement,
@@ -926,7 +926,7 @@ class _StepperButton extends StatelessWidget {
       child: SizedBox(
         width: 45,
         height: double.infinity,
-        child: Icon(icon, color: AppColors.violetPrincipal, size: 24),
+        child: Icon(icon, color: AppColors.zuriRed, size: 24),
       ),
     );
   }
@@ -945,14 +945,14 @@ class _EmptyProductsHint extends StatelessWidget {
         Icon(
           Icons.inventory_2_outlined,
           size: 72,
-          color: AppColors.violetPrincipal.withValues(alpha: 0.22),
+          color: AppColors.zuriRed.withValues(alpha: 0.22),
         ),
         const SizedBox(height: 16),
         Text(
           title,
           textAlign: TextAlign.center,
           style: const TextStyle(
-            color: Color(0xFF101529),
+            color: AppColors.zuriNavy,
             fontSize: 18,
             fontWeight: FontWeight.w900,
           ),
@@ -962,7 +962,7 @@ class _EmptyProductsHint extends StatelessWidget {
           subtitle,
           textAlign: TextAlign.center,
           style: const TextStyle(
-            color: Color(0xFF707792),
+            color: Color(0xFF8A90A5),
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
@@ -998,7 +998,7 @@ class _ActionsBar extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
         decoration: BoxDecoration(
           color: Colors.white,
-          border: Border.all(color: const Color(0xFFE6E8EF)),
+          border: Border.all(color: AppColors.borderSubtle),
           borderRadius: BorderRadius.circular(18),
           boxShadow: [
             BoxShadow(
@@ -1017,7 +1017,7 @@ class _ActionsBar extends StatelessWidget {
                 const Text(
                   'Total',
                   style: TextStyle(
-                    color: Color(0xFF707792),
+                    color: Color(0xFF8A90A5),
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                   ),
@@ -1026,7 +1026,7 @@ class _ActionsBar extends StatelessWidget {
                 Text(
                   '${_amountFormat.format(commande.totalAmount)} FC',
                   style: const TextStyle(
-                    color: Color(0xFF101529),
+                    color: AppColors.zuriNavy,
                     fontSize: 22,
                     fontWeight: FontWeight.w900,
                   ),
@@ -1043,9 +1043,9 @@ class _ActionsBar extends StatelessWidget {
                     child: OutlinedButton.icon(
                       onPressed: onPrint,
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.violetPrincipal,
+                        foregroundColor: AppColors.zuriRed,
                         side: const BorderSide(
-                          color: AppColors.violetPrincipal,
+                          color: AppColors.zuriRed,
                         ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
@@ -1145,13 +1145,13 @@ class _PaymentConfirmationDialog extends StatelessWidget {
         children: [
           const Text(
             'Le total à encaisser est :',
-            style: TextStyle(color: Color(0xFF707792), fontSize: 14),
+            style: TextStyle(color: Color(0xFF8A90A5), fontSize: 14),
           ),
           const SizedBox(height: 8),
           Text(
             '${_amountFormat.format(totalAmount)} FC',
             style: const TextStyle(
-              color: Color(0xFF101529),
+              color: AppColors.zuriNavy,
               fontSize: 30,
               fontWeight: FontWeight.w900,
             ),
@@ -1238,7 +1238,7 @@ class _DetailsTabState extends ConsumerState<_DetailsTab> {
         Text(
           'Client (optionnel)',
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            color: const Color(0xFF101529),
+            color: AppColors.zuriNavy,
             fontSize: 20,
             fontWeight: FontWeight.w900,
           ),
@@ -1281,7 +1281,7 @@ class _DetailsTabState extends ConsumerState<_DetailsTab> {
             Text(
               'Résumé des articles',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: const Color(0xFF101529),
+                color: AppColors.zuriNavy,
                 fontSize: 22,
                 fontWeight: FontWeight.w900,
               ),
@@ -1290,13 +1290,13 @@ class _DetailsTabState extends ConsumerState<_DetailsTab> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 5),
               decoration: BoxDecoration(
-                border: Border.all(color: const Color(0xFFE6E8EF)),
+                border: Border.all(color: AppColors.borderSubtle),
                 borderRadius: BorderRadius.circular(AppRadius.chip),
               ),
               child: Text(
                 '${widget.lines.length} articles',
                 style: const TextStyle(
-                  color: Color(0xFF707792),
+                  color: Color(0xFF8A90A5),
                   fontSize: 14,
                   fontWeight: FontWeight.w800,
                 ),
@@ -1310,7 +1310,7 @@ class _DetailsTabState extends ConsumerState<_DetailsTab> {
                 padding: EdgeInsets.all(6),
                 child: Icon(
                   Icons.chevron_right_rounded,
-                  color: Color(0xFF101529),
+                  color: AppColors.zuriNavy,
                   size: 26,
                 ),
               ),
@@ -1328,7 +1328,7 @@ class _DetailsTabState extends ConsumerState<_DetailsTab> {
             'Commande annulée : les produits ont été remis en stock.',
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Color(0xFF707792),
+              color: Color(0xFF8A90A5),
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -1360,7 +1360,7 @@ class _PhoneEntryField extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border.all(color: const Color(0xFFE6E8EF)),
+        border: Border.all(color: AppColors.borderSubtle),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -1388,7 +1388,7 @@ class _PhoneEntryField extends StatelessWidget {
                           Text(
                             c.displayCode,
                             style: const TextStyle(
-                              color: Color(0xFF101529),
+                              color: AppColors.zuriNavy,
                               fontSize: 17,
                               fontWeight: FontWeight.w700,
                             ),
@@ -1412,7 +1412,7 @@ class _PhoneEntryField extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
-          Container(width: 1, height: 28, color: const Color(0xFFE6E8EF)),
+          Container(width: 1, height: 28, color: AppColors.borderSubtle),
           const SizedBox(width: 12),
           Expanded(
             child: TextField(
@@ -1432,7 +1432,7 @@ class _PhoneEntryField extends StatelessWidget {
                 ),
               ),
               style: const TextStyle(
-                color: Color(0xFF101529),
+                color: AppColors.zuriNavy,
                 fontSize: 17,
                 fontWeight: FontWeight.w700,
               ),
@@ -1464,7 +1464,7 @@ class _ClientSuggestionsPanel extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFFF8F9FC),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFE6E8EF)),
+        border: Border.all(color: AppColors.borderSubtle),
       ),
       child: clients.isEmpty
           ? const Padding(
@@ -1473,7 +1473,7 @@ class _ClientSuggestionsPanel extends StatelessWidget {
                 'Aucun client trouvé avec ce numéro.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Color(0xFF707792),
+                  color: Color(0xFF8A90A5),
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),
@@ -1551,7 +1551,7 @@ class _ClientSuggestionTile extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                            color: Color(0xFF101529),
+                            color: AppColors.zuriNavy,
                             fontSize: 15,
                             fontWeight: FontWeight.w900,
                           ),
@@ -1562,7 +1562,7 @@ class _ClientSuggestionTile extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                            color: Color(0xFF707792),
+                            color: Color(0xFF8A90A5),
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                           ),
@@ -1572,7 +1572,7 @@ class _ClientSuggestionTile extends StatelessWidget {
                   ),
                   const Icon(
                     Icons.chevron_right_rounded,
-                    color: AppColors.violetPrincipal,
+                    color: AppColors.zuriRed,
                   ),
                 ],
               ),
@@ -1596,7 +1596,7 @@ class _SelectedClientCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border.all(color: const Color(0xFFE6E8EF)),
+        border: Border.all(color: AppColors.borderSubtle),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -1610,7 +1610,7 @@ class _SelectedClientCard extends StatelessWidget {
             ),
             child: const Icon(
               Icons.person_outline_rounded,
-              color: Color(0xFF101529),
+              color: AppColors.zuriNavy,
               size: 28,
             ),
           ),
@@ -1624,7 +1624,7 @@ class _SelectedClientCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    color: Color(0xFF101529),
+                    color: AppColors.zuriNavy,
                     fontSize: 18,
                     fontWeight: FontWeight.w900,
                   ),
@@ -1635,7 +1635,7 @@ class _SelectedClientCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    color: Color(0xFF707792),
+                    color: Color(0xFF8A90A5),
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                   ),
@@ -1649,7 +1649,7 @@ class _SelectedClientCard extends StatelessWidget {
               onPressed: onRemove,
               icon: const Icon(
                 Icons.close_rounded,
-                color: Color(0xFF707792),
+                color: Color(0xFF8A90A5),
                 size: 24,
               ),
             ),
@@ -1673,7 +1673,7 @@ class _ArticlesSummaryCard extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border.all(color: const Color(0xFFE6E8EF)),
+        border: Border.all(color: AppColors.borderSubtle),
         borderRadius: BorderRadius.circular(18),
       ),
       child: Column(
@@ -1684,7 +1684,7 @@ class _ArticlesSummaryCard extends StatelessWidget {
               child: Text(
                 'Aucun article dans cette commande.',
                 style: TextStyle(
-                  color: Color(0xFF707792),
+                  color: Color(0xFF8A90A5),
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
                 ),
@@ -1702,7 +1702,7 @@ class _ArticlesSummaryCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          color: Color(0xFF101529),
+                          color: AppColors.zuriNavy,
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
                         ),
@@ -1714,7 +1714,7 @@ class _ArticlesSummaryCard extends StatelessWidget {
                         '${line.quantity}',
                         textAlign: TextAlign.center,
                         style: const TextStyle(
-                          color: Color(0xFF707792),
+                          color: Color(0xFF8A90A5),
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
                         ),
@@ -1728,7 +1728,7 @@ class _ArticlesSummaryCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          color: Color(0xFF101529),
+                          color: AppColors.zuriNavy,
                           fontSize: 16,
                           fontWeight: FontWeight.w800,
                         ),
@@ -1739,14 +1739,14 @@ class _ArticlesSummaryCard extends StatelessWidget {
               ),
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 12),
-            child: Divider(height: 1, color: Color(0xFFE6E8EF)),
+            child: Divider(height: 1, color: AppColors.borderSubtle),
           ),
           Row(
             children: [
               const Text(
                 'Total',
                 style: TextStyle(
-                  color: Color(0xFF101529),
+                  color: AppColors.zuriNavy,
                   fontSize: 19,
                   fontWeight: FontWeight.w900,
                 ),
@@ -1755,7 +1755,7 @@ class _ArticlesSummaryCard extends StatelessWidget {
               Text(
                 '${_amountFormat.format(totalAmount)} FC',
                 style: const TextStyle(
-                  color: Color(0xFF101529),
+                  color: AppColors.zuriNavy,
                   fontSize: 24,
                   fontWeight: FontWeight.w900,
                 ),
@@ -1867,7 +1867,7 @@ class _AddProductSheetState extends ConsumerState<_AddProductSheet> {
                                 'Ajouter un produit',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  color: Color(0xFF101529),
+                                  color: AppColors.zuriNavy,
                                   fontSize: 22,
                                   fontWeight: FontWeight.w900,
                                 ),
@@ -1877,7 +1877,7 @@ class _AddProductSheetState extends ConsumerState<_AddProductSheet> {
                                 'Sélectionnez un produit à ajouter',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  color: Color(0xFF707792),
+                                  color: Color(0xFF8A90A5),
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -1903,7 +1903,7 @@ class _AddProductSheetState extends ConsumerState<_AddProductSheet> {
                           ),
                           prefixIcon: const Icon(
                             Icons.search_rounded,
-                            color: Color(0xFF707792),
+                            color: Color(0xFF8A90A5),
                             size: 30,
                           ),
                           filled: true,
@@ -1911,13 +1911,13 @@ class _AddProductSheetState extends ConsumerState<_AddProductSheet> {
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(18),
                             borderSide: const BorderSide(
-                              color: Color(0xFFE6E8EF),
+                              color: AppColors.borderSubtle,
                             ),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(18),
                             borderSide: const BorderSide(
-                              color: AppColors.violetPrincipal,
+                              color: AppColors.zuriRed,
                             ),
                           ),
                           contentPadding: EdgeInsets.zero,
@@ -2035,7 +2035,7 @@ class _CategoryFilterChip extends StatelessWidget {
         duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.symmetric(horizontal: 18),
         decoration: BoxDecoration(
-          color: selected ? AppColors.violetPrincipal : const Color(0xFFF4F5F9),
+          color: selected ? AppColors.zuriRed : const Color(0xFFF4F5F9),
           borderRadius: BorderRadius.circular(AppRadius.chip),
         ),
         child: Row(
@@ -2045,13 +2045,13 @@ class _CategoryFilterChip extends StatelessWidget {
                   ? Icons.grid_view_rounded
                   : Icons.category_outlined,
               size: 21,
-              color: selected ? Colors.white : const Color(0xFF101529),
+              color: selected ? Colors.white : AppColors.zuriNavy,
             ),
             const SizedBox(width: 8),
             Text(
               label,
               style: TextStyle(
-                color: selected ? Colors.white : const Color(0xFF101529),
+                color: selected ? Colors.white : AppColors.zuriNavy,
                 fontSize: 15,
                 fontWeight: FontWeight.w800,
               ),
@@ -2075,7 +2075,7 @@ class _SectionHeader extends StatelessWidget {
         Text(
           title,
           style: const TextStyle(
-            color: Color(0xFF101529),
+            color: AppColors.zuriNavy,
             fontSize: 20,
             fontWeight: FontWeight.w900,
           ),
@@ -2107,7 +2107,7 @@ class _AllProductsCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border.all(color: const Color(0xFFE6E8EF)),
+        border: Border.all(color: AppColors.borderSubtle),
         borderRadius: BorderRadius.circular(18),
       ),
       child: Column(
@@ -2120,7 +2120,7 @@ class _AllProductsCard extends StatelessWidget {
               onAdd: () => onAdd(products[index]),
             ),
             if (index < products.length - 1)
-              const Divider(height: 1, color: Color(0xFFE6E8EF)),
+              const Divider(height: 1, color: AppColors.borderSubtle),
           ],
         ],
       ),
@@ -2170,7 +2170,7 @@ class _CatalogProductTile extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      color: Color(0xFF101529),
+                      color: AppColors.zuriNavy,
                       fontSize: 17,
                       fontWeight: FontWeight.w900,
                     ),
@@ -2181,7 +2181,7 @@ class _CatalogProductTile extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      color: Color(0xFF707792),
+                      color: Color(0xFF8A90A5),
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                     ),
@@ -2193,7 +2193,7 @@ class _CatalogProductTile extends StatelessWidget {
               '${_amountFormat.format(product.price)} FC',
               style: TextStyle(
                 color: !product.stockTrackingEnabled || product.stock > 0
-                    ? AppColors.violetPrincipal
+                    ? AppColors.zuriRed
                     : const Color(0xFF9AA0B7),
                 fontSize: 16,
                 fontWeight: FontWeight.w900,
@@ -2229,16 +2229,16 @@ class _RoundAddButton extends StatelessWidget {
         onPressed: enabled ? onTap : null,
         style: IconButton.styleFrom(
           backgroundColor: quantity > 0
-              ? AppColors.violetPrincipal
+              ? AppColors.zuriRed
               : Colors.white,
           disabledBackgroundColor: const Color(0xFFF4F5F9),
           foregroundColor: quantity > 0
               ? Colors.white
-              : AppColors.violetPrincipal,
+              : AppColors.zuriRed,
           disabledForegroundColor: const Color(0xFFB8BECF),
           side: BorderSide(
             color: quantity > 0
-                ? AppColors.violetPrincipal
+                ? AppColors.zuriRed
                 : const Color(0xFFDDE2EA),
           ),
           shape: const CircleBorder(),
@@ -2273,7 +2273,7 @@ class _NoProductsMessage extends StatelessWidget {
               : 'Aucun produit disponible dans cette catégorie.',
           textAlign: TextAlign.center,
           style: const TextStyle(
-            color: Color(0xFF707792),
+            color: Color(0xFF8A90A5),
             fontSize: 15,
             fontWeight: FontWeight.w600,
           ),
@@ -2314,7 +2314,7 @@ class _AddProductFooter extends StatelessWidget {
             child: Text(
               '$selectedCount produit${selectedCount > 1 ? 's' : ''} sélectionné${selectedCount > 1 ? 's' : ''}',
               style: const TextStyle(
-                color: Color(0xFF101529),
+                color: AppColors.zuriNavy,
                 fontSize: 17,
                 fontWeight: FontWeight.w900,
               ),
@@ -2325,9 +2325,9 @@ class _AddProductFooter extends StatelessWidget {
             child: FilledButton(
               onPressed: isLoading ? null : onSubmit,
               style: FilledButton.styleFrom(
-                backgroundColor: AppColors.violetPrincipal,
+                backgroundColor: AppColors.zuriRed,
                 foregroundColor: Colors.white,
-                disabledBackgroundColor: AppColors.violetPrincipal.withValues(
+                disabledBackgroundColor: AppColors.zuriRed.withValues(
                   alpha: 0.18,
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 28),
@@ -2380,7 +2380,7 @@ class _CircleActionButton extends StatelessWidget {
         child: SizedBox(
           width: 64,
           height: 64,
-          child: Icon(icon, size: iconSize, color: const Color(0xFF101529)),
+          child: Icon(icon, size: iconSize, color: AppColors.zuriNavy),
         ),
       ),
     );

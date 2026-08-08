@@ -7,6 +7,7 @@ import '../../../../core/domain/business_category.dart';
 import '../../../../core/domain/client_type.dart';
 import '../../../../core/l10n/app_localizations.dart';
 import '../../../../core/routing/routes.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/date_utils.dart';
 import '../../../garage/domain/entities/prestation_summary.dart';
@@ -29,12 +30,18 @@ class ClientDetailScreen extends ConsumerWidget {
     final clientAsync = ref.watch(clientByIdProvider(clientId));
 
     return clientAsync.when(
-      loading: () =>
-          const Scaffold(body: Center(child: CircularProgressIndicator())),
-      error: (error, _) => Scaffold(body: Center(child: Text('$error'))),
+      loading: () => const Scaffold(
+        backgroundColor: AppColors.zuriWhite,
+        body: Center(child: CircularProgressIndicator()),
+      ),
+      error: (error, _) => Scaffold(
+        backgroundColor: AppColors.zuriWhite,
+        body: Center(child: Text('$error')),
+      ),
       data: (client) {
         if (client == null) {
           return const Scaffold(
+            backgroundColor: AppColors.zuriWhite,
             body: Center(child: Text('Client introuvable.')),
           );
         }
@@ -56,15 +63,34 @@ class _ClientDetailBody extends ConsumerWidget {
     return DefaultTabController(
       length: 3,
       child: Scaffold(
+        backgroundColor: AppColors.zuriWhite,
         appBar: AppBar(
-          title: Text(l10n.clientDetailTitle),
+          backgroundColor: AppColors.zuriWhite,
+          foregroundColor: AppColors.zuriNavy,
+          elevation: 0,
+          title: Text(
+            l10n.clientDetailTitle,
+            style: const TextStyle(
+              color: AppColors.zuriNavy,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
           actions: [
             TextButton(
               onPressed: () => context.push(Routes.clientEditPath(client.id)),
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.zuriRed,
+                textStyle: const TextStyle(fontWeight: FontWeight.w700),
+              ),
               child: Text(l10n.modify),
             ),
           ],
           bottom: TabBar(
+            labelColor: AppColors.zuriRed,
+            unselectedLabelColor: const Color(0xFF8A90A5),
+            indicatorColor: AppColors.zuriRed,
+            indicatorWeight: 3,
+            labelStyle: const TextStyle(fontWeight: FontWeight.w700),
             tabs: [
               Tab(text: l10n.tabInformations),
               Tab(text: l10n.tabHistory),
@@ -75,7 +101,7 @@ class _ClientDetailBody extends ConsumerWidget {
         body: Column(
           children: [
             _ClientHeader(client: client),
-            const Divider(height: 1),
+            const Divider(height: 1, color: AppColors.borderSubtle),
             Expanded(
               child: TabBarView(
                 children: [
@@ -105,8 +131,11 @@ class _ClientHeader extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 28,
+            backgroundColor: AppColors.zuriPink.withValues(alpha: 0.14),
+            foregroundColor: AppColors.zuriRed,
             child: Text(
               client.name.isNotEmpty ? client.name[0].toUpperCase() : '?',
+              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 22),
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
@@ -116,7 +145,11 @@ class _ClientHeader extends StatelessWidget {
               children: [
                 Text(
                   client.name,
-                  style: Theme.of(context).textTheme.titleLarge,
+                  style: const TextStyle(
+                    color: AppColors.zuriNavy,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Row(
@@ -126,7 +159,11 @@ class _ClientHeader extends StatelessWidget {
                     Flexible(
                       child: Text(
                         client.displayPhone,
-                        style: Theme.of(context).textTheme.bodyMedium,
+                        style: const TextStyle(
+                          color: Color(0xFF8A90A5),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -153,9 +190,7 @@ class _ClientBadge extends StatelessWidget {
     final label = isBusiness
         ? l10n.clientTypeBusiness
         : l10n.clientTypeIndividual;
-    final color = isBusiness
-        ? Theme.of(context).colorScheme.tertiary
-        : Theme.of(context).colorScheme.primary;
+    final color = isBusiness ? AppColors.zuriMagenta : AppColors.zuriRed;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -165,9 +200,10 @@ class _ClientBadge extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+        style: TextStyle(
           color: color,
-          fontWeight: FontWeight.w600,
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
         ),
       ),
     );
@@ -211,10 +247,15 @@ class _InformationsTab extends ConsumerWidget {
             children: [
               Text(
                 l10n.tabHistory,
-                style: Theme.of(context).textTheme.titleMedium,
+                style: const TextStyle(
+                  color: AppColors.zuriNavy,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
               TextButton(
                 onPressed: () => DefaultTabController.of(context).animateTo(1),
+                style: TextButton.styleFrom(foregroundColor: AppColors.zuriRed),
                 child: Text(l10n.seeAll),
               ),
             ],
@@ -244,8 +285,10 @@ class _HistoryTab extends ConsumerWidget {
           child: Text(
             l10n.noHistoryYet,
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            style: const TextStyle(
+              color: Color(0xFF8A90A5),
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ),
@@ -279,8 +322,10 @@ class _NotesTab extends StatelessWidget {
           child: Text(
             l10n.noNotesYet,
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            style: const TextStyle(
+              color: Color(0xFF8A90A5),
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ),
@@ -289,7 +334,14 @@ class _NotesTab extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.sm),
-      child: Text(notes, style: Theme.of(context).textTheme.bodyMedium),
+      child: Text(
+        notes,
+        style: const TextStyle(
+          color: AppColors.zuriNavy,
+          fontSize: 14,
+          height: 1.4,
+        ),
+      ),
     );
   }
 }
@@ -310,8 +362,10 @@ class _InfoRow extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              style: const TextStyle(
+                color: Color(0xFF8A90A5),
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ),
@@ -319,7 +373,11 @@ class _InfoRow extends StatelessWidget {
             child: Text(
               value,
               textAlign: TextAlign.end,
-              style: Theme.of(context).textTheme.bodyMedium,
+              style: const TextStyle(
+                color: AppColors.zuriNavy,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],
@@ -336,17 +394,38 @@ class _ActivityTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: AppColors.zuriWhite,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.borderSubtle),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.zuriNavy.withValues(alpha: 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: ListTile(
-        title: Text(item.vehiculeDisplayName),
+        title: Text(
+          item.vehiculeDisplayName,
+          style: const TextStyle(
+            color: AppColors.zuriNavy,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
         subtitle: Text(
           DateUtilsHelper.formatDate(item.dateOuverture, locale: locale),
+          style: const TextStyle(color: Color(0xFF8A90A5)),
         ),
         trailing: Text(
           _formatAmount(item.montantTotal),
-          style: Theme.of(
-            context,
-          ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+          style: const TextStyle(
+            color: AppColors.zuriRed,
+            fontWeight: FontWeight.w800,
+          ),
         ),
         onTap: () => context.push(Routes.prestationDetailPath(item.id)),
       ),
