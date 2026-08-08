@@ -141,22 +141,40 @@ class RestaurantReportsScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 4),
                 const Text(
-                  'Le rapport sera envoyé à l’e-mail du propriétaire '
-                  '(période calendaire précédente).',
+                  'Le rapport sera envoyé à l’e-mail du propriétaire.',
                   style: TextStyle(color: ReportColors.textMuted),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.today_outlined),
+                  title: const Text('Rapport du jour'),
+                  subtitle: const Text('Aujourd’hui'),
+                  onTap: () => Navigator.of(sheetContext).pop('daily'),
+                ),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.date_range_outlined),
-                  title: const Text('Rapport hebdomadaire'),
+                  title: const Text('Rapport hebdo semaine en cours'),
+                  subtitle: const Text('Du lundi à aujourd’hui'),
+                  onTap: () =>
+                      Navigator.of(sheetContext).pop('weekly_current'),
+                ),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.history_outlined),
+                  title: const Text(
+                    'Rapport hebdo de la semaine précédente',
+                  ),
                   subtitle: const Text('Semaine calendaire précédente'),
                   onTap: () => Navigator.of(sheetContext).pop('weekly'),
                 ),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.calendar_month_outlined),
-                  title: const Text('Rapport mensuel'),
+                  title: const Text(
+                    'Rapport mensuel du mois précédent',
+                  ),
                   subtitle: const Text('Mois calendaire précédent'),
                   onTap: () => Navigator.of(sheetContext).pop('monthly'),
                 ),

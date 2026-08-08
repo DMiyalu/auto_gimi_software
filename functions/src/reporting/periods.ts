@@ -1,4 +1,8 @@
-export type ReportKind = "weekly" | "monthly";
+export type ReportKind =
+  | "weekly"
+  | "weekly_current"
+  | "monthly"
+  | "daily";
 
 export interface DateRange {
   /** Inclusive start (UTC Date representing Kinshasa midnight). */
@@ -63,29 +67,28 @@ function formatFr(ymd: Ymd): string {
   return `${pad2(ymd.day)}/${pad2(ymd.month)}/${ymd.year}`;
 }
 
+function thisMonday(today: Ymd): Ymd {
+  const dow = weekdayKinshasa(today); // 0 Sun
+  const daysSinceMonday = dow === 0 ? 6 : dow - 1;
+  return addDays(today, -daysSinceMonday);
+}
+
 /**
- * Weekly report run on Monday 07:00 Kinshasa:
- * period = previous Mon 00:00 → this Mon 00:00 (7 closed calendar days).
+ * Semaine précédente (lun→lun clos).
+ * Utilisé par le cron hebdo et l’option « semaine précédente ».
  */
 export function weeklyReportRange(now: Date = new Date()): DateRange {
   const today = kinshasaYmd(now);
-  // Walk back to Monday of current week (Mon=1 … Sun=0 → treat Sun as 7)
-  const dow = weekdayKinshasa(today); // 0 Sun
-  const daysSinceMonday = dow === 0 ? 6 : dow - 1;
-  const thisMonday = addDays(today, -daysSinceMonday);
-  const prevMonday = addDays(thisMonday, -7);
+  const monday = thisMonday(today);
+  const prevMonday = addDays(monday, -7);
 
   const start = kinshasaMidnight(
     prevMonday.year,
     prevMonday.month,
     prevMonday.day,
   );
-  const end = kinshasaMidnight(
-    thisMonday.year,
-    thisMonday.month,
-    thisMonday.day,
-  );
-  const endInclusive = addDays(thisMonday, -1);
+  const end = kinshasaMidnight(monday.year, monday.month, monday.day);
+  const endInclusive = addDays(monday, -1);
 
   return {
     start,
@@ -95,7 +98,26 @@ export function weeklyReportRange(now: Date = new Date()): DateRange {
   };
 }
 
-/** Previous calendar month relative to `now` in Kinshasa. */
+/**
+ * Semaine en cours : lundi 00:00 → demain 00:00 (inclut aujourd’hui).
+ */
+export function weeklyCurrentReportRange(now: Date = new Date()): DateRange {
+  const today = kinshasaYmd(now);
+  const monday = thisMonday(today);
+  const tomorrow = addDays(today, 1);
+
+  const start = kinshasaMidnight(monday.year, monday.month, monday.day);
+  const end = kinshasaMidnight(tomorrow.year, tomorrow.month, tomorrow.day);
+
+  return {
+    start,
+    end,
+    periodKey: `weekly_current_${today.year}-${pad2(today.month)}-${pad2(today.day)}`,
+    label: `${formatFr(monday)} – ${formatFr(today)}`,
+  };
+}
+
+/** Mois calendaire précédent. */
 export function monthlyReportRange(now: Date = new Date()): DateRange {
   const today = kinshasaYmd(now);
   const firstThisMonth = { year: today.year, month: today.month, day: 1 };
@@ -124,6 +146,21 @@ export function monthlyReportRange(now: Date = new Date()): DateRange {
   };
 }
 
+/** Aujourd’hui (minuit → minuit suivant, TZ Kinshasa). */
+export function dailyReportRange(now: Date = new Date()): DateRange {
+  const today = kinshasaYmd(now);
+  const tomorrow = addDays(today, 1);
+  const start = kinshasaMidnight(today.year, today.month, today.day);
+  const end = kinshasaMidnight(tomorrow.year, tomorrow.month, tomorrow.day);
+
+  return {
+    start,
+    end,
+    periodKey: `daily_${today.year}-${pad2(today.month)}-${pad2(today.day)}`,
+    label: formatFr(today),
+  };
+}
+
 export function previousRange(range: DateRange): DateRange {
   const durationMs = range.end.getTime() - range.start.getTime();
   const start = new Date(range.start.getTime() - durationMs);
@@ -140,5 +177,26 @@ export function reportRangeFor(
   kind: ReportKind,
   now: Date = new Date(),
 ): DateRange {
-  return kind === "weekly" ? weeklyReportRange(now) : monthlyReportRange(now);
+  switch (kind) {
+    case "weekly":
+      return weeklyReportRange(now);
+    case "weekly_current":
+      return weeklyCurrentReportRange(now);
+    case "monthly":
+      return monthlyReportRange(now);
+    case "daily":
+      return dailyReportRange(now);
+  }
+}
+
+export function parseReportKind(value: unknown): ReportKind | null {
+  if (
+    value === "weekly" ||
+    value === "weekly_current" ||
+    value === "monthly" ||
+    value === "daily"
+  ) {
+    return value;
+  }
+  return null;
 }

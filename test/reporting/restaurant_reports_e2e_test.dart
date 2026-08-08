@@ -185,6 +185,22 @@ void main() {
       expect(find.byType(RevenueEvolutionChart), findsOneWidget);
       expect(find.byType(ProductSalesBreakdownCard), findsOneWidget);
 
+      // 1b. Sheet d’envoi : 4 périodes.
+      await tester.tap(find.byKey(const Key('send_report_button')));
+      await tester.pumpAndSettle();
+      expect(find.text('Rapport du jour'), findsOneWidget);
+      expect(find.text('Rapport hebdo semaine en cours'), findsOneWidget);
+      expect(
+        find.text('Rapport hebdo de la semaine précédente'),
+        findsOneWidget,
+      );
+      expect(
+        find.text('Rapport mensuel du mois précédent'),
+        findsOneWidget,
+      );
+      await tester.tap(find.text('Rapport du jour'));
+      await tester.pumpAndSettle();
+
       // 2. KPIs issus des commandes clôturées du jour.
       // NumberFormat fr utilise un espace insécable comme séparateur.
       final amountFormat = NumberFormat('#,##0', 'fr');

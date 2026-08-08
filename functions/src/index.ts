@@ -9,7 +9,7 @@ import {
   verifyPhoneCode,
 } from "./phoneVerification";
 import { sendRestaurantReports } from "./reporting/sendReports";
-import type { ReportKind } from "./reporting/periods";
+import { parseReportKind } from "./reporting/periods";
 
 initializeApp();
 setGlobalOptions({ region: "europe-west1" });
@@ -96,8 +96,13 @@ export const sendTestRestaurantReport = onCall(async (request) => {
     );
   }
 
-  const kind: ReportKind =
-    kindRaw === "monthly" ? "monthly" : "weekly";
+  const kind = parseReportKind(kindRaw);
+  if (!kind) {
+    throw new HttpsError(
+      "invalid-argument",
+      "kind invalide (weekly | weekly_current | monthly | daily).",
+    );
+  }
 
   const estSnap = await db.collection("establishments").doc(establishmentId).get();
   if (!estSnap.exists) {

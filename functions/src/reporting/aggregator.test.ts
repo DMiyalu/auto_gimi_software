@@ -4,8 +4,10 @@ import { describe, it } from "node:test";
 import { computeKpis, computeTopProducts, type OrderDoc } from "./aggregator";
 import { isValidReportEmail } from "./emailValidation";
 import {
+  dailyReportRange,
   kinshasaMidnight,
   monthlyReportRange,
+  weeklyCurrentReportRange,
   weeklyReportRange,
 } from "./periods";
 
@@ -37,6 +39,22 @@ describe("periods", () => {
     assert.equal(range.periodKey, "monthly_2026-07");
     assert.equal(range.start.getTime(), kinshasaMidnight(2026, 7, 1).getTime());
     assert.equal(range.end.getTime(), kinshasaMidnight(2026, 8, 1).getTime());
+  });
+
+  it("weekly current is Monday through today", () => {
+    const now = kinshasaMidnight(2026, 8, 12); // Wednesday
+    const range = weeklyCurrentReportRange(now);
+    assert.equal(range.periodKey, "weekly_current_2026-08-12");
+    assert.equal(range.start.getTime(), kinshasaMidnight(2026, 8, 10).getTime());
+    assert.equal(range.end.getTime(), kinshasaMidnight(2026, 8, 13).getTime());
+  });
+
+  it("daily is today only", () => {
+    const now = kinshasaMidnight(2026, 8, 12);
+    const range = dailyReportRange(now);
+    assert.equal(range.periodKey, "daily_2026-08-12");
+    assert.equal(range.start.getTime(), kinshasaMidnight(2026, 8, 12).getTime());
+    assert.equal(range.end.getTime(), kinshasaMidnight(2026, 8, 13).getTime());
   });
 });
 

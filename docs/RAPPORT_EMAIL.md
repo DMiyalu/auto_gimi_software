@@ -13,9 +13,9 @@ propriétaire d’un établissement **restaurant**. Complète
 | Canal | **E-mail uniquement** (pas WhatsApp, pas SMS) |
 | Périmètre | Établissements `category == restaurant` |
 | Destinataire | Propriétaire (`establishments.ownerId`) si `users.email` valide |
-| Contenu | 4 KPIs (+ % vs période précédente) + top 5 produits, montants CDF |
+| Contenu | 4 KPIs (+ % vs période précédente) + top 5 produits, montants CDF ; HTML calqué sur l’écran Rapports (grille 2×2 + carte ventes) |
 | Fréquences auto | Hebdo (lundi 07:00) + mensuel (1er du mois 07:00), TZ `Africa/Kinshasa` |
-| Envoi manuel | Bouton **Envoyer** sur l’écran Rapports |
+| Envoi manuel | Bouton **Envoyer** : jour / semaine en cours / semaine préc. / mois préc. |
 
 ---
 
