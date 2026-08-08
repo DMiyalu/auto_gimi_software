@@ -151,6 +151,21 @@ void main() {
     },
   );
 
+  test('createInvitation accepte le rôle propriétaire', () async {
+    await repository.createInvitation(
+      establishmentId: 'est-1',
+      establishmentName: 'Resto',
+      invitedPhone: '243900111222',
+      role: EstablishmentRole.owner,
+      invitedBy: 'owner',
+      invitedByName: 'Boss',
+    );
+
+    final pending = await firestore.collection('pendingInvitations').get();
+    expect(pending.docs, hasLength(1));
+    expect(pending.docs.first.data()['roleId'], 'owner');
+  });
+
   test('claimPendingInvitations copie vers l’inbox puis marque claimed', () async {
     await firestore.collection('pendingInvitations').doc('inv-p1').set({
       'establishmentId': 'est-1',

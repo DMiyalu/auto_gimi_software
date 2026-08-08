@@ -280,10 +280,6 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
     required String invitedBy,
     required String invitedByName,
   }) async {
-    if (role == EstablishmentRole.owner) {
-      throw StateError('Impossible d’inviter avec le rôle propriétaire.');
-    }
-
     final normalizedPhone = PhoneAuthMapper.normalize(invitedPhone);
     final invitationId = _uuid.v4();
     final payload = {

@@ -177,9 +177,17 @@ class EstablishmentController extends AsyncNotifier<void> {
 
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      if (!ref.read(canInviteMembersProvider)) {
+      final inviterRole = ref.read(activeEstablishmentRoleProvider);
+      if (inviterRole == null || !inviterRole.canInviteMembers) {
         throw StateError(
           'Seuls le propriétaire et les gérants peuvent inviter des membres.',
+        );
+      }
+      if (!inviterRole.canInviteAs(role)) {
+        throw StateError(
+          role == EstablishmentRole.owner
+              ? 'Seul un propriétaire peut inviter un autre propriétaire.'
+              : 'Vous ne pouvez pas inviter avec ce rôle.',
         );
       }
       await ref

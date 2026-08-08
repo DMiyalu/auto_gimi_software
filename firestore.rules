@@ -71,6 +71,18 @@ service cloud.firestore {
       return hasEstablishmentRole(establishmentId, ['owner', 'manager']);
     }
 
+    // Agent/Gérant : owner ou manager. Propriétaire : uniquement un owner.
+    function canAssignInviteRole(establishmentId, roleId) {
+      return (roleId in ['manager', 'agent']
+          && canManageEstablishment(establishmentId))
+        || (roleId == 'owner'
+          && hasEstablishmentRole(establishmentId, ['owner']));
+    }
+
+    function isInvitableRole(roleId) {
+      return roleId in ['owner', 'manager', 'agent'];
+    }
+
     function isValidUserSignup() {
       return isSignedIn()
         && request.resource.data.phoneVerified == false
@@ -120,7 +132,7 @@ service cloud.firestore {
       return isSignedIn()
         && request.auth.uid == memberId
         && request.resource.data.userId == memberId
-        && request.resource.data.roleId in ['manager', 'agent']
+        && isInvitableRole(request.resource.data.roleId)
         && invitation.data.status == 'pending'
         && invitation.data.invitedPhone == userPhone()
         && (invitation.data.roleId == request.resource.data.roleId
@@ -134,7 +146,7 @@ service cloud.firestore {
         && request.resource.data.uid == memberId
         && request.resource.data.establishmentId == establishmentId
         && request.resource.data.phone == userPhone()
-        && request.resource.data.role in ['manager', 'agent']
+        && isInvitableRole(request.resource.data.role)
         && invitation.data.status == 'pending'
         && invitation.data.invitedPhone == userPhone()
         && (invitation.data.roleId == request.resource.data.role
@@ -154,18 +166,20 @@ service cloud.firestore {
 
       match /invitations/{invitationId} {
         allow read: if isSignedIn() && request.auth.uid == userId;
-        // Manager invite un user déjà inscrit (écrit dans l'inbox du destinataire)
+        // Owner/manager invite un user déjà inscrit (écrit dans l'inbox du destinataire)
         allow create: if isSignedIn()
           && request.resource.data.invitedBy == request.auth.uid
           && request.resource.data.status == 'pending'
-          && request.resource.data.roleId in ['manager', 'agent']
-          && canManageEstablishment(request.resource.data.establishmentId);
+          && canAssignInviteRole(
+            request.resource.data.establishmentId,
+            request.resource.data.roleId
+          );
         // Claim : le destinataire copie une pendingInvitation dans son inbox
         allow create: if isSignedIn()
           && request.auth.uid == userId
           && request.resource.data.invitedPhone == userPhone()
           && request.resource.data.status == 'pending'
-          && request.resource.data.roleId in ['manager', 'agent'];
+          && isInvitableRole(request.resource.data.roleId);
         // Accept / refuse par le destinataire
         allow update: if isSignedIn()
           && request.auth.uid == userId
@@ -187,8 +201,10 @@ service cloud.firestore {
       allow create: if isSignedIn()
         && request.resource.data.invitedBy == request.auth.uid
         && request.resource.data.status == 'pending'
-        && request.resource.data.roleId in ['manager', 'agent']
-        && canManageEstablishment(request.resource.data.establishmentId);
+        && canAssignInviteRole(
+          request.resource.data.establishmentId,
+          request.resource.data.roleId
+        );
       // Claim : destinataire marque claimed après copie inbox
       allow update: if isSignedIn()
         && resource.data.invitedPhone == userPhone()

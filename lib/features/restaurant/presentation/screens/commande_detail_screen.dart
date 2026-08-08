@@ -579,63 +579,64 @@ class _ProductsTab extends StatelessWidget {
         ),
         Row(
           children: [
-            Flexible(
-              child: Text(
-                'Liste des produits',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: AppColors.zuriNavy,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w900,
-                ),
+            Expanded(
+              child: Row(
+                children: [
+                  Flexible(
+                    child: Text(
+                      'Liste des produits',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: AppColors.zuriNavy,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 11,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: AppColors.borderSubtle),
+                      borderRadius: BorderRadius.circular(AppRadius.chip),
+                    ),
+                    child: Text(
+                      '$totalLineCount',
+                      style: const TextStyle(
+                        color: Color(0xFF8A90A5),
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(width: 12),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 5),
-              decoration: BoxDecoration(
-                border: Border.all(color: AppColors.borderSubtle),
-                borderRadius: BorderRadius.circular(AppRadius.chip),
-              ),
-              child: Text(
-                '$totalLineCount',
-                style: const TextStyle(
-                  color: Color(0xFF8A90A5),
-                  fontSize: 18,
+            const SizedBox(width: 8),
+            OutlinedButton.icon(
+              onPressed: onAddProduct,
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.zuriRed,
+                side: const BorderSide(color: AppColors.borderSubtle),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 10,
+                ),
+                visualDensity: VisualDensity.compact,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                textStyle: const TextStyle(
+                  fontSize: 13,
                   fontWeight: FontWeight.w800,
                 ),
               ),
-            ),
-            const Spacer(),
-            Flexible(
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: OutlinedButton.icon(
-                  onPressed: onAddProduct,
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.zuriRed,
-                    side: const BorderSide(color: AppColors.borderSubtle),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 16,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    textStyle: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  icon: const Icon(Icons.add_rounded, size: 28),
-                  label: const Text(
-                    'Ajouter un produit',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ),
+              icon: const Icon(Icons.add_rounded, size: 20),
+              label: const Text('Ajouter'),
             ),
           ],
         ),
@@ -732,87 +733,123 @@ class _ProductLineTile extends StatelessWidget {
 
   static final _amountFormat = NumberFormat('#,##0', 'fr');
 
+  Future<void> _confirmRemove(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('Retirer le produit'),
+        content: Text(
+          'Supprimer « ${line.label} » de la commande ?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Annuler'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.zuriRed,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Supprimer'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) onRemove();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 116,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 14, 20, 14),
-        child: Row(
-          children: [
-            _ProductThumb(label: line.label),
-            const SizedBox(width: 24),
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    line.label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: AppColors.zuriNavy,
-                      fontSize: 19,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                  const SizedBox(height: 13),
-                  if (line.quantity > 1)
-                    Text(
-                      '${line.quantity} x ${_amountFormat.format(line.unitPrice)} FC',
-                      style: const TextStyle(
-                        color: Color(0xFF8A90A5),
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    )
-                  else
-                    Text(
-                      '${_amountFormat.format(line.unitPrice)} FC',
-                      style: const TextStyle(
-                        color: Color(0xFF8A90A5),
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
+    final unitTotalLabel =
+        '${_amountFormat.format(line.unitPrice)} FC × ${line.quantity}';
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _ProductThumb(label: line.label),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        line.label,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: AppColors.zuriNavy,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                          height: 1.2,
+                        ),
                       ),
                     ),
-                ],
-              ),
-            ),
-            _QuantityStepper(
-              quantity: line.quantity,
-              disabled: isCanceled || isLoading,
-              onIncrement: onIncrement,
-              onDecrement: onDecrement,
-            ),
-            const SizedBox(width: 28),
-            SizedBox(
-              width: 116,
-              child: Text(
-                '${_amountFormat.format(line.lineAmount)} FC',
-                textAlign: TextAlign.right,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: AppColors.zuriNavy,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w900,
+                    const SizedBox(width: 8),
+                    _QuantityStepper(
+                      quantity: line.quantity,
+                      disabled: isCanceled || isLoading,
+                      onIncrement: onIncrement,
+                      onDecrement: onDecrement,
+                    ),
+                    if (!isCanceled)
+                      IconButton(
+                        tooltip: 'Retirer',
+                        visualDensity: VisualDensity.compact,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(
+                          minWidth: 36,
+                          minHeight: 36,
+                        ),
+                        onPressed: isLoading
+                            ? null
+                            : () => _confirmRemove(context),
+                        icon: const Icon(
+                          Icons.delete_outline,
+                          color: AppColors.zuriRed,
+                          size: 22,
+                        ),
+                      ),
+                  ],
                 ),
-              ),
-            ),
-            const SizedBox(width: 14),
-            if (!isCanceled)
-              IconButton(
-                tooltip: 'Retirer',
-                onPressed: isLoading ? null : onRemove,
-                icon: const Icon(
-                  Icons.delete_outline,
-                  color: AppColors.zuriRed,
-                  size: 28,
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        unitTotalLabel,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Color(0xFF8A90A5),
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      '${_amountFormat.format(line.lineAmount)} FC',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: AppColors.zuriNavy,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-          ],
-        ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -830,8 +867,8 @@ class _ProductThumb extends StatelessWidget {
     final color = _colorFor(lower);
 
     return Container(
-      width: 76,
-      height: 76,
+      width: 52,
+      height: 52,
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(12),
@@ -843,11 +880,11 @@ class _ProductThumb extends StatelessWidget {
                 lower.contains('coca') ? 'Coca' : 'Jus',
                 style: TextStyle(
                   color: color,
-                  fontSize: 15,
+                  fontSize: 12,
                   fontWeight: FontWeight.w900,
                 ),
               )
-            : Icon(Icons.restaurant_menu_rounded, color: color, size: 36),
+            : Icon(Icons.restaurant_menu_rounded, color: color, size: 26),
       ),
     );
   }
@@ -877,11 +914,11 @@ class _QuantityStepper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 138,
-      height: 56,
+      width: 104,
+      height: 36,
       decoration: BoxDecoration(
         border: Border.all(color: AppColors.borderSubtle),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
         children: [
@@ -896,7 +933,7 @@ class _QuantityStepper extends StatelessWidget {
                 '$quantity',
                 style: const TextStyle(
                   color: AppColors.zuriNavy,
-                  fontSize: 18,
+                  fontSize: 14,
                   fontWeight: FontWeight.w900,
                 ),
               ),
@@ -924,9 +961,9 @@ class _StepperButton extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: SizedBox(
-        width: 45,
+        width: 34,
         height: double.infinity,
-        child: Icon(icon, color: AppColors.zuriRed, size: 24),
+        child: Icon(icon, color: AppColors.zuriRed, size: 18),
       ),
     );
   }

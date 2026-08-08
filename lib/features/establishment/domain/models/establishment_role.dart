@@ -21,6 +21,15 @@ enum EstablishmentRole {
   bool get canConfigureEstablishment => this == owner || this == manager;
   bool get canCreateActivities => true;
 
+  /// Rôles qu'un membre avec ce rôle peut attribuer lors d'une invitation.
+  List<EstablishmentRole> get invitableRoles => switch (this) {
+    owner => const [agent, manager, owner],
+    manager => const [agent, manager],
+    agent => const [],
+  };
+
+  bool canInviteAs(EstablishmentRole role) => invitableRoles.contains(role);
+
   static EstablishmentRole fromFirestore(String? value) {
     return EstablishmentRole.values.firstWhere(
       (role) => role.firestoreValue == value,

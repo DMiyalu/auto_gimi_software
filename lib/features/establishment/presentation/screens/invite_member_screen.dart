@@ -47,13 +47,25 @@ class _InviteMemberScreenState extends ConsumerState<InviteMemberScreen> {
       }
     });
 
+    final inviterRole = ref.watch(activeEstablishmentRoleProvider);
+
     return MemberManagementPermissionGate(
-      builder: (context) => _buildForm(context, state),
+      builder: (context) => _buildForm(context, state, inviterRole),
     );
   }
 
-  Widget _buildForm(BuildContext context, AsyncValue<void> state) {
+  Widget _buildForm(
+    BuildContext context,
+    AsyncValue<void> state,
+    EstablishmentRole? inviterRole,
+  ) {
     final l10n = AppLocalizations.of(context);
+    final invitableRoles =
+        inviterRole?.invitableRoles ??
+        const [EstablishmentRole.agent, EstablishmentRole.manager];
+    final selectedRole = invitableRoles.contains(_role)
+        ? _role
+        : invitableRoles.first;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Inviter un membre')),
@@ -86,17 +98,14 @@ class _InviteMemberScreenState extends ConsumerState<InviteMemberScreen> {
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<EstablishmentRole>(
-                      initialValue: _role,
+                      initialValue: selectedRole,
                       decoration: const InputDecoration(labelText: 'Rôle'),
-                      items: const [
-                        DropdownMenuItem(
-                          value: EstablishmentRole.agent,
-                          child: Text('Agent'),
-                        ),
-                        DropdownMenuItem(
-                          value: EstablishmentRole.manager,
-                          child: Text('Gérant'),
-                        ),
+                      items: [
+                        for (final role in invitableRoles)
+                          DropdownMenuItem(
+                            value: role,
+                            child: Text(role.label),
+                          ),
                       ],
                       onChanged: state.isLoading
                           ? null

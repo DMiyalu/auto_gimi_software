@@ -82,6 +82,9 @@ void main() {
           (ref) => Stream.value(establishment),
         ),
         canInviteMembersProvider.overrideWithValue(false),
+        activeEstablishmentRoleProvider.overrideWithValue(
+          EstablishmentRole.agent,
+        ),
         establishmentRepositoryProvider.overrideWithValue(repository),
       ],
     );
@@ -100,5 +103,78 @@ void main() {
 
     expect(repository.invitations, isEmpty);
     expect(container.read(establishmentControllerProvider).hasError, isTrue);
+  });
+
+  test('un gerant ne peut pas inviter un proprietaire', () async {
+    final user = MockFirebaseUser();
+    when(() => user.uid).thenReturn('manager-1');
+
+    final repository = FakeEstablishmentRepository();
+    final container = ProviderContainer(
+      overrides: [
+        authStateProvider.overrideWith((ref) => Stream.value(user)),
+        userProfileProvider.overrideWith((ref) => Stream.value(profile)),
+        currentEstablishmentProvider.overrideWith(
+          (ref) => Stream.value(establishment),
+        ),
+        canInviteMembersProvider.overrideWithValue(true),
+        activeEstablishmentRoleProvider.overrideWithValue(
+          EstablishmentRole.manager,
+        ),
+        establishmentRepositoryProvider.overrideWithValue(repository),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    await container.read(authStateProvider.future);
+    await container.read(userProfileProvider.future);
+    await container.read(currentEstablishmentProvider.future);
+
+    await container
+        .read(establishmentControllerProvider.notifier)
+        .createInvitation(
+          role: EstablishmentRole.owner,
+          invitedPhone: '33600000000',
+        );
+
+    expect(repository.invitations, isEmpty);
+    expect(container.read(establishmentControllerProvider).hasError, isTrue);
+  });
+
+  test('un proprietaire peut inviter un autre proprietaire', () async {
+    final user = MockFirebaseUser();
+    when(() => user.uid).thenReturn('owner-1');
+
+    final repository = FakeEstablishmentRepository();
+    final container = ProviderContainer(
+      overrides: [
+        authStateProvider.overrideWith((ref) => Stream.value(user)),
+        userProfileProvider.overrideWith((ref) => Stream.value(profile)),
+        currentEstablishmentProvider.overrideWith(
+          (ref) => Stream.value(establishment),
+        ),
+        canInviteMembersProvider.overrideWithValue(true),
+        activeEstablishmentRoleProvider.overrideWithValue(
+          EstablishmentRole.owner,
+        ),
+        establishmentRepositoryProvider.overrideWithValue(repository),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    await container.read(authStateProvider.future);
+    await container.read(userProfileProvider.future);
+    await container.read(currentEstablishmentProvider.future);
+
+    await container
+        .read(establishmentControllerProvider.notifier)
+        .createInvitation(
+          role: EstablishmentRole.owner,
+          invitedPhone: '33600000000',
+        );
+
+    expect(repository.invitations, hasLength(1));
+    expect(repository.invitations.first.role, EstablishmentRole.owner);
+    expect(container.read(establishmentControllerProvider).hasError, isFalse);
   });
 }
