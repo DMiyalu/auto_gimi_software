@@ -106,6 +106,7 @@ class BusinessHeader extends ConsumerWidget {
             ),
           ),
           GestureDetector(
+            key: const Key('user_profile_avatar'),
             onTap: () => _showUserProfileSheet(
               context,
               ref,
@@ -254,7 +255,9 @@ class _UserProfileSheet extends ConsumerStatefulWidget {
 
 class _UserProfileSheetState extends ConsumerState<_UserProfileSheet> {
   late final TextEditingController _nameController;
-  var _editing = false;
+  late final TextEditingController _emailController;
+  var _editingName = false;
+  var _editingEmail = false;
 
   @override
   void initState() {
@@ -262,11 +265,15 @@ class _UserProfileSheetState extends ConsumerState<_UserProfileSheet> {
     _nameController = TextEditingController(
       text: widget.profile?.fullName ?? '',
     );
+    _emailController = TextEditingController(
+      text: widget.profile?.email ?? '',
+    );
   }
 
   @override
   void dispose() {
     _nameController.dispose();
+    _emailController.dispose();
     super.dispose();
   }
 
@@ -280,9 +287,31 @@ class _UserProfileSheetState extends ConsumerState<_UserProfileSheet> {
     if (!mounted) return;
     final state = ref.read(establishmentControllerProvider);
     if (!state.hasError) {
-      setState(() => _editing = false);
+      setState(() => _editingName = false);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Nom mis à jour.')),
+      );
+    }
+  }
+
+  Future<void> _saveEmail() async {
+    final email = _emailController.text.trim();
+    if (!UserProfile.isValidReportEmail(email)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Adresse e-mail invalide.')),
+      );
+      return;
+    }
+
+    await ref
+        .read(establishmentControllerProvider.notifier)
+        .updateUserEmail(email);
+    if (!mounted) return;
+    final state = ref.read(establishmentControllerProvider);
+    if (!state.hasError) {
+      setState(() => _editingEmail = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('E-mail mis à jour.')),
       );
     }
   }
@@ -297,116 +326,228 @@ class _UserProfileSheetState extends ConsumerState<_UserProfileSheet> {
         ref.watch(activeEstablishmentRoleProvider) ?? widget.role;
     final loading = ref.watch(establishmentControllerProvider).isLoading;
     final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+    final hasReportEmail = profile?.hasReportEmail ?? false;
 
     return Padding(
       padding: EdgeInsets.fromLTRB(20, 12, 20, 20 + bottomInset),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: const Color(0xFFD5D8E2),
-                borderRadius: BorderRadius.circular(2),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFD5D8E2),
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Mon profil',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: 16),
-          if (_editing) ...[
-            TextField(
-              controller: _nameController,
-              enabled: !loading,
-              autofocus: true,
-              textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(
-                labelText: 'Nom d’utilisateur',
-                border: OutlineInputBorder(),
+            const SizedBox(height: 16),
+            Text(
+              'Mon profil',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w800,
               ),
             ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: loading
-                        ? null
-                        : () {
-                            _nameController.text = profile?.fullName ?? '';
-                            setState(() => _editing = false);
-                          },
-                    child: const Text('Annuler'),
+            if (!hasReportEmail) ...[
+              const SizedBox(height: 12),
+              Material(
+                color: const Color(0xFFFFF4E5),
+                borderRadius: BorderRadius.circular(12),
+                child: const Padding(
+                  padding: EdgeInsets.all(12),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        Icons.mark_email_unread_outlined,
+                        color: Color(0xFFB76E00),
+                      ),
+                      SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'Ajoutez votre e-mail pour recevoir le reporting '
+                          'hebdomadaire et mensuel de vos activités.',
+                          style: TextStyle(
+                            color: Color(0xFF7A4E00),
+                            fontWeight: FontWeight.w600,
+                            height: 1.35,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: FilledButton(
-                    onPressed: loading ? null : _saveName,
-                    child: loading
-                        ? const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Text('Enregistrer'),
+              ),
+            ],
+            const SizedBox(height: 16),
+            if (_editingName) ...[
+              TextField(
+                controller: _nameController,
+                enabled: !loading,
+                autofocus: true,
+                textCapitalization: TextCapitalization.words,
+                decoration: const InputDecoration(
+                  labelText: 'Nom d’utilisateur',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: loading
+                          ? null
+                          : () {
+                              _nameController.text = profile?.fullName ?? '';
+                              setState(() => _editingName = false);
+                            },
+                      child: const Text('Annuler'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: FilledButton(
+                      onPressed: loading ? null : _saveName,
+                      child: loading
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Text('Enregistrer'),
+                    ),
+                  ),
+                ],
+              ),
+            ] else ...[
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: CircleAvatar(
+                  child: Text(
+                    (profile?.fullName.trim().isNotEmpty ?? false)
+                        ? profile!.fullName.trim()[0].toUpperCase()
+                        : '?',
                   ),
                 ),
-              ],
+                title: Text(
+                  profile?.fullName.trim().isNotEmpty == true
+                      ? profile!.fullName
+                      : 'Utilisateur',
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+                subtitle: Text(profile?.phone ?? '—'),
+                trailing: IconButton(
+                  tooltip: 'Modifier le nom',
+                  onPressed: () => setState(() => _editingName = true),
+                  icon: const Icon(Icons.edit_outlined),
+                ),
+              ),
+            ],
+            const SizedBox(height: 8),
+            if (_editingEmail) ...[
+              TextField(
+                controller: _emailController,
+                enabled: !loading,
+                autofocus: true,
+                keyboardType: TextInputType.emailAddress,
+                autocorrect: false,
+                decoration: const InputDecoration(
+                  labelText: 'E-mail',
+                  helperText:
+                      'Utilisé pour le reporting hebdomadaire et mensuel '
+                      'de vos activités.',
+                  helperMaxLines: 3,
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: loading
+                          ? null
+                          : () {
+                              _emailController.text = profile?.email ?? '';
+                              setState(() => _editingEmail = false);
+                            },
+                      child: const Text('Annuler'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: FilledButton(
+                      onPressed: loading ? null : _saveEmail,
+                      child: loading
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Text('Enregistrer'),
+                    ),
+                  ),
+                ],
+              ),
+            ] else ...[
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: Icon(
+                  hasReportEmail
+                      ? Icons.email_outlined
+                      : Icons.mark_email_unread_outlined,
+                  color: hasReportEmail
+                      ? null
+                      : const Color(0xFFB76E00),
+                ),
+                title: Text(
+                  hasReportEmail ? profile!.email!.trim() : 'E-mail manquant',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: hasReportEmail ? null : const Color(0xFFB76E00),
+                  ),
+                ),
+                subtitle: const Text(
+                  'Utilisé pour le reporting hebdomadaire et mensuel '
+                  'de vos activités.',
+                ),
+                trailing: IconButton(
+                  tooltip: 'Modifier l’e-mail',
+                  onPressed: () {
+                    _emailController.text = profile?.email ?? '';
+                    setState(() => _editingEmail = true);
+                  },
+                  icon: const Icon(Icons.edit_outlined),
+                ),
+              ),
+            ],
+            const Divider(height: 28),
+            Text(
+              'Établissement en cours',
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                color: const Color(0xFF7B819B),
+              ),
             ),
-          ] else ...[
+            const SizedBox(height: 8),
             ListTile(
               contentPadding: EdgeInsets.zero,
-              leading: CircleAvatar(
-                child: Text(
-                  (profile?.fullName.trim().isNotEmpty ?? false)
-                      ? profile!.fullName.trim()[0].toUpperCase()
-                      : '?',
-                ),
+              leading: const CircleAvatar(
+                child: Icon(Icons.storefront_outlined),
               ),
-              title: Text(
-                profile?.fullName.trim().isNotEmpty == true
-                    ? profile!.fullName
-                    : 'Utilisateur',
-                style: const TextStyle(fontWeight: FontWeight.w700),
-              ),
-              subtitle: Text(profile?.phone ?? '—'),
-              trailing: IconButton(
-                tooltip: 'Modifier le nom',
-                onPressed: () => setState(() => _editing = true),
-                icon: const Icon(Icons.edit_outlined),
+              title: Text(establishment?.name ?? '—'),
+              subtitle: Text(
+                role?.label ?? 'Rôle non défini',
+                style: const TextStyle(fontWeight: FontWeight.w600),
               ),
             ),
+            const SizedBox(height: 8),
           ],
-          const Divider(height: 28),
-          Text(
-            'Établissement en cours',
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              color: const Color(0xFF7B819B),
-            ),
-          ),
-          const SizedBox(height: 8),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: const CircleAvatar(
-              child: Icon(Icons.storefront_outlined),
-            ),
-            title: Text(establishment?.name ?? '—'),
-            subtitle: Text(
-              role?.label ?? 'Rôle non défini',
-              style: const TextStyle(fontWeight: FontWeight.w600),
-            ),
-          ),
-          const SizedBox(height: 8),
-        ],
+        ),
       ),
     );
   }

@@ -176,8 +176,10 @@ void main() {
 
       await _pump(tester, database);
 
-      // 1. Écran restaurant (pas le stub garage) — titre header, sans sous-titre.
+      // 1. Écran restaurant (pas le stub garage) — titre header + Envoyer.
       expect(find.text('Rapports'), findsWidgets);
+      expect(find.byKey(const Key('send_report_button')), findsOneWidget);
+      expect(find.text('Envoyer'), findsOneWidget);
       expect(find.text('Aperçu de votre activité'), findsNothing);
       expect(find.byType(RestaurantReportKpiGrid), findsOneWidget);
       expect(find.byType(RevenueEvolutionChart), findsOneWidget);

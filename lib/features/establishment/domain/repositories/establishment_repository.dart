@@ -71,4 +71,9 @@ abstract class EstablishmentRepository {
     required String uid,
     required String fullName,
   });
+
+  Future<void> updateUserEmail({
+    required String uid,
+    required String email,
+  });
 }

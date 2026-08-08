@@ -144,7 +144,13 @@ service cloud.firestore {
     match /users/{userId} {
       allow read: if isSignedIn() && request.auth.uid == userId;
       allow create: if request.auth.uid == userId && isValidUserSignup();
-      allow update: if isSignedIn() && request.auth.uid == userId;
+      // Self-update (fullName, email reporting, activeEstablishmentId, etc.).
+      // email optionnel : string non vide quand présent (reporting hebdo/mensuel).
+      allow update: if isSignedIn()
+        && request.auth.uid == userId
+        && (!('email' in request.resource.data)
+          || (request.resource.data.email is string
+            && request.resource.data.email.size() > 2));
 
       match /invitations/{invitationId} {
         allow read: if isSignedIn() && request.auth.uid == userId;

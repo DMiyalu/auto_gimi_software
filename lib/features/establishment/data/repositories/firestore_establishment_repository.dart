@@ -410,6 +410,21 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
     });
   }
 
+  @override
+  Future<void> updateUserEmail({
+    required String uid,
+    required String email,
+  }) async {
+    final trimmed = email.trim();
+    if (!UserProfile.isValidReportEmail(trimmed)) {
+      throw ArgumentError('Adresse e-mail invalide.');
+    }
+    await _users.doc(uid).update({
+      'email': trimmed,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
   Future<EstablishmentMember?> _readTeamOrMember({
     required String establishmentId,
     required String uid,
@@ -463,6 +478,7 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
       uid: snapshot.id,
       phone: data['phone'] as String,
       fullName: data['fullName'] as String,
+      email: data['email'] as String?,
       establishmentId: legacyEstablishmentId,
       role: data['role'] as String? ?? 'agent',
       phoneVerified: data['phoneVerified'] as bool? ?? false,

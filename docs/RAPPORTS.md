@@ -18,7 +18,7 @@ période sélectionnable :
 
 | Bloc | Contenu |
 |------|---------|
-| En-tête | Titre « Rapports », sous-titre « Aperçu de votre activité » |
+| En-tête | Titre « Rapports » (header dédié, sans identité établissement) |
 | Filtre de période | Aujourd’hui / Hier / 7 j. / 30 j. / plage personnalisée |
 | KPIs | CA, Commandes, Panier moyen, Clients servis (+ variation vs période précédente) |
 | Graphique | Évolution journalière du chiffre d’affaires (barres) |
@@ -169,10 +169,17 @@ flutter test test/reporting/
 
 ---
 
-## 7. Limites connues / suite
+## 7. Reporting email hebdo / mensuel (cloud)
+
+Voir **[`RAPPORT_EMAIL.md`](RAPPORT_EMAIL.md)** : cron, bouton **Envoyer**,
+profil `users.email`, config SMTP/Resend, déploiement et checklist.
+
+---
+
+## 8. Limites connues / suite
 
 - Stub multi-métier (garage, etc.) non enrichi.
 - Pas d’image produit en base → placeholder uniquement.
 - CA basé sur `createdAt` de la commande clôturée (pas sur un
   `paidAt` dédié).
-- Pas de reporting cloud / email journalier (hors périmètre MVP mobile).
+- Pas de WhatsApp / SMS pour les digests (volontairement hors V1).

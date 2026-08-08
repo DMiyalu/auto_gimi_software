@@ -8,6 +8,7 @@ class UserProfile {
     required this.role,
     required this.phoneVerified,
     required this.createdAt,
+    this.email,
     this.establishmentIds = const [],
     this.activeEstablishmentId,
     this.rolesByEstablishment = const {},
@@ -16,6 +17,9 @@ class UserProfile {
   final String uid;
   final String phone;
   final String fullName;
+
+  /// Email de contact pour le reporting hebdo / mensuel (optionnel).
+  final String? email;
 
   /// Champ historique : premier établissement créé/rejoint.
   final String establishmentId;
@@ -40,4 +44,17 @@ class UserProfile {
 
   String roleFor(String establishmentId) =>
       rolesByEstablishment[establishmentId] ?? role;
+
+  /// Email utilisable pour l’envoi des rapports d’activité.
+  bool get hasReportEmail => isValidReportEmail(email);
+
+  static final RegExp _emailPattern = RegExp(
+    r'^[^\s@]+@[^\s@]+\.[^\s@]+$',
+  );
+
+  static bool isValidReportEmail(String? value) {
+    final trimmed = value?.trim() ?? '';
+    if (trimmed.isEmpty) return false;
+    return _emailPattern.hasMatch(trimmed);
+  }
 }

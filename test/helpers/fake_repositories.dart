@@ -291,6 +291,7 @@ class FakeEstablishmentRepository implements EstablishmentRepository {
           uid: current.uid,
           phone: phone,
           fullName: fullName,
+          email: current.email,
           establishmentId: current.establishmentId.isEmpty
               ? invitation.establishmentId
               : current.establishmentId,
@@ -347,6 +348,7 @@ class FakeEstablishmentRepository implements EstablishmentRepository {
       uid: current.uid,
       phone: current.phone,
       fullName: current.fullName,
+      email: current.email,
       establishmentId: current.establishmentId,
       role: current.role,
       phoneVerified: current.phoneVerified,
@@ -370,6 +372,35 @@ class FakeEstablishmentRepository implements EstablishmentRepository {
         uid: current.uid,
         phone: current.phone,
         fullName: fullName.trim(),
+        email: current.email,
+        establishmentId: current.establishmentId,
+        role: current.role,
+        phoneVerified: current.phoneVerified,
+        createdAt: current.createdAt,
+        establishmentIds: current.establishmentIds,
+        activeEstablishmentId: current.activeEstablishmentId,
+        rolesByEstablishment: current.rolesByEstablishment,
+      ),
+    );
+  }
+
+  @override
+  Future<void> updateUserEmail({
+    required String uid,
+    required String email,
+  }) async {
+    final current = profile;
+    if (current == null) return;
+    final trimmed = email.trim();
+    if (!UserProfile.isValidReportEmail(trimmed)) {
+      throw ArgumentError('Adresse e-mail invalide.');
+    }
+    setProfile(
+      UserProfile(
+        uid: current.uid,
+        phone: current.phone,
+        fullName: current.fullName,
+        email: trimmed,
         establishmentId: current.establishmentId,
         role: current.role,
         phoneVerified: current.phoneVerified,

@@ -231,4 +231,16 @@ class EstablishmentController extends AsyncNotifier<void> {
           .updateUserFullName(uid: user.uid, fullName: fullName);
     });
   }
+
+  Future<void> updateUserEmail(String email) async {
+    final user = ref.read(authStateProvider).valueOrNull;
+    if (user == null) return;
+
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      await ref
+          .read(establishmentRepositoryProvider)
+          .updateUserEmail(uid: user.uid, email: email);
+    });
+  }
 }

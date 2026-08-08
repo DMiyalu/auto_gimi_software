@@ -171,7 +171,7 @@ Une prestation se déroule en **moments distincts**.
 | Élément | Raison |
 |---------|--------|
 | Impression factures et jetons | Pas de terminal d'impression ; affichage écran suffit |
-| Email reporting journalier admin | Extension Firebase Trigger Email, phase suivante |
+| Email reporting hebdo / mensuel propriétaire (restaurant) | Cloud Functions planifiées + `users.email` (voir `docs/RAPPORTS.md`) |
 | Gestion fine des stocks | Hors périmètre initial |
 | Personnel et rôles avancés | Un seul profil admin suffit |
 | Gamification avancée | Phase ultérieure |
