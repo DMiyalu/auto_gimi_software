@@ -419,7 +419,8 @@ class _LogoPickerCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 const Text(
-                  'Affiché en en-tête de facture. Sinon, le nom de l’établissement est utilisé.',
+                  'Affiché sur l’écran Commandes et en en-tête de facture. '
+                  'Sinon, le logo Zuri Business est utilisé.',
                   style: TextStyle(
                     color: Color(0xFF8A90A5),
                     fontSize: 12,

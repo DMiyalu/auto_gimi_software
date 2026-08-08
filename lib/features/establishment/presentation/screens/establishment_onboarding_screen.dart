@@ -9,7 +9,7 @@ import '../../../../core/l10n/app_localizations.dart';
 import '../../../../core/routing/routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../auth/presentation/providers/auth_providers.dart';
+import '../../../auth/presentation/utils/confirm_sign_out.dart';
 import '../../domain/models/establishment.dart';
 import '../../domain/models/establishment_invitation.dart';
 import '../../domain/models/establishment_member.dart';
@@ -174,8 +174,7 @@ class _LandingTopBar extends ConsumerWidget {
             ),
           ),
           TextButton.icon(
-            onPressed: () =>
-                ref.read(authControllerProvider.notifier).signOut(),
+            onPressed: () => confirmAndSignOut(context, ref),
             icon: const Icon(Icons.logout_rounded, size: 18),
             label: const Text('Déconnexion'),
             style: TextButton.styleFrom(

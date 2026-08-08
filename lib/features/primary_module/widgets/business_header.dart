@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -55,15 +57,7 @@ class BusinessHeader extends ConsumerWidget {
       child: Row(
         children: [
           if (isRestaurant)
-            ClipRRect(
-              borderRadius: BorderRadius.circular(14),
-              child: Image.asset(
-                'public/images/logo.png',
-                width: 48,
-                height: 48,
-                fit: BoxFit.cover,
-              ),
-            )
+            _EstablishmentBrandLogo(establishment: establishment, size: 48)
           else
             CircleAvatar(
               radius: 22,
@@ -249,6 +243,48 @@ class BusinessHeader extends ConsumerWidget {
       }
     }
     return EstablishmentRole.fromFirestore(profile?.roleFor(establishmentId));
+  }
+}
+
+/// Logo établissement s'il est renseigné, sinon logo Zuri Business par défaut.
+class _EstablishmentBrandLogo extends StatelessWidget {
+  const _EstablishmentBrandLogo({
+    required this.establishment,
+    required this.size,
+  });
+
+  final Establishment? establishment;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final bytes = establishment?.logoBytes;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(14),
+      child: SizedBox(
+        width: size,
+        height: size,
+        child: bytes != null
+            ? Image.memory(
+                bytes is Uint8List ? bytes : Uint8List.fromList(bytes),
+                width: size,
+                height: size,
+                fit: BoxFit.cover,
+                errorBuilder: (_, _, _) => _defaultLogo(size),
+              )
+            : _defaultLogo(size),
+      ),
+    );
+  }
+
+  static Widget _defaultLogo(double size) {
+    return Image.asset(
+      'public/images/logo.png',
+      width: size,
+      height: size,
+      fit: BoxFit.cover,
+    );
   }
 }
 

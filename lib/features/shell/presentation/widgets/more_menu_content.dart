@@ -6,7 +6,7 @@ import '../../../../core/domain/business_category.dart';
 import '../../../../core/l10n/app_localizations.dart';
 import '../../../../core/routing/routes.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../auth/presentation/providers/auth_providers.dart';
+import '../../../auth/presentation/utils/confirm_sign_out.dart';
 import '../../../establishment/domain/models/establishment.dart';
 import '../../../establishment/presentation/providers/establishment_providers.dart';
 import '../../../primary_module/controllers/primary_module_providers.dart';
@@ -73,7 +73,7 @@ class MoreMenuContent extends ConsumerWidget {
         icon: Icons.logout_rounded,
         title: l10n.logout,
         subtitle: 'Se déconnecter de l’application',
-        onTap: () => ref.read(authControllerProvider.notifier).signOut(),
+        onTap: () => confirmAndSignOut(context, ref),
       ),
     ];
 
