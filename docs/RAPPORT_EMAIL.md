@@ -95,7 +95,7 @@ Modèle : `functions/.env.example`.
 
 ```bash
 MAIL_PROVIDER=smtp          # console | smtp | resend
-REPORT_FROM_EMAIL=ZOLANA Rapports <noreply@example.com>
+REPORT_FROM_EMAIL=Zuri Business Rapports <noreply@example.com>
 
 # Si MAIL_PROVIDER=smtp
 SMTP_HOST=smtp.gmail.com

@@ -27,7 +27,7 @@ export function getMailConfig(): MailConfig {
   const from =
     process.env.REPORT_FROM_EMAIL ??
     process.env.MAIL_FROM ??
-    "ZOLANA Rapports <noreply@zolana.app>";
+    "Zuri Business Rapports <noreply@zolana.app>";
 
   if (provider === "smtp") {
     return {

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 
 /// Couleurs d'accent stables pour les cartes "domaine" (produits,
-/// catégories...) qui doivent rester dans la palette Zolana — contrairement à
+/// catégories...) qui doivent rester dans la palette Zuri Business — contrairement à
 /// [AvatarColors], jamais de vert/rouge/orange arbitraires.
 abstract final class DomainAccentColors {
   static const _palette = [

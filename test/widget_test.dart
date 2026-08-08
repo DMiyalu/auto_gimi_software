@@ -27,7 +27,7 @@ void main() {
     await database.close();
   });
 
-  testWidgets('App démarre avec le titre ZOLANA', (tester) async {
+  testWidgets('App démarre avec le titre Zuri Business', (tester) async {
     final prefs = await SharedPreferences.getInstance();
     final authRepository = FakeAuthRepository();
     final establishmentRepository = FakeEstablishmentRepository();
@@ -51,6 +51,6 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    expect(find.text('ZOLANA'), findsOneWidget);
+    expect(find.text('Zuri Business'), findsOneWidget);
   });
 }

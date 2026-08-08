@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "auto_mobile_software" "\0"
+            VALUE "FileDescription", "Zuri Business" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "auto_mobile_software" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 com.example. All rights reserved." "\0"
             VALUE "OriginalFilename", "auto_mobile_software.exe" "\0"
-            VALUE "ProductName", "auto_mobile_software" "\0"
+            VALUE "ProductName", "Zuri Business" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

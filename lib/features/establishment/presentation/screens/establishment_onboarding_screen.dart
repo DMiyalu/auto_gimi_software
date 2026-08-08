@@ -31,7 +31,7 @@ class EstablishmentOnboardingScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('ZOLANA'),
+        title: const Text('Zuri Business'),
         actions: [
           IconButton(
             tooltip: 'Déconnexion',
