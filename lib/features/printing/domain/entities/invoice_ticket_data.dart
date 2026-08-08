@@ -21,6 +21,9 @@ class InvoiceTicketData {
   const InvoiceTicketData({
     required this.establishmentName,
     this.establishmentPhone,
+    this.logoBase64,
+    this.headerLines = const [],
+    this.footerLines = const [],
     required this.reference,
     required this.date,
     this.clientName,
@@ -36,6 +39,9 @@ class InvoiceTicketData {
 
   final String establishmentName;
   final String? establishmentPhone;
+  final String? logoBase64;
+  final List<String> headerLines;
+  final List<String> footerLines;
   final String reference;
   final DateTime date;
   final String? clientName;

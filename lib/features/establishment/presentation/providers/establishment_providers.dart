@@ -82,6 +82,11 @@ final canCreateActivitiesProvider = Provider<bool>((ref) {
       false;
 });
 
+final canConfigureEstablishmentProvider = Provider<bool>((ref) {
+  return ref.watch(activeEstablishmentRoleProvider)?.canConfigureEstablishment ??
+      false;
+});
+
 final establishmentMembersProvider = StreamProvider<List<EstablishmentMember>>((
   ref,
 ) {
@@ -241,6 +246,36 @@ class EstablishmentController extends AsyncNotifier<void> {
       await ref
           .read(establishmentRepositoryProvider)
           .updateUserEmail(uid: user.uid, email: email);
+    });
+  }
+
+  Future<void> updateEstablishmentSettings({
+    required String name,
+    String? logoBase64,
+    bool clearLogo = false,
+    required List<String> invoiceHeaderLines,
+    required List<String> invoiceFooterLines,
+  }) async {
+    final establishment = ref.read(currentEstablishmentProvider).valueOrNull;
+    if (establishment == null) return;
+
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      if (!ref.read(canConfigureEstablishmentProvider)) {
+        throw StateError(
+          'Seuls le propriétaire et les gérants peuvent modifier l’établissement.',
+        );
+      }
+      await ref
+          .read(establishmentRepositoryProvider)
+          .updateEstablishmentSettings(
+            establishmentId: establishment.id,
+            name: name,
+            logoBase64: logoBase64,
+            clearLogo: clearLogo,
+            invoiceHeaderLines: invoiceHeaderLines,
+            invoiceFooterLines: invoiceFooterLines,
+          );
     });
   }
 }

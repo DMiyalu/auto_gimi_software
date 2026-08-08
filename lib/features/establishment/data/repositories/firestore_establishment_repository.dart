@@ -84,6 +84,9 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
       'managerName': managerName.trim(),
       'phone': normalizedPhone,
       'phoneVerified': false,
+      'logoBase64': null,
+      'invoiceHeaderLines': const <String>[],
+      'invoiceFooterLines': const <String>[],
       'createdAt': now,
       'updatedAt': now,
     });
@@ -445,6 +448,40 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
     return null;
   }
 
+  @override
+  Future<void> updateEstablishmentSettings({
+    required String establishmentId,
+    required String name,
+    String? logoBase64,
+    bool clearLogo = false,
+    required List<String> invoiceHeaderLines,
+    required List<String> invoiceFooterLines,
+  }) async {
+    final trimmedName = name.trim();
+    if (trimmedName.isEmpty) {
+      throw ArgumentError('Le nom de l’établissement est obligatoire.');
+    }
+
+    final payload = <String, dynamic>{
+      'name': trimmedName,
+      'invoiceHeaderLines': Establishment.sanitizeInvoiceLines(
+        invoiceHeaderLines,
+      ),
+      'invoiceFooterLines': Establishment.sanitizeInvoiceLines(
+        invoiceFooterLines,
+      ),
+      'updatedAt': FieldValue.serverTimestamp(),
+    };
+
+    if (clearLogo) {
+      payload['logoBase64'] = null;
+    } else if (logoBase64 != null) {
+      payload['logoBase64'] = logoBase64;
+    }
+
+    await _establishments.doc(establishmentId).update(payload);
+  }
+
   Establishment _establishmentFromSnapshot(
     DocumentSnapshot<Map<String, dynamic>> snapshot,
   ) {
@@ -458,6 +495,9 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
       phone: data['phone'] as String,
       phoneVerified: data['phoneVerified'] as bool? ?? false,
       createdAt: _timestampToDateTime(data['createdAt']),
+      logoBase64: data['logoBase64'] as String?,
+      invoiceHeaderLines: _stringList(data['invoiceHeaderLines']),
+      invoiceFooterLines: _stringList(data['invoiceFooterLines']),
     );
   }
 

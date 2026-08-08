@@ -97,4 +97,14 @@ class DisabledEstablishmentRepository implements EstablishmentRepository {
     required String uid,
     required String email,
   }) async => _disabled();
+
+  @override
+  Future<void> updateEstablishmentSettings({
+    required String establishmentId,
+    required String name,
+    String? logoBase64,
+    bool clearLogo = false,
+    required List<String> invoiceHeaderLines,
+    required List<String> invoiceFooterLines,
+  }) async => _disabled();
 }

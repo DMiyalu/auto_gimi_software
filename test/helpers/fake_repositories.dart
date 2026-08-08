@@ -411,4 +411,43 @@ class FakeEstablishmentRepository implements EstablishmentRepository {
       ),
     );
   }
+
+  @override
+  Future<void> updateEstablishmentSettings({
+    required String establishmentId,
+    required String name,
+    String? logoBase64,
+    bool clearLogo = false,
+    required List<String> invoiceHeaderLines,
+    required List<String> invoiceFooterLines,
+  }) async {
+    final trimmedName = name.trim();
+    if (trimmedName.isEmpty) {
+      throw ArgumentError('Le nom de l’établissement est obligatoire.');
+    }
+
+    Establishment update(Establishment current) {
+      return current.copyWith(
+        name: trimmedName,
+        logoBase64: logoBase64,
+        clearLogo: clearLogo,
+        invoiceHeaderLines: Establishment.sanitizeInvoiceLines(
+          invoiceHeaderLines,
+        ),
+        invoiceFooterLines: Establishment.sanitizeInvoiceLines(
+          invoiceFooterLines,
+        ),
+      );
+    }
+
+    if (establishment?.id == establishmentId) {
+      establishment = update(establishment!);
+      _establishmentController.add(establishment);
+    }
+
+    setEstablishments([
+      for (final item in establishments)
+        if (item.id == establishmentId) update(item) else item,
+    ]);
+  }
 }

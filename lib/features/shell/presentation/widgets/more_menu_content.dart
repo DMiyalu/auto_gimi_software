@@ -8,9 +8,6 @@ import '../../../../core/routing/routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../../establishment/domain/models/establishment.dart';
-import '../../../establishment/domain/models/establishment_member.dart';
-import '../../../establishment/domain/models/establishment_role.dart';
-import '../../../establishment/domain/models/user_profile.dart';
 import '../../../establishment/presentation/providers/establishment_providers.dart';
 import '../../../primary_module/controllers/primary_module_providers.dart';
 
@@ -25,10 +22,6 @@ class MoreMenuContent extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final config = ref.watch(primaryModuleConfigProvider);
     final establishment = ref.watch(currentEstablishmentProvider).valueOrNull;
-    final establishments = ref.watch(userEstablishmentsProvider).valueOrNull;
-    final memberships =
-        ref.watch(userMembershipsProvider).valueOrNull ?? const [];
-    final profile = ref.watch(userProfileProvider).valueOrNull;
     final canInviteMembers = ref.watch(canInviteMembersProvider);
     final pendingInvitationCount =
         ref.watch(pendingInvitationsProvider).valueOrNull?.length ?? 0;
@@ -93,14 +86,7 @@ class MoreMenuContent extends ConsumerWidget {
             _EstablishmentCard(
               establishment: establishment,
               categoryLabel: establishment.category.label(l10n),
-              onTap: () => _showEstablishmentSwitcher(
-                context,
-                ref,
-                establishment: establishment,
-                establishments: establishments,
-                memberships: memberships,
-                profile: profile,
-              ),
+              onTap: () => context.push(Routes.establishmentSettings),
             ),
             const SizedBox(height: 22),
           ],
@@ -130,90 +116,6 @@ class MoreMenuContent extends ConsumerWidget {
       Routes.alertes => 'Consultez les alertes d’entretien',
       _ => label,
     };
-  }
-
-  void _showEstablishmentSwitcher(
-    BuildContext context,
-    WidgetRef ref, {
-    required Establishment establishment,
-    required List<Establishment>? establishments,
-    required List<EstablishmentMember> memberships,
-    required UserProfile? profile,
-  }) {
-    final l10n = AppLocalizations.of(context);
-    final controllerState = ref.read(establishmentControllerProvider);
-    final activeId = establishment.id;
-    final items = establishments == null || establishments.isEmpty
-        ? [establishment]
-        : establishments;
-
-    showDialog<void>(
-      context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: const Text('Établissements'),
-          content: SizedBox(
-            width: 320,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                for (final item in items)
-                  ListTile(
-                    leading: CircleAvatar(child: Icon(item.category.icon)),
-                    title: Text(item.name),
-                    subtitle: Text(
-                      '${item.category.label(l10n)} • '
-                      '${_roleFor(item.id, memberships, profile).label}',
-                    ),
-                    trailing: item.id == activeId
-                        ? const Icon(
-                            Icons.check_circle,
-                            color: AppColors.zuriRed,
-                          )
-                        : null,
-                    onTap: item.id == activeId || controllerState.isLoading
-                        ? null
-                        : () {
-                            Navigator.of(dialogContext).pop();
-                            ref
-                                .read(establishmentControllerProvider.notifier)
-                                .switchEstablishment(item.id);
-                          },
-                  ),
-                const Divider(),
-                ListTile(
-                  leading: const Icon(Icons.add_business_outlined),
-                  title: const Text('Ajouter un établissement'),
-                  onTap: () {
-                    Navigator.of(dialogContext).pop();
-                    context.push(Routes.establishmentNew);
-                  },
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
-              child: Text(l10n.cancel),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  EstablishmentRole _roleFor(
-    String establishmentId,
-    List<EstablishmentMember> memberships,
-    UserProfile? profile,
-  ) {
-    for (final membership in memberships) {
-      if (membership.establishmentId == establishmentId) {
-        return membership.role;
-      }
-    }
-    return EstablishmentRole.fromFirestore(profile?.roleFor(establishmentId));
   }
 }
 

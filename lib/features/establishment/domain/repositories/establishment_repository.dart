@@ -76,4 +76,14 @@ abstract class EstablishmentRepository {
     required String uid,
     required String email,
   });
+
+  /// Met à jour les paramètres d'identité / facture de l'établissement.
+  Future<void> updateEstablishmentSettings({
+    required String establishmentId,
+    required String name,
+    String? logoBase64,
+    bool clearLogo = false,
+    required List<String> invoiceHeaderLines,
+    required List<String> invoiceFooterLines,
+  });
 }

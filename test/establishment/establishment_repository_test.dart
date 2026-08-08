@@ -72,6 +72,35 @@ void main() {
     expect(user.data()!['establishmentIds'], contains(est.id));
   });
 
+  test('updateEstablishmentSettings persiste nom, logo et lignes facture', () async {
+    await repository.createUserProfile(
+      uid: 'owner',
+      fullName: 'Boss',
+      phone: '243900000001',
+    );
+    final est = await repository.createOwnedEstablishment(
+      ownerId: 'owner',
+      category: BusinessCategory.restaurant,
+      establishmentName: 'Chez Nous',
+      managerName: 'Boss',
+      phone: '243900000001',
+    );
+
+    await repository.updateEstablishmentSettings(
+      establishmentId: est.id,
+      name: 'Le Goût Parfait',
+      logoBase64: 'YmxvYg==',
+      invoiceHeaderLines: const ['Ouvert 7j/7', 'trop-long-pour-vingt-caracteres'],
+      invoiceFooterLines: const ['Merci'],
+    );
+
+    final updated = await repository.watchEstablishment(est.id).first;
+    expect(updated?.name, 'Le Goût Parfait');
+    expect(updated?.logoBase64, 'YmxvYg==');
+    expect(updated?.invoiceHeaderLines, ['Ouvert 7j/7', 'trop-long-pour-vingt']);
+    expect(updated?.invoiceFooterLines, ['Merci']);
+  });
+
   test(
     'createInvitation écrit dans l’inbox user si phoneIndex existe',
     () async {

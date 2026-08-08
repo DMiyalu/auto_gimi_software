@@ -47,5 +47,7 @@
 	<true/>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>Zuri Business utilise Bluetooth pour détecter les imprimantes thermiques associées au device.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Zuri Business accède à vos photos pour définir le logo de l’établissement sur les factures.</string>
 </dict>
 </plist>

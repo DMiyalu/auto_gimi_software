@@ -1,12 +1,15 @@
 import 'package:esc_pos_utils_plus/esc_pos_utils_plus.dart';
 import 'package:intl/intl.dart';
 
+import '../../../establishment/presentation/utils/establishment_logo_codec.dart';
 import '../../domain/entities/invoice_ticket_data.dart';
 
 /// Génère les octets ESC/POS d'un ticket de facture pour une imprimante
 /// thermique 58mm, à partir de données génériques [InvoiceTicketData].
 class InvoiceTicketBuilder {
   const InvoiceTicketBuilder();
+
+  static const poweredBy = 'Powered by Zuri Business Inc.';
 
   static final _amountFormat = NumberFormat('#,##0.##');
   static final _dateFormat = DateFormat('dd/MM/yyyy HH:mm');
@@ -16,22 +19,40 @@ class InvoiceTicketBuilder {
     final generator = Generator(PaperSize.mm58, profile);
     final bytes = <int>[];
 
-    bytes.addAll(
-      generator.text(
-        data.establishmentName,
-        styles: const PosStyles(
-          align: PosAlign.center,
-          bold: true,
-          height: PosTextSize.size2,
-          width: PosTextSize.size2,
+    final logo = EstablishmentLogoCodec.decodeForPrint(data.logoBase64);
+    if (logo != null) {
+      bytes.addAll(generator.image(logo));
+      bytes.addAll(generator.feed(1));
+    } else {
+      bytes.addAll(
+        generator.text(
+          data.establishmentName,
+          styles: const PosStyles(
+            align: PosAlign.center,
+            bold: true,
+            height: PosTextSize.size2,
+            width: PosTextSize.size2,
+          ),
         ),
-      ),
-    );
+      );
+    }
+
     if (data.establishmentPhone != null &&
         data.establishmentPhone!.isNotEmpty) {
       bytes.addAll(
         generator.text(
           data.establishmentPhone!,
+          styles: const PosStyles(align: PosAlign.center),
+        ),
+      );
+    }
+
+    for (final line in data.headerLines) {
+      final trimmed = line.trim();
+      if (trimmed.isEmpty) continue;
+      bytes.addAll(
+        generator.text(
+          trimmed,
           styles: const PosStyles(align: PosAlign.center),
         ),
       );
@@ -136,11 +157,30 @@ class InvoiceTicketBuilder {
       );
     }
 
+    final footerLines = data.footerLines
+        .map((line) => line.trim())
+        .where((line) => line.isNotEmpty)
+        .toList();
+    if (footerLines.isNotEmpty) {
+      bytes.addAll(generator.hr());
+      for (final line in footerLines) {
+        bytes.addAll(
+          generator.text(
+            line,
+            styles: const PosStyles(align: PosAlign.center),
+          ),
+        );
+      }
+    }
+
     bytes.addAll(generator.hr());
     bytes.addAll(
       generator.text(
-        'Merci de votre confiance !',
-        styles: const PosStyles(align: PosAlign.center),
+        poweredBy,
+        styles: const PosStyles(
+          align: PosAlign.center,
+          bold: true,
+        ),
       ),
     );
     bytes.addAll(generator.feed(2));

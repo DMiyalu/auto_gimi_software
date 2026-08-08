@@ -70,6 +70,9 @@ class _PrestationDetailBody extends ConsumerWidget {
     final data = InvoiceTicketData(
       establishmentName: establishment?.name ?? 'Facture',
       establishmentPhone: establishment?.phone,
+      logoBase64: establishment?.logoBase64,
+      headerLines: establishment?.invoiceHeaderLines ?? const [],
+      footerLines: establishment?.invoiceFooterLines ?? const [],
       reference: facture?.reference ?? prestationId,
       date: facture?.issuedAt ?? DateTime.now(),
       clientName: client?.name,
