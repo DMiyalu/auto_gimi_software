@@ -132,13 +132,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Table 2'), findsWidgets);
-      expect(
-        find.text('Ajoutez des produits à la commande'),
-        findsOneWidget,
-      );
+      expect(find.text('Ajoutez des produits à la commande'), findsOneWidget);
 
       // 4. Ajouter un produit via la vraie feuille de sélection.
-      await tester.tap(find.text('Ajouter un produit'));
+      await tester.tap(find.text('Ajouter'));
       await tester.pumpAndSettle();
 
       await tester.tap(find.byTooltip('Ajouter'));
@@ -151,7 +148,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Poulet braisé'), findsOneWidget);
-      expect(find.text('2 x 10 FC'), findsOneWidget);
+      expect(find.text('10 FC × 2'), findsOneWidget);
 
       // 5. Attacher un client via la recherche inline (onglet Détails).
       await tester.tap(find.text('Détails'));
@@ -188,6 +185,9 @@ void main() {
         findsOneWidget,
       );
       await tester.tap(find.text('Argent encaissé'));
+      await tester.pumpAndSettle();
+      expect(find.text('Mode de paiement'), findsWidgets);
+      await tester.tap(find.text('Valider'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 

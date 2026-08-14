@@ -85,87 +85,92 @@ void main() {
   });
 
   testWidgets(
-      'flux e2e : création de commande synchronisée, puis chaque changement '
-      'de statut re-synchronisé automatiquement', (tester) async {
-    database = await pumpTestApp(
-      tester,
-      overrides: [
-        authRepositoryProvider.overrideWithValue(authRepository),
-        establishmentRepositoryProvider.overrideWithValue(
-          establishmentRepository,
-        ),
-        phoneVerificationRepositoryProvider.overrideWithValue(
-          phoneVerificationRepository,
-        ),
-        signupOtpPendingProvider.overrideWith((ref) => false),
-        // Un Firestore de test pour toute la chaîne de synchro :
-        // AutoSyncCoordinator (câblé dans AppShellScreen) l'utilise à la
-        // fois pour le push débouncé déclenché après chaque écriture
-        // locale (schedulePush, via syncEngineProvider) et pour ses
-        // écouteurs temps réel.
-        firestoreProvider.overrideWithValue(firestore),
-      ],
-    );
-    await tester.pumpAndSettle();
+    'flux e2e : création de commande synchronisée, puis chaque changement '
+    'de statut re-synchronisé automatiquement',
+    (tester) async {
+      database = await pumpTestApp(
+        tester,
+        overrides: [
+          authRepositoryProvider.overrideWithValue(authRepository),
+          establishmentRepositoryProvider.overrideWithValue(
+            establishmentRepository,
+          ),
+          phoneVerificationRepositoryProvider.overrideWithValue(
+            phoneVerificationRepository,
+          ),
+          signupOtpPendingProvider.overrideWith((ref) => false),
+          // Un Firestore de test pour toute la chaîne de synchro :
+          // AutoSyncCoordinator (câblé dans AppShellScreen) l'utilise à la
+          // fois pour le push débouncé déclenché après chaque écriture
+          // locale (schedulePush, via syncEngineProvider) et pour ses
+          // écouteurs temps réel.
+          firestoreProvider.overrideWithValue(firestore),
+        ],
+      );
+      await tester.pumpAndSettle();
 
-    expect(find.text('Commandes'), findsWidgets);
+      expect(find.text('Commandes'), findsWidgets);
 
-    final remoteCommandes = firestore.collection(
-      'establishments/$_establishmentId/commandes',
-    );
+      final remoteCommandes = firestore.collection(
+        'establishments/$_establishmentId/commandes',
+      );
 
-    // 1. Création d'une commande (sans table, pour rester simple) via le
-    // vrai flux UI.
-    await tester.tap(find.byType(FloatingActionButton));
-    await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(ListTile, 'Nouvelle commande'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Continuer'));
-    await tester.pumpAndSettle();
+      // 1. Création d'une commande (sans table, pour rester simple) via le
+      // vrai flux UI.
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(ListTile, 'Nouvelle commande'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Continuer'));
+      await tester.pumpAndSettle();
 
-    // Visible localement tout de suite, sans attendre le réseau.
-    expect(find.text('Ajoutez des produits à la commande'), findsOneWidget);
-    expect((await remoteCommandes.get()).docs, isEmpty);
+      // Visible localement tout de suite, sans attendre le réseau.
+      expect(find.text('Ajoutez des produits à la commande'), findsOneWidget);
+      expect((await remoteCommandes.get()).docs, isEmpty);
 
-    // Le push est débouncé (~1.5s) après l'écriture locale.
-    await tester.pump(const Duration(milliseconds: 1600));
-    await tester.pumpAndSettle();
+      // Le push est débouncé (~1.5s) après l'écriture locale.
+      await tester.pump(const Duration(milliseconds: 1600));
+      await tester.pumpAndSettle();
 
-    var synced = await remoteCommandes.get();
-    expect(synced.docs, hasLength(1));
-    expect(synced.docs.single.data()['statut'], 'en_cours');
-    final commandeId = synced.docs.single.id;
+      var synced = await remoteCommandes.get();
+      expect(synced.docs, hasLength(1));
+      expect(synced.docs.single.data()['statut'], 'en_cours');
+      final commandeId = synced.docs.single.id;
 
-    // 2. Encaissement direct (sans facture imprimée) : en_cours -> clôturée.
-    await tester.tap(find.text('Encaisser paiement'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Argent encaissé'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
+      // 2. Encaissement direct (sans facture imprimée) : en_cours -> clôturée.
+      await tester.tap(find.text('Encaisser paiement'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Argent encaissé'));
+      await tester.pumpAndSettle();
+      expect(find.text('Mode de paiement'), findsWidgets);
+      await tester.tap(find.text('Valider'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
 
-    expect(find.text('Payée'), findsOneWidget);
+      expect(find.text('Payée'), findsOneWidget);
 
-    // Le nouveau changement de statut doit lui aussi se re-synchroniser
-    // automatiquement, sans action manuelle. On évite pumpAndSettle ici :
-    // les confettis animent en continu pendant toute leur durée (par
-    // design) et ne "se stabilisent" jamais au sens strict attendu par
-    // pumpAndSettle.
-    await tester.pump(const Duration(milliseconds: 1600));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
+      // Le nouveau changement de statut doit lui aussi se re-synchroniser
+      // automatiquement, sans action manuelle. On évite pumpAndSettle ici :
+      // les confettis animent en continu pendant toute leur durée (par
+      // design) et ne "se stabilisent" jamais au sens strict attendu par
+      // pumpAndSettle.
+      await tester.pump(const Duration(milliseconds: 1600));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
 
-    synced = await remoteCommandes.get();
-    expect(synced.docs, hasLength(1));
-    expect(synced.docs.single.id, commandeId);
-    expect(synced.docs.single.data()['statut'], 'cloturee');
+      synced = await remoteCommandes.get();
+      expect(synced.docs, hasLength(1));
+      expect(synced.docs.single.id, commandeId);
+      expect(synced.docs.single.data()['statut'], 'cloturee');
 
-    final localRow = await (database.select(
-      database.commandes,
-    )..where((c) => c.id.equals(commandeId))).getSingle();
-    expect(localRow.isDirty, isFalse);
+      final localRow = await (database.select(
+        database.commandes,
+      )..where((c) => c.id.equals(commandeId))).getSingle();
+      expect(localRow.isDirty, isFalse);
 
-    await tester.pumpWidget(const SizedBox());
-    await tester.pump(const Duration(milliseconds: 1));
-    await tester.pump(const Duration(milliseconds: 1));
-  });
+      await tester.pumpWidget(const SizedBox());
+      await tester.pump(const Duration(milliseconds: 1));
+      await tester.pump(const Duration(milliseconds: 1));
+    },
+  );
 }
