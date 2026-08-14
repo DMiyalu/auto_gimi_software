@@ -44,7 +44,7 @@ class SignUpSuccessScreen extends ConsumerWidget {
                       const SizedBox(height: 8),
                       const AuthBrandHeader(),
                       const SizedBox(height: 22),
-                      const SignUpStepper(currentStep: 3),
+                      const SignUpStepper(currentStep: 2),
                       const SizedBox(height: 28),
                       Center(
                         child: Container(

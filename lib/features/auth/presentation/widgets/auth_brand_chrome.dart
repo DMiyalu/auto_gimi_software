@@ -225,11 +225,11 @@ class AuthBrandHeader extends StatelessWidget {
   }
 }
 
-/// Stepper d'inscription : 1 Infos · 2 Vérification · 3 Terminé.
+/// Stepper d'inscription : 1 Infos · 2 Terminé.
 class SignUpStepper extends StatelessWidget {
   const SignUpStepper({super.key, required this.currentStep});
 
-  /// 1-based step index (1, 2 or 3).
+  /// 1-based step index (1 or 2).
   final int currentStep;
 
   @override
@@ -237,13 +237,12 @@ class SignUpStepper extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final labels = [
       l10n.signUpStepInfos,
-      l10n.signUpStepVerification,
       l10n.signUpStepDone,
     ];
 
     return Row(
       children: [
-        for (var i = 0; i < 3; i++) ...[
+        for (var i = 0; i < labels.length; i++) ...[
           if (i > 0)
             Expanded(
               child: Container(

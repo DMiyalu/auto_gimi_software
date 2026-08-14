@@ -143,7 +143,7 @@
   "signUpStepInfos": "Info",
   "signUpStepVerification": "Verification",
   "signUpStepDone": "Done",
-  "signUpOtpInfo": "A verification code (OTP) will be sent by WhatsApp or SMS to confirm your number.",
+  "signUpOtpInfo": "A verification code (OTP) will be sent by SMS to confirm your number.",
   "signUpDataSecurity": "Your data is secure and will never be shared.",
   "signUpDataSecurityShort": "Your data is secure",
   "continueLabel": "Continue",
@@ -178,7 +178,7 @@
     }
   },
   "verificationSubtitlePrefix": "We sent a verification code (OTP) to ",
-  "verificationSubtitleSuffix": " via WhatsApp.",
+  "verificationSubtitleSuffix": " via SMS.",
   "verificationCode": "Verification code",
   "verificationCodeInvalid": "6-digit code required",
   "verificationCodeSent": "Code sent via SMS",

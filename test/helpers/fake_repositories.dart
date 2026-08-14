@@ -101,7 +101,7 @@ class FakeEstablishmentRepository implements EstablishmentRepository {
         fullName: fullName,
         establishmentId: '',
         role: 'agent',
-        phoneVerified: false,
+        phoneVerified: true,
         createdAt: DateTime(2026, 1, 1),
       ),
     );

@@ -63,7 +63,11 @@ export async function sendPhoneVerificationCode(params: {
     `Il expire dans ${config.codeTtlMinutes} minutes.`;
 
   const smsProvider = createSmsProvider();
-  await smsProvider.sendSms({ to: phone, message });
+  try {
+    await smsProvider.sendSms({ to: phone, message });
+  } catch (error) {
+    throw mapSmsSendError(error);
+  }
 
   await verificationRef.set({
     phone,
@@ -78,6 +82,40 @@ export async function sendPhoneVerificationCode(params: {
     expiresInSeconds: config.codeTtlMinutes * 60,
     debugCode: config.provider === "console" ? code : undefined,
   };
+}
+
+function mapSmsSendError(error: unknown): HttpsError {
+  const message = error instanceof Error ? error.message : String(error);
+  const lower = message.toLowerCase();
+
+  // Twilio trial: destination number must be verified.
+  if (
+    lower.includes("unverified") ||
+    lower.includes("21608") ||
+    lower.includes("trial accounts cannot send")
+  ) {
+    return new HttpsError(
+      "failed-precondition",
+      "Impossible d'envoyer le SMS : le compte Twilio est en mode essai et ce numéro n'est pas vérifié. Vérifiez le numéro dans Twilio ou passez à un compte payant.",
+    );
+  }
+
+  if (
+    lower.includes("authenticate") ||
+    lower.includes("20003") ||
+    lower.includes("invalid credentials")
+  ) {
+    return new HttpsError(
+      "failed-precondition",
+      "Configuration SMS invalide. Vérifiez les identifiants du fournisseur SMS.",
+    );
+  }
+
+  console.error("SMS send failed", error);
+  return new HttpsError(
+    "internal",
+    "L'envoi du SMS a échoué. Réessayez dans quelques instants.",
+  );
 }
 
 export async function verifyPhoneCode(params: {

@@ -242,39 +242,9 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                             onFieldSubmitted: (_) => _submit(),
                           ),
                         ),
-                        const SizedBox(height: 16),
-                        Container(
-                          padding: const EdgeInsets.all(14),
-                          decoration: BoxDecoration(
-                            color: AppColors.zuriPink.withValues(alpha: 0.08),
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Icon(
-                                Icons.info_outline_rounded,
-                                color: AppColors.zuriRed,
-                                size: 20,
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Text(
-                                  l10n.signUpOtpInfo,
-                                  style: const TextStyle(
-                                    color: AppColors.zuriNavy,
-                                    fontSize: 13,
-                                    height: 1.4,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
                         const SizedBox(height: 22),
                         AuthPrimaryButton(
-                          label: l10n.continueLabel,
+                          label: l10n.createAccount,
                           isLoading: authState.isLoading,
                           onPressed: authState.isLoading ? null : _submit,
                         ),

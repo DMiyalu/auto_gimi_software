@@ -85,7 +85,7 @@ service cloud.firestore {
 
     function isValidUserSignup() {
       return isSignedIn()
-        && request.resource.data.phoneVerified == false
+        && request.resource.data.phoneVerified is bool
         && request.resource.data.fullName is string
         && request.resource.data.phone is string
         && (request.resource.data.establishments is list

@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/auth/auth_error_mapper.dart';
 import '../../../../core/l10n/app_localizations.dart';
 import '../../../../core/routing/routes.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -131,7 +132,7 @@ class _PhoneVerificationScreenState
     ref.listen(verificationControllerProvider, (_, next) {
       if (next.hasError && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(next.error.toString())),
+          SnackBar(content: Text(AuthErrorMapper.message(next.error!))),
         );
       }
     });

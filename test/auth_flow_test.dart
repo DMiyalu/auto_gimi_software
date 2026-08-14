@@ -7,14 +7,12 @@ import 'package:mocktail/mocktail.dart';
 import 'package:auto_mobile_software/core/domain/business_category.dart';
 import 'package:auto_mobile_software/core/database/app_database.dart';
 import 'package:auto_mobile_software/features/auth/presentation/providers/auth_state_provider.dart';
-import 'package:auto_mobile_software/features/auth/presentation/providers/phone_verification_repository_provider.dart';
-import 'package:auto_mobile_software/features/auth/presentation/providers/signup_otp_pending_provider.dart';
+import 'package:auto_mobile_software/features/auth/presentation/providers/signup_success_pending_provider.dart';
 import 'package:auto_mobile_software/features/establishment/domain/models/establishment.dart';
 import 'package:auto_mobile_software/features/establishment/domain/models/establishment_invitation.dart';
 import 'package:auto_mobile_software/features/establishment/domain/models/establishment_role.dart';
 import 'package:auto_mobile_software/features/establishment/domain/models/user_profile.dart';
 import 'package:auto_mobile_software/features/establishment/presentation/providers/establishment_repository_provider.dart';
-import 'helpers/fake_phone_verification_repository.dart';
 import 'helpers/fake_repositories.dart';
 import 'helpers/pump_test_app.dart';
 
@@ -26,20 +24,9 @@ void main() {
   late MockFirebaseUser user;
   late FakeAuthRepository authRepository;
   late FakeEstablishmentRepository establishmentRepository;
-  late FakePhoneVerificationRepository phoneVerificationRepository;
   late AppDatabase database;
 
-  UserProfile unverifiedProfileWithoutEstablishment() => UserProfile(
-    uid: 'uid-test',
-    phone: '33612345678',
-    fullName: 'Test Manager',
-    establishmentId: '',
-    role: 'agent',
-    phoneVerified: false,
-    createdAt: DateTime(2026, 1, 1),
-  );
-
-  UserProfile verifiedProfileWithoutEstablishment() => UserProfile(
+  UserProfile profileWithoutEstablishment() => UserProfile(
     uid: 'uid-test',
     phone: '33612345678',
     fullName: 'Test Manager',
@@ -49,7 +36,7 @@ void main() {
     createdAt: DateTime(2026, 1, 1),
   );
 
-  UserProfile verifiedProfileWithEstablishment() => UserProfile(
+  UserProfile profileWithEstablishment() => UserProfile(
     uid: 'uid-test',
     phone: '33612345678',
     fullName: 'Test Manager',
@@ -73,13 +60,10 @@ void main() {
     createdAt: DateTime(2026, 1, 1),
   );
 
-  List<Override> testOverrides({bool otpPending = false}) => [
+  List<Override> testOverrides({bool signupSuccessPending = false}) => [
     authRepositoryProvider.overrideWithValue(authRepository),
     establishmentRepositoryProvider.overrideWithValue(establishmentRepository),
-    phoneVerificationRepositoryProvider.overrideWithValue(
-      phoneVerificationRepository,
-    ),
-    signupOtpPendingProvider.overrideWith((ref) => otpPending),
+    signupSuccessPendingProvider.overrideWith((ref) => signupSuccessPending),
   ];
 
   setUp(() {
@@ -88,13 +72,6 @@ void main() {
 
     authRepository = FakeAuthRepository();
     establishmentRepository = FakeEstablishmentRepository();
-    phoneVerificationRepository = FakePhoneVerificationRepository(
-      onVerified: () {
-        establishmentRepository.setProfile(
-          verifiedProfileWithoutEstablishment(),
-        );
-      },
-    );
   });
 
   tearDown(() async {
@@ -115,13 +92,10 @@ void main() {
     'login : reprise directe de l’activité si un établissement actif existe',
     (tester) async {
       authRepository.setUser(user);
-      establishmentRepository.setProfile(verifiedProfileWithEstablishment());
+      establishmentRepository.setProfile(profileWithEstablishment());
       establishmentRepository.setEstablishments([testEstablishment()]);
 
-      database = await pumpTestApp(
-        tester,
-        overrides: testOverrides(otpPending: false),
-      );
+      database = await pumpTestApp(tester, overrides: testOverrides());
       await tester.pumpAndSettle();
 
       expect(find.text('Prestations'), findsWidgets);
@@ -130,43 +104,29 @@ void main() {
     },
   );
 
-  testWidgets('signup : redirige vers la vérification OTP', (tester) async {
+  testWidgets('signup : redirige vers l’écran de succès', (tester) async {
     authRepository.setUser(user);
-    establishmentRepository.setProfile(unverifiedProfileWithoutEstablishment());
+    establishmentRepository.setProfile(profileWithoutEstablishment());
 
     database = await pumpTestApp(
       tester,
-      overrides: testOverrides(otpPending: true),
+      overrides: testOverrides(signupSuccessPending: true),
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Verify your number'), findsOneWidget);
-    expect(find.byKey(const Key('verify_code_field')), findsOneWidget);
+    expect(find.text('Registration successful!'), findsOneWidget);
+    expect(find.byKey(const Key('signup_success_continue_button')), findsOneWidget);
   });
 
-  testWidgets('flux e2e: signup -> vérification OTP -> landing post-auth', (
-    tester,
-  ) async {
+  testWidgets('flux e2e: signup -> succès -> landing post-auth', (tester) async {
     authRepository.setUser(user);
-    establishmentRepository.setProfile(unverifiedProfileWithoutEstablishment());
+    establishmentRepository.setProfile(profileWithoutEstablishment());
 
     database = await pumpTestApp(
       tester,
-      overrides: testOverrides(otpPending: true),
+      overrides: testOverrides(signupSuccessPending: true),
     );
     await tester.pumpAndSettle();
-
-    expect(find.text('Verify your number'), findsOneWidget);
-
-    await tester.enterText(
-      find.byKey(const Key('verify_code_field')),
-      FakePhoneVerificationRepository.testCode,
-    );
-    await tester.ensureVisible(find.byKey(const Key('verify_submit_button')));
-    await tester.tap(find.byKey(const Key('verify_submit_button')));
-    // Timers OTP : éviter pumpAndSettle infini.
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
 
     expect(find.text('Registration successful!'), findsOneWidget);
     await tester.ensureVisible(
@@ -180,10 +140,10 @@ void main() {
   });
 
   testWidgets(
-    'affiche la landing quand le téléphone est vérifié sans établissement',
+    'affiche la landing quand connecté sans établissement',
     (tester) async {
       authRepository.setUser(user);
-      establishmentRepository.setProfile(verifiedProfileWithoutEstablishment());
+      establishmentRepository.setProfile(profileWithoutEstablishment());
 
       database = await pumpTestApp(tester, overrides: testOverrides());
       await tester.pumpAndSettle();
@@ -206,7 +166,7 @@ void main() {
       addTearDown(tester.view.resetDevicePixelRatio);
 
       authRepository.setUser(user);
-      establishmentRepository.setProfile(verifiedProfileWithoutEstablishment());
+      establishmentRepository.setProfile(profileWithoutEstablishment());
       establishmentRepository.setInvitations([
         EstablishmentInvitation(
           id: 'inv-1',

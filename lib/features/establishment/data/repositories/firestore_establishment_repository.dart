@@ -48,7 +48,7 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
       'activeEstablishmentId': null,
       'role': 'agent',
       'rolesByEstablishment': const <String, String>{},
-      'phoneVerified': false,
+      'phoneVerified': true,
       'createdAt': FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),
     });

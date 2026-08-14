@@ -749,7 +749,7 @@ abstract class AppLocalizations {
   /// No description provided for @signUpOtpInfo.
   ///
   /// In en, this message translates to:
-  /// **'A verification code (OTP) will be sent by WhatsApp or SMS to confirm your number.'**
+  /// **'A verification code (OTP) will be sent by SMS to confirm your number.'**
   String get signUpOtpInfo;
 
   /// No description provided for @signUpDataSecurity.
@@ -917,7 +917,7 @@ abstract class AppLocalizations {
   /// No description provided for @verificationSubtitleSuffix.
   ///
   /// In en, this message translates to:
-  /// **' via WhatsApp.'**
+  /// **' via SMS.'**
   String get verificationSubtitleSuffix;
 
   /// No description provided for @verificationCode.

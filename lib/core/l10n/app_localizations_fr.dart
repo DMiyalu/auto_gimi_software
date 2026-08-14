@@ -357,7 +357,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get signUpOtpInfo =>
-      'Un code de vérification (OTP) vous sera envoyé par WhatsApp ou SMS pour confirmer votre numéro.';
+      'Un code de vérification (OTP) vous sera envoyé par SMS pour confirmer votre numéro.';
 
   @override
   String get signUpDataSecurity =>
@@ -445,7 +445,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Nous avons envoyé un code de vérification (OTP) au ';
 
   @override
-  String get verificationSubtitleSuffix => ' via WhatsApp.';
+  String get verificationSubtitleSuffix => ' par SMS.';
 
   @override
   String get verificationCode => 'Code de vérification';
