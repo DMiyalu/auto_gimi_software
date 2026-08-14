@@ -8,6 +8,7 @@ class Commandes extends Table {
   TextColumn get statut => text().withDefault(const Constant('en_cours'))();
   TextColumn get contexte => text().nullable()();
   RealColumn get montantTotal => real().withDefault(const Constant(0))();
+  TextColumn get paymentMethod => text().nullable()();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
   BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();

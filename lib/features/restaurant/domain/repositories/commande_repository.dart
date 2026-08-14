@@ -57,6 +57,7 @@ abstract class CommandeRepository {
   Future<void> registerPayment({
     required String establishmentId,
     required String commandeId,
+    CommandePaymentMethod paymentMethod = CommandePaymentMethod.cash,
   });
 
   Future<void> attachClient({

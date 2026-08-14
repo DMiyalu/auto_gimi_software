@@ -4009,6 +4009,17 @@ class $CommandesTable extends Commandes
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _paymentMethodMeta = const VerificationMeta(
+    'paymentMethod',
+  );
+  @override
+  late final GeneratedColumn<String> paymentMethod = GeneratedColumn<String>(
+    'payment_method',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -4070,6 +4081,7 @@ class $CommandesTable extends Commandes
     statut,
     contexte,
     montantTotal,
+    paymentMethod,
     createdAt,
     updatedAt,
     isDeleted,
@@ -4133,6 +4145,15 @@ class $CommandesTable extends Commandes
         montantTotal.isAcceptableOrUnknown(
           data['montant_total']!,
           _montantTotalMeta,
+        ),
+      );
+    }
+    if (data.containsKey('payment_method')) {
+      context.handle(
+        _paymentMethodMeta,
+        paymentMethod.isAcceptableOrUnknown(
+          data['payment_method']!,
+          _paymentMethodMeta,
         ),
       );
     }
@@ -4201,6 +4222,10 @@ class $CommandesTable extends Commandes
         DriftSqlType.double,
         data['${effectivePrefix}montant_total'],
       )!,
+      paymentMethod: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}payment_method'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -4234,6 +4259,7 @@ class Commande extends DataClass implements Insertable<Commande> {
   final String statut;
   final String? contexte;
   final double montantTotal;
+  final String? paymentMethod;
   final DateTime createdAt;
   final DateTime updatedAt;
   final bool isDeleted;
@@ -4246,6 +4272,7 @@ class Commande extends DataClass implements Insertable<Commande> {
     required this.statut,
     this.contexte,
     required this.montantTotal,
+    this.paymentMethod,
     required this.createdAt,
     required this.updatedAt,
     required this.isDeleted,
@@ -4265,6 +4292,9 @@ class Commande extends DataClass implements Insertable<Commande> {
       map['contexte'] = Variable<String>(contexte);
     }
     map['montant_total'] = Variable<double>(montantTotal);
+    if (!nullToAbsent || paymentMethod != null) {
+      map['payment_method'] = Variable<String>(paymentMethod);
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     map['is_deleted'] = Variable<bool>(isDeleted);
@@ -4285,6 +4315,9 @@ class Commande extends DataClass implements Insertable<Commande> {
           ? const Value.absent()
           : Value(contexte),
       montantTotal: Value(montantTotal),
+      paymentMethod: paymentMethod == null && nullToAbsent
+          ? const Value.absent()
+          : Value(paymentMethod),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
       isDeleted: Value(isDeleted),
@@ -4305,6 +4338,7 @@ class Commande extends DataClass implements Insertable<Commande> {
       statut: serializer.fromJson<String>(json['statut']),
       contexte: serializer.fromJson<String?>(json['contexte']),
       montantTotal: serializer.fromJson<double>(json['montantTotal']),
+      paymentMethod: serializer.fromJson<String?>(json['paymentMethod']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       isDeleted: serializer.fromJson<bool>(json['isDeleted']),
@@ -4322,6 +4356,7 @@ class Commande extends DataClass implements Insertable<Commande> {
       'statut': serializer.toJson<String>(statut),
       'contexte': serializer.toJson<String?>(contexte),
       'montantTotal': serializer.toJson<double>(montantTotal),
+      'paymentMethod': serializer.toJson<String?>(paymentMethod),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'isDeleted': serializer.toJson<bool>(isDeleted),
@@ -4337,6 +4372,7 @@ class Commande extends DataClass implements Insertable<Commande> {
     String? statut,
     Value<String?> contexte = const Value.absent(),
     double? montantTotal,
+    Value<String?> paymentMethod = const Value.absent(),
     DateTime? createdAt,
     DateTime? updatedAt,
     bool? isDeleted,
@@ -4349,6 +4385,9 @@ class Commande extends DataClass implements Insertable<Commande> {
     statut: statut ?? this.statut,
     contexte: contexte.present ? contexte.value : this.contexte,
     montantTotal: montantTotal ?? this.montantTotal,
+    paymentMethod: paymentMethod.present
+        ? paymentMethod.value
+        : this.paymentMethod,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     isDeleted: isDeleted ?? this.isDeleted,
@@ -4367,6 +4406,9 @@ class Commande extends DataClass implements Insertable<Commande> {
       montantTotal: data.montantTotal.present
           ? data.montantTotal.value
           : this.montantTotal,
+      paymentMethod: data.paymentMethod.present
+          ? data.paymentMethod.value
+          : this.paymentMethod,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       isDeleted: data.isDeleted.present ? data.isDeleted.value : this.isDeleted,
@@ -4384,6 +4426,7 @@ class Commande extends DataClass implements Insertable<Commande> {
           ..write('statut: $statut, ')
           ..write('contexte: $contexte, ')
           ..write('montantTotal: $montantTotal, ')
+          ..write('paymentMethod: $paymentMethod, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('isDeleted: $isDeleted, ')
@@ -4401,6 +4444,7 @@ class Commande extends DataClass implements Insertable<Commande> {
     statut,
     contexte,
     montantTotal,
+    paymentMethod,
     createdAt,
     updatedAt,
     isDeleted,
@@ -4417,6 +4461,7 @@ class Commande extends DataClass implements Insertable<Commande> {
           other.statut == this.statut &&
           other.contexte == this.contexte &&
           other.montantTotal == this.montantTotal &&
+          other.paymentMethod == this.paymentMethod &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.isDeleted == this.isDeleted &&
@@ -4431,6 +4476,7 @@ class CommandesCompanion extends UpdateCompanion<Commande> {
   final Value<String> statut;
   final Value<String?> contexte;
   final Value<double> montantTotal;
+  final Value<String?> paymentMethod;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<bool> isDeleted;
@@ -4444,6 +4490,7 @@ class CommandesCompanion extends UpdateCompanion<Commande> {
     this.statut = const Value.absent(),
     this.contexte = const Value.absent(),
     this.montantTotal = const Value.absent(),
+    this.paymentMethod = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.isDeleted = const Value.absent(),
@@ -4458,6 +4505,7 @@ class CommandesCompanion extends UpdateCompanion<Commande> {
     this.statut = const Value.absent(),
     this.contexte = const Value.absent(),
     this.montantTotal = const Value.absent(),
+    this.paymentMethod = const Value.absent(),
     required DateTime createdAt,
     required DateTime updatedAt,
     this.isDeleted = const Value.absent(),
@@ -4475,6 +4523,7 @@ class CommandesCompanion extends UpdateCompanion<Commande> {
     Expression<String>? statut,
     Expression<String>? contexte,
     Expression<double>? montantTotal,
+    Expression<String>? paymentMethod,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<bool>? isDeleted,
@@ -4489,6 +4538,7 @@ class CommandesCompanion extends UpdateCompanion<Commande> {
       if (statut != null) 'statut': statut,
       if (contexte != null) 'contexte': contexte,
       if (montantTotal != null) 'montant_total': montantTotal,
+      if (paymentMethod != null) 'payment_method': paymentMethod,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (isDeleted != null) 'is_deleted': isDeleted,
@@ -4505,6 +4555,7 @@ class CommandesCompanion extends UpdateCompanion<Commande> {
     Value<String>? statut,
     Value<String?>? contexte,
     Value<double>? montantTotal,
+    Value<String?>? paymentMethod,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<bool>? isDeleted,
@@ -4519,6 +4570,7 @@ class CommandesCompanion extends UpdateCompanion<Commande> {
       statut: statut ?? this.statut,
       contexte: contexte ?? this.contexte,
       montantTotal: montantTotal ?? this.montantTotal,
+      paymentMethod: paymentMethod ?? this.paymentMethod,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       isDeleted: isDeleted ?? this.isDeleted,
@@ -4551,6 +4603,9 @@ class CommandesCompanion extends UpdateCompanion<Commande> {
     if (montantTotal.present) {
       map['montant_total'] = Variable<double>(montantTotal.value);
     }
+    if (paymentMethod.present) {
+      map['payment_method'] = Variable<String>(paymentMethod.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -4579,6 +4634,7 @@ class CommandesCompanion extends UpdateCompanion<Commande> {
           ..write('statut: $statut, ')
           ..write('contexte: $contexte, ')
           ..write('montantTotal: $montantTotal, ')
+          ..write('paymentMethod: $paymentMethod, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('isDeleted: $isDeleted, ')
@@ -15819,6 +15875,7 @@ typedef $$CommandesTableCreateCompanionBuilder =
       Value<String> statut,
       Value<String?> contexte,
       Value<double> montantTotal,
+      Value<String?> paymentMethod,
       required DateTime createdAt,
       required DateTime updatedAt,
       Value<bool> isDeleted,
@@ -15834,6 +15891,7 @@ typedef $$CommandesTableUpdateCompanionBuilder =
       Value<String> statut,
       Value<String?> contexte,
       Value<double> montantTotal,
+      Value<String?> paymentMethod,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<bool> isDeleted,
@@ -15908,6 +15966,11 @@ class $$CommandesTableFilterComposer
 
   ColumnFilters<double> get montantTotal => $composableBuilder(
     column: $table.montantTotal,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get paymentMethod => $composableBuilder(
+    column: $table.paymentMethod,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -16001,6 +16064,11 @@ class $$CommandesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get paymentMethod => $composableBuilder(
+    column: $table.paymentMethod,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -16053,6 +16121,11 @@ class $$CommandesTableAnnotationComposer
 
   GeneratedColumn<double> get montantTotal => $composableBuilder(
     column: $table.montantTotal,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get paymentMethod => $composableBuilder(
+    column: $table.paymentMethod,
     builder: (column) => column,
   );
 
@@ -16129,6 +16202,7 @@ class $$CommandesTableTableManager
                 Value<String> statut = const Value.absent(),
                 Value<String?> contexte = const Value.absent(),
                 Value<double> montantTotal = const Value.absent(),
+                Value<String?> paymentMethod = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<bool> isDeleted = const Value.absent(),
@@ -16142,6 +16216,7 @@ class $$CommandesTableTableManager
                 statut: statut,
                 contexte: contexte,
                 montantTotal: montantTotal,
+                paymentMethod: paymentMethod,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 isDeleted: isDeleted,
@@ -16157,6 +16232,7 @@ class $$CommandesTableTableManager
                 Value<String> statut = const Value.absent(),
                 Value<String?> contexte = const Value.absent(),
                 Value<double> montantTotal = const Value.absent(),
+                Value<String?> paymentMethod = const Value.absent(),
                 required DateTime createdAt,
                 required DateTime updatedAt,
                 Value<bool> isDeleted = const Value.absent(),
@@ -16170,6 +16246,7 @@ class $$CommandesTableTableManager
                 statut: statut,
                 contexte: contexte,
                 montantTotal: montantTotal,
+                paymentMethod: paymentMethod,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 isDeleted: isDeleted,

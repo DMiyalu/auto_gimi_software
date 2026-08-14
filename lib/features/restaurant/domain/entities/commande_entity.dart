@@ -11,6 +11,7 @@ class CommandeEntity {
     required this.statusLabel,
     this.context,
     required this.totalAmount,
+    this.paymentMethod,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -22,6 +23,7 @@ class CommandeEntity {
   final String statusLabel;
   final String? context;
   final double totalAmount;
+  final CommandePaymentMethod? paymentMethod;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -39,6 +41,27 @@ class CommandeEntity {
   bool get isClosed => statusKey == CommandeStatus.cloturee;
 
   bool get isCanceled => statusKey == CommandeStatus.annulees;
+}
+
+enum CommandePaymentMethod {
+  cash('cash', 'Cash'),
+  mpesa('m_pesa', 'M-pesa'),
+  orangeMoney('orange_money', 'Orange Money'),
+  airtelMoney('airtel_money', 'Airtel Money'),
+  afrimoney('afrimoney', 'Afrimoney'),
+  equityBcdc('equity_bcdc', 'EquityBCDC');
+
+  const CommandePaymentMethod(this.value, this.label);
+
+  final String value;
+  final String label;
+
+  static CommandePaymentMethod fromValue(String? value) {
+    return CommandePaymentMethod.values.firstWhere(
+      (method) => method.value == value,
+      orElse: () => CommandePaymentMethod.cash,
+    );
+  }
 }
 
 /// Clés de statut d'une commande — seule source de vérité pour éviter les

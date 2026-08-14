@@ -848,6 +848,7 @@ class CommandeSyncAdapter implements SyncAdapter {
           'statut': row.statut,
           'context': row.contexte,
           'montantTotal': row.montantTotal,
+          'paymentMethod': row.paymentMethod,
           'createdAt': Timestamp.fromDate(row.createdAt),
           'updatedAt': Timestamp.fromDate(row.updatedAt),
           'isDeleted': row.isDeleted,
@@ -903,6 +904,7 @@ class CommandeSyncAdapter implements SyncAdapter {
                 montantTotal: Value(
                   (data['montantTotal'] as num?)?.toDouble() ?? 0,
                 ),
+                paymentMethod: Value(data['paymentMethod'] as String?),
                 createdAt: Value(
                   readFirestoreDate(data['createdAt']) ?? remoteUpdatedAt,
                 ),

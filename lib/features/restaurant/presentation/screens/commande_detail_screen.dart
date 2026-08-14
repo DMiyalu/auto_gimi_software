@@ -197,8 +197,7 @@ class _CommandeDetailScreenState extends ConsumerState<CommandeDetailScreen> {
     }
 
     final message = switch (commande.statusKey) {
-      CommandeStatus.cloturee =>
-        'Cette commande est déjà clôturée et payée.',
+      CommandeStatus.cloturee => 'Cette commande est déjà clôturée et payée.',
       CommandeStatus.annulees => 'Cette commande est déjà annulée.',
       CommandeStatus.aPayer =>
         'Cette commande est à payer et ne peut plus être modifiée.',
@@ -279,9 +278,15 @@ class _CommandeDetailScreenState extends ConsumerState<CommandeDetailScreen> {
     );
     if (confirmed != true || !mounted) return;
 
+    final paymentMethod = await showDialog<CommandePaymentMethod>(
+      context: context,
+      builder: (_) => const _PaymentMethodDialog(),
+    );
+    if (paymentMethod == null || !mounted) return;
+
     await ref
         .read(commandeControllerProvider.notifier)
-        .registerPayment(commandeId: commande.id);
+        .registerPayment(commandeId: commande.id, paymentMethod: paymentMethod);
     if (!mounted) return;
     if (ref.read(commandeControllerProvider).hasError) return;
 
@@ -523,9 +528,7 @@ class _TabButton extends StatelessWidget {
               child: Text(
                 label,
                 style: TextStyle(
-                  color: selected
-                      ? AppColors.zuriRed
-                      : const Color(0xFF8A90A5),
+                  color: selected ? AppColors.zuriRed : const Color(0xFF8A90A5),
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
                 ),
@@ -739,9 +742,7 @@ class _ProductLineTile extends StatelessWidget {
       builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text('Retirer le produit'),
-        content: Text(
-          'Supprimer « ${line.label} » de la commande ?',
-        ),
+        content: Text('Supprimer « ${line.label} » de la commande ?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
@@ -1081,9 +1082,7 @@ class _ActionsBar extends StatelessWidget {
                       onPressed: onPrint,
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.zuriRed,
-                        side: const BorderSide(
-                          color: AppColors.zuriRed,
-                        ),
+                        side: const BorderSide(color: AppColors.zuriRed),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
@@ -1208,6 +1207,67 @@ class _PaymentConfirmationDialog extends StatelessWidget {
           onPressed: () => Navigator.of(context).pop(true),
           icon: const Icon(Icons.payments_outlined),
           label: const Text('Argent encaissé'),
+        ),
+      ],
+    );
+  }
+}
+
+class _PaymentMethodDialog extends StatefulWidget {
+  const _PaymentMethodDialog();
+
+  @override
+  State<_PaymentMethodDialog> createState() => _PaymentMethodDialogState();
+}
+
+class _PaymentMethodDialogState extends State<_PaymentMethodDialog> {
+  CommandePaymentMethod _method = CommandePaymentMethod.cash;
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      title: const Text('Mode de paiement'),
+      content: DropdownButtonFormField<CommandePaymentMethod>(
+        initialValue: _method,
+        decoration: InputDecoration(
+          labelText: 'Mode de paiement',
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(18),
+            borderSide: const BorderSide(color: AppColors.borderSubtle),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(18),
+            borderSide: const BorderSide(color: AppColors.borderSubtle),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(18),
+            borderSide: const BorderSide(color: AppColors.zuriRed, width: 1.3),
+          ),
+        ),
+        items: [
+          for (final method in CommandePaymentMethod.values)
+            DropdownMenuItem(value: method, child: Text(method.label)),
+        ],
+        onChanged: (value) {
+          if (value != null) setState(() => _method = value);
+        },
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Annuler'),
+        ),
+        FilledButton.icon(
+          style: FilledButton.styleFrom(
+            backgroundColor: AppColors.vertPrincipal,
+            foregroundColor: Colors.white,
+          ),
+          onPressed: () => Navigator.of(context).pop(_method),
+          icon: const Icon(Icons.check_rounded),
+          label: const Text('Valider'),
         ),
       ],
     );
@@ -2265,18 +2325,12 @@ class _RoundAddButton extends StatelessWidget {
         tooltip: 'Ajouter',
         onPressed: enabled ? onTap : null,
         style: IconButton.styleFrom(
-          backgroundColor: quantity > 0
-              ? AppColors.zuriRed
-              : Colors.white,
+          backgroundColor: quantity > 0 ? AppColors.zuriRed : Colors.white,
           disabledBackgroundColor: const Color(0xFFF4F5F9),
-          foregroundColor: quantity > 0
-              ? Colors.white
-              : AppColors.zuriRed,
+          foregroundColor: quantity > 0 ? Colors.white : AppColors.zuriRed,
           disabledForegroundColor: const Color(0xFFB8BECF),
           side: BorderSide(
-            color: quantity > 0
-                ? AppColors.zuriRed
-                : const Color(0xFFDDE2EA),
+            color: quantity > 0 ? AppColors.zuriRed : const Color(0xFFDDE2EA),
           ),
           shape: const CircleBorder(),
         ),

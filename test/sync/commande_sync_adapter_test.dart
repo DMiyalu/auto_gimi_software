@@ -80,6 +80,7 @@ void main() {
         'statut': 'a_payer',
         'context': 'Table 4',
         'montantTotal': 42.5,
+        'paymentMethod': null,
         'createdAt': Timestamp.fromDate(DateTime(2026, 1, 1)),
         'updatedAt': Timestamp.fromDate(DateTime(2026, 1, 2)),
         'isDeleted': false,
@@ -87,45 +88,42 @@ void main() {
     },
   );
 
-  test(
-    'un changement de statut (registerPayment) remet la commande isDirty '
-    'pour re-synchronisation',
-    () async {
-      final now = DateTime(2026, 1, 1);
-      await database
-          .into(database.commandes)
-          .insert(
-            CommandesCompanion.insert(
-              id: 'cmd1',
-              establishmentId: const Value(_establishmentId),
-              reference: 'CMD-1',
-              statut: const Value('en_cours'),
-              createdAt: now,
-              updatedAt: now,
-              isDirty: const Value(false),
-            ),
-          );
+  test('un changement de statut (registerPayment) remet la commande isDirty '
+      'pour re-synchronisation', () async {
+    final now = DateTime(2026, 1, 1);
+    await database
+        .into(database.commandes)
+        .insert(
+          CommandesCompanion.insert(
+            id: 'cmd1',
+            establishmentId: const Value(_establishmentId),
+            reference: 'CMD-1',
+            statut: const Value('en_cours'),
+            createdAt: now,
+            updatedAt: now,
+            isDirty: const Value(false),
+          ),
+        );
 
-      await (database.update(database.commandes)
-            ..where((t) => t.id.equals('cmd1')))
-          .write(
-        CommandesCompanion(
-          statut: const Value('cloturee'),
-          updatedAt: Value(DateTime(2026, 1, 3)),
-          isDirty: const Value(true),
-        ),
-      );
+    await (database.update(
+      database.commandes,
+    )..where((t) => t.id.equals('cmd1'))).write(
+      CommandesCompanion(
+        statut: const Value('cloturee'),
+        updatedAt: Value(DateTime(2026, 1, 3)),
+        isDirty: const Value(true),
+      ),
+    );
 
-      final docs = await adapter.loadDirtyDocs(
-        database,
-        establishmentId: _establishmentId,
-        limit: 10,
-      );
+    final docs = await adapter.loadDirtyDocs(
+      database,
+      establishmentId: _establishmentId,
+      limit: 10,
+    );
 
-      expect(docs.keys, ['cmd1']);
-      expect(docs['cmd1']?['statut'], 'cloturee');
-    },
-  );
+    expect(docs.keys, ['cmd1']);
+    expect(docs['cmd1']?['statut'], 'cloturee');
+  });
 
   test('clearDirty marque les commandes comme synchronisées', () async {
     await database
@@ -157,6 +155,7 @@ void main() {
         'statut': 'a_payer',
         'context': 'Table 2',
         'montantTotal': 15.0,
+        'paymentMethod': 'orange_money',
         'createdAt': Timestamp.fromDate(DateTime(2026, 1, 1)),
         'updatedAt': Timestamp.fromDate(DateTime(2026, 1, 2)),
         'isDeleted': false,
@@ -176,47 +175,45 @@ void main() {
       expect(row.reference, 'CMD-9');
       expect(row.statut, 'a_payer');
       expect(row.montantTotal, 15.0);
+      expect(row.paymentMethod, 'orange_money');
       expect(row.isDirty, isFalse);
     },
   );
 
-  test(
-    'applyRemoteDocs conserve une commande locale isDirty plus récente '
-    '(conflit résolu en faveur du plus récent updatedAt)',
-    () async {
-      final now = DateTime(2026, 1, 5);
-      await database
-          .into(database.commandes)
-          .insert(
-            CommandesCompanion.insert(
-              id: 'cmd1',
-              establishmentId: const Value(_establishmentId),
-              reference: 'CMD-1',
-              statut: const Value('cloturee'),
-              createdAt: now,
-              updatedAt: now,
-            ),
-          );
+  test('applyRemoteDocs conserve une commande locale isDirty plus récente '
+      '(conflit résolu en faveur du plus récent updatedAt)', () async {
+    final now = DateTime(2026, 1, 5);
+    await database
+        .into(database.commandes)
+        .insert(
+          CommandesCompanion.insert(
+            id: 'cmd1',
+            establishmentId: const Value(_establishmentId),
+            reference: 'CMD-1',
+            statut: const Value('cloturee'),
+            createdAt: now,
+            updatedAt: now,
+          ),
+        );
 
-      await commandesCollection().doc('cmd1').set({
-        'reference': 'CMD-1',
-        'statut': 'en_cours',
-        'montantTotal': 0.0,
-        'createdAt': Timestamp.fromDate(now),
-        'updatedAt': Timestamp.fromDate(now),
-        'isDeleted': false,
-      });
-      final snapshot = await commandesCollection().get();
+    await commandesCollection().doc('cmd1').set({
+      'reference': 'CMD-1',
+      'statut': 'en_cours',
+      'montantTotal': 0.0,
+      'createdAt': Timestamp.fromDate(now),
+      'updatedAt': Timestamp.fromDate(now),
+      'isDeleted': false,
+    });
+    final snapshot = await commandesCollection().get();
 
-      await adapter.applyRemoteDocs(database, _establishmentId, snapshot.docs);
+    await adapter.applyRemoteDocs(database, _establishmentId, snapshot.docs);
 
-      final row = await (database.select(
-        database.commandes,
-      )..where((t) => t.id.equals('cmd1'))).getSingle();
-      expect(row.statut, 'cloturee');
-      expect(row.isDirty, isTrue);
-    },
-  );
+    final row = await (database.select(
+      database.commandes,
+    )..where((t) => t.id.equals('cmd1'))).getSingle();
+    expect(row.statut, 'cloturee');
+    expect(row.isDirty, isTrue);
+  });
 
   test('LigneCommandeSyncAdapter : mapping et cycle complet', () async {
     await database

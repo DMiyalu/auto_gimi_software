@@ -97,6 +97,7 @@ class CommandeRepositoryImpl implements CommandeRepository {
       statusLabel: commandeStatusLabel(CommandeStatus.enCours),
       context: _blankToNull(context),
       totalAmount: 0,
+      paymentMethod: null,
       createdAt: now,
       updatedAt: now,
     );
@@ -426,6 +427,7 @@ class CommandeRepositoryImpl implements CommandeRepository {
   Future<void> registerPayment({
     required String establishmentId,
     required String commandeId,
+    CommandePaymentMethod paymentMethod = CommandePaymentMethod.cash,
   }) async {
     final commande = await _requireExistingCommande(
       establishmentId,
@@ -445,6 +447,7 @@ class CommandeRepositoryImpl implements CommandeRepository {
         .write(
           CommandesCompanion(
             statut: const Value(CommandeStatus.cloturee),
+            paymentMethod: Value(paymentMethod.value),
             updatedAt: Value(now),
             isDirty: const Value(true),
           ),
@@ -597,6 +600,9 @@ class CommandeRepositoryImpl implements CommandeRepository {
       statusLabel: commandeStatusLabel(row.statut),
       context: row.contexte,
       totalAmount: row.montantTotal,
+      paymentMethod: row.paymentMethod == null
+          ? null
+          : CommandePaymentMethod.fromValue(row.paymentMethod),
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     );

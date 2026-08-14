@@ -5,6 +5,7 @@ import 'package:auto_mobile_software/core/database/app_database.dart';
 import 'package:auto_mobile_software/core/domain/app_currency.dart';
 import 'package:auto_mobile_software/features/produits/data/repositories/produit_repository_impl.dart';
 import 'package:auto_mobile_software/features/restaurant/data/repositories/commande_repository_impl.dart';
+import 'package:auto_mobile_software/features/restaurant/domain/entities/commande_entity.dart';
 
 void main() {
   late AppDatabase database;
@@ -167,6 +168,7 @@ void main() {
       await commandeRepository.registerPayment(
         establishmentId: 'est-1',
         commandeId: commande.id,
+        paymentMethod: CommandePaymentMethod.mpesa,
       );
 
       final updated = await commandeRepository
@@ -174,6 +176,7 @@ void main() {
           .first;
       expect(updated!.statusKey, 'cloturee');
       expect(updated.statusLabel, 'Clôturée');
+      expect(updated.paymentMethod, CommandePaymentMethod.mpesa);
     },
   );
 

@@ -171,7 +171,10 @@ class CommandeController extends AsyncNotifier<void> {
 
   /// Déclenché par l'encaissement du paiement : (en_cours ou à_payer) →
   /// clôturée.
-  Future<void> registerPayment({required String commandeId}) async {
+  Future<void> registerPayment({
+    required String commandeId,
+    CommandePaymentMethod paymentMethod = CommandePaymentMethod.cash,
+  }) async {
     final establishmentId = _requireEstablishmentId();
 
     state = const AsyncLoading();
@@ -182,6 +185,7 @@ class CommandeController extends AsyncNotifier<void> {
           .registerPayment(
             establishmentId: establishmentId,
             commandeId: commandeId,
+            paymentMethod: paymentMethod,
           );
       ref.read(autoSyncCoordinatorProvider).schedulePush();
     });

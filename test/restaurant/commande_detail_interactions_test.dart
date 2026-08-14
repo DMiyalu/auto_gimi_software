@@ -46,14 +46,13 @@ Future<_Fixture> _seed() async {
     whatsappPhone: '+243900111222',
   );
 
-  final produit = await ProduitRepositoryImpl(database: database)
-      .createProduit(
-        establishmentId: 'etab-1',
-        name: 'Poulet braisé',
-        price: 10,
-        currency: AppCurrency.usd,
-        stock: 5,
-      );
+  final produit = await ProduitRepositoryImpl(database: database).createProduit(
+    establishmentId: 'etab-1',
+    name: 'Poulet braisé',
+    price: 10,
+    currency: AppCurrency.usd,
+    stock: 5,
+  );
 
   final commandeRepository = CommandeRepositoryImpl(database: database);
   final commande = await commandeRepository.createCommande(
@@ -219,6 +218,11 @@ void main() {
       );
 
       await tester.tap(find.text('Argent encaissé'));
+      await tester.pumpAndSettle();
+      expect(find.text('Mode de paiement'), findsWidgets);
+      expect(find.text('Cash'), findsOneWidget);
+
+      await tester.tap(find.text('Valider'));
       // Pompe quelques frames sans attendre la fin du SnackBar (durée par
       // défaut ~4s) : pumpAndSettle attendrait sa disparition automatique
       // et manquerait l'assertion sur son contenu.
@@ -280,7 +284,7 @@ void main() {
 
       await _pump(tester, fixture);
 
-      await tester.tap(find.text('Ajouter un produit'));
+      await tester.tap(find.text('Ajouter'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
 
@@ -306,7 +310,7 @@ void main() {
 
       await _pump(tester, fixture);
 
-      await tester.tap(find.text('Ajouter un produit'));
+      await tester.tap(find.text('Ajouter'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
 
