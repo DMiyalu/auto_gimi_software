@@ -25,9 +25,11 @@ class _ProduitFormScreenState extends ConsumerState<ProduitFormScreen> {
   final _priceController = TextEditingController();
   final _stockController = TextEditingController(text: '0');
   String? _categoryId;
-  AppCurrency _currency = AppCurrency.usd;
+  AppCurrency _currency = AppCurrency.cdf;
   bool _stockTrackingEnabled = false;
   var _initialized = false;
+
+  static const _availableCurrencies = [AppCurrency.cdf, AppCurrency.usd];
 
   bool get _isEditing => widget.produitId != null;
 
@@ -242,7 +244,10 @@ class _ProduitFormScreenState extends ConsumerState<ProduitFormScreen> {
               IconButton(
                 tooltip: l10n.delete,
                 onPressed: formState.isLoading ? null : _delete,
-                icon: const Icon(Icons.delete_outline, color: AppColors.zuriRed),
+                icon: const Icon(
+                  Icons.delete_outline,
+                  color: AppColors.zuriRed,
+                ),
               ),
           ],
         ),
@@ -283,7 +288,9 @@ class _ProduitFormScreenState extends ConsumerState<ProduitFormScreen> {
                       const SizedBox(height: 16),
                       TextFormField(
                         controller: _nameController,
-                        decoration: InputDecoration(labelText: l10n.productName),
+                        decoration: InputDecoration(
+                          labelText: l10n.productName,
+                        ),
                         textCapitalization: TextCapitalization.sentences,
                         style: const TextStyle(
                           color: AppColors.zuriNavy,
@@ -328,7 +335,7 @@ class _ProduitFormScreenState extends ConsumerState<ProduitFormScreen> {
                         key: ValueKey('product_cur_$_initialized$_currency'),
                         initialValue: _currency,
                         decoration: InputDecoration(labelText: l10n.currency),
-                        items: AppCurrency.values
+                        items: _availableCurrencies
                             .map(
                               (c) => DropdownMenuItem(
                                 value: c,
@@ -418,8 +425,9 @@ class _ProduitFormScreenState extends ConsumerState<ProduitFormScreen> {
                         style: FilledButton.styleFrom(
                           backgroundColor: AppColors.zuriRed,
                           foregroundColor: Colors.white,
-                          disabledBackgroundColor:
-                              AppColors.zuriRed.withValues(alpha: 0.4),
+                          disabledBackgroundColor: AppColors.zuriRed.withValues(
+                            alpha: 0.4,
+                          ),
                           minimumSize: const Size.fromHeight(50),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14),
