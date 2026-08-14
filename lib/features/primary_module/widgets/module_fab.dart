@@ -77,7 +77,9 @@ class ModuleFab extends ConsumerWidget {
                     title: Text(action.label),
                     onTap: () {
                       Navigator.of(sheetContext).pop();
-                      if (action.route != null) {
+                      if (action.onSelected != null) {
+                        action.onSelected!();
+                      } else if (action.route != null) {
                         context.push(action.route!);
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(

@@ -10,6 +10,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   firebase_auth
   firebase_core
   print_bluetooth_thermal
+  printing
   sqlite3_flutter_libs
 )
 

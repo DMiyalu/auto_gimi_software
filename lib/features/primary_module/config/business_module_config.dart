@@ -16,11 +16,17 @@ class StatusFilterOption {
 /// action, l'UI affiche un message "bientôt disponible" au lieu de naviguer
 /// vers du code mort.
 class FabActionConfig {
-  const FabActionConfig({required this.label, required this.icon, this.route});
+  const FabActionConfig({
+    required this.label,
+    required this.icon,
+    this.route,
+    this.onSelected,
+  });
 
   final String label;
   final IconData icon;
   final String? route;
+  final VoidCallback? onSelected;
 }
 
 /// L'onglet catalogue de la bottom navigation (Produits ou Services selon
