@@ -115,10 +115,15 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Registration successful!'), findsOneWidget);
-    expect(find.byKey(const Key('signup_success_continue_button')), findsOneWidget);
+    expect(
+      find.byKey(const Key('signup_success_continue_button')),
+      findsOneWidget,
+    );
   });
 
-  testWidgets('flux e2e: signup -> succès -> landing post-auth', (tester) async {
+  testWidgets('flux e2e: signup -> succès -> landing post-auth', (
+    tester,
+  ) async {
     authRepository.setUser(user);
     establishmentRepository.setProfile(profileWithoutEstablishment());
 
@@ -139,69 +144,131 @@ void main() {
     expect(find.text('Aucune invitation en attente'), findsOneWidget);
   });
 
-  testWidgets(
-    'affiche la landing quand connecté sans établissement',
-    (tester) async {
-      authRepository.setUser(user);
-      establishmentRepository.setProfile(profileWithoutEstablishment());
+  testWidgets('affiche la landing quand connecté sans établissement', (
+    tester,
+  ) async {
+    authRepository.setUser(user);
+    establishmentRepository.setProfile(profileWithoutEstablishment());
 
-      database = await pumpTestApp(tester, overrides: testOverrides());
-      await tester.pumpAndSettle();
+    database = await pumpTestApp(tester, overrides: testOverrides());
+    await tester.pumpAndSettle();
 
-      expect(find.text('Bienvenue, Test Manager'), findsOneWidget);
-      expect(
-        find.byKey(const Key('onboarding_create_establishment_button')),
-        findsOneWidget,
-      );
-      expect(find.text('Verify your number'), findsNothing);
-    },
-  );
+    expect(find.text('Bienvenue, Test Manager'), findsOneWidget);
+    expect(
+      find.byKey(const Key('onboarding_create_establishment_button')),
+      findsOneWidget,
+    );
+    expect(find.text('Verify your number'), findsNothing);
+  });
 
-  testWidgets(
-    'landing : accepter une invitation puis ouvrir l’établissement',
-    (tester) async {
-      tester.view.physicalSize = const Size(1080, 2400);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
+  testWidgets('landing : icône utilisateur ouvre le profil', (tester) async {
+    authRepository.setUser(user);
+    establishmentRepository.setProfile(profileWithoutEstablishment());
 
-      authRepository.setUser(user);
-      establishmentRepository.setProfile(profileWithoutEstablishment());
-      establishmentRepository.setInvitations([
-        EstablishmentInvitation(
-          id: 'inv-1',
-          establishmentId: 'est-invited',
-          establishmentName: 'Restaurant invité',
-          invitedPhone: '33612345678',
-          role: EstablishmentRole.manager,
-          status: EstablishmentInvitationStatus.pending,
-          invitedBy: 'owner-1',
-          invitedByName: 'Propriétaire',
-          createdAt: DateTime(2026, 1, 1),
-        ),
-      ]);
+    database = await pumpTestApp(tester, overrides: testOverrides());
+    await tester.pumpAndSettle();
 
-      database = await pumpTestApp(tester, overrides: testOverrides());
-      await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Profil'));
+    await tester.pumpAndSettle();
 
-      expect(find.text('Invitations reçues'), findsOneWidget);
-      expect(find.text('Restaurant invité'), findsOneWidget);
+    expect(find.text('Profil'), findsWidgets);
+    expect(find.text('Test Manager'), findsWidgets);
+    expect(find.text('33612345678'), findsOneWidget);
+    expect(find.text('Déconnexion'), findsOneWidget);
+  });
 
-      await tester.tap(find.byKey(const Key('accept_invitation_inv-1')));
-      await tester.pumpAndSettle();
+  testWidgets('création établissement : formulaire clair en trois champs', (
+    tester,
+  ) async {
+    authRepository.setUser(user);
+    establishmentRepository.setProfile(profileWithoutEstablishment());
 
-      // Reste sur la landing ; l'établissement apparaît dans la liste.
-      expect(find.text('Mes établissements'), findsOneWidget);
-      expect(find.text('Restaurant invité'), findsWidgets);
-      expect(find.text('Créer un établissement'), findsOneWidget);
+    database = await pumpTestApp(tester, overrides: testOverrides());
+    await tester.pumpAndSettle();
 
-      await tester.tap(find.byKey(const Key('open_establishment_est-invited')));
-      await tester.pumpAndSettle();
+    final createButton = find.byKey(
+      const Key('onboarding_create_establishment_button'),
+    );
+    await tester.ensureVisible(createButton);
+    await tester.pumpAndSettle();
+    await tester.tap(createButton);
+    await tester.pumpAndSettle();
 
-      expect(find.text('Commandes'), findsWidgets);
+    expect(find.text('Nouvel établissement'), findsOneWidget);
+    expect(find.text('Catégorie d’activité'), findsOneWidget);
+    expect(find.text('Nom de l’établissement'), findsOneWidget);
+    expect(find.text('Logo'), findsOneWidget);
+    expect(find.text('Créer l’établissement'), findsOneWidget);
+    expect(find.text('Nom du gérant'), findsNothing);
+    expect(find.text('Numéro de téléphone'), findsNothing);
 
-      await tester.pumpWidget(const SizedBox.shrink());
-      await tester.pump(const Duration(milliseconds: 1));
-    },
-  );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Nom de l’établissement'),
+      'Restaurant Clair',
+    );
+    final submitButton = find.widgetWithText(
+      FilledButton,
+      'Créer l’établissement',
+    );
+    await tester.ensureVisible(submitButton);
+    await tester.pumpAndSettle();
+    await tester.tap(submitButton);
+    await tester.pumpAndSettle();
+
+    final created = establishmentRepository.establishments.single;
+    expect(created.name, 'Restaurant Clair');
+    expect(created.managerName, 'Test Manager');
+    expect(created.phone, '33612345678');
+    expect(created.logoBase64, isNull);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump(const Duration(milliseconds: 1));
+  });
+
+  testWidgets('landing : accepter une invitation puis ouvrir l’établissement', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    authRepository.setUser(user);
+    establishmentRepository.setProfile(profileWithoutEstablishment());
+    establishmentRepository.setInvitations([
+      EstablishmentInvitation(
+        id: 'inv-1',
+        establishmentId: 'est-invited',
+        establishmentName: 'Restaurant invité',
+        invitedPhone: '33612345678',
+        role: EstablishmentRole.manager,
+        status: EstablishmentInvitationStatus.pending,
+        invitedBy: 'owner-1',
+        invitedByName: 'Propriétaire',
+        createdAt: DateTime(2026, 1, 1),
+      ),
+    ]);
+
+    database = await pumpTestApp(tester, overrides: testOverrides());
+    await tester.pumpAndSettle();
+
+    expect(find.text('Invitations reçues'), findsOneWidget);
+    expect(find.text('Restaurant invité'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('accept_invitation_inv-1')));
+    await tester.pumpAndSettle();
+
+    // Reste sur la landing ; l'établissement apparaît dans la liste.
+    expect(find.text('Mes établissements'), findsOneWidget);
+    expect(find.text('Restaurant invité'), findsWidgets);
+    expect(find.text('Créer un établissement'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('open_establishment_est-invited')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Commandes'), findsWidgets);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump(const Duration(milliseconds: 1));
+  });
 }

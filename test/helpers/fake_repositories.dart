@@ -114,6 +114,7 @@ class FakeEstablishmentRepository implements EstablishmentRepository {
     required String establishmentName,
     required String managerName,
     required String phone,
+    String? logoBase64,
   }) async {
     final value = Establishment(
       id: 'est-${establishments.length + 1}',
@@ -123,6 +124,7 @@ class FakeEstablishmentRepository implements EstablishmentRepository {
       managerName: managerName,
       phone: phone,
       phoneVerified: false,
+      logoBase64: logoBase64,
       createdAt: DateTime(2026, 1, 1),
     );
     setEstablishments([...establishments, value]);
@@ -176,9 +178,7 @@ class FakeEstablishmentRepository implements EstablishmentRepository {
   Stream<List<EstablishmentInvitation>> watchPendingInvitations(
     String uid,
   ) async* {
-    List<EstablishmentInvitation> pending(
-      List<EstablishmentInvitation> items,
-    ) {
+    List<EstablishmentInvitation> pending(List<EstablishmentInvitation> items) {
       return items
           .where(
             (invitation) =>

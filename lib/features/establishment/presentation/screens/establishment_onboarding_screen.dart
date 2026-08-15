@@ -9,7 +9,6 @@ import '../../../../core/l10n/app_localizations.dart';
 import '../../../../core/routing/routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../auth/presentation/utils/confirm_sign_out.dart';
 import '../../domain/models/establishment.dart';
 import '../../domain/models/establishment_invitation.dart';
 import '../../domain/models/establishment_member.dart';
@@ -24,7 +23,8 @@ class EstablishmentOnboardingScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final invitations = ref.watch(pendingInvitationsProvider);
     final establishments = ref.watch(userEstablishmentsProvider);
-    final memberships = ref.watch(userMembershipsProvider).valueOrNull ?? const [];
+    final memberships =
+        ref.watch(userMembershipsProvider).valueOrNull ?? const [];
     final profile = ref.watch(userProfileProvider).valueOrNull;
     final controllerState = ref.watch(establishmentControllerProvider);
 
@@ -65,7 +65,8 @@ class EstablishmentOnboardingScreen extends ConsumerWidget {
                                 onOpen: (establishment) async {
                                   await ref
                                       .read(
-                                        establishmentControllerProvider.notifier,
+                                        establishmentControllerProvider
+                                            .notifier,
                                       )
                                       .switchEstablishment(establishment.id);
                                   if (!context.mounted) return;
@@ -92,14 +93,16 @@ class EstablishmentOnboardingScreen extends ConsumerWidget {
                                 onAccept: (invitation) async {
                                   await ref
                                       .read(
-                                        establishmentControllerProvider.notifier,
+                                        establishmentControllerProvider
+                                            .notifier,
                                       )
                                       .acceptInvitation(invitation);
                                 },
                                 onRefuse: (invitation) async {
                                   await ref
                                       .read(
-                                        establishmentControllerProvider.notifier,
+                                        establishmentControllerProvider
+                                            .notifier,
                                       )
                                       .refuseInvitation(invitation);
                                 },
@@ -173,15 +176,20 @@ class _LandingTopBar extends ConsumerWidget {
               ),
             ),
           ),
-          TextButton.icon(
-            onPressed: () => confirmAndSignOut(context, ref),
-            icon: const Icon(Icons.logout_rounded, size: 18),
-            label: const Text('Déconnexion'),
-            style: TextButton.styleFrom(
-              foregroundColor: AppColors.zuriRed,
-              textStyle: const TextStyle(
-                fontWeight: FontWeight.w700,
-                fontSize: 13,
+          IconButton(
+            tooltip: 'Profil',
+            onPressed: () => context.push(Routes.userProfile),
+            icon: Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: AppColors.zuriPink.withValues(alpha: 0.14),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.person_outline_rounded,
+                color: AppColors.zuriRed,
+                size: 23,
               ),
             ),
           ),
@@ -321,7 +329,8 @@ class _EstablishmentsSection extends StatelessWidget {
               loading: loading,
               onOpen: () => onOpen(establishment),
             ),
-            if (establishment != establishments.last) const SizedBox(height: 10),
+            if (establishment != establishments.last)
+              const SizedBox(height: 10),
           ],
       ],
     );
@@ -425,10 +434,7 @@ class _EstablishmentCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(
-                Icons.chevron_right_rounded,
-                color: AppColors.zuriRed,
-              ),
+              const Icon(Icons.chevron_right_rounded, color: AppColors.zuriRed),
             ],
           ),
         ),

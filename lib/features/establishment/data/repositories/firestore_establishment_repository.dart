@@ -67,6 +67,7 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
     required String establishmentName,
     required String managerName,
     required String phone,
+    String? logoBase64,
   }) async {
     final establishmentId = _uuid.v4();
     final normalizedPhone = PhoneAuthMapper.normalize(phone);
@@ -84,7 +85,7 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
       'managerName': managerName.trim(),
       'phone': normalizedPhone,
       'phoneVerified': false,
-      'logoBase64': null,
+      'logoBase64': logoBase64,
       'invoiceHeaderLines': const <String>[],
       'invoiceFooterLines': const <String>[],
       'createdAt': now,
@@ -322,9 +323,7 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
     final batch = _firestore.batch();
     final userRef = _users.doc(uid);
     final establishmentRef = _establishments.doc(invitation.establishmentId);
-    final invitationRef = userRef
-        .collection('invitations')
-        .doc(invitation.id);
+    final invitationRef = userRef.collection('invitations').doc(invitation.id);
     final teamRef = establishmentRef.collection('team').doc(uid);
     final membersRef = establishmentRef.collection('members').doc(uid);
 
@@ -519,8 +518,7 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
       role: data['role'] as String? ?? 'agent',
       phoneVerified: data['phoneVerified'] as bool? ?? false,
       createdAt: _timestampToDateTime(data['createdAt']),
-      establishmentIds:
-          resolvedIds.isEmpty && legacyEstablishmentId.isNotEmpty
+      establishmentIds: resolvedIds.isEmpty && legacyEstablishmentId.isNotEmpty
           ? [legacyEstablishmentId]
           : resolvedIds,
       activeEstablishmentId: activeEstablishmentId,

@@ -6,6 +6,7 @@ abstract final class Routes {
   static const signUpSuccess = '/signup/success';
   static const dashboard = '/';
   static const establishmentOnboarding = '/establishments/onboarding';
+  static const userProfile = '/profile';
   static const establishmentNew = '/establishments/new';
   static const establishmentSettings = '/establishments/settings';
   static const invitationNew = '/establishments/invitations/new';

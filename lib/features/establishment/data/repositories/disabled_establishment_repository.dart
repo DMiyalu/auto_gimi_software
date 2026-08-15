@@ -7,8 +7,9 @@ import '../../domain/models/user_profile.dart';
 import '../../domain/repositories/establishment_repository.dart';
 
 class DisabledEstablishmentRepository implements EstablishmentRepository {
-  Never _disabled() =>
-      throw StateError('Firebase non configuré. Exécutez: flutterfire configure');
+  Never _disabled() => throw StateError(
+    'Firebase non configuré. Exécutez: flutterfire configure',
+  );
 
   @override
   Future<void> createUserProfile({
@@ -24,6 +25,7 @@ class DisabledEstablishmentRepository implements EstablishmentRepository {
     required String establishmentName,
     required String managerName,
     required String phone,
+    String? logoBase64,
   }) async => _disabled();
 
   @override

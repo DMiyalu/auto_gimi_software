@@ -18,6 +18,7 @@ abstract class EstablishmentRepository {
     required String establishmentName,
     required String managerName,
     required String phone,
+    String? logoBase64,
   });
 
   Stream<UserProfile?> watchUserProfile(String uid);
@@ -72,10 +73,7 @@ abstract class EstablishmentRepository {
     required String fullName,
   });
 
-  Future<void> updateUserEmail({
-    required String uid,
-    required String email,
-  });
+  Future<void> updateUserEmail({required String uid, required String email});
 
   /// Met à jour les paramètres d'identité / facture de l'établissement.
   Future<void> updateEstablishmentSettings({

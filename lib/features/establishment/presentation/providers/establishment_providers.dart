@@ -83,7 +83,9 @@ final canCreateActivitiesProvider = Provider<bool>((ref) {
 });
 
 final canConfigureEstablishmentProvider = Provider<bool>((ref) {
-  return ref.watch(activeEstablishmentRoleProvider)?.canConfigureEstablishment ??
+  return ref
+          .watch(activeEstablishmentRoleProvider)
+          ?.canConfigureEstablishment ??
       false;
 });
 
@@ -148,6 +150,7 @@ class EstablishmentController extends AsyncNotifier<void> {
     required String establishmentName,
     required String managerName,
     required String phone,
+    String? logoBase64,
   }) async {
     final user = ref.read(authStateProvider).valueOrNull;
     if (user == null) return;
@@ -162,6 +165,7 @@ class EstablishmentController extends AsyncNotifier<void> {
             establishmentName: establishmentName,
             managerName: managerName,
             phone: phone,
+            logoBase64: logoBase64,
           );
     });
   }

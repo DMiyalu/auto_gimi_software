@@ -14,6 +14,7 @@ import '../../features/establishment/presentation/screens/establishment_settings
 import '../../features/establishment/presentation/screens/invitations_screen.dart';
 import '../../features/establishment/presentation/screens/invite_member_screen.dart';
 import '../../features/establishment/presentation/screens/team_members_screen.dart';
+import '../../features/establishment/presentation/screens/user_profile_screen.dart';
 import '../../features/clients/presentation/screens/client_detail_screen.dart';
 import '../../features/clients/presentation/screens/client_form_screen.dart';
 import '../../features/clients/presentation/screens/clients_list_screen.dart';
@@ -68,6 +69,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       final onHub =
           onLanding ||
           location == Routes.establishmentNew ||
+          location == Routes.userProfile ||
           location == Routes.invitations ||
           location == Routes.settings;
 
@@ -126,6 +128,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: Routes.establishmentNew,
             builder: (_, __) => const EstablishmentFormScreen(),
+          ),
+          GoRoute(
+            path: Routes.userProfile,
+            builder: (_, __) => const UserProfileScreen(),
           ),
           GoRoute(
             path: Routes.establishmentSettings,
