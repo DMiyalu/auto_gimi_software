@@ -19,6 +19,8 @@ class InvoiceTicketBuilder {
     final generator = Generator(PaperSize.mm58, profile);
     final bytes = <int>[];
 
+    bytes.addAll(generator.setGlobalCodeTable('CP1252'));
+
     final logo = EstablishmentLogoCodec.decodeForPrint(data.logoBase64);
     if (logo != null) {
       bytes.addAll(generator.image(logo));
@@ -26,7 +28,7 @@ class InvoiceTicketBuilder {
     } else {
       bytes.addAll(
         generator.text(
-          data.establishmentName,
+          _escPosText(data.establishmentName),
           styles: const PosStyles(
             align: PosAlign.center,
             bold: true,
@@ -37,22 +39,12 @@ class InvoiceTicketBuilder {
       );
     }
 
-    if (data.establishmentPhone != null &&
-        data.establishmentPhone!.isNotEmpty) {
-      bytes.addAll(
-        generator.text(
-          data.establishmentPhone!,
-          styles: const PosStyles(align: PosAlign.center),
-        ),
-      );
-    }
-
     for (final line in data.headerLines) {
       final trimmed = line.trim();
       if (trimmed.isEmpty) continue;
       bytes.addAll(
         generator.text(
-          trimmed,
+          _escPosText(trimmed),
           styles: const PosStyles(align: PosAlign.center),
         ),
       );
@@ -61,35 +53,41 @@ class InvoiceTicketBuilder {
     bytes.addAll(generator.hr());
     bytes.addAll(
       generator.text(
-        'Facture ${data.reference}',
+        _escPosText('Facture ${data.reference}'),
         styles: const PosStyles(bold: true),
       ),
     );
     bytes.addAll(generator.text(_dateFormat.format(data.date)));
     if (data.clientName != null && data.clientName!.isNotEmpty) {
-      bytes.addAll(generator.text('Client : ${data.clientName}'));
+      bytes.addAll(generator.text(_escPosText('Client : ${data.clientName}')));
     }
     if (data.clientPhone != null && data.clientPhone!.isNotEmpty) {
-      bytes.addAll(generator.text('Tél : ${data.clientPhone}'));
+      bytes.addAll(generator.text(_escPosText('Tél : ${data.clientPhone}')));
     }
     if (data.vehicleLabel != null && data.vehicleLabel!.isNotEmpty) {
-      bytes.addAll(generator.text('Véhicule : ${data.vehicleLabel}'));
+      bytes.addAll(
+        generator.text(_escPosText('Véhicule : ${data.vehicleLabel}')),
+      );
     }
     bytes.addAll(generator.hr());
 
     for (final line in data.lines) {
       bytes.addAll(
-        generator.text(line.label, styles: const PosStyles(bold: true)),
+        generator.text(
+          _escPosText(line.label),
+          styles: const PosStyles(bold: true),
+        ),
       );
       final qtyPrice = line.quantity > 1
           ? '${line.quantity} x ${_amountFormat.format(line.unitPrice)}'
           : _amountFormat.format(line.unitPrice);
       bytes.addAll(
         generator.row([
-          PosColumn(text: qtyPrice, width: 6),
+          PosColumn(text: _escPosText(qtyPrice), width: 6),
           PosColumn(
-            text:
-                '${_amountFormat.format(line.lineAmount)} ${data.currency.symbol}',
+            text: _escPosText(
+              '${_amountFormat.format(line.lineAmount)} ${data.currency.symbol}',
+            ),
             width: 6,
             styles: const PosStyles(align: PosAlign.right),
           ),
@@ -101,13 +99,14 @@ class InvoiceTicketBuilder {
     bytes.addAll(
       generator.row([
         PosColumn(
-          text: 'TOTAL',
+          text: _escPosText('TOTAL'),
           width: 6,
           styles: const PosStyles(bold: true, height: PosTextSize.size2),
         ),
         PosColumn(
-          text:
-              '${_amountFormat.format(data.totalAmount)} ${data.currency.symbol}',
+          text: _escPosText(
+            '${_amountFormat.format(data.totalAmount)} ${data.currency.symbol}',
+          ),
           width: 6,
           styles: const PosStyles(
             align: PosAlign.right,
@@ -121,10 +120,11 @@ class InvoiceTicketBuilder {
     if (data.paidAmount != null) {
       bytes.addAll(
         generator.row([
-          PosColumn(text: 'Payé', width: 6),
+          PosColumn(text: _escPosText('Payé'), width: 6),
           PosColumn(
-            text:
-                '${_amountFormat.format(data.paidAmount)} ${data.currency.symbol}',
+            text: _escPosText(
+              '${_amountFormat.format(data.paidAmount)} ${data.currency.symbol}',
+            ),
             width: 6,
             styles: const PosStyles(align: PosAlign.right),
           ),
@@ -135,13 +135,14 @@ class InvoiceTicketBuilder {
       bytes.addAll(
         generator.row([
           PosColumn(
-            text: 'Solde',
+            text: _escPosText('Solde'),
             width: 6,
             styles: const PosStyles(bold: true),
           ),
           PosColumn(
-            text:
-                '${_amountFormat.format(data.balanceDue)} ${data.currency.symbol}',
+            text: _escPosText(
+              '${_amountFormat.format(data.balanceDue)} ${data.currency.symbol}',
+            ),
             width: 6,
             styles: const PosStyles(align: PosAlign.right, bold: true),
           ),
@@ -151,7 +152,7 @@ class InvoiceTicketBuilder {
     if (data.statusLabel != null && data.statusLabel!.isNotEmpty) {
       bytes.addAll(
         generator.text(
-          data.statusLabel!,
+          _escPosText(data.statusLabel!),
           styles: const PosStyles(align: PosAlign.center),
         ),
       );
@@ -166,7 +167,7 @@ class InvoiceTicketBuilder {
       for (final line in footerLines) {
         bytes.addAll(
           generator.text(
-            line,
+            _escPosText(line),
             styles: const PosStyles(align: PosAlign.center),
           ),
         );
@@ -176,16 +177,27 @@ class InvoiceTicketBuilder {
     bytes.addAll(generator.hr());
     bytes.addAll(
       generator.text(
-        poweredBy,
-        styles: const PosStyles(
-          align: PosAlign.center,
-          bold: true,
-        ),
+        _escPosText(poweredBy),
+        styles: const PosStyles(align: PosAlign.center, bold: true),
       ),
     );
     bytes.addAll(generator.feed(2));
     bytes.addAll(generator.cut());
 
     return bytes;
+  }
+
+  static String _escPosText(String value) {
+    return value
+        .replaceAll('\u00A0', ' ')
+        .replaceAll('’', "'")
+        .replaceAll('‘', "'")
+        .replaceAll('“', '"')
+        .replaceAll('”', '"')
+        .replaceAll('–', '-')
+        .replaceAll('—', '-')
+        .replaceAll('…', '...')
+        .replaceAll('œ', 'oe')
+        .replaceAll('Œ', 'OE');
   }
 }

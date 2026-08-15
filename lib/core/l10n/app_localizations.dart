@@ -866,6 +866,30 @@ abstract class AppLocalizations {
   /// **'Shop / Store'**
   String get categoryShop;
 
+  /// No description provided for @categoryTerraceBarLounge.
+  ///
+  /// In en, this message translates to:
+  /// **'Terrace / Bar / Lounge'**
+  String get categoryTerraceBarLounge;
+
+  /// No description provided for @categoryHairSalon.
+  ///
+  /// In en, this message translates to:
+  /// **'Hair salon'**
+  String get categoryHairSalon;
+
+  /// No description provided for @categoryBeautyInstitute.
+  ///
+  /// In en, this message translates to:
+  /// **'Beauty institute'**
+  String get categoryBeautyInstitute;
+
+  /// No description provided for @categoryClinicMedicalCenter.
+  ///
+  /// In en, this message translates to:
+  /// **'Clinic / Medical center'**
+  String get categoryClinicMedicalCenter;
+
   /// No description provided for @categoryGarageAuto.
   ///
   /// In en, this message translates to:

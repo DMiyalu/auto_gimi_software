@@ -15,6 +15,10 @@ abstract final class BusinessModuleConfigs {
       BusinessCategory.garageAuto => garage,
       BusinessCategory.restaurant => restaurant,
       BusinessCategory.shop => shop,
+      BusinessCategory.terraceBarLounge => terraceBarLounge,
+      BusinessCategory.hairSalon => hairSalon,
+      BusinessCategory.beautyInstitute => beautyInstitute,
+      BusinessCategory.clinicMedicalCenter => clinicMedicalCenter,
       BusinessCategory.sanitation => sanitation,
       _ => _genericFallback(category),
     };
@@ -162,6 +166,80 @@ abstract final class BusinessModuleConfigs {
     ],
   );
 
+  static final terraceBarLounge = _commandeWorkflow(
+    category: BusinessCategory.terraceBarLounge,
+    primaryColor: const Color(0xFFB45309),
+    activityIcon: Icons.local_bar_outlined,
+    searchPlaceholder: 'Rechercher une commande, table, client…',
+    fabActions: const [
+      FabActionConfig(
+        label: 'Nouvelle commande',
+        icon: Icons.add_shopping_cart_outlined,
+        route: Routes.commandeNew,
+      ),
+      FabActionConfig(label: 'Réservation', icon: Icons.event_seat_outlined),
+      FabActionConfig(label: 'À emporter', icon: Icons.shopping_bag_outlined),
+      FabActionConfig(label: 'Livraison', icon: Icons.delivery_dining_outlined),
+    ],
+  );
+
+  static final hairSalon = _commandeWorkflow(
+    category: BusinessCategory.hairSalon,
+    primaryColor: const Color(0xFFBE185D),
+    activityIcon: Icons.content_cut_outlined,
+    searchPlaceholder: 'Rechercher une commande, client ou rendez-vous…',
+    fabActions: const [
+      FabActionConfig(
+        label: 'Nouvelle commande',
+        icon: Icons.add_shopping_cart_outlined,
+        route: Routes.commandeNew,
+      ),
+      FabActionConfig(label: 'Rendez-vous', icon: Icons.event_available),
+      FabActionConfig(label: 'Service coiffure', icon: Icons.content_cut),
+      FabActionConfig(
+        label: 'Produit vendu',
+        icon: Icons.shopping_bag_outlined,
+      ),
+    ],
+  );
+
+  static final beautyInstitute = _commandeWorkflow(
+    category: BusinessCategory.beautyInstitute,
+    primaryColor: const Color(0xFF9333EA),
+    activityIcon: Icons.spa_outlined,
+    searchPlaceholder: 'Rechercher une commande, client ou soin…',
+    fabActions: const [
+      FabActionConfig(
+        label: 'Nouvelle commande',
+        icon: Icons.add_shopping_cart_outlined,
+        route: Routes.commandeNew,
+      ),
+      FabActionConfig(label: 'Rendez-vous', icon: Icons.event_available),
+      FabActionConfig(label: 'Soin beauté', icon: Icons.spa_outlined),
+      FabActionConfig(
+        label: 'Produit vendu',
+        icon: Icons.shopping_bag_outlined,
+      ),
+    ],
+  );
+
+  static final clinicMedicalCenter = _commandeWorkflow(
+    category: BusinessCategory.clinicMedicalCenter,
+    primaryColor: const Color(0xFF2563EB),
+    activityIcon: Icons.local_hospital_outlined,
+    searchPlaceholder: 'Rechercher une commande, patient ou service…',
+    fabActions: const [
+      FabActionConfig(
+        label: 'Nouvelle commande',
+        icon: Icons.add_shopping_cart_outlined,
+        route: Routes.commandeNew,
+      ),
+      FabActionConfig(label: 'Consultation', icon: Icons.medical_services),
+      FabActionConfig(label: 'Rendez-vous', icon: Icons.event_available),
+      FabActionConfig(label: 'Pharmacie', icon: Icons.local_pharmacy_outlined),
+    ],
+  );
+
   static final sanitation = BusinessModuleConfig(
     category: BusinessCategory.sanitation,
     primaryModuleLabel: 'Collectes',
@@ -205,6 +283,46 @@ abstract final class BusinessModuleConfigs {
 
   /// Filet de sécurité pour les métiers pas encore détaillés (pressing,
   /// gym, pharmacy...) — reste générique, sans libellé métier hasardeux.
+  static BusinessModuleConfig _commandeWorkflow({
+    required BusinessCategory category,
+    required Color primaryColor,
+    required IconData activityIcon,
+    required String searchPlaceholder,
+    required List<FabActionConfig> fabActions,
+  }) {
+    return BusinessModuleConfig(
+      category: category,
+      primaryModuleLabel: 'Commandes',
+      searchPlaceholder: searchPlaceholder,
+      primaryColor: primaryColor,
+      activityIcon: activityIcon,
+      statusFilters: const [
+        StatusFilterOption(key: 'all', label: 'Toutes'),
+        StatusFilterOption(key: 'en_cours', label: 'En cours'),
+        StatusFilterOption(key: 'a_payer', label: 'À payer'),
+        StatusFilterOption(key: 'cloturee', label: 'Clôturées'),
+        StatusFilterOption(key: 'annulees', label: 'Annulées'),
+      ],
+      catalogTab: const CatalogTabConfig(
+        label: 'Produits',
+        route: Routes.produits,
+      ),
+      fabActions: fabActions,
+      moreMenuItems: const [
+        MoreMenuItemConfig(
+          label: 'Inventaires',
+          icon: Icons.inventory_2_outlined,
+          route: Routes.inventories,
+        ),
+        MoreMenuItemConfig(
+          label: 'Services',
+          icon: Icons.room_service_outlined,
+          route: Routes.services,
+        ),
+      ],
+    );
+  }
+
   static BusinessModuleConfig _genericFallback(BusinessCategory category) {
     return BusinessModuleConfig(
       category: category,

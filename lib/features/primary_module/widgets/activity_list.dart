@@ -287,6 +287,26 @@ class _EmptyState extends StatelessWidget {
         subtitle:
             'Créez une commande, ajoutez les articles, puis encaissez depuis le même parcours.',
       ),
+      BusinessCategory.terraceBarLounge => const _EmptyCopy(
+        title: 'Votre espace est prêt pour sa première commande',
+        subtitle:
+            'Créez une commande, ajoutez les produits, puis encaissez depuis le même parcours.',
+      ),
+      BusinessCategory.hairSalon => const _EmptyCopy(
+        title: 'Votre salon est prêt pour sa première commande',
+        subtitle:
+            'Créez une commande, ajoutez les services ou produits, puis encaissez simplement.',
+      ),
+      BusinessCategory.beautyInstitute => const _EmptyCopy(
+        title: 'Votre institut est prêt pour sa première commande',
+        subtitle:
+            'Créez une commande, ajoutez les soins ou produits, puis encaissez simplement.',
+      ),
+      BusinessCategory.clinicMedicalCenter => const _EmptyCopy(
+        title: 'Votre centre est prêt pour sa première commande',
+        subtitle:
+            'Créez une commande, ajoutez les services ou produits, puis encaissez depuis le même parcours.',
+      ),
       BusinessCategory.garageAuto => const _EmptyCopy(
         title: 'Votre atelier est prêt pour la première prestation',
         subtitle:

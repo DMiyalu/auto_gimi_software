@@ -823,6 +823,10 @@ Color _categoryAccent(BusinessCategory category) {
   return switch (category) {
     BusinessCategory.restaurant => AppColors.zuriRed,
     BusinessCategory.shop => const Color(0xFF0F766E),
+    BusinessCategory.terraceBarLounge => const Color(0xFFB45309),
+    BusinessCategory.hairSalon => const Color(0xFFBE185D),
+    BusinessCategory.beautyInstitute => const Color(0xFF9333EA),
+    BusinessCategory.clinicMedicalCenter => const Color(0xFF2563EB),
     BusinessCategory.garageAuto => const Color(0xFFF57C00),
     BusinessCategory.sanitation => const Color(0xFF2E7D32),
     BusinessCategory.pharmacy => const Color(0xFF7B1FA2),

@@ -6,6 +6,10 @@ import '../l10n/app_localizations.dart';
 enum BusinessCategory {
   restaurant,
   shop,
+  terraceBarLounge,
+  hairSalon,
+  beautyInstitute,
+  clinicMedicalCenter,
   garageAuto,
   pressing,
   sanitation,
@@ -15,6 +19,10 @@ enum BusinessCategory {
   String get firestoreValue => switch (this) {
     restaurant => 'restaurant',
     shop => 'shop',
+    terraceBarLounge => 'terrace_bar_lounge',
+    hairSalon => 'hair_salon',
+    beautyInstitute => 'beauty_institute',
+    clinicMedicalCenter => 'clinic_medical_center',
     garageAuto => 'garage_auto',
     pressing => 'pressing',
     sanitation => 'sanitation',
@@ -32,6 +40,10 @@ enum BusinessCategory {
   String label(AppLocalizations l10n) => switch (this) {
     restaurant => l10n.categoryRestaurant,
     shop => l10n.categoryShop,
+    terraceBarLounge => l10n.categoryTerraceBarLounge,
+    hairSalon => l10n.categoryHairSalon,
+    beautyInstitute => l10n.categoryBeautyInstitute,
+    clinicMedicalCenter => l10n.categoryClinicMedicalCenter,
     garageAuto => l10n.categoryGarageAuto,
     pressing => l10n.categoryPressing,
     sanitation => l10n.categorySanitation,
@@ -42,6 +54,10 @@ enum BusinessCategory {
   IconData get icon => switch (this) {
     restaurant => Icons.restaurant_outlined,
     shop => Icons.storefront_outlined,
+    terraceBarLounge => Icons.local_bar_outlined,
+    hairSalon => Icons.content_cut_outlined,
+    beautyInstitute => Icons.spa_outlined,
+    clinicMedicalCenter => Icons.local_hospital_outlined,
     garageAuto => Icons.car_repair_outlined,
     pressing => Icons.local_laundry_service_outlined,
     sanitation => Icons.cleaning_services_outlined,
@@ -50,7 +66,12 @@ enum BusinessCategory {
   };
 
   bool get usesRestaurantWorkflow => switch (this) {
-    restaurant || shop => true,
+    restaurant ||
+    shop ||
+    terraceBarLounge ||
+    hairSalon ||
+    beautyInstitute ||
+    clinicMedicalCenter => true,
     garageAuto || pressing || sanitation || gym || pharmacy => false,
   };
 }
