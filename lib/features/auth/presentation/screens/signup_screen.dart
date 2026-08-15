@@ -37,7 +37,9 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    await ref.read(authControllerProvider.notifier).signUp(
+    await ref
+        .read(authControllerProvider.notifier)
+        .signUp(
           fullName: _fullNameController.text,
           phone: _phone,
           password: _passwordController.text,
@@ -122,58 +124,23 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                         const SizedBox(height: 14),
                         DecoratedBox(
                           decoration: authSoftCardDecoration,
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(4, 4, 8, 4),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Padding(
-                                  padding: EdgeInsets.only(left: 10, top: 18),
-                                  child: Icon(
-                                    Icons.phone_outlined,
-                                    color: AppColors.zuriRed,
-                                    size: 22,
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Theme(
-                                    data: Theme.of(context).copyWith(
-                                      inputDecorationTheme:
-                                          const InputDecorationTheme(
-                                        border: InputBorder.none,
-                                        enabledBorder: InputBorder.none,
-                                        focusedBorder: InputBorder.none,
-                                        errorBorder: InputBorder.none,
-                                        focusedErrorBorder: InputBorder.none,
-                                        filled: false,
-                                      ),
-                                    ),
-                                    child: PhoneNumberField(
-                                      key: const Key('signup_phone_field'),
-                                      labelText: l10n.phoneShort,
-                                      enabled: !authState.isLoading,
-                                      localNumberKey: const Key(
-                                        'signup_phone_local_field',
-                                      ),
-                                      onFullNumberChanged: (value) =>
-                                          _phone = value,
-                                      validator: (value) {
-                                        if (value == null ||
-                                            value.trim().isEmpty) {
-                                          return l10n.phoneNumber;
-                                        }
-                                        if (!PhoneAuthMapper.isValidFullNumber(
-                                          value,
-                                        )) {
-                                          return l10n.phoneNumberInvalid;
-                                        }
-                                        return null;
-                                      },
-                                    ),
-                                  ),
-                                ),
-                              ],
+                          child: PhoneNumberField(
+                            key: const Key('signup_phone_field'),
+                            labelText: l10n.phoneShort,
+                            enabled: !authState.isLoading,
+                            localNumberKey: const Key(
+                              'signup_phone_local_field',
                             ),
+                            onFullNumberChanged: (value) => _phone = value,
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return l10n.phoneNumber;
+                              }
+                              if (!PhoneAuthMapper.isValidFullNumber(value)) {
+                                return l10n.phoneNumberInvalid;
+                              }
+                              return null;
+                            },
                           ),
                         ),
                         const SizedBox(height: 14),
@@ -255,8 +222,9 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                               child: Divider(color: Color(0xFFE4E6EE)),
                             ),
                             Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 12),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                              ),
                               child: Text(
                                 l10n.alreadyHaveAccountShort,
                                 style: const TextStyle(

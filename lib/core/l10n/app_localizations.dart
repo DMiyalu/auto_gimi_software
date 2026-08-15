@@ -110,12 +110,6 @@ abstract class AppLocalizations {
   /// **'Sign in'**
   String get login;
 
-  /// No description provided for @loginSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Manage all your establishments from one place.'**
-  String get loginSubtitle;
-
   /// No description provided for @loginWelcome.
   ///
   /// In en, this message translates to:

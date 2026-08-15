@@ -15,9 +15,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get login => 'Sign in';
 
   @override
-  String get loginSubtitle => 'Manage all your establishments from one place.';
-
-  @override
   String get loginWelcome => 'Welcome!';
 
   @override

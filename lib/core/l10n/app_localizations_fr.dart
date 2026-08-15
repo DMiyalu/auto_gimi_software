@@ -15,10 +15,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get login => 'Se connecter';
 
   @override
-  String get loginSubtitle =>
-      'Gérez tous vos établissements, depuis un seul endroit.';
-
-  @override
   String get loginWelcome => 'Bienvenue !';
 
   @override

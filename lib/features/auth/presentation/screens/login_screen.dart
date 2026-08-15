@@ -118,17 +118,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           height: 132,
                           fit: BoxFit.contain,
                         ),
-                        const SizedBox(height: 10),
-                        Text(
-                          l10n.loginSubtitle,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: AppColors.zuriNavy,
-                            fontSize: 14,
-                            height: 1.35,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
                         const SizedBox(height: 28),
                         Text(
                           l10n.loginWelcome,
@@ -151,59 +140,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         const SizedBox(height: 22),
                         DecoratedBox(
                           decoration: _softCardDecoration,
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(4, 4, 8, 4),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Padding(
-                                  padding: EdgeInsets.only(left: 10, top: 18),
-                                  child: Icon(
-                                    Icons.email_outlined,
-                                    color: AppColors.zuriRed,
-                                    size: 22,
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Theme(
-                                    data: Theme.of(context).copyWith(
-                                      inputDecorationTheme:
-                                          const InputDecorationTheme(
-                                            border: InputBorder.none,
-                                            enabledBorder: InputBorder.none,
-                                            focusedBorder: InputBorder.none,
-                                            errorBorder: InputBorder.none,
-                                            focusedErrorBorder:
-                                                InputBorder.none,
-                                            filled: false,
-                                          ),
-                                    ),
-                                    child: PhoneNumberField(
-                                      key: const Key('login_phone_field'),
-                                      labelText: l10n.phoneNumber,
-                                      enabled: !authState.isLoading,
-                                      localNumberKey: const Key(
-                                        'login_phone_local_field',
-                                      ),
-                                      onFullNumberChanged: (value) =>
-                                          _phone = value,
-                                      validator: (value) {
-                                        if (value == null ||
-                                            value.trim().isEmpty) {
-                                          return l10n.phoneNumber;
-                                        }
-                                        if (!PhoneAuthMapper.isValidFullNumber(
-                                          value,
-                                        )) {
-                                          return l10n.phoneNumberInvalid;
-                                        }
-                                        return null;
-                                      },
-                                    ),
-                                  ),
-                                ),
-                              ],
+                          child: PhoneNumberField(
+                            key: const Key('login_phone_field'),
+                            labelText: l10n.phoneNumber,
+                            enabled: !authState.isLoading,
+                            localNumberKey: const Key(
+                              'login_phone_local_field',
                             ),
+                            onFullNumberChanged: (value) => _phone = value,
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return l10n.phoneNumber;
+                              }
+                              if (!PhoneAuthMapper.isValidFullNumber(value)) {
+                                return l10n.phoneNumberInvalid;
+                              }
+                              return null;
+                            },
                           ),
                         ),
                         const SizedBox(height: 14),
@@ -519,11 +472,8 @@ class _MicrosoftMark extends StatelessWidget {
   Widget build(BuildContext context) {
     const size = 7.0;
     const gap = 1.5;
-    Widget tile(Color color) => Container(
-      width: size,
-      height: size,
-      color: color,
-    );
+    Widget tile(Color color) =>
+        Container(width: size, height: size, color: color);
     return SizedBox(
       width: size * 2 + gap,
       height: size * 2 + gap,
@@ -568,29 +518,37 @@ class _LoginBackdropPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final pink = Paint()
-      ..shader = RadialGradient(
-        colors: [
-          AppColors.zuriPink.withValues(alpha: 0.16),
-          AppColors.zuriMagenta.withValues(alpha: 0.06),
-          Colors.transparent,
-        ],
-        stops: const [0, 0.45, 1],
-      ).createShader(Rect.fromCircle(center: Offset.zero, radius: size.width * 0.7));
-    canvas.drawCircle(Offset(size.width * 0.05, size.height * 0.02), size.width * 0.55, pink);
+      ..shader =
+          RadialGradient(
+            colors: [
+              AppColors.zuriPink.withValues(alpha: 0.16),
+              AppColors.zuriMagenta.withValues(alpha: 0.06),
+              Colors.transparent,
+            ],
+            stops: const [0, 0.45, 1],
+          ).createShader(
+            Rect.fromCircle(center: Offset.zero, radius: size.width * 0.7),
+          );
+    canvas.drawCircle(
+      Offset(size.width * 0.05, size.height * 0.02),
+      size.width * 0.55,
+      pink,
+    );
 
     final topRight = Paint()
-      ..shader = RadialGradient(
-        colors: [
-          AppColors.zuriRed.withValues(alpha: 0.10),
-          AppColors.zuriPink.withValues(alpha: 0.05),
-          Colors.transparent,
-        ],
-      ).createShader(
-        Rect.fromCircle(
-          center: Offset(size.width, 0),
-          radius: size.width * 0.55,
-        ),
-      );
+      ..shader =
+          RadialGradient(
+            colors: [
+              AppColors.zuriRed.withValues(alpha: 0.10),
+              AppColors.zuriPink.withValues(alpha: 0.05),
+              Colors.transparent,
+            ],
+          ).createShader(
+            Rect.fromCircle(
+              center: Offset(size.width, 0),
+              radius: size.width * 0.55,
+            ),
+          );
     canvas.drawCircle(
       Offset(size.width * 0.95, size.height * 0.08),
       size.width * 0.45,
@@ -598,18 +556,19 @@ class _LoginBackdropPainter extends CustomPainter {
     );
 
     final bottom = Paint()
-      ..shader = RadialGradient(
-        colors: [
-          AppColors.zuriMagenta.withValues(alpha: 0.12),
-          AppColors.zuriPink.withValues(alpha: 0.04),
-          Colors.transparent,
-        ],
-      ).createShader(
-        Rect.fromCircle(
-          center: Offset(size.width, size.height),
-          radius: size.width * 0.7,
-        ),
-      );
+      ..shader =
+          RadialGradient(
+            colors: [
+              AppColors.zuriMagenta.withValues(alpha: 0.12),
+              AppColors.zuriPink.withValues(alpha: 0.04),
+              Colors.transparent,
+            ],
+          ).createShader(
+            Rect.fromCircle(
+              center: Offset(size.width, size.height),
+              radius: size.width * 0.7,
+            ),
+          );
     canvas.drawCircle(
       Offset(size.width * 0.9, size.height * 0.95),
       size.width * 0.55,
@@ -623,9 +582,21 @@ class _LoginBackdropPainter extends CustomPainter {
 
     _drawBag(canvas, Offset(size.width * 0.14, size.height * 0.16), iconPaint);
     _drawCar(canvas, Offset(size.width * 0.78, size.height * 0.14), iconPaint);
-    _drawChefHat(canvas, Offset(size.width * 0.22, size.height * 0.28), iconPaint);
-    _drawCross(canvas, Offset(size.width * 0.86, size.height * 0.26), iconPaint);
-    _drawStore(canvas, Offset(size.width * 0.48, size.height * 0.11), iconPaint);
+    _drawChefHat(
+      canvas,
+      Offset(size.width * 0.22, size.height * 0.28),
+      iconPaint,
+    );
+    _drawCross(
+      canvas,
+      Offset(size.width * 0.86, size.height * 0.26),
+      iconPaint,
+    );
+    _drawStore(
+      canvas,
+      Offset(size.width * 0.48, size.height * 0.11),
+      iconPaint,
+    );
   }
 
   void _drawBag(Canvas canvas, Offset c, Paint paint) {

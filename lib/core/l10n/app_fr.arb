@@ -2,7 +2,6 @@
   "@@locale": "fr",
   "appTitle": "Zuri Business",
   "login": "Se connecter",
-  "loginSubtitle": "Gérez tous vos établissements, depuis un seul endroit.",
   "loginWelcome": "Bienvenue !",
   "loginWelcomeSubtitle": "Connectez-vous à votre compte",
   "forgotPassword": "Mot de passe oublié ?",
