@@ -23,6 +23,7 @@ import '../../../clients/presentation/widgets/client_avatar.dart';
 import '../../../establishment/presentation/providers/establishment_providers.dart';
 import '../../../billing/domain/entities/facture_entity.dart';
 import '../../../printing/domain/entities/invoice_ticket_data.dart';
+import '../../../printing/presentation/providers/printer_providers.dart';
 import '../../../printing/presentation/utils/invoice_print_flow.dart';
 import '../../../produits/domain/entities/produit_entity.dart';
 import '../../../produits/presentation/providers/produit_providers.dart';
@@ -92,6 +93,9 @@ class _CommandeDetailScreenState extends ConsumerState<CommandeDetailScreen> {
         }
 
         final isCanceled = item.isCanceled;
+        final printerCanPrint =
+            ref.watch(currentPrinterStatusProvider).valueOrNull?.canPrint ??
+            false;
         return Stack(
           alignment: Alignment.topCenter,
           children: [
@@ -104,7 +108,10 @@ class _CommandeDetailScreenState extends ConsumerState<CommandeDetailScreen> {
                   if (!isCanceled)
                     _ActionsBar(
                       commande: item,
+                      canPrint: printerCanPrint,
                       onPrint: () => _printInvoice(item),
+                      onConfigurePrinter: () =>
+                          context.push(Routes.printerSettings),
                       onCollectPayment: () => _collectPayment(item),
                     ),
                   const PrimaryBottomNavigation(location: Routes.dashboard),
@@ -1038,12 +1045,16 @@ class _EmptyProductsHint extends StatelessWidget {
 class _ActionsBar extends StatelessWidget {
   const _ActionsBar({
     required this.commande,
+    required this.canPrint,
     required this.onPrint,
+    required this.onConfigurePrinter,
     required this.onCollectPayment,
   });
 
   final CommandeEntity commande;
+  final bool canPrint;
   final VoidCallback onPrint;
+  final VoidCallback onConfigurePrinter;
   final VoidCallback onCollectPayment;
 
   static final _amountFormat = NumberFormat('#,##0', 'fr');
@@ -1101,7 +1112,7 @@ class _ActionsBar extends StatelessWidget {
                   child: SizedBox(
                     height: 54,
                     child: OutlinedButton.icon(
-                      onPressed: onPrint,
+                      onPressed: canPrint ? onPrint : onConfigurePrinter,
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.zuriRed,
                         side: const BorderSide(color: AppColors.zuriRed),
@@ -1113,8 +1124,17 @@ class _ActionsBar extends StatelessWidget {
                           fontWeight: FontWeight.w800,
                         ),
                       ),
-                      icon: const Icon(Icons.print_outlined, size: 22),
-                      label: const Text('Imprimer facture'),
+                      icon: Icon(
+                        canPrint
+                            ? Icons.print_outlined
+                            : Icons.settings_outlined,
+                        size: 22,
+                      ),
+                      label: Text(
+                        canPrint
+                            ? 'Imprimer facture'
+                            : 'Configurer une imprimante',
+                      ),
                     ),
                   ),
                 ),

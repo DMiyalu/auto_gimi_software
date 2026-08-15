@@ -101,6 +101,9 @@ void main() {
       expect(find.text('Prestations'), findsWidgets);
       expect(find.text('Phone verification'), findsNothing);
       expect(find.text('Mes établissements'), findsNothing);
+
+      await tester.pumpWidget(const SizedBox());
+      await tester.pump(const Duration(milliseconds: 100));
     },
   );
 

@@ -1,5 +1,6 @@
 /// Routes nommées de l'application.
 abstract final class Routes {
+  static const splash = '/splash';
   static const login = '/login';
   static const signUp = '/signup';
   static const verifyPhone = '/verify-phone';

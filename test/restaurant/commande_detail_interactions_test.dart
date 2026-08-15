@@ -15,6 +15,8 @@ import 'package:auto_mobile_software/core/routing/routes.dart';
 import 'package:auto_mobile_software/features/clients/data/repositories/client_repository_impl.dart';
 import 'package:auto_mobile_software/features/establishment/domain/models/establishment.dart';
 import 'package:auto_mobile_software/features/establishment/presentation/providers/establishment_providers.dart';
+import 'package:auto_mobile_software/features/printing/presentation/providers/printer_providers.dart';
+import 'package:auto_mobile_software/features/printing/presentation/screens/printer_settings_screen.dart';
 import 'package:auto_mobile_software/features/produits/data/repositories/produit_repository_impl.dart';
 import 'package:auto_mobile_software/features/restaurant/data/repositories/commande_repository_impl.dart';
 import 'package:auto_mobile_software/features/restaurant/presentation/screens/commande_detail_screen.dart';
@@ -69,7 +71,15 @@ Future<_Fixture> _seed() async {
   return _Fixture(database: database, commandeId: commande.id);
 }
 
-Future<void> _pump(WidgetTester tester, _Fixture fixture) async {
+Future<void> _pump(
+  WidgetTester tester,
+  _Fixture fixture, {
+  PrinterConnectionStatus printerStatus = const PrinterConnectionStatus(
+    selectedAddress: null,
+    selectedName: null,
+    connected: false,
+  ),
+}) async {
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
@@ -81,6 +91,7 @@ Future<void> _pump(WidgetTester tester, _Fixture fixture) async {
         // défaut et bloque silencieusement toute mutation passant par le
         // controller (attachClient, registerPayment...).
         canCreateActivitiesProvider.overrideWithValue(true),
+        currentPrinterStatusProvider.overrideWith((ref) async => printerStatus),
       ],
       child: MaterialApp.router(
         localizationsDelegates: const [
@@ -97,6 +108,10 @@ Future<void> _pump(WidgetTester tester, _Fixture fixture) async {
               path: Routes.commandeDetail,
               builder: (context, state) =>
                   CommandeDetailScreen(commandeId: state.pathParameters['id']!),
+            ),
+            GoRoute(
+              path: Routes.printerSettings,
+              builder: (context, state) => const PrinterSettingsScreen(),
             ),
           ],
         ),
@@ -118,12 +133,18 @@ void main() {
   // indéfiniment faute de handler de plateforme en environnement de test.
   SharedPreferences.setMockInitialValues(const {});
 
+  const connectedPrinter = PrinterConnectionStatus(
+    selectedAddress: '00:11:22:AA:BB:CC',
+    selectedName: 'MP210',
+    connected: true,
+  );
+
   testWidgets(
     'les deux onglets exposent Imprimer facture et Encaisser paiement, sans le bouton Enregistrer',
     (tester) async {
       final fixture = await _seed();
       addTearDown(fixture.database.close);
-      await _pump(tester, fixture);
+      await _pump(tester, fixture, printerStatus: connectedPrinter);
 
       expect(find.text('Enregistrer la commande'), findsNothing);
       expect(find.text('Imprimer facture'), findsOneWidget);
@@ -177,7 +198,7 @@ void main() {
     (tester) async {
       final fixture = await _seed();
       addTearDown(fixture.database.close);
-      await _pump(tester, fixture);
+      await _pump(tester, fixture, printerStatus: connectedPrinter);
 
       await tester.tap(find.text('Imprimer facture'));
       await tester.pumpAndSettle();
@@ -190,6 +211,25 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Imprimer la facture'), findsNothing);
+
+      await _disposeTree(tester);
+    },
+  );
+
+  testWidgets(
+    'sans imprimante connectée, le bouton ouvre la configuration imprimante',
+    (tester) async {
+      final fixture = await _seed();
+      addTearDown(fixture.database.close);
+      await _pump(tester, fixture);
+
+      expect(find.text('Imprimer facture'), findsNothing);
+      expect(find.text('Configurer une imprimante'), findsOneWidget);
+
+      await tester.tap(find.text('Configurer une imprimante'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Configuration imprimante'), findsOneWidget);
 
       await _disposeTree(tester);
     },

@@ -16,6 +16,7 @@ import 'package:auto_mobile_software/features/clients/data/repositories/client_r
 import 'package:auto_mobile_software/features/establishment/domain/models/establishment.dart';
 import 'package:auto_mobile_software/features/establishment/presentation/providers/establishment_providers.dart';
 import 'package:auto_mobile_software/features/primary_module/screens/primary_module_screen.dart';
+import 'package:auto_mobile_software/features/printing/presentation/screens/printer_settings_screen.dart';
 import 'package:auto_mobile_software/features/produits/data/repositories/produit_repository_impl.dart';
 import 'package:auto_mobile_software/features/restaurant/presentation/screens/commande_detail_screen.dart';
 import 'package:auto_mobile_software/features/restaurant/presentation/screens/new_commande_screen.dart';
@@ -86,6 +87,10 @@ Future<void> _pump(WidgetTester tester, AppDatabase database) async {
               path: Routes.commandeDetail,
               builder: (context, state) =>
                   CommandeDetailScreen(commandeId: state.pathParameters['id']!),
+            ),
+            GoRoute(
+              path: Routes.printerSettings,
+              builder: (context, state) => const PrinterSettingsScreen(),
             ),
           ],
         ),
@@ -164,13 +169,14 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byTooltip('Retirer le client'), findsOneWidget);
 
-      // 6. Vérifier que le popup d'impression est bien atteignable depuis
-      // une commande réellement créée et peuplée (aucune imprimante ici).
-      await tester.tap(find.text('Imprimer facture'));
+      // 6. Sans imprimante configurée/connectée, le détail commande renvoie
+      // vers la configuration imprimante au lieu de proposer l'impression.
+      expect(find.text('Imprimer facture'), findsNothing);
+      expect(find.text('Configurer une imprimante'), findsOneWidget);
+      await tester.tap(find.text('Configurer une imprimante'));
       await tester.pumpAndSettle();
-      expect(find.text('Imprimer la facture'), findsOneWidget);
-      expect(find.text('Aucune imprimante configurée.'), findsOneWidget);
-      await tester.tap(find.text('Annuler'));
+      expect(find.text('Configuration imprimante'), findsOneWidget);
+      await tester.pageBack();
       await tester.pumpAndSettle();
 
       // 7. Encaisser sans avoir imprimé (cas d'usage explicitement demandé) :

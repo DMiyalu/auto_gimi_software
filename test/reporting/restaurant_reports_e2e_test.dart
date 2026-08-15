@@ -111,13 +111,11 @@ Future<AppDatabase> _seed() async {
   // CA = 2*10000 + 5000 + 10000 = 35 000 CDF, 2 commandes, 1 client.
   final now = DateTime.now();
   for (final id in [commandeA.id, commandeB.id]) {
-    await (database.update(database.commandes)..where((c) => c.id.equals(id)))
-        .write(
-          CommandesCompanion(
-            createdAt: Value(now),
-            updatedAt: Value(now),
-          ),
-        );
+    await (database.update(
+      database.commandes,
+    )..where((c) => c.id.equals(id))).write(
+      CommandesCompanion(createdAt: Value(now), updatedAt: Value(now)),
+    );
   }
 
   return database;
@@ -176,17 +174,19 @@ void main() {
 
       await _pump(tester, database);
 
-      // 1. Écran restaurant (pas le stub garage) — titre header + Envoyer.
+      // 1. Écran restaurant (pas le stub garage) — titre header + Partager.
       expect(find.text('Rapports'), findsWidgets);
-      expect(find.byKey(const Key('send_report_button')), findsOneWidget);
-      expect(find.text('Envoyer'), findsOneWidget);
+      expect(find.byKey(const Key('send_report_button')), findsNothing);
+      expect(find.text('Envoyer'), findsNothing);
+      expect(find.byKey(const Key('share_report_button')), findsOneWidget);
+      expect(find.text('Partager'), findsOneWidget);
       expect(find.text('Aperçu de votre activité'), findsNothing);
       expect(find.byType(RestaurantReportKpiGrid), findsOneWidget);
       expect(find.byType(RevenueEvolutionChart), findsOneWidget);
       expect(find.byType(ProductSalesBreakdownCard), findsOneWidget);
 
-      // 1b. Sheet d’envoi : 4 périodes.
-      await tester.tap(find.byKey(const Key('send_report_button')));
+      // 1b. Sheet de partage : 4 périodes.
+      await tester.tap(find.byKey(const Key('share_report_button')));
       await tester.pumpAndSettle();
       expect(find.text('Rapport du jour'), findsOneWidget);
       expect(find.text('Rapport hebdo semaine en cours'), findsOneWidget);
@@ -194,11 +194,8 @@ void main() {
         find.text('Rapport hebdo de la semaine précédente'),
         findsOneWidget,
       );
-      expect(
-        find.text('Rapport mensuel du mois précédent'),
-        findsOneWidget,
-      );
-      await tester.tap(find.text('Rapport du jour'));
+      expect(find.text('Rapport mensuel du mois précédent'), findsOneWidget);
+      await tester.tapAt(const Offset(8, 8));
       await tester.pumpAndSettle();
 
       // 2. KPIs issus des commandes clôturées du jour.
@@ -222,10 +219,7 @@ void main() {
       // 3. Graphique + répartition.
       expect(find.text("Évolution du chiffre d'affaires"), findsOneWidget);
       expect(find.text('CA (CDF)'), findsOneWidget);
-      expect(
-        find.text('Répartition des ventes par catégorie'),
-        findsOneWidget,
-      );
+      expect(find.text('Répartition des ventes par catégorie'), findsOneWidget);
       expect(find.text('Plats'), findsOneWidget);
       expect(find.text('Poulet braisé'), findsOneWidget);
       expect(find.text('Riz gras'), findsOneWidget);

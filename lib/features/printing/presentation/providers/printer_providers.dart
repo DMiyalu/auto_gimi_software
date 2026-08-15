@@ -20,3 +20,34 @@ final pairedBluetoothPrintersProvider =
     FutureProvider.autoDispose<List<BluetoothPrinterDevice>>((ref) {
       return ref.watch(bluetoothPrinterServiceProvider).searchDevices();
     });
+
+final currentPrinterStatusProvider = FutureProvider<PrinterConnectionStatus>((
+  ref,
+) async {
+  final service = ref.watch(bluetoothPrinterServiceProvider);
+  final address = await service.selectedPrinterAddress();
+  final name = await service.selectedPrinterName();
+  final connected = address != null && await service.isConnected();
+  return PrinterConnectionStatus(
+    selectedAddress: address,
+    selectedName: name,
+    connected: connected,
+  );
+});
+
+class PrinterConnectionStatus {
+  const PrinterConnectionStatus({
+    required this.selectedAddress,
+    required this.selectedName,
+    required this.connected,
+  });
+
+  final String? selectedAddress;
+  final String? selectedName;
+  final bool connected;
+
+  bool get hasSelectedPrinter =>
+      selectedAddress != null && selectedAddress!.isNotEmpty;
+
+  bool get canPrint => hasSelectedPrinter && connected;
+}

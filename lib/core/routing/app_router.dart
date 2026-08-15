@@ -40,6 +40,7 @@ import '../../features/shell/presentation/screens/app_shell_screen.dart';
 import '../../features/shell/presentation/widgets/more_menu_screen.dart';
 import '../l10n/app_localizations.dart';
 import '../presentation/screens/placeholder_screen.dart';
+import '../presentation/screens/splash_screen.dart';
 import 'routes.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -47,21 +48,22 @@ final routerProvider = Provider<GoRouter>((ref) {
   ref.listen(authStateProvider, (_, __) => refresh.value++);
   ref.listen(userProfileProvider, (_, __) => refresh.value++);
   ref.listen(userEstablishmentsProvider, (_, __) => refresh.value++);
+  ref.listen(currentEstablishmentProvider, (_, __) => refresh.value++);
   ref.listen(signupSuccessPendingProvider, (_, __) => refresh.value++);
 
   return GoRouter(
-    initialLocation: Routes.dashboard,
+    initialLocation: Routes.splash,
     refreshListenable: refresh,
     redirect: (context, state) {
       final auth = ref.read(authStateProvider);
       final profile = ref.read(userProfileProvider);
       final establishments = ref.read(userEstablishmentsProvider);
+      final currentEstablishment = ref.read(currentEstablishmentProvider);
       final location = state.matchedLocation;
-
-      if (auth.isLoading) return null;
 
       final isLoggedIn = auth.valueOrNull != null;
       final onLogin = location == Routes.login;
+      final onSplash = location == Routes.splash;
       final onSignUp = location == Routes.signUp;
       final onSignUpSuccess = location == Routes.signUpSuccess;
       final onAuthScreen = onLogin || onSignUp || onSignUpSuccess;
@@ -73,12 +75,16 @@ final routerProvider = Provider<GoRouter>((ref) {
           location == Routes.invitations ||
           location == Routes.settings;
 
+      if (auth.isLoading) {
+        return onSplash ? null : Routes.splash;
+      }
+
       if (!isLoggedIn) {
         if (onLogin || onSignUp) return null;
         return Routes.login;
       }
 
-      if (profile.isLoading) return null;
+      if (profile.isLoading) return onSplash ? null : Routes.splash;
 
       final loadedProfile = profile.valueOrNull;
       final signupSuccessPending = ref.read(signupSuccessPendingProvider);
@@ -88,7 +94,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         return Routes.signUpSuccess;
       }
 
-      if (establishments.isLoading) return null;
+      if (establishments.isLoading) return onSplash ? null : Routes.splash;
 
       final hasEstablishment =
           (establishments.valueOrNull ?? const []).isNotEmpty;
@@ -97,17 +103,24 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       // Session déjà configurée : reprise directe sur le dernier établissement.
       if (hasEstablishment && hasActiveEstablishment) {
-        if (onAuthScreen || onLanding) return Routes.dashboard;
+        if (!currentEstablishment.hasValue) {
+          return onSplash ? null : Routes.splash;
+        }
+        if (currentEstablishment.valueOrNull == null) {
+          return Routes.establishmentOnboarding;
+        }
+        if (onAuthScreen || onLanding || onSplash) return Routes.dashboard;
         return null;
       }
 
       // Première connexion / pas d'actif : landing (créer, invitations, choisir).
-      if (onAuthScreen) return Routes.establishmentOnboarding;
+      if (onAuthScreen || onSplash) return Routes.establishmentOnboarding;
       if (!onHub) return Routes.establishmentOnboarding;
 
       return null;
     },
     routes: [
+      GoRoute(path: Routes.splash, builder: (_, __) => const SplashScreen()),
       GoRoute(path: Routes.login, builder: (_, __) => const LoginScreen()),
       GoRoute(path: Routes.signUp, builder: (_, __) => const SignUpScreen()),
       GoRoute(

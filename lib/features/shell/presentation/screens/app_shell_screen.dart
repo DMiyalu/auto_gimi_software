@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/presentation/screens/splash_screen.dart';
 import '../../../../core/sync/auto_sync_coordinator.dart';
+import '../../../establishment/presentation/providers/establishment_providers.dart';
 
 /// Point d'ancrage des routes authentifiées : ne dessine plus aucun chrome
 /// (Scaffold/bottom nav) lui-même — chaque écran racine choisit son propre
@@ -17,6 +19,13 @@ class AppShellScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(autoSyncCoordinatorProvider);
+    final establishmentId = ref.watch(currentEstablishmentIdProvider);
+    final establishment = ref.watch(currentEstablishmentProvider);
+    if (establishmentId != null &&
+        establishmentId.isNotEmpty &&
+        !establishment.hasValue) {
+      return const SplashScreen();
+    }
     return child;
   }
 }

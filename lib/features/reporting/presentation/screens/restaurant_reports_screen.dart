@@ -32,23 +32,6 @@ class _RestaurantReportsScreenState
 
   @override
   Widget build(BuildContext context) {
-    final sending = ref.watch(sendRestaurantReportProvider).isLoading;
-
-    ref.listen(sendRestaurantReportProvider, (prev, next) {
-      if (next.hasError) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AuthErrorMapper.message(next.error!))),
-        );
-        return;
-      }
-      final wasLoading = prev?.isLoading ?? false;
-      if (wasLoading && next.hasValue && !next.hasError) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Rapport envoyé par e-mail.')),
-        );
-      }
-    });
-
     return PrimaryScaffold(
       body: ColoredBox(
         color: ReportColors.pageBackground,
@@ -68,37 +51,6 @@ class _RestaurantReportsScreenState
                     ),
                   ),
                 ),
-                FilledButton.icon(
-                  key: const Key('send_report_button'),
-                  onPressed: sending
-                      ? null
-                      : () => _onSendPressed(context, ref),
-                  icon: sending
-                      ? const SizedBox(
-                          width: 14,
-                          height: 14,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Icon(Icons.send_outlined, size: 16),
-                  label: Text(sending ? 'Envoi…' : 'Envoyer'),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: ReportColors.accent,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                    visualDensity: VisualDensity.compact,
-                    textStyle: const TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 13,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
                 OutlinedButton.icon(
                   key: const Key('share_report_button'),
                   onPressed: _sharing ? null : () => _onSharePressed(context),
@@ -138,19 +90,6 @@ class _RestaurantReportsScreenState
         ),
       ),
     );
-  }
-
-  Future<void> _onSendPressed(BuildContext context, WidgetRef ref) async {
-    final option = await _pickReportOption(
-      context: context,
-      title: 'Envoyer le rapport',
-      subtitle: 'Le rapport sera envoyé à l’e-mail du propriétaire.',
-    );
-
-    if (option == null || !context.mounted) return;
-    await ref
-        .read(sendRestaurantReportProvider.notifier)
-        .send(kind: option.kind);
   }
 
   Future<void> _onSharePressed(BuildContext context) async {

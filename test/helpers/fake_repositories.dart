@@ -151,8 +151,16 @@ class FakeEstablishmentRepository implements EstablishmentRepository {
 
   @override
   Stream<Establishment?> watchEstablishment(String establishmentId) async* {
-    yield establishment;
+    yield _establishmentById(establishmentId);
     yield* _establishmentController.stream;
+  }
+
+  Establishment? _establishmentById(String establishmentId) {
+    if (establishment?.id == establishmentId) return establishment;
+    for (final value in establishments) {
+      if (value.id == establishmentId) return value;
+    }
+    return null;
   }
 
   @override
