@@ -217,9 +217,11 @@ class ProduitRepositoryImpl implements ProduitRepository {
     required AppCurrency currency,
     int stock = 0,
     bool stockTrackingEnabled = true,
+    int stockAlertThreshold = defaultProductStockAlertThreshold,
   }) async {
     final trimmedName = _requireName(name, 'produit');
     _requirePrice(price);
+    _requireStockAlertThreshold(stockAlertThreshold);
     final categoryName = await _resolveCategoryName(
       establishmentId,
       categoryId,
@@ -240,6 +242,7 @@ class ProduitRepositoryImpl implements ProduitRepository {
             devise: Value(currency.code),
             stock: Value(stock),
             stockTrackingEnabled: Value(stockTrackingEnabled),
+            stockAlertThreshold: Value(stockAlertThreshold),
             createdAt: now,
             updatedAt: now,
           ),
@@ -254,6 +257,7 @@ class ProduitRepositoryImpl implements ProduitRepository {
       currency: currency,
       stock: stock,
       stockTrackingEnabled: stockTrackingEnabled,
+      stockAlertThreshold: stockAlertThreshold,
       createdAt: now,
       updatedAt: now,
     );
@@ -269,9 +273,11 @@ class ProduitRepositoryImpl implements ProduitRepository {
     required AppCurrency currency,
     int stock = 0,
     bool stockTrackingEnabled = true,
+    int stockAlertThreshold = defaultProductStockAlertThreshold,
   }) async {
     final trimmedName = _requireName(name, 'produit');
     _requirePrice(price);
+    _requireStockAlertThreshold(stockAlertThreshold);
     final existing = await getProduit(establishmentId: establishmentId, id: id);
     if (existing == null) throw StateError('Produit introuvable.');
     final categoryName = await _resolveCategoryName(
@@ -291,6 +297,7 @@ class ProduitRepositoryImpl implements ProduitRepository {
             devise: Value(currency.code),
             stock: Value(stock),
             stockTrackingEnabled: Value(stockTrackingEnabled),
+            stockAlertThreshold: Value(stockAlertThreshold),
             updatedAt: Value(now),
             isDirty: const Value(true),
           ),
@@ -305,6 +312,7 @@ class ProduitRepositoryImpl implements ProduitRepository {
       currency: currency,
       stock: stock,
       stockTrackingEnabled: stockTrackingEnabled,
+      stockAlertThreshold: stockAlertThreshold,
       createdAt: existing.createdAt,
       updatedAt: now,
     );
@@ -391,6 +399,12 @@ class ProduitRepositoryImpl implements ProduitRepository {
     }
   }
 
+  void _requireStockAlertThreshold(int threshold) {
+    if (threshold < 0) {
+      throw ArgumentError("Le seuil d'alerte stock ne peut pas être négatif.");
+    }
+  }
+
   ProductCategoryEntity _categoryFromDrift(ProductCategory row) {
     return ProductCategoryEntity(
       id: row.id,
@@ -411,6 +425,7 @@ class ProduitRepositoryImpl implements ProduitRepository {
       currency: AppCurrency.fromCode(row.devise),
       stock: row.stock,
       stockTrackingEnabled: row.stockTrackingEnabled,
+      stockAlertThreshold: row.stockAlertThreshold,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     );

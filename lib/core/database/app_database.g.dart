@@ -3304,6 +3304,17 @@ class $ProduitsTable extends Produits with TableInfo<$ProduitsTable, Produit> {
     ),
     defaultValue: const Constant(true),
   );
+  static const VerificationMeta _stockAlertThresholdMeta =
+      const VerificationMeta('stockAlertThreshold');
+  @override
+  late final GeneratedColumn<int> stockAlertThreshold = GeneratedColumn<int>(
+    'stock_alert_threshold',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(5),
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -3366,6 +3377,7 @@ class $ProduitsTable extends Produits with TableInfo<$ProduitsTable, Produit> {
     devise,
     stock,
     stockTrackingEnabled,
+    stockAlertThreshold,
     createdAt,
     updatedAt,
     isDeleted,
@@ -3443,6 +3455,15 @@ class $ProduitsTable extends Produits with TableInfo<$ProduitsTable, Produit> {
         ),
       );
     }
+    if (data.containsKey('stock_alert_threshold')) {
+      context.handle(
+        _stockAlertThresholdMeta,
+        stockAlertThreshold.isAcceptableOrUnknown(
+          data['stock_alert_threshold']!,
+          _stockAlertThresholdMeta,
+        ),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -3512,6 +3533,10 @@ class $ProduitsTable extends Produits with TableInfo<$ProduitsTable, Produit> {
         DriftSqlType.bool,
         data['${effectivePrefix}stock_tracking_enabled'],
       )!,
+      stockAlertThreshold: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}stock_alert_threshold'],
+      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -3546,6 +3571,7 @@ class Produit extends DataClass implements Insertable<Produit> {
   final String devise;
   final int stock;
   final bool stockTrackingEnabled;
+  final int stockAlertThreshold;
   final DateTime createdAt;
   final DateTime updatedAt;
   final bool isDeleted;
@@ -3559,6 +3585,7 @@ class Produit extends DataClass implements Insertable<Produit> {
     required this.devise,
     required this.stock,
     required this.stockTrackingEnabled,
+    required this.stockAlertThreshold,
     required this.createdAt,
     required this.updatedAt,
     required this.isDeleted,
@@ -3577,6 +3604,7 @@ class Produit extends DataClass implements Insertable<Produit> {
     map['devise'] = Variable<String>(devise);
     map['stock'] = Variable<int>(stock);
     map['stock_tracking_enabled'] = Variable<bool>(stockTrackingEnabled);
+    map['stock_alert_threshold'] = Variable<int>(stockAlertThreshold);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     map['is_deleted'] = Variable<bool>(isDeleted);
@@ -3596,6 +3624,7 @@ class Produit extends DataClass implements Insertable<Produit> {
       devise: Value(devise),
       stock: Value(stock),
       stockTrackingEnabled: Value(stockTrackingEnabled),
+      stockAlertThreshold: Value(stockAlertThreshold),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
       isDeleted: Value(isDeleted),
@@ -3619,6 +3648,9 @@ class Produit extends DataClass implements Insertable<Produit> {
       stockTrackingEnabled: serializer.fromJson<bool>(
         json['stockTrackingEnabled'],
       ),
+      stockAlertThreshold: serializer.fromJson<int>(
+        json['stockAlertThreshold'],
+      ),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       isDeleted: serializer.fromJson<bool>(json['isDeleted']),
@@ -3637,6 +3669,7 @@ class Produit extends DataClass implements Insertable<Produit> {
       'devise': serializer.toJson<String>(devise),
       'stock': serializer.toJson<int>(stock),
       'stockTrackingEnabled': serializer.toJson<bool>(stockTrackingEnabled),
+      'stockAlertThreshold': serializer.toJson<int>(stockAlertThreshold),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'isDeleted': serializer.toJson<bool>(isDeleted),
@@ -3653,6 +3686,7 @@ class Produit extends DataClass implements Insertable<Produit> {
     String? devise,
     int? stock,
     bool? stockTrackingEnabled,
+    int? stockAlertThreshold,
     DateTime? createdAt,
     DateTime? updatedAt,
     bool? isDeleted,
@@ -3666,6 +3700,7 @@ class Produit extends DataClass implements Insertable<Produit> {
     devise: devise ?? this.devise,
     stock: stock ?? this.stock,
     stockTrackingEnabled: stockTrackingEnabled ?? this.stockTrackingEnabled,
+    stockAlertThreshold: stockAlertThreshold ?? this.stockAlertThreshold,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     isDeleted: isDeleted ?? this.isDeleted,
@@ -3687,6 +3722,9 @@ class Produit extends DataClass implements Insertable<Produit> {
       stockTrackingEnabled: data.stockTrackingEnabled.present
           ? data.stockTrackingEnabled.value
           : this.stockTrackingEnabled,
+      stockAlertThreshold: data.stockAlertThreshold.present
+          ? data.stockAlertThreshold.value
+          : this.stockAlertThreshold,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       isDeleted: data.isDeleted.present ? data.isDeleted.value : this.isDeleted,
@@ -3705,6 +3743,7 @@ class Produit extends DataClass implements Insertable<Produit> {
           ..write('devise: $devise, ')
           ..write('stock: $stock, ')
           ..write('stockTrackingEnabled: $stockTrackingEnabled, ')
+          ..write('stockAlertThreshold: $stockAlertThreshold, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('isDeleted: $isDeleted, ')
@@ -3723,6 +3762,7 @@ class Produit extends DataClass implements Insertable<Produit> {
     devise,
     stock,
     stockTrackingEnabled,
+    stockAlertThreshold,
     createdAt,
     updatedAt,
     isDeleted,
@@ -3740,6 +3780,7 @@ class Produit extends DataClass implements Insertable<Produit> {
           other.devise == this.devise &&
           other.stock == this.stock &&
           other.stockTrackingEnabled == this.stockTrackingEnabled &&
+          other.stockAlertThreshold == this.stockAlertThreshold &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.isDeleted == this.isDeleted &&
@@ -3755,6 +3796,7 @@ class ProduitsCompanion extends UpdateCompanion<Produit> {
   final Value<String> devise;
   final Value<int> stock;
   final Value<bool> stockTrackingEnabled;
+  final Value<int> stockAlertThreshold;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<bool> isDeleted;
@@ -3769,6 +3811,7 @@ class ProduitsCompanion extends UpdateCompanion<Produit> {
     this.devise = const Value.absent(),
     this.stock = const Value.absent(),
     this.stockTrackingEnabled = const Value.absent(),
+    this.stockAlertThreshold = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.isDeleted = const Value.absent(),
@@ -3784,6 +3827,7 @@ class ProduitsCompanion extends UpdateCompanion<Produit> {
     this.devise = const Value.absent(),
     this.stock = const Value.absent(),
     this.stockTrackingEnabled = const Value.absent(),
+    this.stockAlertThreshold = const Value.absent(),
     required DateTime createdAt,
     required DateTime updatedAt,
     this.isDeleted = const Value.absent(),
@@ -3803,6 +3847,7 @@ class ProduitsCompanion extends UpdateCompanion<Produit> {
     Expression<String>? devise,
     Expression<int>? stock,
     Expression<bool>? stockTrackingEnabled,
+    Expression<int>? stockAlertThreshold,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<bool>? isDeleted,
@@ -3819,6 +3864,8 @@ class ProduitsCompanion extends UpdateCompanion<Produit> {
       if (stock != null) 'stock': stock,
       if (stockTrackingEnabled != null)
         'stock_tracking_enabled': stockTrackingEnabled,
+      if (stockAlertThreshold != null)
+        'stock_alert_threshold': stockAlertThreshold,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (isDeleted != null) 'is_deleted': isDeleted,
@@ -3836,6 +3883,7 @@ class ProduitsCompanion extends UpdateCompanion<Produit> {
     Value<String>? devise,
     Value<int>? stock,
     Value<bool>? stockTrackingEnabled,
+    Value<int>? stockAlertThreshold,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<bool>? isDeleted,
@@ -3851,6 +3899,7 @@ class ProduitsCompanion extends UpdateCompanion<Produit> {
       devise: devise ?? this.devise,
       stock: stock ?? this.stock,
       stockTrackingEnabled: stockTrackingEnabled ?? this.stockTrackingEnabled,
+      stockAlertThreshold: stockAlertThreshold ?? this.stockAlertThreshold,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       isDeleted: isDeleted ?? this.isDeleted,
@@ -3888,6 +3937,9 @@ class ProduitsCompanion extends UpdateCompanion<Produit> {
         stockTrackingEnabled.value,
       );
     }
+    if (stockAlertThreshold.present) {
+      map['stock_alert_threshold'] = Variable<int>(stockAlertThreshold.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -3917,6 +3969,7 @@ class ProduitsCompanion extends UpdateCompanion<Produit> {
           ..write('devise: $devise, ')
           ..write('stock: $stock, ')
           ..write('stockTrackingEnabled: $stockTrackingEnabled, ')
+          ..write('stockAlertThreshold: $stockAlertThreshold, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('isDeleted: $isDeleted, ')
@@ -15118,6 +15171,7 @@ typedef $$ProduitsTableCreateCompanionBuilder =
       Value<String> devise,
       Value<int> stock,
       Value<bool> stockTrackingEnabled,
+      Value<int> stockAlertThreshold,
       required DateTime createdAt,
       required DateTime updatedAt,
       Value<bool> isDeleted,
@@ -15134,6 +15188,7 @@ typedef $$ProduitsTableUpdateCompanionBuilder =
       Value<String> devise,
       Value<int> stock,
       Value<bool> stockTrackingEnabled,
+      Value<int> stockAlertThreshold,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<bool> isDeleted,
@@ -15273,6 +15328,11 @@ class $$ProduitsTableFilterComposer
 
   ColumnFilters<bool> get stockTrackingEnabled => $composableBuilder(
     column: $table.stockTrackingEnabled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get stockAlertThreshold => $composableBuilder(
+    column: $table.stockAlertThreshold,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -15439,6 +15499,11 @@ class $$ProduitsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get stockAlertThreshold => $composableBuilder(
+    column: $table.stockAlertThreshold,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -15514,6 +15579,11 @@ class $$ProduitsTableAnnotationComposer
 
   GeneratedColumn<bool> get stockTrackingEnabled => $composableBuilder(
     column: $table.stockTrackingEnabled,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get stockAlertThreshold => $composableBuilder(
+    column: $table.stockAlertThreshold,
     builder: (column) => column,
   );
 
@@ -15670,6 +15740,7 @@ class $$ProduitsTableTableManager
                 Value<String> devise = const Value.absent(),
                 Value<int> stock = const Value.absent(),
                 Value<bool> stockTrackingEnabled = const Value.absent(),
+                Value<int> stockAlertThreshold = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<bool> isDeleted = const Value.absent(),
@@ -15684,6 +15755,7 @@ class $$ProduitsTableTableManager
                 devise: devise,
                 stock: stock,
                 stockTrackingEnabled: stockTrackingEnabled,
+                stockAlertThreshold: stockAlertThreshold,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 isDeleted: isDeleted,
@@ -15700,6 +15772,7 @@ class $$ProduitsTableTableManager
                 Value<String> devise = const Value.absent(),
                 Value<int> stock = const Value.absent(),
                 Value<bool> stockTrackingEnabled = const Value.absent(),
+                Value<int> stockAlertThreshold = const Value.absent(),
                 required DateTime createdAt,
                 required DateTime updatedAt,
                 Value<bool> isDeleted = const Value.absent(),
@@ -15714,6 +15787,7 @@ class $$ProduitsTableTableManager
                 devise: devise,
                 stock: stock,
                 stockTrackingEnabled: stockTrackingEnabled,
+                stockAlertThreshold: stockAlertThreshold,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 isDeleted: isDeleted,

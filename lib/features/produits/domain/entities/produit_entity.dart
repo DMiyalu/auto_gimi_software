@@ -1,5 +1,7 @@
 import '../../../../core/domain/app_currency.dart';
 
+const defaultProductStockAlertThreshold = 5;
+
 /// Produit proposé par le garage, éventuellement rattaché à une catégorie.
 class ProduitEntity {
   const ProduitEntity({
@@ -11,6 +13,7 @@ class ProduitEntity {
     required this.currency,
     required this.stock,
     required this.stockTrackingEnabled,
+    this.stockAlertThreshold = defaultProductStockAlertThreshold,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -23,11 +26,12 @@ class ProduitEntity {
   final AppCurrency currency;
   final int stock;
   final bool stockTrackingEnabled;
+  final int stockAlertThreshold;
   final DateTime createdAt;
   final DateTime updatedAt;
 
   ProductStockStatus get stockStatus => stockTrackingEnabled
-      ? ProductStockStatus.of(stock)
+      ? ProductStockStatus.of(stock, alertThreshold: stockAlertThreshold)
       : ProductStockStatus.notTracked;
 }
 
@@ -40,9 +44,12 @@ enum ProductStockStatus {
   low,
   inStock;
 
-  static ProductStockStatus of(int stock) {
+  static ProductStockStatus of(
+    int stock, {
+    int alertThreshold = defaultProductStockAlertThreshold,
+  }) {
     if (stock <= 0) return ProductStockStatus.outOfStock;
-    if (stock < 5) return ProductStockStatus.low;
+    if (stock <= alertThreshold) return ProductStockStatus.low;
     return ProductStockStatus.inStock;
   }
 }

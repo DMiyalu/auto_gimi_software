@@ -329,6 +329,7 @@ class ProduitSyncAdapter implements SyncAdapter {
           'currency': row.devise,
           'stock': row.stock,
           'stockTrackingEnabled': row.stockTrackingEnabled,
+          'stockAlertThreshold': row.stockAlertThreshold,
           'createdAt': Timestamp.fromDate(row.createdAt),
           'updatedAt': Timestamp.fromDate(row.updatedAt),
           'isDeleted': row.isDeleted,
@@ -385,6 +386,9 @@ class ProduitSyncAdapter implements SyncAdapter {
                 stock: Value((data['stock'] as num?)?.toInt() ?? 0),
                 stockTrackingEnabled: Value(
                   data['stockTrackingEnabled'] as bool? ?? true,
+                ),
+                stockAlertThreshold: Value(
+                  (data['stockAlertThreshold'] as num?)?.toInt() ?? 5,
                 ),
                 createdAt: Value(
                   readFirestoreDate(data['createdAt']) ?? remoteUpdatedAt,

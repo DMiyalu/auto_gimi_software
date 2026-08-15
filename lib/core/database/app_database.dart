@@ -53,7 +53,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 14;
+  int get schemaVersion => 15;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -93,6 +93,9 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 14) {
         await _addCommandePaymentMethodColumn(m);
+      }
+      if (from < 15) {
+        await _addProductStockAlertThresholdColumn(m);
       }
     },
     beforeOpen: (details) async {
@@ -220,6 +223,11 @@ class AppDatabase extends _$AppDatabase {
   /// produits existants, puis laisse chaque produit désactiver ce contrôle.
   Future<void> _addProductStockTrackingColumn(Migrator m) async {
     await m.addColumn(produits, produits.stockTrackingEnabled);
+  }
+
+  /// Seuil local de notification stock faible par produit.
+  Future<void> _addProductStockAlertThresholdColumn(Migrator m) async {
+    await m.addColumn(produits, produits.stockAlertThreshold);
   }
 
   /// Mémorise le moyen choisi au moment de l'encaissement d'une commande.

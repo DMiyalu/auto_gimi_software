@@ -43,6 +43,7 @@ abstract class ProduitRepository {
     required AppCurrency currency,
     int stock = 0,
     bool stockTrackingEnabled = true,
+    int stockAlertThreshold = defaultProductStockAlertThreshold,
   });
 
   Future<ProduitEntity> updateProduit({
@@ -54,6 +55,7 @@ abstract class ProduitRepository {
     required AppCurrency currency,
     int stock = 0,
     bool stockTrackingEnabled = true,
+    int stockAlertThreshold = defaultProductStockAlertThreshold,
   });
 
   Future<void> updateStockTracking({

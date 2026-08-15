@@ -13,6 +13,8 @@ class Produits extends Table {
   IntColumn get stock => integer().withDefault(const Constant(0))();
   BoolColumn get stockTrackingEnabled =>
       boolean().withDefault(const Constant(true))();
+  IntColumn get stockAlertThreshold =>
+      integer().withDefault(const Constant(5))();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
   BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();

@@ -107,10 +107,17 @@ class _PhoneNumberFieldBodyState extends State<_PhoneNumberFieldBody> {
     final errorText = widget.field.errorText;
 
     return InputDecorator(
-      decoration: authFieldDecoration(
-        labelText: widget.labelText,
-        prefixIcon: Icons.phone_outlined,
-      ).copyWith(errorText: errorText),
+      decoration:
+          authFieldDecoration(
+            labelText: widget.labelText,
+            prefixIcon: Icons.phone_outlined,
+          ).copyWith(
+            errorText: errorText,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 15,
+            ),
+          ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -167,17 +174,12 @@ class _CountrySelector extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: Colors.white,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(10),
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
         onTap: enabled ? () => _showCountryPicker(context) : null,
-        child: Container(
-          constraints: const BoxConstraints(minHeight: 42),
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-          decoration: BoxDecoration(
-            border: Border.all(color: const Color(0xFFE8EAF0)),
-            borderRadius: BorderRadius.circular(12),
-          ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [

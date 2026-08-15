@@ -8,6 +8,7 @@ import '../../../../core/domain/app_currency.dart';
 import '../../../../core/l10n/app_localizations.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../establishment/presentation/widgets/catalog_permission_gate.dart';
+import '../../domain/entities/produit_entity.dart';
 import '../providers/produit_providers.dart';
 
 class ProduitFormScreen extends ConsumerStatefulWidget {
@@ -24,6 +25,9 @@ class _ProduitFormScreenState extends ConsumerState<ProduitFormScreen> {
   final _nameController = TextEditingController();
   final _priceController = TextEditingController();
   final _stockController = TextEditingController(text: '0');
+  final _stockAlertThresholdController = TextEditingController(
+    text: '$defaultProductStockAlertThreshold',
+  );
   String? _categoryId;
   AppCurrency _currency = AppCurrency.cdf;
   bool _stockTrackingEnabled = false;
@@ -38,6 +42,7 @@ class _ProduitFormScreenState extends ConsumerState<ProduitFormScreen> {
     _nameController.dispose();
     _priceController.dispose();
     _stockController.dispose();
+    _stockAlertThresholdController.dispose();
     super.dispose();
   }
 
@@ -49,6 +54,8 @@ class _ProduitFormScreenState extends ConsumerState<ProduitFormScreen> {
       _nameController.text = produit.name;
       _priceController.text = produit.price.toString();
       _stockController.text = produit.stock.toString();
+      _stockAlertThresholdController.text = produit.stockAlertThreshold
+          .toString();
       _categoryId = produit.categoryId;
       _currency = produit.currency;
       _stockTrackingEnabled = produit.stockTrackingEnabled;
@@ -63,6 +70,9 @@ class _ProduitFormScreenState extends ConsumerState<ProduitFormScreen> {
     final price = double.tryParse(_priceController.text.replaceAll(',', '.'));
     if (price == null) return;
     final stock = int.tryParse(_stockController.text) ?? 0;
+    final stockAlertThreshold =
+        int.tryParse(_stockAlertThresholdController.text) ??
+        defaultProductStockAlertThreshold;
 
     final controller = ref.read(produitControllerProvider.notifier);
     if (_isEditing) {
@@ -74,6 +84,7 @@ class _ProduitFormScreenState extends ConsumerState<ProduitFormScreen> {
         currency: _currency,
         stock: stock,
         stockTrackingEnabled: _stockTrackingEnabled,
+        stockAlertThreshold: stockAlertThreshold,
       );
     } else {
       await controller.createProduit(
@@ -83,6 +94,7 @@ class _ProduitFormScreenState extends ConsumerState<ProduitFormScreen> {
         currency: _currency,
         stock: stock,
         stockTrackingEnabled: _stockTrackingEnabled,
+        stockAlertThreshold: stockAlertThreshold,
       );
     }
 
@@ -417,6 +429,43 @@ class _ProduitFormScreenState extends ConsumerState<ProduitFormScreen> {
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
+                              ),
+                      ),
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 220),
+                        switchInCurve: Curves.easeOutCubic,
+                        switchOutCurve: Curves.easeInCubic,
+                        child: _stockTrackingEnabled
+                            ? Padding(
+                                key: const ValueKey(
+                                  'stock_alert_threshold_field',
+                                ),
+                                padding: const EdgeInsets.only(top: 16),
+                                child: TextFormField(
+                                  controller: _stockAlertThresholdController,
+                                  decoration: const InputDecoration(
+                                    labelText: "Seuil d'alerte stock",
+                                  ),
+                                  keyboardType: TextInputType.number,
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.digitsOnly,
+                                  ],
+                                  style: const TextStyle(
+                                    color: AppColors.zuriNavy,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  enabled: !formState.isLoading,
+                                  validator: (value) {
+                                    final parsed = int.tryParse(value ?? '');
+                                    if (parsed == null || parsed < 0) {
+                                      return 'Seuil invalide';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              )
+                            : const SizedBox.shrink(
+                                key: ValueKey('stock_alert_threshold_hidden'),
                               ),
                       ),
                       const SizedBox(height: 32),

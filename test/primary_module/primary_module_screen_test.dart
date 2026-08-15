@@ -122,6 +122,30 @@ void main() {
     await tester.pump(const Duration(milliseconds: 1));
   });
 
+  testWidgets(
+    'le bouton de l’état vide des commandes ouvre les options d’action',
+    (tester) async {
+      final database = AppDatabase(NativeDatabase.memory());
+      addTearDown(database.close);
+
+      await _pump(tester, BusinessCategory.restaurant, database: database);
+
+      await tester.tap(find.text('Nouvelle commande'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.widgetWithText(ListTile, 'Nouvelle commande'),
+        findsOneWidget,
+      );
+      expect(find.widgetWithText(ListTile, 'Réservation'), findsOneWidget);
+      expect(find.widgetWithText(ListTile, 'À emporter'), findsOneWidget);
+      expect(find.widgetWithText(ListTile, 'Livraison'), findsOneWidget);
+
+      await tester.pumpWidget(const SizedBox());
+      await tester.pump(const Duration(milliseconds: 1));
+    },
+  );
+
   testWidgets('affiche les vraies commandes pour un restaurant', (
     tester,
   ) async {
