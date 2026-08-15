@@ -340,7 +340,7 @@ class _GoogleAuthButton extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const _GoogleMark(),
+              const GoogleMark(),
               const SizedBox(width: 10),
               Text(
                 label,
@@ -353,23 +353,6 @@ class _GoogleAuthButton extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _GoogleMark extends StatelessWidget {
-  const _GoogleMark();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Text(
-      'G',
-      style: TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.w800,
-        color: Color(0xFF4285F4),
-        height: 1,
       ),
     );
   }

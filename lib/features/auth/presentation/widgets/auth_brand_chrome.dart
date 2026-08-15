@@ -82,18 +82,19 @@ class _AuthBackdropPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final topRight = Paint()
-      ..shader = RadialGradient(
-        colors: [
-          AppColors.zuriPink.withValues(alpha: 0.18),
-          AppColors.zuriMagenta.withValues(alpha: 0.07),
-          Colors.transparent,
-        ],
-      ).createShader(
-        Rect.fromCircle(
-          center: Offset(size.width, 0),
-          radius: size.width * 0.65,
-        ),
-      );
+      ..shader =
+          RadialGradient(
+            colors: [
+              AppColors.zuriPink.withValues(alpha: 0.18),
+              AppColors.zuriMagenta.withValues(alpha: 0.07),
+              Colors.transparent,
+            ],
+          ).createShader(
+            Rect.fromCircle(
+              center: Offset(size.width, 0),
+              radius: size.width * 0.65,
+            ),
+          );
     canvas.drawCircle(
       Offset(size.width * 0.92, size.height * 0.06),
       size.width * 0.5,
@@ -101,18 +102,19 @@ class _AuthBackdropPainter extends CustomPainter {
     );
 
     final bottomLeft = Paint()
-      ..shader = RadialGradient(
-        colors: [
-          AppColors.zuriMagenta.withValues(alpha: 0.14),
-          AppColors.zuriPink.withValues(alpha: 0.05),
-          Colors.transparent,
-        ],
-      ).createShader(
-        Rect.fromCircle(
-          center: Offset(0, size.height),
-          radius: size.width * 0.7,
-        ),
-      );
+      ..shader =
+          RadialGradient(
+            colors: [
+              AppColors.zuriMagenta.withValues(alpha: 0.14),
+              AppColors.zuriPink.withValues(alpha: 0.05),
+              Colors.transparent,
+            ],
+          ).createShader(
+            Rect.fromCircle(
+              center: Offset(0, size.height),
+              radius: size.width * 0.7,
+            ),
+          );
     canvas.drawCircle(
       Offset(size.width * 0.08, size.height * 0.94),
       size.width * 0.55,
@@ -176,11 +178,7 @@ class AuthBrandHeader extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     return Column(
       children: [
-        Image.asset(
-          'public/images/logo.png',
-          height: 88,
-          fit: BoxFit.contain,
-        ),
+        Image.asset('public/images/logo.png', height: 88, fit: BoxFit.contain),
         const SizedBox(height: 6),
         Text.rich(
           TextSpan(
@@ -235,10 +233,7 @@ class SignUpStepper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final labels = [
-      l10n.signUpStepInfos,
-      l10n.signUpStepDone,
-    ];
+    final labels = [l10n.signUpStepInfos, l10n.signUpStepDone];
 
     return Row(
       children: [
@@ -259,8 +254,8 @@ class SignUpStepper extends StatelessWidget {
             state: currentStep > i + 1
                 ? _StepState.done
                 : currentStep == i + 1
-                    ? _StepState.active
-                    : _StepState.todo,
+                ? _StepState.active
+                : _StepState.todo,
           ),
         ],
       ],
@@ -297,7 +292,9 @@ class _StepNode extends StatelessWidget {
             shape: BoxShape.circle,
             color: active ? AppColors.zuriRed : AppColors.zuriWhite,
             border: Border.all(
-              color: (active || done) ? AppColors.zuriRed : const Color(0xFFD5D8E2),
+              color: (active || done)
+                  ? AppColors.zuriRed
+                  : const Color(0xFFD5D8E2),
               width: 1.6,
             ),
           ),
@@ -422,6 +419,62 @@ class AuthSecurityFooter extends StatelessWidget {
       ],
     );
   }
+}
+
+class GoogleMark extends StatelessWidget {
+  const GoogleMark({super.key, this.size = 18});
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      size: Size.square(size),
+      painter: const _GoogleMarkPainter(),
+    );
+  }
+}
+
+class _GoogleMarkPainter extends CustomPainter {
+  const _GoogleMarkPainter();
+
+  static const _blue = Color(0xFF4285F4);
+  static const _red = Color(0xFFEA4335);
+  static const _yellow = Color(0xFFFBBC05);
+  static const _green = Color(0xFF34A853);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final stroke = size.width * 0.19;
+    final rect = Rect.fromLTWH(
+      stroke / 2,
+      stroke / 2,
+      size.width - stroke,
+      size.height - stroke,
+    );
+    Paint segment(Color color) => Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = stroke
+      ..strokeCap = StrokeCap.round;
+
+    canvas.drawArc(rect, -0.07, 1.38, false, segment(_blue));
+    canvas.drawArc(rect, 1.32, 1.18, false, segment(_green));
+    canvas.drawArc(rect, 2.50, 1.04, false, segment(_yellow));
+    canvas.drawArc(rect, 3.54, 1.55, false, segment(_red));
+
+    final centerY = size.height * 0.53;
+    final startX = size.width * 0.53;
+    final endX = size.width * 0.91;
+    canvas.drawLine(
+      Offset(startX, centerY),
+      Offset(endX, centerY),
+      segment(_blue)..strokeCap = StrokeCap.square,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 String formatPhoneForDisplay(String raw) {

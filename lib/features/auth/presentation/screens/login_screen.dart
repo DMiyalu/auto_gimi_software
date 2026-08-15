@@ -9,6 +9,7 @@ import '../../../../core/presentation/widgets/phone_number_field.dart';
 import '../../../../core/routing/routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../providers/auth_providers.dart';
+import '../widgets/auth_brand_chrome.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -264,7 +265,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             Expanded(
                               child: _SocialLoginButton(
                                 label: l10n.continueWithGoogle,
-                                leading: const _GoogleMark(),
+                                leading: const GoogleMark(),
                                 onPressed: authState.isLoading
                                     ? null
                                     : _signInWithGoogle,
@@ -430,23 +431,6 @@ class _SocialLoginButton extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _GoogleMark extends StatelessWidget {
-  const _GoogleMark();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Text(
-      'G',
-      style: TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.w800,
-        color: Color(0xFF4285F4),
-        height: 1,
       ),
     );
   }
