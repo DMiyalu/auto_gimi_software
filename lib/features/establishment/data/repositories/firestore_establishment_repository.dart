@@ -34,14 +34,18 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
     required String uid,
     required String fullName,
     required String phone,
+    String? email,
   }) async {
     final normalizedPhone = PhoneAuthMapper.normalize(phone);
     final batch = _firestore.batch();
     final userRef = _users.doc(uid);
+    final normalizedEmail = email?.trim();
 
     batch.set(userRef, {
       'phone': normalizedPhone,
       'fullName': fullName.trim(),
+      if (normalizedEmail != null && normalizedEmail.isNotEmpty)
+        'email': normalizedEmail,
       'establishmentId': '',
       'establishments': const <String>[],
       'establishmentIds': const <String>[],
@@ -52,10 +56,12 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
       'createdAt': FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),
     });
-    batch.set(_phoneIndex.doc(normalizedPhone), {
-      'uid': uid,
-      'updatedAt': FieldValue.serverTimestamp(),
-    });
+    if (normalizedPhone.isNotEmpty) {
+      batch.set(_phoneIndex.doc(normalizedPhone), {
+        'uid': uid,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    }
 
     await batch.commit();
   }

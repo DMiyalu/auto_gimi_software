@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/domain/business_category.dart';
 import '../../../../core/routing/routes.dart';
 import '../../../primary_module/controllers/primary_module_providers.dart';
 
@@ -54,7 +53,7 @@ class PrimaryBottomNavigation extends ConsumerWidget {
     final selectedIndex = _selectedIndex(destinations.map((d) => d.route));
     final safeSelectedIndex = selectedIndex < 0 ? 0 : selectedIndex;
 
-    if (config.category == BusinessCategory.restaurant) {
+    if (config.category.usesRestaurantWorkflow) {
       return SafeArea(
         minimum: const EdgeInsets.fromLTRB(10, 0, 10, 8),
         child: Container(
@@ -140,11 +139,7 @@ class _RestaurantNavItem extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            icon,
-            size: 26,
-            color: itemColor,
-          ),
+          Icon(icon, size: 26, color: itemColor),
           const SizedBox(height: 4),
           Text(
             label,

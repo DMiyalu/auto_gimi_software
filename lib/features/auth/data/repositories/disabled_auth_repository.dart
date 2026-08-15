@@ -12,20 +12,18 @@ class DisabledAuthRepository implements AuthRepository {
   User? get currentUser => null;
 
   @override
-  Future<void> signIn({
-    required String phone,
-    required String password,
-  }) async {
-    throw StateError(
-      'Firebase non configuré. Exécutez: flutterfire configure',
-    );
+  Future<void> signIn({required String phone, required String password}) async {
+    throw StateError('Firebase non configuré. Exécutez: flutterfire configure');
+  }
+
+  @override
+  Future<void> signInWithGoogle() async {
+    throw StateError('Firebase non configuré. Exécutez: flutterfire configure');
   }
 
   @override
   Future<void> signUp(SignUpRequest request) async {
-    throw StateError(
-      'Firebase non configuré. Exécutez: flutterfire configure',
-    );
+    throw StateError('Firebase non configuré. Exécutez: flutterfire configure');
   }
 
   @override

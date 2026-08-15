@@ -46,6 +46,10 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
         );
   }
 
+  Future<void> _signInWithGoogle() async {
+    await ref.read(authControllerProvider.notifier).signInWithGoogle();
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -216,6 +220,15 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                           onPressed: authState.isLoading ? null : _submit,
                         ),
                         const SizedBox(height: 22),
+                        _AuthDivider(label: l10n.continueWith),
+                        const SizedBox(height: 16),
+                        _GoogleAuthButton(
+                          label: l10n.continueWithGoogle,
+                          onPressed: authState.isLoading
+                              ? null
+                              : _signInWithGoogle,
+                        ),
+                        const SizedBox(height: 22),
                         Row(
                           children: [
                             const Expanded(
@@ -264,6 +277,99 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _AuthDivider extends StatelessWidget {
+  const _AuthDivider({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        const Expanded(child: Divider(color: Color(0xFFE4E6EE))),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: Text(
+            label,
+            style: const TextStyle(
+              color: authMutedColor,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+        const Expanded(child: Divider(color: Color(0xFFE4E6EE))),
+      ],
+    );
+  }
+}
+
+class _GoogleAuthButton extends StatelessWidget {
+  const _GoogleAuthButton({required this.label, required this.onPressed});
+
+  final String label;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.zuriWhite,
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(14),
+        child: Ink(
+          height: 52,
+          decoration: BoxDecoration(
+            color: AppColors.zuriWhite,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: const Color(0xFFE8EAF0)),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.zuriNavy.withValues(alpha: 0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const _GoogleMark(),
+              const SizedBox(width: 10),
+              Text(
+                label,
+                style: const TextStyle(
+                  color: AppColors.zuriNavy,
+                  fontSize: 14.5,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _GoogleMark extends StatelessWidget {
+  const _GoogleMark();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Text(
+      'G',
+      style: TextStyle(
+        fontSize: 18,
+        fontWeight: FontWeight.w800,
+        color: Color(0xFF4285F4),
+        height: 1,
       ),
     );
   }

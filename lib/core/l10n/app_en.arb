@@ -162,6 +162,7 @@
   "passwordsDoNotMatch": "Passwords do not match",
   "passwordTooShort": "At least 6 characters",
   "categoryRestaurant": "Restaurant",
+  "categoryShop": "Shop / Store",
   "categoryGarageAuto": "Auto repair shop",
   "categoryPressing": "Dry cleaning",
   "categorySanitation": "Sanitation service",

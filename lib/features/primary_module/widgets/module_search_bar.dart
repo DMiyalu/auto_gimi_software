@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/domain/business_category.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../controllers/primary_module_providers.dart';
@@ -32,32 +31,34 @@ class _ModuleSearchBarState extends ConsumerState<ModuleSearchBar> {
   @override
   Widget build(BuildContext context) {
     final config = ref.watch(primaryModuleConfigProvider);
-    final isRestaurant = config.category == BusinessCategory.restaurant;
-    final radius = isRestaurant ? 16.0 : AppRadius.chip;
+    final usesRestaurantWorkflow = config.category.usesRestaurantWorkflow;
+    final radius = usesRestaurantWorkflow ? 16.0 : AppRadius.chip;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 18),
       child: SizedBox(
-        height: isRestaurant ? 52 : 56,
+        height: usesRestaurantWorkflow ? 52 : 56,
         child: TextField(
           controller: _controller,
           onChanged: (value) =>
               ref.read(moduleSearchQueryProvider.notifier).state = value,
           style: TextStyle(
             fontSize: 16,
-            color: isRestaurant ? AppColors.zuriNavy : AppColors.textPrimary,
+            color: usesRestaurantWorkflow
+                ? AppColors.zuriNavy
+                : AppColors.textPrimary,
           ),
           decoration: InputDecoration(
             hintText: config.searchPlaceholder,
             hintStyle: TextStyle(
               color: AppColors.textMuted,
-              fontSize: isRestaurant ? 15 : 16,
+              fontSize: usesRestaurantWorkflow ? 15 : 16,
               fontWeight: FontWeight.w500,
             ),
             prefixIcon: Icon(
               Icons.search_rounded,
-              color: isRestaurant ? AppColors.textMuted : AppColors.textMuted,
-              size: isRestaurant ? 24 : 28,
+              color: AppColors.textMuted,
+              size: usesRestaurantWorkflow ? 24 : 28,
             ),
             suffixIcon: ValueListenableBuilder<TextEditingValue>(
               valueListenable: _controller,

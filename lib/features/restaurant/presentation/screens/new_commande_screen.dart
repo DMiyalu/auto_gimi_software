@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/auth/auth_error_mapper.dart';
+import '../../../../core/domain/business_category.dart';
 import '../../../../core/routing/routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -24,9 +25,16 @@ class _NewCommandeScreenState extends ConsumerState<NewCommandeScreen> {
   int? _selectedTable;
 
   Future<void> _submit() async {
+    final category = ref
+        .read(currentEstablishmentProvider)
+        .valueOrNull
+        ?.category;
     final controller = ref.read(commandeControllerProvider.notifier);
     final commandeId = await controller.createCommande(
-      context: _contextFromTable(_selectedTable),
+      context: _contextFromSelection(
+        _selectedTable,
+        isShop: category == BusinessCategory.shop,
+      ),
     );
 
     if (!mounted) return;
@@ -34,13 +42,21 @@ class _NewCommandeScreenState extends ConsumerState<NewCommandeScreen> {
     if (!state.hasError) context.go(Routes.commandeDetailPath(commandeId));
   }
 
-  String? _contextFromTable(int? tableNumber) =>
-      tableNumber == null ? null : 'Table $tableNumber';
+  String? _contextFromSelection(int? value, {required bool isShop}) =>
+      value == null ? null : '${isShop ? 'Caisse' : 'Table'} $value';
 
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(commandeControllerProvider);
     final canCreateActivities = ref.watch(canCreateActivitiesProvider);
+    final category = ref
+        .watch(currentEstablishmentProvider)
+        .valueOrNull
+        ?.category;
+    final isShop = category == BusinessCategory.shop;
+    final heroIcon = isShop
+        ? Icons.storefront_outlined
+        : Icons.table_restaurant_outlined;
 
     ref.listen(commandeControllerProvider, (_, next) {
       if (next.hasError && mounted) {
@@ -82,7 +98,7 @@ class _NewCommandeScreenState extends ConsumerState<NewCommandeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Icon(
-                    Icons.table_restaurant_outlined,
+                    heroIcon,
                     size: 64,
                     color: Theme.of(context).colorScheme.primary,
                   ),
@@ -96,7 +112,9 @@ class _NewCommandeScreenState extends ConsumerState<NewCommandeScreen> {
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
-                    'Le numéro de table est optionnel. Vous pourrez ajouter les produits et le client ensuite.',
+                    isShop
+                        ? 'La caisse est optionnelle. Vous pourrez ajouter les articles et le client ensuite.'
+                        : 'Le numéro de table est optionnel. Vous pourrez ajouter les produits et le client ensuite.',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: const Color(0xFF707792),
@@ -105,8 +123,9 @@ class _NewCommandeScreenState extends ConsumerState<NewCommandeScreen> {
                   const SizedBox(height: AppSpacing.lg),
                   _TableSelectorField(
                     selectedTable: _selectedTable,
+                    isShop: isShop,
                     enabled: !state.isLoading,
-                    onTap: () => _showTablePicker(context),
+                    onTap: () => _showTablePicker(context, isShop: isShop),
                   ),
                   const SizedBox(height: 24),
                   FilledButton.icon(
@@ -129,7 +148,7 @@ class _NewCommandeScreenState extends ConsumerState<NewCommandeScreen> {
     );
   }
 
-  void _showTablePicker(BuildContext context) {
+  void _showTablePicker(BuildContext context, {required bool isShop}) {
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: Colors.transparent,
@@ -139,6 +158,7 @@ class _NewCommandeScreenState extends ConsumerState<NewCommandeScreen> {
         return _TablePickerSheet(
           selectedTable: _selectedTable,
           tableNumbers: _tableNumbers,
+          isShop: isShop,
           onSelected: (value) {
             setState(() => _selectedTable = value);
             Navigator.of(sheetContext).pop();
@@ -152,17 +172,24 @@ class _NewCommandeScreenState extends ConsumerState<NewCommandeScreen> {
 class _TableSelectorField extends StatelessWidget {
   const _TableSelectorField({
     required this.selectedTable,
+    required this.isShop,
     required this.enabled,
     required this.onTap,
   });
 
   final int? selectedTable;
+  final bool isShop;
   final bool enabled;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final label = selectedTable == null ? 'Sans table' : 'Table $selectedTable';
+    final label = selectedTable == null
+        ? (isShop ? 'Sans caisse' : 'Sans table')
+        : '${isShop ? 'Caisse' : 'Table'} $selectedTable';
+    final icon = isShop
+        ? Icons.point_of_sale_outlined
+        : Icons.table_restaurant_outlined;
 
     return AnimatedOpacity(
       duration: const Duration(milliseconds: 180),
@@ -199,10 +226,7 @@ class _TableSelectorField extends StatelessWidget {
                     color: AppColors.violetPrincipal.withValues(alpha: 0.10),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
-                    Icons.table_restaurant_outlined,
-                    color: AppColors.violetPrincipal,
-                  ),
+                  child: Icon(icon, color: AppColors.violetPrincipal),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -210,8 +234,8 @@ class _TableSelectorField extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text(
-                        'Table',
+                      Text(
+                        isShop ? 'Caisse' : 'Table',
                         style: TextStyle(
                           color: Color(0xFF707792),
                           fontSize: 13,
@@ -259,16 +283,21 @@ class _TablePickerSheet extends StatelessWidget {
   const _TablePickerSheet({
     required this.selectedTable,
     required this.tableNumbers,
+    required this.isShop,
     required this.onSelected,
   });
 
   final int? selectedTable;
   final List<int> tableNumbers;
+  final bool isShop;
   final ValueChanged<int?> onSelected;
 
   @override
   Widget build(BuildContext context) {
     final options = <int?>[null, ...tableNumbers];
+    final icon = isShop
+        ? Icons.point_of_sale_outlined
+        : Icons.table_restaurant_outlined;
 
     return SafeArea(
       top: false,
@@ -324,18 +353,17 @@ class _TablePickerSheet extends StatelessWidget {
                           ),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(
-                          Icons.table_restaurant_outlined,
-                          color: AppColors.violetPrincipal,
-                        ),
+                        child: Icon(icon, color: AppColors.violetPrincipal),
                       ),
                       const SizedBox(width: 14),
-                      const Expanded(
+                      Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Choisir une table',
+                              isShop
+                                  ? 'Choisir une caisse'
+                                  : 'Choisir une table',
                               style: TextStyle(
                                 color: Color(0xFF101529),
                                 fontSize: 20,
@@ -344,7 +372,9 @@ class _TablePickerSheet extends StatelessWidget {
                             ),
                             SizedBox(height: 4),
                             Text(
-                              '5 choix visibles, faites défiler pour la suite.',
+                              isShop
+                                  ? 'Associez la commande à une caisse si utile.'
+                                  : '5 choix visibles, faites défiler pour la suite.',
                               style: TextStyle(
                                 color: Color(0xFF707792),
                                 fontSize: 14,
@@ -376,6 +406,7 @@ class _TablePickerSheet extends StatelessWidget {
                           return _TableOptionTile(
                             table: table,
                             selected: table == selectedTable,
+                            isShop: isShop,
                             index: index,
                             onTap: () => onSelected(table),
                           );
@@ -397,21 +428,27 @@ class _TableOptionTile extends StatelessWidget {
   const _TableOptionTile({
     required this.table,
     required this.selected,
+    required this.isShop,
     required this.index,
     required this.onTap,
   });
 
   final int? table;
   final bool selected;
+  final bool isShop;
   final int index;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final label = table == null ? 'Sans table' : 'Table $table';
+    final label = table == null
+        ? (isShop ? 'Sans caisse' : 'Sans table')
+        : '${isShop ? 'Caisse' : 'Table'} $table';
     final subtitle = table == null
-        ? 'Pour livraison, à emporter ou commande libre'
-        : 'Service en salle';
+        ? (isShop
+              ? 'Pour retrait, livraison ou vente libre'
+              : 'Pour livraison, à emporter ou commande libre')
+        : (isShop ? 'Vente en boutique' : 'Service en salle');
 
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: 1),
@@ -440,8 +477,12 @@ class _TableOptionTile extends StatelessWidget {
                 children: [
                   Icon(
                     table == null
-                        ? Icons.more_horiz_rounded
-                        : Icons.table_restaurant_outlined,
+                        ? (isShop
+                              ? Icons.shopping_bag_outlined
+                              : Icons.more_horiz_rounded)
+                        : (isShop
+                              ? Icons.point_of_sale_outlined
+                              : Icons.table_restaurant_outlined),
                     color: selected ? Colors.white : AppColors.violetPrincipal,
                   ),
                   const SizedBox(width: 12),

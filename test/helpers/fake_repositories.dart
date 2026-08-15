@@ -40,6 +40,13 @@ class FakeAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<void> signInWithGoogle() async {
+    if (_currentUser == null) {
+      throw StateError('Aucun utilisateur de test configuré.');
+    }
+  }
+
+  @override
   Future<void> signUp(SignUpRequest request) async {
     if (_currentUser == null) {
       throw StateError('Aucun utilisateur de test configuré.');
@@ -93,12 +100,14 @@ class FakeEstablishmentRepository implements EstablishmentRepository {
     required String uid,
     required String fullName,
     required String phone,
+    String? email,
   }) async {
     setProfile(
       UserProfile(
         uid: uid,
         phone: phone,
         fullName: fullName,
+        email: email,
         establishmentId: '',
         role: 'agent',
         phoneVerified: true,

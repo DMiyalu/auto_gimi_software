@@ -39,6 +39,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         .signIn(_phone, _passwordController.text);
   }
 
+  Future<void> _signInWithGoogle() async {
+    await ref.read(authControllerProvider.notifier).signInWithGoogle();
+  }
+
   InputDecoration _fieldDecoration({
     required String labelText,
     required IconData prefixIcon,
@@ -101,6 +105,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       body: Stack(
         children: [
           const Positioned.fill(child: _LoginBackdrop()),
+          const Positioned.fill(child: _LoginDecorativeIcons()),
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
@@ -260,27 +265,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               child: _SocialLoginButton(
                                 label: l10n.continueWithGoogle,
                                 leading: const _GoogleMark(),
-                                onPressed: authState.isLoading ? null : () {},
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: _SocialLoginButton(
-                                label: l10n.continueWithMicrosoft,
-                                leading: const _MicrosoftMark(),
-                                onPressed: authState.isLoading ? null : () {},
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: _SocialLoginButton(
-                                label: l10n.continueWithApple,
-                                leading: const Icon(
-                                  Icons.apple,
-                                  size: 18,
-                                  color: AppColors.zuriNavy,
-                                ),
-                                onPressed: authState.isLoading ? null : () {},
+                                onPressed: authState.isLoading
+                                    ? null
+                                    : _signInWithGoogle,
                               ),
                             ),
                           ],
@@ -465,41 +452,6 @@ class _GoogleMark extends StatelessWidget {
   }
 }
 
-class _MicrosoftMark extends StatelessWidget {
-  const _MicrosoftMark();
-
-  @override
-  Widget build(BuildContext context) {
-    const size = 7.0;
-    const gap = 1.5;
-    Widget tile(Color color) =>
-        Container(width: size, height: size, color: color);
-    return SizedBox(
-      width: size * 2 + gap,
-      height: size * 2 + gap,
-      child: Column(
-        children: [
-          Row(
-            children: [
-              tile(const Color(0xFFF25022)),
-              const SizedBox(width: gap),
-              tile(const Color(0xFF7FBA00)),
-            ],
-          ),
-          const SizedBox(height: gap),
-          Row(
-            children: [
-              tile(const Color(0xFF00A4EF)),
-              const SizedBox(width: gap),
-              tile(const Color(0xFFFFB900)),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _LoginBackdrop extends StatelessWidget {
   const _LoginBackdrop();
 
@@ -514,9 +466,118 @@ class _LoginBackdrop extends StatelessWidget {
   }
 }
 
+class _LoginDecorativeIcons extends StatelessWidget {
+  const _LoginDecorativeIcons();
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final width = constraints.maxWidth;
+          final height = constraints.maxHeight;
+          final tileSize = (width * 0.105).clamp(42.0, 58.0);
+
+          return Stack(
+            children: [
+              _DecorativeIconTile(
+                icon: Icons.shopping_bag_outlined,
+                left: width * 0.14,
+                top: height * 0.11,
+                size: tileSize,
+                angle: -0.25,
+              ),
+              _DecorativeIconTile(
+                icon: Icons.bakery_dining_outlined,
+                left: width * 0.75,
+                top: height * 0.13,
+                size: tileSize,
+                angle: -0.18,
+              ),
+              _DecorativeIconTile(
+                icon: Icons.directions_car_outlined,
+                left: width * 0.08,
+                top: height * 0.31,
+                size: tileSize,
+                angle: -0.20,
+              ),
+              _DecorativeIconTile(
+                icon: Icons.local_pharmacy_outlined,
+                left: width * 0.81,
+                top: height * 0.25,
+                size: tileSize,
+                angle: 0.18,
+              ),
+              _DecorativeIconTile(
+                icon: Icons.storefront_outlined,
+                left: width * 0.78,
+                top: height * 0.38,
+                size: tileSize,
+                angle: 0.14,
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _DecorativeIconTile extends StatelessWidget {
+  const _DecorativeIconTile({
+    required this.icon,
+    required this.left,
+    required this.top,
+    required this.size,
+    required this.angle,
+  });
+
+  final IconData icon;
+  final double left;
+  final double top;
+  final double size;
+  final double angle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      left: left,
+      top: top,
+      child: Transform.rotate(
+        angle: angle,
+        child: Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.40),
+            borderRadius: BorderRadius.circular(size * 0.28),
+            border: Border.all(
+              color: AppColors.zuriRed.withValues(alpha: 0.08),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.zuriRed.withValues(alpha: 0.025),
+                blurRadius: 18,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Icon(
+            icon,
+            color: AppColors.zuriRed.withValues(alpha: 0.26),
+            size: size * 0.42,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _LoginBackdropPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
+    _drawWaves(canvas, size);
+
     final pink = Paint()
       ..shader =
           RadialGradient(
@@ -574,101 +635,68 @@ class _LoginBackdropPainter extends CustomPainter {
       size.width * 0.55,
       bottom,
     );
-
-    final iconPaint = Paint()
-      ..color = AppColors.zuriNavy.withValues(alpha: 0.045)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.4;
-
-    _drawBag(canvas, Offset(size.width * 0.14, size.height * 0.16), iconPaint);
-    _drawCar(canvas, Offset(size.width * 0.78, size.height * 0.14), iconPaint);
-    _drawChefHat(
-      canvas,
-      Offset(size.width * 0.22, size.height * 0.28),
-      iconPaint,
-    );
-    _drawCross(
-      canvas,
-      Offset(size.width * 0.86, size.height * 0.26),
-      iconPaint,
-    );
-    _drawStore(
-      canvas,
-      Offset(size.width * 0.48, size.height * 0.11),
-      iconPaint,
-    );
   }
 
-  void _drawBag(Canvas canvas, Offset c, Paint paint) {
-    final path = Path()
-      ..moveTo(c.dx - 8, c.dy - 2)
-      ..lineTo(c.dx - 8, c.dy + 9)
-      ..lineTo(c.dx + 8, c.dy + 9)
-      ..lineTo(c.dx + 8, c.dy - 2)
+  void _drawWaves(Canvas canvas, Size size) {
+    final topWave = Paint()
+      ..color = AppColors.zuriPink.withValues(alpha: 0.14)
+      ..style = PaintingStyle.fill;
+    final topPath = Path()
+      ..moveTo(size.width * 0.60, 0)
+      ..cubicTo(
+        size.width * 0.70,
+        size.height * 0.06,
+        size.width * 0.86,
+        size.height * 0.03,
+        size.width,
+        size.height * 0.16,
+      )
+      ..lineTo(size.width, 0)
       ..close();
-    canvas.drawPath(path, paint);
-    canvas.drawArc(
-      Rect.fromCenter(center: Offset(c.dx, c.dy - 2), width: 16, height: 12),
-      3.14,
-      3.14,
-      false,
-      paint,
-    );
-  }
+    canvas.drawPath(topPath, topWave);
 
-  void _drawCar(Canvas canvas, Offset c, Paint paint) {
-    final body = RRect.fromRectAndRadius(
-      Rect.fromCenter(center: c, width: 22, height: 10),
-      const Radius.circular(3),
-    );
-    canvas.drawRRect(body, paint);
-    canvas.drawCircle(Offset(c.dx - 6, c.dy + 6), 2.2, paint);
-    canvas.drawCircle(Offset(c.dx + 6, c.dy + 6), 2.2, paint);
-  }
-
-  void _drawChefHat(Canvas canvas, Offset c, Paint paint) {
-    canvas.drawArc(
-      Rect.fromCenter(center: Offset(c.dx, c.dy - 2), width: 18, height: 14),
-      3.4,
-      2.5,
-      false,
-      paint,
-    );
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromCenter(center: Offset(c.dx, c.dy + 6), width: 14, height: 6),
-        const Radius.circular(2),
-      ),
-      paint,
-    );
-  }
-
-  void _drawCross(Canvas canvas, Offset c, Paint paint) {
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromCenter(center: c, width: 6, height: 16),
-        const Radius.circular(1.5),
-      ),
-      paint,
-    );
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromCenter(center: c, width: 16, height: 6),
-        const Radius.circular(1.5),
-      ),
-      paint,
-    );
-  }
-
-  void _drawStore(Canvas canvas, Offset c, Paint paint) {
-    final path = Path()
-      ..moveTo(c.dx - 10, c.dy)
-      ..lineTo(c.dx - 10, c.dy + 10)
-      ..lineTo(c.dx + 10, c.dy + 10)
-      ..lineTo(c.dx + 10, c.dy)
-      ..lineTo(c.dx, c.dy - 8)
+    final bottomWave = Paint()
+      ..color = AppColors.zuriPink.withValues(alpha: 0.16)
+      ..style = PaintingStyle.fill;
+    final bottomPath = Path()
+      ..moveTo(0, size.height * 0.88)
+      ..cubicTo(
+        size.width * 0.18,
+        size.height * 0.90,
+        size.width * 0.10,
+        size.height * 0.99,
+        size.width * 0.38,
+        size.height * 0.98,
+      )
+      ..cubicTo(
+        size.width * 0.62,
+        size.height * 0.98,
+        size.width * 0.78,
+        size.height * 0.91,
+        size.width,
+        size.height * 0.92,
+      )
+      ..lineTo(size.width, size.height)
+      ..lineTo(0, size.height)
       ..close();
-    canvas.drawPath(path, paint);
+    canvas.drawPath(bottomPath, bottomWave);
+
+    final bottomAccent = Paint()
+      ..color = AppColors.zuriMagenta.withValues(alpha: 0.18)
+      ..style = PaintingStyle.fill;
+    final accentPath = Path()
+      ..moveTo(0, size.height * 0.93)
+      ..cubicTo(
+        size.width * 0.16,
+        size.height * 0.96,
+        size.width * 0.13,
+        size.height,
+        size.width * 0.38,
+        size.height,
+      )
+      ..lineTo(0, size.height)
+      ..close();
+    canvas.drawPath(accentPath, bottomAccent);
   }
 
   @override

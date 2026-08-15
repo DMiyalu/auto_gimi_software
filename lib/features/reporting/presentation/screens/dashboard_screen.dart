@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/domain/business_category.dart';
 import '../../../../core/l10n/app_localizations.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/currency_formatter.dart';
@@ -15,7 +14,7 @@ class DashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final category = ref.watch(activeBusinessCategoryProvider);
-    if (category == BusinessCategory.restaurant) {
+    if (category.usesRestaurantWorkflow) {
       return const RestaurantReportsScreen();
     }
 

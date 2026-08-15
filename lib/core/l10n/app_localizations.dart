@@ -860,6 +860,12 @@ abstract class AppLocalizations {
   /// **'Restaurant'**
   String get categoryRestaurant;
 
+  /// No description provided for @categoryShop.
+  ///
+  /// In en, this message translates to:
+  /// **'Shop / Store'**
+  String get categoryShop;
+
   /// No description provided for @categoryGarageAuto.
   ///
   /// In en, this message translates to:

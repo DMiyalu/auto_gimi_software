@@ -45,8 +45,25 @@ class _ProductCategoryFormScreenState
     'Menu enfant',
   ];
 
-  List<String> _availableSuggestions(Set<String> existingNames) {
-    return _restaurantCategorySuggestions
+  static const _shopCategorySuggestions = [
+    'Épicerie',
+    'Boissons',
+    'Produits frais',
+    'Hygiène',
+    'Beauté',
+    'Maison',
+    'Mode',
+    'Accessoires',
+    'Électronique',
+    'Papeterie',
+    'Promotions',
+  ];
+
+  List<String> _availableSuggestions(
+    Set<String> existingNames,
+    List<String> source,
+  ) {
+    return source
         .where((name) => !existingNames.contains(name.toLowerCase()))
         .toList();
   }
@@ -161,8 +178,13 @@ class _ProductCategoryFormScreenState
     final formState = ref.watch(produitControllerProvider);
     final categoriesAsync = ref.watch(productCategoriesProvider);
     final establishment = ref.watch(currentEstablishmentProvider).valueOrNull;
-    final showRestaurantSuggestions =
-        !_isEditing && establishment?.category == BusinessCategory.restaurant;
+    final category = establishment?.category;
+    final suggestionSource = switch (category) {
+      BusinessCategory.restaurant => _restaurantCategorySuggestions,
+      BusinessCategory.shop => _shopCategorySuggestions,
+      _ => const <String>[],
+    };
+    final showSuggestions = !_isEditing && suggestionSource.isNotEmpty;
 
     if (_isEditing) {
       ref.watch(productCategoryByIdProvider(widget.categoryId!));
@@ -189,8 +211,8 @@ class _ProductCategoryFormScreenState
             final existingNames = categories
                 .map((category) => category.name.toLowerCase())
                 .toSet();
-            final suggestions = showRestaurantSuggestions
-                ? _availableSuggestions(existingNames)
+            final suggestions = showSuggestions
+                ? _availableSuggestions(existingNames, suggestionSource)
                 : const <String>[];
             final hasCategories = categories.isNotEmpty;
 

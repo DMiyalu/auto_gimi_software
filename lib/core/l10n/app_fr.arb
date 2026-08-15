@@ -162,6 +162,7 @@
   "passwordsDoNotMatch": "Les mots de passe ne correspondent pas",
   "passwordTooShort": "6 caractères minimum",
   "categoryRestaurant": "Restaurant",
+  "categoryShop": "Boutique / Magasin",
   "categoryGarageAuto": "Garage Auto-Mobile",
   "categoryPressing": "Pressing",
   "categorySanitation": "Service Assainissement",

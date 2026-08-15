@@ -10,6 +10,7 @@ abstract class EstablishmentRepository {
     required String uid,
     required String fullName,
     required String phone,
+    String? email,
   });
 
   Future<Establishment> createOwnedEstablishment({

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/domain/business_category.dart';
 import '../../../core/theme/app_colors.dart';
 import '../controllers/primary_module_providers.dart';
 
@@ -15,15 +14,16 @@ class StatusFilters extends ConsumerWidget {
     final config = ref.watch(primaryModuleConfigProvider);
     final items = ref.watch(activityListProvider);
     final selected = ref.watch(moduleSelectedFilterProvider);
-    final isRestaurant = config.category == BusinessCategory.restaurant;
+    final usesRestaurantWorkflow = config.category.usesRestaurantWorkflow;
 
     return SizedBox(
-      height: isRestaurant ? 44 : 48,
+      height: usesRestaurantWorkflow ? 44 : 48,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 18),
         itemCount: config.statusFilters.length,
-        separatorBuilder: (_, _) => SizedBox(width: isRestaurant ? 8 : 8),
+        separatorBuilder: (_, _) =>
+            SizedBox(width: usesRestaurantWorkflow ? 8 : 8),
         itemBuilder: (context, index) {
           final option = config.statusFilters[index];
           final isSelected = option.key == selected;
@@ -33,29 +33,29 @@ class StatusFilters extends ConsumerWidget {
 
           final dotColor = switch (option.key) {
             'en_cours' || 'en_attente' => const Color(0xFFFF8A00),
-            'a_payer' || 'en_preparation' => AppColors.zuriRed,
+            'a_payer' || 'en_preparation' => config.primaryColor,
             'cloturee' || 'pretes' || 'terminees' => const Color(0xFF16A34A),
             'annulees' => Colors.grey,
             'livraison' => AppColors.zuriMagenta,
             _ => config.primaryColor,
           };
 
-          if (isRestaurant) {
+          if (usesRestaurantWorkflow) {
             return Material(
               key: Key('status_filter_${option.key}'),
-              color: isSelected ? AppColors.zuriRed : AppColors.zuriWhite,
+              color: isSelected ? config.primaryColor : AppColors.zuriWhite,
               borderRadius: BorderRadius.circular(22),
               child: InkWell(
                 borderRadius: BorderRadius.circular(22),
-                onTap: () => ref
-                    .read(moduleSelectedFilterProvider.notifier)
-                    .state = option.key,
+                onTap: () =>
+                    ref.read(moduleSelectedFilterProvider.notifier).state =
+                        option.key,
                 child: Ink(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(22),
                     border: Border.all(
                       color: isSelected
-                          ? AppColors.zuriRed
+                          ? config.primaryColor
                           : const Color(0xFFE6E8EF),
                     ),
                     boxShadow: isSelected
@@ -83,8 +83,9 @@ class StatusFilters extends ConsumerWidget {
                                 ? AppColors.zuriWhite
                                 : AppColors.zuriNavy,
                             fontSize: 14,
-                            fontWeight:
-                                isSelected ? FontWeight.w800 : FontWeight.w600,
+                            fontWeight: isSelected
+                                ? FontWeight.w800
+                                : FontWeight.w600,
                           ),
                         ),
                         if (hasItems && option.key != 'all') ...[

@@ -16,6 +16,7 @@ class DisabledEstablishmentRepository implements EstablishmentRepository {
     required String uid,
     required String fullName,
     required String phone,
+    String? email,
   }) async => _disabled();
 
   @override

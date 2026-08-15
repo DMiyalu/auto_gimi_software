@@ -414,6 +414,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get categoryRestaurant => 'Restaurant';
 
   @override
+  String get categoryShop => 'Boutique / Magasin';
+
+  @override
   String get categoryGarageAuto => 'Garage Auto-Mobile';
 
   @override

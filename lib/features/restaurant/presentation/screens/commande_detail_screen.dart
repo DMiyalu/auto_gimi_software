@@ -11,6 +11,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/auth/auth_error_mapper.dart';
 import '../../../../core/auth/phone_auth_mapper.dart';
 import '../../../../core/domain/app_currency.dart';
+import '../../../../core/domain/business_category.dart';
 import '../../../../core/domain/country_dial_code.dart';
 import '../../../../core/routing/routes.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -68,6 +69,10 @@ class _CommandeDetailScreenState extends ConsumerState<CommandeDetailScreen> {
         ref.watch(commandeLinesProvider(widget.commandeId)).valueOrNull ??
         const <LigneCommandeEntity>[];
     final state = ref.watch(commandeControllerProvider);
+    final category = ref
+        .watch(currentEstablishmentProvider)
+        .valueOrNull
+        ?.category;
 
     ref.listen(commandeControllerProvider, (_, next) {
       if (next.hasError && mounted) {
@@ -111,6 +116,7 @@ class _CommandeDetailScreenState extends ConsumerState<CommandeDetailScreen> {
                   children: [
                     _DetailHeader(
                       commande: item,
+                      category: category,
                       onBack: () => context.canPop()
                           ? context.pop()
                           : context.go(Routes.dashboard),
@@ -364,6 +370,7 @@ class _CommandeDetailScreenState extends ConsumerState<CommandeDetailScreen> {
 class _DetailHeader extends StatelessWidget {
   const _DetailHeader({
     required this.commande,
+    required this.category,
     required this.onBack,
     required this.onMore,
     required this.onPrint,
@@ -371,6 +378,7 @@ class _DetailHeader extends StatelessWidget {
   });
 
   final CommandeEntity commande;
+  final BusinessCategory? category;
   final VoidCallback onBack;
   final VoidCallback onMore;
   final VoidCallback onPrint;
@@ -379,7 +387,7 @@ class _DetailHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final title = commande.context ?? commande.reference;
-    final accent = _accentForTitle(title);
+    final accent = _accentForTitle(title, category);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(18, 22, 18, 28),
@@ -394,7 +402,11 @@ class _DetailHeader extends StatelessWidget {
           CircleAvatar(
             radius: 34,
             backgroundColor: accent.withValues(alpha: 0.12),
-            child: Icon(_iconForTitle(title), color: accent, size: 36),
+            child: Icon(
+              _iconForTitle(title, category),
+              color: accent,
+              size: 36,
+            ),
           ),
           const SizedBox(width: 18),
           Expanded(
@@ -453,17 +465,27 @@ class _DetailHeader extends StatelessWidget {
     );
   }
 
-  static IconData _iconForTitle(String title) {
+  static IconData _iconForTitle(String title, BusinessCategory? category) {
+    final isShop = category == BusinessCategory.shop;
     final lower = title.toLowerCase();
-    if (lower.contains('livraison')) return Icons.delivery_dining_outlined;
+    if (lower.contains('livraison')) {
+      return isShop
+          ? Icons.local_shipping_outlined
+          : Icons.delivery_dining_outlined;
+    }
     if (lower.contains('emporter')) return Icons.shopping_bag_outlined;
+    if (isShop) return Icons.storefront_outlined;
     return Icons.table_restaurant_outlined;
   }
 
-  static Color _accentForTitle(String title) {
+  static Color _accentForTitle(String title, BusinessCategory? category) {
+    final isShop = category == BusinessCategory.shop;
     final lower = title.toLowerCase();
-    if (lower.contains('livraison')) return AppColors.zuriMagenta;
+    if (lower.contains('livraison')) {
+      return isShop ? const Color(0xFF0F766E) : AppColors.zuriMagenta;
+    }
     if (lower.contains('emporter')) return AppColors.zuriPink;
+    if (isShop) return const Color(0xFF0F766E);
     return AppColors.zuriRed;
   }
 }

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-import '../../../core/domain/business_category.dart';
 import '../../../core/presentation/widgets/domain_card.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -32,7 +31,7 @@ class ActivityCard extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final config = ref.watch(primaryModuleConfigProvider);
 
-    if (config.category == BusinessCategory.restaurant) {
+    if (config.category.usesRestaurantWorkflow) {
       return _RestaurantActivityCard(
         item: item,
         onTap: onTap,

@@ -48,9 +48,11 @@ class ActivityListNotifier extends Notifier<List<ActivityItem>> {
       final summaries = ref.watch(prestationsSummaryProvider).valueOrNull ?? [];
       return summaries.map(_fromPrestationSummary).toList();
     }
-    if (category == BusinessCategory.restaurant) {
+    if (category.usesRestaurantWorkflow) {
       final commandes = ref.watch(commandesProvider).valueOrNull ?? [];
-      return commandes.map(_fromCommande).toList();
+      return commandes
+          .map((commande) => _fromCommande(commande, category))
+          .toList();
     }
     return const [];
   }
@@ -76,15 +78,18 @@ class ActivityListNotifier extends Notifier<List<ActivityItem>> {
     );
   }
 
-  ActivityItem _fromCommande(CommandeEntity commande) {
+  ActivityItem _fromCommande(
+    CommandeEntity commande,
+    BusinessCategory category,
+  ) {
     final contextLabel = commande.context?.trim();
     final hasContext = contextLabel != null && contextLabel.isNotEmpty;
-    final visual = _commandeVisualFor(contextLabel);
+    final visual = _commandeVisualFor(contextLabel, category);
 
     return ActivityItem(
       id: commande.id,
       title: hasContext ? contextLabel : commande.reference,
-      subtitle: hasContext ? commande.reference : 'Commande restaurant',
+      subtitle: hasContext ? commande.reference : 'Commande',
       time: commande.createdAt,
       statusKey: commande.statusKey,
       statusLabel: commande.statusLabel,
@@ -96,19 +101,28 @@ class ActivityListNotifier extends Notifier<List<ActivityItem>> {
     );
   }
 
-  ({IconData icon, Color accent}) _commandeVisualFor(String? context) {
+  ({IconData icon, Color accent}) _commandeVisualFor(
+    String? context,
+    BusinessCategory category,
+  ) {
+    final isShop = category == BusinessCategory.shop;
     final lower = (context ?? '').toLowerCase();
     if (lower.contains('livraison')) {
       return (
-        icon: Icons.delivery_dining_outlined,
-        accent: AppColors.zuriRed,
+        icon: isShop
+            ? Icons.local_shipping_outlined
+            : Icons.delivery_dining_outlined,
+        accent: isShop ? const Color(0xFF0F766E) : AppColors.zuriRed,
       );
     }
-    if (lower.contains('emporter')) {
+    if (lower.contains('emporter') || lower.contains('retrait')) {
       return (
         icon: Icons.shopping_bag_outlined,
         accent: const Color(0xFF22C55E),
       );
+    }
+    if (isShop) {
+      return (icon: Icons.storefront_outlined, accent: const Color(0xFF0F766E));
     }
     // Table / salle par défaut
     return (
@@ -149,8 +163,10 @@ class ActivityListNotifier extends Notifier<List<ActivityItem>> {
 Color _statusColorFor(String key) {
   return switch (key) {
     'en_attente' => const Color(0xFFFF8A00),
-    'en_preparation' || 'en_cours' || 'diagnostic' || 'planifiees' =>
-      AppColors.zuriRed,
+    'en_preparation' ||
+    'en_cours' ||
+    'diagnostic' ||
+    'planifiees' => AppColors.zuriRed,
     'pretes' || 'terminees' || 'cloturee' => const Color(0xFF16A34A),
     'livraison' || 'a_payer' => AppColors.zuriMagenta,
     'annulees' => Colors.grey,

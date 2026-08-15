@@ -10,6 +10,8 @@ import {
   type ReportKind,
 } from "./periods";
 
+const REPORTABLE_CATEGORIES = ["restaurant", "shop"] as const;
+
 export interface SendReportsResult {
   scanned: number;
   sent: number;
@@ -142,8 +144,14 @@ export async function sendRestaurantReports(params: {
       return result;
     }
     const data = doc.data()!;
-    if (data.category !== "restaurant") {
-      result.errors.push("L’établissement n’est pas un restaurant.");
+    if (
+      !REPORTABLE_CATEGORIES.includes(
+        data.category as (typeof REPORTABLE_CATEGORIES)[number],
+      )
+    ) {
+      result.errors.push(
+        "L’établissement n’utilise pas le workflow commandes.",
+      );
       return result;
     }
     await processOne({
@@ -162,7 +170,7 @@ export async function sendRestaurantReports(params: {
 
   const snap = await params.db
     .collection("establishments")
-    .where("category", "==", "restaurant")
+    .where("category", "in", REPORTABLE_CATEGORIES)
     .get();
   for (const doc of snap.docs) {
     const data = doc.data();

@@ -200,10 +200,7 @@ class _EstablishmentCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(
-                Icons.chevron_right_rounded,
-                color: Color(0xFF8A90A5),
-              ),
+              const Icon(Icons.chevron_right_rounded, color: Color(0xFF8A90A5)),
             ],
           ),
         ),
@@ -339,10 +336,7 @@ class _MenuTile extends StatelessWidget {
               ),
             ],
             const SizedBox(width: 4),
-            const Icon(
-              Icons.chevron_right_rounded,
-              color: Color(0xFF8A90A5),
-            ),
+            const Icon(Icons.chevron_right_rounded, color: Color(0xFF8A90A5)),
           ],
         ),
       ),
@@ -353,6 +347,7 @@ class _MenuTile extends StatelessWidget {
 Color _categoryAccent(BusinessCategory category) {
   return switch (category) {
     BusinessCategory.restaurant => AppColors.zuriRed,
+    BusinessCategory.shop => const Color(0xFF0F766E),
     BusinessCategory.garageAuto => const Color(0xFFF57C00),
     BusinessCategory.sanitation => const Color(0xFF2E7D32),
     BusinessCategory.pharmacy => const Color(0xFF7B1FA2),

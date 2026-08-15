@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/auth/auth_error_mapper.dart';
-import '../../../core/domain/business_category.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/routing/routes.dart';
 import '../../../core/theme/app_colors.dart';
@@ -30,14 +29,12 @@ class BusinessHeader extends ConsumerWidget {
     final memberships =
         ref.watch(userMembershipsProvider).valueOrNull ?? const [];
     final profile = ref.watch(userProfileProvider).valueOrNull;
-    final isRestaurant = config.category == BusinessCategory.restaurant;
+    final usesRestaurantWorkflow = config.category.usesRestaurantWorkflow;
     final hasSystemTopInset = MediaQuery.paddingOf(context).top > 0;
 
     ref.listen(establishmentControllerProvider, (_, next) {
       if (next.hasError) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(AuthErrorMapper.message(next.error!))),
         );
       }
@@ -49,14 +46,14 @@ class BusinessHeader extends ConsumerWidget {
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
-        isRestaurant ? 18 : AppSpacing.sm,
-        isRestaurant ? (hasSystemTopInset ? 22 : 8) : AppSpacing.xs,
-        isRestaurant ? 18 : AppSpacing.sm,
-        isRestaurant ? 16 : AppSpacing.xs,
+        usesRestaurantWorkflow ? 18 : AppSpacing.sm,
+        usesRestaurantWorkflow ? (hasSystemTopInset ? 22 : 8) : AppSpacing.xs,
+        usesRestaurantWorkflow ? 18 : AppSpacing.sm,
+        usesRestaurantWorkflow ? 16 : AppSpacing.xs,
       ),
       child: Row(
         children: [
-          if (isRestaurant)
+          if (usesRestaurantWorkflow)
             _EstablishmentBrandLogo(establishment: establishment, size: 48)
           else
             CircleAvatar(
@@ -68,7 +65,7 @@ class BusinessHeader extends ConsumerWidget {
                 size: 24,
               ),
             ),
-          SizedBox(width: isRestaurant ? 14 : AppSpacing.xs),
+          SizedBox(width: usesRestaurantWorkflow ? 14 : AppSpacing.xs),
           Expanded(
             child: InkWell(
               borderRadius: BorderRadius.circular(AppRadius.card),
@@ -89,9 +86,9 @@ class BusinessHeader extends ConsumerWidget {
                       child: Text(
                         name,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontSize: isRestaurant ? 20 : null,
+                          fontSize: usesRestaurantWorkflow ? 20 : null,
                           fontWeight: FontWeight.w800,
-                          color: isRestaurant
+                          color: usesRestaurantWorkflow
                               ? AppColors.zuriNavy
                               : const Color(0xFF101529),
                           height: 1.05,
@@ -103,7 +100,7 @@ class BusinessHeader extends ConsumerWidget {
                     Icon(
                       Icons.keyboard_arrow_down_rounded,
                       size: 22,
-                      color: isRestaurant
+                      color: usesRestaurantWorkflow
                           ? AppColors.zuriNavy
                           : const Color(0xFF101529),
                     ),
@@ -122,12 +119,12 @@ class BusinessHeader extends ConsumerWidget {
               role: role,
             ),
             child: CircleAvatar(
-              radius: isRestaurant ? 24 : 20,
+              radius: usesRestaurantWorkflow ? 24 : 20,
               backgroundColor: const Color(0xFFEFF1F5),
               child: Text(
                 initials,
                 style: TextStyle(
-                  color: isRestaurant ? AppColors.zuriNavy : null,
+                  color: usesRestaurantWorkflow ? AppColors.zuriNavy : null,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -315,9 +312,7 @@ class _UserProfileSheetState extends ConsumerState<_UserProfileSheet> {
     _nameController = TextEditingController(
       text: widget.profile?.fullName ?? '',
     );
-    _emailController = TextEditingController(
-      text: widget.profile?.email ?? '',
-    );
+    _emailController = TextEditingController(text: widget.profile?.email ?? '');
   }
 
   @override
@@ -338,18 +333,18 @@ class _UserProfileSheetState extends ConsumerState<_UserProfileSheet> {
     final state = ref.read(establishmentControllerProvider);
     if (!state.hasError) {
       setState(() => _editingName = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Nom mis à jour.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Nom mis à jour.')));
     }
   }
 
   Future<void> _saveEmail() async {
     final email = _emailController.text.trim();
     if (!UserProfile.isValidReportEmail(email)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Adresse e-mail invalide.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Adresse e-mail invalide.')));
       return;
     }
 
@@ -360,20 +355,20 @@ class _UserProfileSheetState extends ConsumerState<_UserProfileSheet> {
     final state = ref.read(establishmentControllerProvider);
     if (!state.hasError) {
       setState(() => _editingEmail = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('E-mail mis à jour.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('E-mail mis à jour.')));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final profile = ref.watch(userProfileProvider).valueOrNull ?? widget.profile;
+    final profile =
+        ref.watch(userProfileProvider).valueOrNull ?? widget.profile;
     final establishment =
         ref.watch(currentEstablishmentProvider).valueOrNull ??
         widget.establishment;
-    final role =
-        ref.watch(activeEstablishmentRoleProvider) ?? widget.role;
+    final role = ref.watch(activeEstablishmentRoleProvider) ?? widget.role;
     final loading = ref.watch(establishmentControllerProvider).isLoading;
     final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
     final hasReportEmail = profile?.hasReportEmail ?? false;
@@ -398,9 +393,9 @@ class _UserProfileSheetState extends ConsumerState<_UserProfileSheet> {
             const SizedBox(height: 16),
             Text(
               'Mon profil',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w800,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
             ),
             if (!hasReportEmail) ...[
               const SizedBox(height: 12),
@@ -551,9 +546,7 @@ class _UserProfileSheetState extends ConsumerState<_UserProfileSheet> {
                   hasReportEmail
                       ? Icons.email_outlined
                       : Icons.mark_email_unread_outlined,
-                  color: hasReportEmail
-                      ? null
-                      : const Color(0xFFB76E00),
+                  color: hasReportEmail ? null : const Color(0xFFB76E00),
                 ),
                 title: Text(
                   hasReportEmail ? profile!.email!.trim() : 'E-mail manquant',
@@ -579,9 +572,9 @@ class _UserProfileSheetState extends ConsumerState<_UserProfileSheet> {
             const Divider(height: 28),
             Text(
               'Établissement en cours',
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: const Color(0xFF7B819B),
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.labelLarge?.copyWith(color: const Color(0xFF7B819B)),
             ),
             const SizedBox(height: 8),
             ListTile(

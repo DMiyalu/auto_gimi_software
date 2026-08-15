@@ -12,6 +12,7 @@ import '../models/activity_item.dart';
 import 'activity_card.dart';
 import 'activity_card_actions_sheet.dart';
 import '../config/business_module_config.dart';
+import 'module_fab.dart';
 
 /// Liste principale de l'activité métier — recherche + filtre déjà
 /// appliqués en amont par [filteredActivityListProvider].
@@ -22,7 +23,7 @@ class ActivityList extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final items = ref.watch(filteredActivityListProvider);
     final config = ref.watch(primaryModuleConfigProvider);
-    final isRestaurant = config.category == BusinessCategory.restaurant;
+    final usesRestaurantWorkflow = config.category.usesRestaurantWorkflow;
 
     if (items.isEmpty) {
       return _EmptyState(config: config);
@@ -54,7 +55,7 @@ class ActivityList extends ConsumerWidget {
                     context.push(Routes.prestationDetailPath(item.id));
                     return;
                   }
-                  if (config.category == BusinessCategory.restaurant) {
+                  if (config.category.usesRestaurantWorkflow) {
                     context.push(Routes.commandeDetailPath(item.id));
                     return;
                   }
@@ -66,7 +67,7 @@ class ActivityList extends ConsumerWidget {
           );
         }
 
-        final list = isRestaurant
+        final list = usesRestaurantWorkflow
             ? SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(18, 0, 18, 120),
                 child: Column(
@@ -94,7 +95,7 @@ class ActivityList extends ConsumerWidget {
 
         final content = Column(
           children: [
-            if (isRestaurant)
+            if (usesRestaurantWorkflow)
               Padding(
                 padding: const EdgeInsets.fromLTRB(18, 0, 18, 14),
                 child: Row(
@@ -111,7 +112,7 @@ class ActivityList extends ConsumerWidget {
                     Text(
                       '${items.length} commande${items.length > 1 ? 's' : ''}',
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: AppColors.zuriRed,
+                        color: config.primaryColor,
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
                       ),
@@ -248,7 +249,11 @@ class _EmptyState extends StatelessWidget {
                   if (primaryAction != null) ...[
                     const SizedBox(height: 20),
                     FilledButton.icon(
-                      onPressed: () => context.push(primaryAction.route!),
+                      onPressed: () => showModuleFabActionsSheet(
+                        context,
+                        config.fabActions,
+                        config.primaryColor,
+                      ),
                       icon: Icon(primaryAction.icon),
                       label: Text(primaryAction.label),
                       style: FilledButton.styleFrom(
@@ -276,6 +281,11 @@ class _EmptyState extends StatelessWidget {
         title: 'Votre salle est prête à accueillir sa première commande',
         subtitle:
             'Créez une commande en quelques secondes, puis ajoutez les produits au fil du service.',
+      ),
+      BusinessCategory.shop => const _EmptyCopy(
+        title: 'Votre boutique est prête pour sa première commande',
+        subtitle:
+            'Créez une commande, ajoutez les articles, puis encaissez depuis le même parcours.',
       ),
       BusinessCategory.garageAuto => const _EmptyCopy(
         title: 'Votre atelier est prêt pour la première prestation',

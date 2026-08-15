@@ -14,6 +14,7 @@ abstract final class BusinessModuleConfigs {
     return switch (category) {
       BusinessCategory.garageAuto => garage,
       BusinessCategory.restaurant => restaurant,
+      BusinessCategory.shop => shop,
       BusinessCategory.sanitation => sanitation,
       _ => _genericFallback(category),
     };
@@ -102,6 +103,50 @@ abstract final class BusinessModuleConfigs {
       FabActionConfig(label: 'Réservation', icon: Icons.event_seat_outlined),
       FabActionConfig(label: 'À emporter', icon: Icons.shopping_bag_outlined),
       FabActionConfig(label: 'Livraison', icon: Icons.delivery_dining_outlined),
+    ],
+    moreMenuItems: const [
+      MoreMenuItemConfig(
+        label: 'Inventaires',
+        icon: Icons.inventory_2_outlined,
+        route: Routes.inventories,
+      ),
+      MoreMenuItemConfig(
+        label: 'Services',
+        icon: Icons.room_service_outlined,
+        route: Routes.services,
+      ),
+    ],
+  );
+
+  static final shop = BusinessModuleConfig(
+    category: BusinessCategory.shop,
+    primaryModuleLabel: 'Commandes',
+    searchPlaceholder: 'Rechercher une commande, un client, un retrait…',
+    primaryColor: const Color(0xFF0F766E),
+    activityIcon: Icons.storefront_outlined,
+    statusFilters: const [
+      StatusFilterOption(key: 'all', label: 'Toutes'),
+      StatusFilterOption(key: 'en_cours', label: 'En cours'),
+      StatusFilterOption(key: 'a_payer', label: 'À payer'),
+      StatusFilterOption(key: 'cloturee', label: 'Clôturées'),
+      StatusFilterOption(key: 'annulees', label: 'Annulées'),
+    ],
+    catalogTab: const CatalogTabConfig(
+      label: 'Produits',
+      route: Routes.produits,
+    ),
+    fabActions: const [
+      FabActionConfig(
+        label: 'Nouvelle commande',
+        icon: Icons.add_shopping_cart_outlined,
+        route: Routes.commandeNew,
+      ),
+      FabActionConfig(
+        label: 'Retrait boutique',
+        icon: Icons.shopping_bag_outlined,
+      ),
+      FabActionConfig(label: 'Livraison', icon: Icons.local_shipping_outlined),
+      FabActionConfig(label: 'Réservation', icon: Icons.bookmark_add_outlined),
     ],
     moreMenuItems: const [
       MoreMenuItemConfig(

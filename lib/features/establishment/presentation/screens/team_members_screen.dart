@@ -577,11 +577,7 @@ class _MemberCard extends StatelessWidget {
 }
 
 class _MemberAvatar extends StatelessWidget {
-  const _MemberAvatar({
-    required this.name,
-    required this.role,
-    this.size = 44,
-  });
+  const _MemberAvatar({required this.name, required this.role, this.size = 44});
 
   final String name;
   final EstablishmentRole role;
@@ -596,10 +592,7 @@ class _MemberAvatar extends StatelessWidget {
       width: size,
       height: size,
       alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: colors.$1,
-        shape: BoxShape.circle,
-      ),
+      decoration: BoxDecoration(color: colors.$1, shape: BoxShape.circle),
       child: Text(
         initials,
         style: TextStyle(
@@ -780,10 +773,7 @@ class _EmptyMembers extends StatelessWidget {
 
 (Color, Color) _roleColors(EstablishmentRole role) {
   return switch (role) {
-    EstablishmentRole.owner => (
-      const Color(0xFFFFE4EF),
-      AppColors.zuriMagenta,
-    ),
+    EstablishmentRole.owner => (const Color(0xFFFFE4EF), AppColors.zuriMagenta),
     EstablishmentRole.manager => (
       const Color(0xFFFFF3E0),
       const Color(0xFFEF6C00),
@@ -797,10 +787,7 @@ class _EmptyMembers extends StatelessWidget {
 
 (Color, Color) _avatarColors(EstablishmentRole role) {
   return switch (role) {
-    EstablishmentRole.owner => (
-      const Color(0xFFFFE4EF),
-      AppColors.zuriMagenta,
-    ),
+    EstablishmentRole.owner => (const Color(0xFFFFE4EF), AppColors.zuriMagenta),
     EstablishmentRole.manager => (
       const Color(0xFFFFE0B2),
       const Color(0xFFEF6C00),
@@ -815,6 +802,7 @@ class _EmptyMembers extends StatelessWidget {
 Color _categoryAccent(BusinessCategory category) {
   return switch (category) {
     BusinessCategory.restaurant => AppColors.zuriRed,
+    BusinessCategory.shop => const Color(0xFF0F766E),
     BusinessCategory.garageAuto => const Color(0xFFF57C00),
     BusinessCategory.sanitation => const Color(0xFF2E7D32),
     BusinessCategory.pharmacy => const Color(0xFF7B1FA2),

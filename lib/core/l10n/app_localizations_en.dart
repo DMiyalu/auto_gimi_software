@@ -412,6 +412,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get categoryRestaurant => 'Restaurant';
 
   @override
+  String get categoryShop => 'Shop / Store';
+
+  @override
   String get categoryGarageAuto => 'Auto repair shop';
 
   @override
