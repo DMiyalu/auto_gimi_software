@@ -439,6 +439,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get categoryGym => 'Gym';
 
   @override
+  String get categoryHotelGuestHouse => 'Hotels / Guest House';
+
+  @override
   String get categoryPharmacy => 'Pharmacy';
 
   @override

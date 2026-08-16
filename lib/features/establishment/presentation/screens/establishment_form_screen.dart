@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../../core/auth/auth_error_mapper.dart';
 import '../../../../core/domain/business_category.dart';
 import '../../../../core/l10n/app_localizations.dart';
+import '../../../../core/routing/routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../providers/establishment_providers.dart';
@@ -72,7 +73,7 @@ class _EstablishmentFormScreenState
 
     if (!mounted) return;
     final state = ref.read(establishmentControllerProvider);
-    if (!state.hasError) context.pop();
+    if (!state.hasError) context.go(Routes.dashboard);
   }
 
   @override

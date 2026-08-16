@@ -105,30 +105,15 @@ class ActivityListNotifier extends Notifier<List<ActivityItem>> {
     String? context,
     BusinessCategory category,
   ) {
-    final isShop = category == BusinessCategory.shop;
     final lower = (context ?? '').toLowerCase();
     if (lower.contains('livraison')) {
-      return (
-        icon: isShop
-            ? Icons.local_shipping_outlined
-            : Icons.delivery_dining_outlined,
-        accent: isShop ? const Color(0xFF0F766E) : AppColors.zuriRed,
-      );
+      return (icon: Icons.delivery_dining_outlined, accent: AppColors.zuriRed);
     }
     if (lower.contains('emporter') || lower.contains('retrait')) {
-      return (
-        icon: Icons.shopping_bag_outlined,
-        accent: const Color(0xFF22C55E),
-      );
-    }
-    if (isShop) {
-      return (icon: Icons.storefront_outlined, accent: const Color(0xFF0F766E));
+      return (icon: Icons.shopping_bag_outlined, accent: AppColors.zuriRed);
     }
     // Table / salle par défaut
-    return (
-      icon: Icons.table_restaurant_outlined,
-      accent: const Color(0xFF16A34A),
-    );
+    return (icon: Icons.table_restaurant_outlined, accent: AppColors.zuriRed);
   }
 
   /// Épingle/désépingle une carte — les cartes épinglées remontent en tête

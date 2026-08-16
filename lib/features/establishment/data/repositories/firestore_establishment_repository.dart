@@ -87,6 +87,7 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
     batch.set(establishmentRef, {
       'name': establishmentName.trim(),
       'category': category.firestoreValue,
+      'mainActivity': category.defaultMainActivity,
       'ownerId': ownerId,
       'managerName': managerName.trim(),
       'phone': normalizedPhone,
@@ -536,6 +537,11 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
       id: snapshot.id,
       name: data['name'] as String,
       category: BusinessCategory.fromFirestore(data['category'] as String),
+      mainActivity:
+          data['mainActivity'] as String? ??
+          BusinessCategory.fromFirestore(
+            data['category'] as String,
+          ).defaultMainActivity,
       ownerId: data['ownerId'] as String,
       managerName: data['managerName'] as String,
       phone: data['phone'] as String,

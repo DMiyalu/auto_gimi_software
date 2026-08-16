@@ -11,6 +11,8 @@ import 'package:auto_mobile_software/features/auth/presentation/providers/auth_s
 import 'package:auto_mobile_software/features/auth/presentation/providers/phone_verification_repository_provider.dart';
 import 'package:auto_mobile_software/features/auth/presentation/providers/signup_otp_pending_provider.dart';
 import 'package:auto_mobile_software/features/establishment/domain/models/establishment.dart';
+import 'package:auto_mobile_software/features/establishment/domain/models/establishment_member.dart';
+import 'package:auto_mobile_software/features/establishment/domain/models/establishment_role.dart';
 import 'package:auto_mobile_software/features/establishment/domain/models/user_profile.dart';
 import 'package:auto_mobile_software/features/establishment/presentation/providers/establishment_repository_provider.dart';
 
@@ -72,6 +74,17 @@ void main() {
           phone: '221771234567',
           phoneVerified: true,
           createdAt: DateTime(2026, 1, 1),
+        ),
+      ])
+      ..setMemberships([
+        EstablishmentMember(
+          uid: 'uid-test',
+          establishmentId: _establishmentId,
+          phone: '33612345678',
+          fullName: 'Test Manager',
+          role: EstablishmentRole.owner,
+          phoneVerified: true,
+          joinedAt: DateTime(2026, 1, 1),
         ),
       ]);
     phoneVerificationRepository = FakePhoneVerificationRepository(

@@ -99,6 +99,7 @@ service cloud.firestore {
         && request.resource.data.ownerId == request.auth.uid
         && request.resource.data.phoneVerified == false
         && request.resource.data.category is string
+        && request.resource.data.mainActivity is string
         && request.resource.data.name is string
         && request.resource.data.managerName is string
         && request.resource.data.phone is string;

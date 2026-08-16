@@ -171,6 +171,7 @@
   "categoryPressing": "Pressing",
   "categorySanitation": "Service Assainissement",
   "categoryGym": "Salle de sport",
+  "categoryHotelGuestHouse": "Hotels / Guest House",
   "categoryPharmacy": "Pharmacie",
   "verificationTitle": "Vérifiez votre numéro",
   "verificationSubtitle": "Un code à 6 chiffres a été envoyé au {phone}.",

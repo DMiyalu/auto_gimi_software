@@ -34,72 +34,91 @@ void main() {
     expect(index.data()!['uid'], 'u1');
   });
 
-  test('createOwnedEstablishment écrit team + members (migration douce)', () async {
-    await repository.createUserProfile(
-      uid: 'owner',
-      fullName: 'Boss',
-      phone: '243900000001',
-    );
+  test(
+    'createOwnedEstablishment écrit team + members (migration douce)',
+    () async {
+      await repository.createUserProfile(
+        uid: 'owner',
+        fullName: 'Boss',
+        phone: '243900000001',
+      );
 
-    final est = await repository.createOwnedEstablishment(
-      ownerId: 'owner',
-      category: BusinessCategory.restaurant,
-      establishmentName: 'Chez Nous',
-      managerName: 'Boss',
-      phone: '243900000001',
-    );
+      final est = await repository.createOwnedEstablishment(
+        ownerId: 'owner',
+        category: BusinessCategory.restaurant,
+        establishmentName: 'Chez Nous',
+        managerName: 'Boss',
+        phone: '243900000001',
+      );
 
-    final team = await firestore
-        .collection('establishments')
-        .doc(est.id)
-        .collection('team')
-        .doc('owner')
-        .get();
-    expect(team.exists, isTrue);
-    expect(team.data()!['userId'], 'owner');
-    expect(team.data()!['roleId'], 'owner');
+      final team = await firestore
+          .collection('establishments')
+          .doc(est.id)
+          .collection('team')
+          .doc('owner')
+          .get();
+      expect(team.exists, isTrue);
+      expect(team.data()!['userId'], 'owner');
+      expect(team.data()!['roleId'], 'owner');
 
-    final members = await firestore
-        .collection('establishments')
-        .doc(est.id)
-        .collection('members')
-        .doc('owner')
-        .get();
-    expect(members.exists, isTrue);
+      final members = await firestore
+          .collection('establishments')
+          .doc(est.id)
+          .collection('members')
+          .doc('owner')
+          .get();
+      expect(members.exists, isTrue);
 
-    final user = await firestore.collection('users').doc('owner').get();
-    expect(user.data()!['establishments'], contains(est.id));
-    expect(user.data()!['establishmentIds'], contains(est.id));
-  });
+      final user = await firestore.collection('users').doc('owner').get();
+      expect(user.data()!['establishments'], contains(est.id));
+      expect(user.data()!['establishmentIds'], contains(est.id));
 
-  test('updateEstablishmentSettings persiste nom, logo et lignes facture', () async {
-    await repository.createUserProfile(
-      uid: 'owner',
-      fullName: 'Boss',
-      phone: '243900000001',
-    );
-    final est = await repository.createOwnedEstablishment(
-      ownerId: 'owner',
-      category: BusinessCategory.restaurant,
-      establishmentName: 'Chez Nous',
-      managerName: 'Boss',
-      phone: '243900000001',
-    );
+      final establishmentDoc = await firestore
+          .collection('establishments')
+          .doc(est.id)
+          .get();
+      expect(establishmentDoc.data()!['mainActivity'], 'Commandes');
+      expect(est.mainActivity, 'Commandes');
+    },
+  );
 
-    await repository.updateEstablishmentSettings(
-      establishmentId: est.id,
-      name: 'Le Goût Parfait',
-      logoBase64: 'YmxvYg==',
-      invoiceHeaderLines: const ['Ouvert 7j/7', 'trop-long-pour-vingt-caracteres'],
-      invoiceFooterLines: const ['Merci'],
-    );
+  test(
+    'updateEstablishmentSettings persiste nom, logo et lignes facture',
+    () async {
+      await repository.createUserProfile(
+        uid: 'owner',
+        fullName: 'Boss',
+        phone: '243900000001',
+      );
+      final est = await repository.createOwnedEstablishment(
+        ownerId: 'owner',
+        category: BusinessCategory.restaurant,
+        establishmentName: 'Chez Nous',
+        managerName: 'Boss',
+        phone: '243900000001',
+      );
 
-    final updated = await repository.watchEstablishment(est.id).first;
-    expect(updated?.name, 'Le Goût Parfait');
-    expect(updated?.logoBase64, 'YmxvYg==');
-    expect(updated?.invoiceHeaderLines, ['Ouvert 7j/7', 'trop-long-pour-vingt']);
-    expect(updated?.invoiceFooterLines, ['Merci']);
-  });
+      await repository.updateEstablishmentSettings(
+        establishmentId: est.id,
+        name: 'Le Goût Parfait',
+        logoBase64: 'YmxvYg==',
+        invoiceHeaderLines: const [
+          'Ouvert 7j/7',
+          'trop-long-pour-vingt-caracteres',
+        ],
+        invoiceFooterLines: const ['Merci'],
+      );
+
+      final updated = await repository.watchEstablishment(est.id).first;
+      expect(updated?.name, 'Le Goût Parfait');
+      expect(updated?.logoBase64, 'YmxvYg==');
+      expect(updated?.invoiceHeaderLines, [
+        'Ouvert 7j/7',
+        'trop-long-pour-vingt',
+      ]);
+      expect(updated?.invoiceFooterLines, ['Merci']);
+    },
+  );
 
   test(
     'createInvitation écrit dans l’inbox user si phoneIndex existe',
@@ -166,45 +185,48 @@ void main() {
     expect(pending.docs.first.data()['roleId'], 'owner');
   });
 
-  test('claimPendingInvitations copie vers l’inbox puis marque claimed', () async {
-    await firestore.collection('pendingInvitations').doc('inv-p1').set({
-      'establishmentId': 'est-1',
-      'establishmentName': 'Resto',
-      'invitedPhone': '243900444555',
-      'roleId': 'agent',
-      'role': 'agent',
-      'status': 'pending',
-      'invitedBy': 'owner',
-      'invitedByName': 'Boss',
-      'createdAt': DateTime(2026, 1, 1),
-    });
+  test(
+    'claimPendingInvitations copie vers l’inbox puis marque claimed',
+    () async {
+      await firestore.collection('pendingInvitations').doc('inv-p1').set({
+        'establishmentId': 'est-1',
+        'establishmentName': 'Resto',
+        'invitedPhone': '243900444555',
+        'roleId': 'agent',
+        'role': 'agent',
+        'status': 'pending',
+        'invitedBy': 'owner',
+        'invitedByName': 'Boss',
+        'createdAt': DateTime(2026, 1, 1),
+      });
 
-    await repository.createUserProfile(
-      uid: 'new-user',
-      fullName: 'Carla',
-      phone: '243900444555',
-    );
+      await repository.createUserProfile(
+        uid: 'new-user',
+        fullName: 'Carla',
+        phone: '243900444555',
+      );
 
-    await repository.claimPendingInvitations(
-      uid: 'new-user',
-      phone: '243900444555',
-    );
+      await repository.claimPendingInvitations(
+        uid: 'new-user',
+        phone: '243900444555',
+      );
 
-    final inbox = await firestore
-        .collection('users')
-        .doc('new-user')
-        .collection('invitations')
-        .doc('inv-p1')
-        .get();
-    expect(inbox.exists, isTrue);
-    expect(inbox.data()!['status'], 'pending');
+      final inbox = await firestore
+          .collection('users')
+          .doc('new-user')
+          .collection('invitations')
+          .doc('inv-p1')
+          .get();
+      expect(inbox.exists, isTrue);
+      expect(inbox.data()!['status'], 'pending');
 
-    final pending = await firestore
-        .collection('pendingInvitations')
-        .doc('inv-p1')
-        .get();
-    expect(pending.data()!['status'], 'claimed');
-  });
+      final pending = await firestore
+          .collection('pendingInvitations')
+          .doc('inv-p1')
+          .get();
+      expect(pending.data()!['status'], 'claimed');
+    },
+  );
 
   test('acceptInvitation crée team et ajoute establishments', () async {
     await repository.createUserProfile(
@@ -328,52 +350,57 @@ void main() {
     expect(doc.data()!['status'], 'revoked');
   });
 
-  test('watchEstablishmentMembers lit team en priorité, sinon members', () async {
-    await firestore.collection('establishments').doc('est-legacy').set({
-      'name': 'Legacy',
-      'category': 'restaurant',
-      'ownerId': 'o1',
-      'managerName': 'O',
-      'phone': '1',
-      'phoneVerified': false,
-      'createdAt': DateTime(2026, 1, 1),
-    });
-    await firestore
-        .collection('establishments')
-        .doc('est-legacy')
-        .collection('members')
-        .doc('o1')
-        .set({
-          'uid': 'o1',
-          'establishmentId': 'est-legacy',
-          'phone': '1',
-          'fullName': 'Owner',
-          'role': 'owner',
-          'phoneVerified': true,
-          'joinedAt': DateTime(2026, 1, 1),
-        });
+  test(
+    'watchEstablishmentMembers lit team en priorité, sinon members',
+    () async {
+      await firestore.collection('establishments').doc('est-legacy').set({
+        'name': 'Legacy',
+        'category': 'restaurant',
+        'ownerId': 'o1',
+        'managerName': 'O',
+        'phone': '1',
+        'phoneVerified': false,
+        'createdAt': DateTime(2026, 1, 1),
+      });
+      await firestore
+          .collection('establishments')
+          .doc('est-legacy')
+          .collection('members')
+          .doc('o1')
+          .set({
+            'uid': 'o1',
+            'establishmentId': 'est-legacy',
+            'phone': '1',
+            'fullName': 'Owner',
+            'role': 'owner',
+            'phoneVerified': true,
+            'joinedAt': DateTime(2026, 1, 1),
+          });
 
-    final fromMembers = await repository
-        .watchEstablishmentMembers('est-legacy')
-        .first;
-    expect(fromMembers, hasLength(1));
-    expect(fromMembers.first.uid, 'o1');
+      final fromMembers = await repository
+          .watchEstablishmentMembers('est-legacy')
+          .first;
+      expect(fromMembers, hasLength(1));
+      expect(fromMembers.first.uid, 'o1');
 
-    await firestore
-        .collection('establishments')
-        .doc('est-legacy')
-        .collection('team')
-        .doc('o1')
-        .set({
-          'userId': 'o1',
-          'roleId': 'owner',
-          'fullName': 'Owner Team',
-          'phone': '1',
-          'joinedAt': DateTime(2026, 1, 1),
-        });
+      await firestore
+          .collection('establishments')
+          .doc('est-legacy')
+          .collection('team')
+          .doc('o1')
+          .set({
+            'userId': 'o1',
+            'roleId': 'owner',
+            'fullName': 'Owner Team',
+            'phone': '1',
+            'joinedAt': DateTime(2026, 1, 1),
+          });
 
-    final fromTeam = await repository.watchEstablishmentMembers('est-legacy').first;
-    expect(fromTeam, hasLength(1));
-    expect(fromTeam.first.fullName, 'Owner Team');
-  });
+      final fromTeam = await repository
+          .watchEstablishmentMembers('est-legacy')
+          .first;
+      expect(fromTeam, hasLength(1));
+      expect(fromTeam.first.fullName, 'Owner Team');
+    },
+  );
 }

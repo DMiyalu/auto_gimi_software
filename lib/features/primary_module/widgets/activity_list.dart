@@ -110,7 +110,7 @@ class ActivityList extends ConsumerWidget {
                       ),
                     ),
                     Text(
-                      '${items.length} commande${items.length > 1 ? 's' : ''}',
+                      _countLabel(items.length, config.primaryModuleLabel),
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         color: config.primaryColor,
                         fontSize: 15,
@@ -133,6 +133,16 @@ class ActivityList extends ConsumerWidget {
         );
       },
     );
+  }
+
+  String _countLabel(int count, String label) {
+    final singular = switch (label) {
+      'Commandes' => 'commande',
+      'Prestations' => 'prestation',
+      'Séjours' => 'séjour',
+      _ => 'activité',
+    };
+    return '$count $singular${count > 1 ? 's' : ''}';
   }
 
   /// Glisser à gauche ou à droite révèle la même action "Imprimer" des deux

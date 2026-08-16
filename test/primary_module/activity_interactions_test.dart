@@ -187,13 +187,13 @@ void main() {
     (tester) async {
       await _pump(tester);
 
-      await tester.tap(find.text('Le Goût Parfait'));
+      await tester.tap(find.byIcon(Icons.keyboard_arrow_down_rounded).first);
       await tester.pumpAndSettle();
 
       expect(find.text('Établissements'), findsOneWidget);
-      expect(find.text('Ajouter un établissement'), findsOneWidget);
+      expect(find.text('Créer un établissement'), findsOneWidget);
 
-      await tester.tap(find.text('Ajouter un établissement'));
+      await tester.tap(find.text('Créer un établissement'));
       await tester.pumpAndSettle();
 
       expect(find.text('Établissements'), findsNothing);
@@ -266,14 +266,16 @@ void main() {
         ],
       );
 
-      await tester.tap(find.text('Le Goût Parfait'));
+      await tester.tap(find.byIcon(Icons.keyboard_arrow_down_rounded).first);
       await tester.pumpAndSettle();
 
       expect(find.text('Établissements'), findsOneWidget);
       expect(find.text('Le Goût Parfait'), findsWidgets);
       expect(find.text('Garage Zuri'), findsOneWidget);
-      expect(find.text('Restaurant • Propriétaire'), findsOneWidget);
-      expect(find.text('Garage Auto-Mobile • Gérant'), findsOneWidget);
+      expect(find.textContaining('Restaurant'), findsWidgets);
+      expect(find.textContaining('Propriétaire'), findsOneWidget);
+      expect(find.textContaining('Garage Auto-Mobile'), findsOneWidget);
+      expect(find.textContaining('Gérant'), findsOneWidget);
     },
   );
 }

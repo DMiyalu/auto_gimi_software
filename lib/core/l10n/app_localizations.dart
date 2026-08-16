@@ -914,6 +914,12 @@ abstract class AppLocalizations {
   /// **'Gym'**
   String get categoryGym;
 
+  /// No description provided for @categoryHotelGuestHouse.
+  ///
+  /// In en, this message translates to:
+  /// **'Hotels / Guest House'**
+  String get categoryHotelGuestHouse;
+
   /// No description provided for @categoryPharmacy.
   ///
   /// In en, this message translates to:

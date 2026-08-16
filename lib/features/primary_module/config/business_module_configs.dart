@@ -12,74 +12,12 @@ import 'business_module_config.dart';
 abstract final class BusinessModuleConfigs {
   static BusinessModuleConfig forCategory(BusinessCategory category) {
     return switch (category) {
-      BusinessCategory.garageAuto => garage,
+      BusinessCategory.garageAuto => activityWorkflow(category),
       BusinessCategory.restaurant => restaurant,
-      BusinessCategory.shop => shop,
-      BusinessCategory.terraceBarLounge => terraceBarLounge,
-      BusinessCategory.hairSalon => hairSalon,
-      BusinessCategory.beautyInstitute => beautyInstitute,
-      BusinessCategory.clinicMedicalCenter => clinicMedicalCenter,
-      BusinessCategory.sanitation => sanitation,
-      _ => _genericFallback(category),
+      BusinessCategory.terraceBarLounge => activityWorkflow(category),
+      _ => activityWorkflow(category),
     };
   }
-
-  static final garage = BusinessModuleConfig(
-    category: BusinessCategory.garageAuto,
-    primaryModuleLabel: 'Prestations',
-    searchPlaceholder: 'Rechercher une prestation, un véhicule ou un client…',
-    primaryColor: AppColors.bleuRoyal,
-    activityIcon: Icons.build_circle_outlined,
-    statusFilters: const [
-      StatusFilterOption(key: 'all', label: 'Toutes'),
-      StatusFilterOption(key: 'diagnostic', label: 'Diagnostic'),
-      StatusFilterOption(key: 'en_cours', label: 'En cours'),
-      StatusFilterOption(key: 'terminees', label: 'Terminées'),
-      StatusFilterOption(key: 'en_attente', label: 'En attente'),
-      StatusFilterOption(key: 'annulees', label: 'Annulées'),
-    ],
-    catalogTab: const CatalogTabConfig(
-      label: 'Services',
-      route: Routes.services,
-    ),
-    fabActions: const [
-      FabActionConfig(
-        label: 'Nouvelle prestation',
-        icon: Icons.build_outlined,
-        route: Routes.prestationNew,
-      ),
-      FabActionConfig(
-        label: 'Nouveau rendez-vous',
-        icon: Icons.event_available_outlined,
-      ),
-      FabActionConfig(
-        label: 'Nouveau véhicule',
-        icon: Icons.directions_car_outlined,
-      ),
-    ],
-    moreMenuItems: const [
-      MoreMenuItemConfig(
-        label: 'Produits',
-        icon: Icons.inventory_2_outlined,
-        route: Routes.produits,
-      ),
-      MoreMenuItemConfig(
-        label: 'Scanner client',
-        icon: Icons.qr_code_scanner,
-        route: Routes.prestationScan,
-      ),
-      MoreMenuItemConfig(
-        label: 'Scanner jeton',
-        icon: Icons.local_drink_outlined,
-        route: Routes.jetonScan,
-      ),
-      MoreMenuItemConfig(
-        label: 'Alertes',
-        icon: Icons.notifications_active_outlined,
-        route: Routes.alertes,
-      ),
-    ],
-  );
 
   static final restaurant = BusinessModuleConfig(
     category: BusinessCategory.restaurant,
@@ -122,180 +60,20 @@ abstract final class BusinessModuleConfigs {
     ],
   );
 
-  static final shop = BusinessModuleConfig(
-    category: BusinessCategory.shop,
-    primaryModuleLabel: 'Commandes',
-    searchPlaceholder: 'Rechercher une commande, un client, un retrait…',
-    primaryColor: const Color(0xFF0F766E),
-    activityIcon: Icons.storefront_outlined,
-    statusFilters: const [
-      StatusFilterOption(key: 'all', label: 'Toutes'),
-      StatusFilterOption(key: 'en_cours', label: 'En cours'),
-      StatusFilterOption(key: 'a_payer', label: 'À payer'),
-      StatusFilterOption(key: 'cloturee', label: 'Clôturées'),
-      StatusFilterOption(key: 'annulees', label: 'Annulées'),
-    ],
-    catalogTab: const CatalogTabConfig(
-      label: 'Produits',
-      route: Routes.produits,
-    ),
-    fabActions: const [
-      FabActionConfig(
-        label: 'Nouvelle commande',
-        icon: Icons.add_shopping_cart_outlined,
-        route: Routes.commandeNew,
-      ),
-      FabActionConfig(
-        label: 'Retrait boutique',
-        icon: Icons.shopping_bag_outlined,
-      ),
-      FabActionConfig(label: 'Livraison', icon: Icons.local_shipping_outlined),
-      FabActionConfig(label: 'Réservation', icon: Icons.bookmark_add_outlined),
-    ],
-    moreMenuItems: const [
-      MoreMenuItemConfig(
-        label: 'Inventaires',
-        icon: Icons.inventory_2_outlined,
-        route: Routes.inventories,
-      ),
-      MoreMenuItemConfig(
-        label: 'Services',
-        icon: Icons.room_service_outlined,
-        route: Routes.services,
-      ),
-    ],
-  );
+  static BusinessModuleConfig activityWorkflow(BusinessCategory category) {
+    final mainActivity = category.defaultMainActivity;
+    final isGarage = category == BusinessCategory.garageAuto;
+    final isCommande = mainActivity == 'Commandes';
+    final singular = _singularMainActivity(mainActivity);
 
-  static final terraceBarLounge = _commandeWorkflow(
-    category: BusinessCategory.terraceBarLounge,
-    primaryColor: const Color(0xFFB45309),
-    activityIcon: Icons.local_bar_outlined,
-    searchPlaceholder: 'Rechercher une commande, table, client…',
-    fabActions: const [
-      FabActionConfig(
-        label: 'Nouvelle commande',
-        icon: Icons.add_shopping_cart_outlined,
-        route: Routes.commandeNew,
-      ),
-      FabActionConfig(label: 'Réservation', icon: Icons.event_seat_outlined),
-      FabActionConfig(label: 'À emporter', icon: Icons.shopping_bag_outlined),
-      FabActionConfig(label: 'Livraison', icon: Icons.delivery_dining_outlined),
-    ],
-  );
-
-  static final hairSalon = _commandeWorkflow(
-    category: BusinessCategory.hairSalon,
-    primaryColor: const Color(0xFFBE185D),
-    activityIcon: Icons.content_cut_outlined,
-    searchPlaceholder: 'Rechercher une commande, client ou rendez-vous…',
-    fabActions: const [
-      FabActionConfig(
-        label: 'Nouvelle commande',
-        icon: Icons.add_shopping_cart_outlined,
-        route: Routes.commandeNew,
-      ),
-      FabActionConfig(label: 'Rendez-vous', icon: Icons.event_available),
-      FabActionConfig(label: 'Service coiffure', icon: Icons.content_cut),
-      FabActionConfig(
-        label: 'Produit vendu',
-        icon: Icons.shopping_bag_outlined,
-      ),
-    ],
-  );
-
-  static final beautyInstitute = _commandeWorkflow(
-    category: BusinessCategory.beautyInstitute,
-    primaryColor: const Color(0xFF9333EA),
-    activityIcon: Icons.spa_outlined,
-    searchPlaceholder: 'Rechercher une commande, client ou soin…',
-    fabActions: const [
-      FabActionConfig(
-        label: 'Nouvelle commande',
-        icon: Icons.add_shopping_cart_outlined,
-        route: Routes.commandeNew,
-      ),
-      FabActionConfig(label: 'Rendez-vous', icon: Icons.event_available),
-      FabActionConfig(label: 'Soin beauté', icon: Icons.spa_outlined),
-      FabActionConfig(
-        label: 'Produit vendu',
-        icon: Icons.shopping_bag_outlined,
-      ),
-    ],
-  );
-
-  static final clinicMedicalCenter = _commandeWorkflow(
-    category: BusinessCategory.clinicMedicalCenter,
-    primaryColor: const Color(0xFF2563EB),
-    activityIcon: Icons.local_hospital_outlined,
-    searchPlaceholder: 'Rechercher une commande, patient ou service…',
-    fabActions: const [
-      FabActionConfig(
-        label: 'Nouvelle commande',
-        icon: Icons.add_shopping_cart_outlined,
-        route: Routes.commandeNew,
-      ),
-      FabActionConfig(label: 'Consultation', icon: Icons.medical_services),
-      FabActionConfig(label: 'Rendez-vous', icon: Icons.event_available),
-      FabActionConfig(label: 'Pharmacie', icon: Icons.local_pharmacy_outlined),
-    ],
-  );
-
-  static final sanitation = BusinessModuleConfig(
-    category: BusinessCategory.sanitation,
-    primaryModuleLabel: 'Collectes',
-    searchPlaceholder: 'Rechercher une collecte, une tournée ou un client…',
-    primaryColor: AppColors.cyan,
-    activityIcon: Icons.cleaning_services_outlined,
-    statusFilters: const [
-      StatusFilterOption(key: 'all', label: 'Toutes'),
-      StatusFilterOption(key: 'planifiees', label: 'Planifiées'),
-      StatusFilterOption(key: 'en_cours', label: 'En cours'),
-      StatusFilterOption(key: 'terminees', label: 'Terminées'),
-      StatusFilterOption(key: 'annulees', label: 'Annulées'),
-    ],
-    catalogTab: const CatalogTabConfig(
-      label: 'Services',
-      route: Routes.services,
-    ),
-    fabActions: const [
-      FabActionConfig(
-        label: 'Nouvelle collecte',
-        icon: Icons.local_shipping_outlined,
-      ),
-      FabActionConfig(
-        label: 'Nouvelle tournée',
-        icon: Icons.alt_route_outlined,
-      ),
-      FabActionConfig(
-        label: 'Nouveau client',
-        icon: Icons.person_add_alt_outlined,
-        route: Routes.clientNew,
-      ),
-    ],
-    moreMenuItems: const [
-      MoreMenuItemConfig(
-        label: 'Produits',
-        icon: Icons.inventory_2_outlined,
-        route: Routes.produits,
-      ),
-    ],
-  );
-
-  /// Filet de sécurité pour les métiers pas encore détaillés (pressing,
-  /// gym, pharmacy...) — reste générique, sans libellé métier hasardeux.
-  static BusinessModuleConfig _commandeWorkflow({
-    required BusinessCategory category,
-    required Color primaryColor,
-    required IconData activityIcon,
-    required String searchPlaceholder,
-    required List<FabActionConfig> fabActions,
-  }) {
     return BusinessModuleConfig(
       category: category,
-      primaryModuleLabel: 'Commandes',
-      searchPlaceholder: searchPlaceholder,
-      primaryColor: primaryColor,
-      activityIcon: activityIcon,
+      primaryModuleLabel: mainActivity,
+      searchPlaceholder: isGarage
+          ? 'Rechercher une prestation, un véhicule ou un client…'
+          : 'Rechercher $singular ou un client…',
+      primaryColor: AppColors.zuriRed,
+      activityIcon: category.icon,
       statusFilters: const [
         StatusFilterOption(key: 'all', label: 'Toutes'),
         StatusFilterOption(key: 'en_cours', label: 'En cours'),
@@ -307,7 +85,36 @@ abstract final class BusinessModuleConfigs {
         label: 'Produits',
         route: Routes.produits,
       ),
-      fabActions: fabActions,
+      fabActions: [
+        FabActionConfig(
+          label: isCommande
+              ? 'Nouvelle commande'
+              : '${singular.startsWith('un ') ? 'Nouveau' : 'Nouvelle'} '
+                    '${singular.replaceFirst(RegExp(r'^(un|une) '), '')}',
+          icon: isCommande
+              ? Icons.add_shopping_cart_outlined
+              : Icons.add_circle_outline,
+          route: isGarage
+              ? Routes.prestationNew
+              : isCommande
+              ? Routes.commandeNew
+              : null,
+        ),
+        if (isCommande) ...const [
+          FabActionConfig(
+            label: 'Réservation',
+            icon: Icons.event_seat_outlined,
+          ),
+          FabActionConfig(
+            label: 'À emporter',
+            icon: Icons.shopping_bag_outlined,
+          ),
+          FabActionConfig(
+            label: 'Livraison',
+            icon: Icons.delivery_dining_outlined,
+          ),
+        ],
+      ],
       moreMenuItems: const [
         MoreMenuItemConfig(
           label: 'Inventaires',
@@ -323,37 +130,12 @@ abstract final class BusinessModuleConfigs {
     );
   }
 
-  static BusinessModuleConfig _genericFallback(BusinessCategory category) {
-    return BusinessModuleConfig(
-      category: category,
-      primaryModuleLabel: 'Activités',
-      searchPlaceholder: 'Rechercher une activité ou un client…',
-      primaryColor: AppColors.bleuSaas,
-      activityIcon: category.icon,
-      statusFilters: const [
-        StatusFilterOption(key: 'all', label: 'Toutes'),
-        StatusFilterOption(key: 'en_attente', label: 'En attente'),
-        StatusFilterOption(key: 'en_cours', label: 'En cours'),
-        StatusFilterOption(key: 'terminees', label: 'Terminées'),
-        StatusFilterOption(key: 'annulees', label: 'Annulées'),
-      ],
-      catalogTab: const CatalogTabConfig(
-        label: 'Produits',
-        route: Routes.produits,
-      ),
-      fabActions: const [
-        FabActionConfig(
-          label: 'Nouvelle activité',
-          icon: Icons.add_circle_outline,
-        ),
-      ],
-      moreMenuItems: const [
-        MoreMenuItemConfig(
-          label: 'Services',
-          icon: Icons.room_service_outlined,
-          route: Routes.services,
-        ),
-      ],
-    );
+  static String _singularMainActivity(String mainActivity) {
+    return switch (mainActivity) {
+      'Commandes' => 'une commande',
+      'Prestations' => 'une prestation',
+      'Séjours' => 'un séjour',
+      _ => 'une activité',
+    };
   }
 }

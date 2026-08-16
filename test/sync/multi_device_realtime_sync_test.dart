@@ -15,6 +15,8 @@ import 'package:auto_mobile_software/core/providers/database_provider.dart';
 import 'package:auto_mobile_software/core/sync/auto_sync_coordinator.dart';
 import 'package:auto_mobile_software/core/sync/sync_engine.dart';
 import 'package:auto_mobile_software/features/establishment/domain/models/establishment.dart';
+import 'package:auto_mobile_software/features/establishment/domain/models/establishment_member.dart';
+import 'package:auto_mobile_software/features/establishment/domain/models/establishment_role.dart';
 import 'package:auto_mobile_software/features/establishment/presentation/providers/establishment_providers.dart';
 import 'package:auto_mobile_software/features/restaurant/presentation/providers/commande_providers.dart';
 
@@ -52,6 +54,19 @@ Future<_Device> _createDevice(FakeFirebaseFirestore sharedFirestore) async {
     overrides: [
       currentEstablishmentProvider.overrideWith(
         (ref) => Stream.value(_establishment),
+      ),
+      userMembershipsProvider.overrideWith(
+        (ref) => Stream.value([
+          EstablishmentMember(
+            uid: 'owner-1',
+            establishmentId: _establishmentId,
+            phone: '+243900000000',
+            fullName: 'Jean Kalonji',
+            role: EstablishmentRole.owner,
+            phoneVerified: true,
+            joinedAt: DateTime(2026, 1, 1),
+          ),
+        ]),
       ),
       databaseProvider.overrideWithValue(database),
       firestoreProvider.overrideWithValue(sharedFirestore),

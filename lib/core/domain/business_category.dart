@@ -14,6 +14,7 @@ enum BusinessCategory {
   pressing,
   sanitation,
   gym,
+  hotelGuestHouse,
   pharmacy;
 
   String get firestoreValue => switch (this) {
@@ -27,6 +28,7 @@ enum BusinessCategory {
     pressing => 'pressing',
     sanitation => 'sanitation',
     gym => 'gym',
+    hotelGuestHouse => 'hotel_guest_house',
     pharmacy => 'pharmacy',
   };
 
@@ -48,6 +50,7 @@ enum BusinessCategory {
     pressing => l10n.categoryPressing,
     sanitation => l10n.categorySanitation,
     gym => l10n.categoryGym,
+    hotelGuestHouse => l10n.categoryHotelGuestHouse,
     pharmacy => l10n.categoryPharmacy,
   };
 
@@ -62,16 +65,21 @@ enum BusinessCategory {
     pressing => Icons.local_laundry_service_outlined,
     sanitation => Icons.cleaning_services_outlined,
     gym => Icons.fitness_center_outlined,
+    hotelGuestHouse => Icons.hotel_outlined,
     pharmacy => Icons.local_pharmacy_outlined,
   };
 
+  String get defaultMainActivity => switch (this) {
+    restaurant || terraceBarLounge => 'Commandes',
+    garageAuto => 'Prestations',
+    hotelGuestHouse => 'Séjours',
+    _ => 'Activités',
+  };
+
   bool get usesRestaurantWorkflow => switch (this) {
-    restaurant ||
-    shop ||
-    terraceBarLounge ||
-    hairSalon ||
-    beautyInstitute ||
-    clinicMedicalCenter => true,
-    garageAuto || pressing || sanitation || gym || pharmacy => false,
+    // Tous les établissements utilisent le même socle d'activité et la même
+    // structure UI Zuri. Le nom historique est conservé pour limiter le
+    // périmètre de migration du code existant.
+    _ => true,
   };
 }

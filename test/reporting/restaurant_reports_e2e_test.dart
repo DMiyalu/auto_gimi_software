@@ -121,7 +121,11 @@ Future<AppDatabase> _seed() async {
   return database;
 }
 
-Future<void> _pump(WidgetTester tester, AppDatabase database) async {
+Future<void> _pump(
+  WidgetTester tester,
+  AppDatabase database, {
+  BusinessCategory category = BusinessCategory.restaurant,
+}) async {
   tester.view.physicalSize = const Size(1080, 2400);
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.resetPhysicalSize);
@@ -131,7 +135,7 @@ Future<void> _pump(WidgetTester tester, AppDatabase database) async {
     ProviderScope(
       overrides: [
         currentEstablishmentProvider.overrideWith(
-          (ref) => Stream.value(_establishment),
+          (ref) => Stream.value(_establishment.copyWith(category: category)),
         ),
         databaseProvider.overrideWithValue(database),
         canCreateActivitiesProvider.overrideWithValue(true),
@@ -253,4 +257,23 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
     },
   );
+
+  testWidgets('la page Rapports est identique pour Hotel / Guest House', (
+    tester,
+  ) async {
+    final database = await _seed();
+    addTearDown(database.close);
+
+    await _pump(tester, database, category: BusinessCategory.hotelGuestHouse);
+
+    expect(find.byKey(const Key('share_report_button')), findsOneWidget);
+    expect(find.byType(RestaurantReportKpiGrid), findsOneWidget);
+    expect(find.byType(RevenueEvolutionChart), findsOneWidget);
+    expect(find.byType(ProductSalesBreakdownCard), findsOneWidget);
+    expect(find.text('Partager'), findsOneWidget);
+    expect(find.text('Prestations du jour'), findsNothing);
+
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump(const Duration(milliseconds: 100));
+  });
 }

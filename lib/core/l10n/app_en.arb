@@ -171,6 +171,7 @@
   "categoryPressing": "Dry cleaning",
   "categorySanitation": "Sanitation service",
   "categoryGym": "Gym",
+  "categoryHotelGuestHouse": "Hotels / Guest House",
   "categoryPharmacy": "Pharmacy",
   "verificationTitle": "Verify your number",
   "verificationSubtitle": "A 6-digit code was sent to {phone}.",

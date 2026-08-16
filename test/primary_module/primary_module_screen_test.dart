@@ -90,7 +90,7 @@ void main() {
       find.text('Rechercher une prestation, un véhicule ou un client…'),
       findsOneWidget,
     );
-    expect(find.text('Diagnostic'), findsWidgets);
+    expect(find.text('À payer'), findsOneWidget);
     expect(find.text('CD 214 KM'), findsOneWidget);
 
     // Démonte l'arbre avant la fin du test : la fermeture des flux Drift
@@ -101,6 +101,27 @@ void main() {
     await tester.pump(const Duration(milliseconds: 1));
     await tester.pump(const Duration(milliseconds: 1));
   });
+
+  testWidgets(
+    'affiche Hotel / Guest House avec mainActivity Séjours et Zuri UI',
+    (tester) async {
+      final database = AppDatabase(NativeDatabase.memory());
+      addTearDown(database.close);
+
+      await _pump(tester, BusinessCategory.hotelGuestHouse, database: database);
+
+      expect(find.text('Séjours'), findsWidgets);
+      expect(find.text('Rechercher un séjour ou un client…'), findsOneWidget);
+      expect(find.text('À payer'), findsOneWidget);
+
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pumpAndSettle();
+      expect(find.widgetWithText(ListTile, 'Nouveau séjour'), findsOneWidget);
+
+      await tester.pumpWidget(const SizedBox());
+      await tester.pump(const Duration(milliseconds: 1));
+    },
+  );
 
   testWidgets('affiche la config restaurant sans libellé garage codé en dur', (
     tester,

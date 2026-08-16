@@ -474,26 +474,20 @@ class _DetailHeader extends StatelessWidget {
   }
 
   static IconData _iconForTitle(String title, BusinessCategory? category) {
-    final isShop = category == BusinessCategory.shop;
     final lower = title.toLowerCase();
     if (lower.contains('livraison')) {
-      return isShop
-          ? Icons.local_shipping_outlined
-          : Icons.delivery_dining_outlined;
+      return Icons.delivery_dining_outlined;
     }
     if (lower.contains('emporter')) return Icons.shopping_bag_outlined;
-    if (isShop) return Icons.storefront_outlined;
     return Icons.table_restaurant_outlined;
   }
 
   static Color _accentForTitle(String title, BusinessCategory? category) {
-    final isShop = category == BusinessCategory.shop;
     final lower = title.toLowerCase();
     if (lower.contains('livraison')) {
-      return isShop ? const Color(0xFF0F766E) : AppColors.zuriMagenta;
+      return AppColors.zuriMagenta;
     }
     if (lower.contains('emporter')) return AppColors.zuriPink;
-    if (isShop) return const Color(0xFF0F766E);
     return AppColors.zuriRed;
   }
 }

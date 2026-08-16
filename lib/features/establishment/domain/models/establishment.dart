@@ -4,7 +4,7 @@ import '../../../../core/domain/business_category.dart';
 
 /// Établissement — unité d'isolation des données (tenant SaaS).
 class Establishment {
-  const Establishment({
+  Establishment({
     required this.id,
     required this.name,
     required this.category,
@@ -13,10 +13,11 @@ class Establishment {
     required this.phone,
     required this.phoneVerified,
     required this.createdAt,
+    String? mainActivity,
     this.logoBase64,
     this.invoiceHeaderLines = const [],
     this.invoiceFooterLines = const [],
-  });
+  }) : mainActivity = mainActivity ?? category.defaultMainActivity;
 
   static const invoiceLineMaxLength = 20;
   static const invoiceLinesMaxCount = 6;
@@ -29,6 +30,7 @@ class Establishment {
   final String phone;
   final bool phoneVerified;
   final DateTime createdAt;
+  final String mainActivity;
 
   /// Logo compressé (JPEG base64) pour affichage UI + impression ticket.
   final String? logoBase64;
@@ -60,6 +62,7 @@ class Establishment {
     String? phone,
     bool? phoneVerified,
     DateTime? createdAt,
+    String? mainActivity,
     String? logoBase64,
     bool clearLogo = false,
     List<String>? invoiceHeaderLines,
@@ -74,6 +77,7 @@ class Establishment {
       phone: phone ?? this.phone,
       phoneVerified: phoneVerified ?? this.phoneVerified,
       createdAt: createdAt ?? this.createdAt,
+      mainActivity: mainActivity ?? this.mainActivity,
       logoBase64: clearLogo ? null : (logoBase64 ?? this.logoBase64),
       invoiceHeaderLines: invoiceHeaderLines ?? this.invoiceHeaderLines,
       invoiceFooterLines: invoiceFooterLines ?? this.invoiceFooterLines,

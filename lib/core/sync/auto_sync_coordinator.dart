@@ -7,11 +7,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/establishment/domain/models/establishment.dart';
 import '../../features/establishment/presentation/providers/establishment_providers.dart';
 import 'connectivity_service.dart';
+import '../../features/establishment/domain/models/establishment_member.dart';
 import 'sync_engine.dart';
 import 'sync_registry.dart';
 
-final autoSyncCoordinatorProvider =
-    Provider.autoDispose<AutoSyncCoordinator>((ref) {
+final autoSyncCoordinatorProvider = Provider.autoDispose<AutoSyncCoordinator>((
+  ref,
+) {
   final coordinator = AutoSyncCoordinator(ref);
   ref.onDispose(coordinator.dispose);
   return coordinator;
@@ -37,9 +39,14 @@ class AutoSyncCoordinator {
     ) {
       final id = next.valueOrNull?.id;
       if (id != null && id != previous?.valueOrNull?.id) {
-        _listenRealtime(id);
+        _cancelRealtimeListeners();
+        _realtimeEstablishmentId = null;
         _trigger();
       }
+    });
+
+    _membershipsSub = _ref.listen(userMembershipsProvider, (previous, next) {
+      _trigger();
     });
 
     _connectivitySub = _ref
@@ -58,7 +65,7 @@ class AutoSyncCoordinator {
     });
 
     final initialId = _ref.read(currentEstablishmentProvider).valueOrNull?.id;
-    if (initialId != null) _listenRealtime(initialId);
+    if (initialId != null && _canSync(initialId)) _listenRealtime(initialId);
     _trigger();
   }
 
@@ -70,6 +77,8 @@ class AutoSyncCoordinator {
 
   final Ref _ref;
   late final ProviderSubscription<AsyncValue<Establishment?>> _establishmentSub;
+  late final ProviderSubscription<AsyncValue<List<EstablishmentMember>>>
+  _membershipsSub;
   StreamSubscription<bool>? _connectivitySub;
   AppLifecycleListener? _lifecycleListener;
   Timer? _safetyNetTimer;
@@ -126,18 +135,15 @@ class AutoSyncCoordinator {
             .orderBy('updatedAt', descending: true)
             .limit(1)
             .snapshots()
-            .listen(
-              (snapshot) {
-                // Un instantané encore local (écriture optimiste de cet
-                // appareil, pas confirmée serveur) ne justifie pas de
-                // réveiller un cycle : celui déclenché par schedulePush()
-                // suffit déjà. On ne réagit qu'aux changements confirmés,
-                // potentiellement faits par un autre appareil.
-                if (snapshot.metadata.hasPendingWrites) return;
-                _scheduleRealtimeTrigger();
-              },
-              onError: (_) {},
-            );
+            .listen((snapshot) {
+              // Un instantané encore local (écriture optimiste de cet
+              // appareil, pas confirmée serveur) ne justifie pas de
+              // réveiller un cycle : celui déclenché par schedulePush()
+              // suffit déjà. On ne réagit qu'aux changements confirmés,
+              // potentiellement faits par un autre appareil.
+              if (snapshot.metadata.hasPendingWrites) return;
+              _scheduleRealtimeTrigger();
+            }, onError: (_) {});
         _realtimeSubs.add(sub);
       }
     } catch (error) {
@@ -163,12 +169,25 @@ class AutoSyncCoordinator {
   }
 
   void _trigger() {
-    final establishmentId =
-        _ref.read(currentEstablishmentProvider).valueOrNull?.id;
+    final establishmentId = _ref
+        .read(currentEstablishmentProvider)
+        .valueOrNull
+        ?.id;
     if (establishmentId == null) return;
+    if (!_canSync(establishmentId)) return;
 
+    _listenRealtime(establishmentId);
     _backoffTimer?.cancel();
     unawaited(_runSync(establishmentId));
+  }
+
+  bool _canSync(String establishmentId) {
+    final memberships = _ref.read(userMembershipsProvider);
+    if (!memberships.hasValue) return false;
+    return memberships.valueOrNull?.any(
+          (membership) => membership.establishmentId == establishmentId,
+        ) ??
+        false;
   }
 
   Future<void> _runSync(String establishmentId) async {
@@ -201,6 +220,7 @@ class AutoSyncCoordinator {
 
   void dispose() {
     _establishmentSub.close();
+    _membershipsSub.close();
     _connectivitySub?.cancel();
     _lifecycleListener?.dispose();
     _safetyNetTimer?.cancel();

@@ -137,6 +137,18 @@ class FakeEstablishmentRepository implements EstablishmentRepository {
       createdAt: DateTime(2026, 1, 1),
     );
     setEstablishments([...establishments, value]);
+    setMemberships([
+      ...memberships,
+      EstablishmentMember(
+        uid: ownerId,
+        establishmentId: value.id,
+        phone: phone,
+        fullName: managerName,
+        role: EstablishmentRole.owner,
+        phoneVerified: false,
+        joinedAt: DateTime(2026, 1, 1),
+      ),
+    ]);
     establishment = value;
     _establishmentController.add(value);
     await setActiveEstablishment(uid: ownerId, establishmentId: value.id);
