@@ -53,7 +53,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 15;
+  int get schemaVersion => 16;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -96,6 +96,9 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 15) {
         await _addProductStockAlertThresholdColumn(m);
+      }
+      if (from < 16) {
+        await _addCommandeServedByMemberColumn(m);
       }
     },
     beforeOpen: (details) async {
@@ -233,6 +236,11 @@ class AppDatabase extends _$AppDatabase {
   /// Mémorise le moyen choisi au moment de l'encaissement d'une commande.
   Future<void> _addCommandePaymentMethodColumn(Migrator m) async {
     await m.addColumn(commandes, commandes.paymentMethod);
+  }
+
+  /// Membre de l'équipe ayant reçu/servi la commande.
+  Future<void> _addCommandeServedByMemberColumn(Migrator m) async {
+    await m.addColumn(commandes, commandes.servedByMemberId);
   }
 
   /// Ajoute le scope tenant local. Les anciennes lignes restent avec une

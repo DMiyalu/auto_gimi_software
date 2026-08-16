@@ -309,7 +309,7 @@ class _TeamHeader extends StatelessWidget {
             child: FilledButton.icon(
               onPressed: onInvite,
               icon: const Icon(Icons.add, size: 18),
-              label: const Text('Inviter'),
+              label: const Text('Ajouter un membre'),
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.zuriRed,
                 foregroundColor: Colors.white,

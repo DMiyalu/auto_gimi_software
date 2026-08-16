@@ -6,6 +6,7 @@ class CommandeEntity {
   const CommandeEntity({
     required this.id,
     this.clientId,
+    this.servedByMemberId,
     required this.reference,
     required this.statusKey,
     required this.statusLabel,
@@ -18,6 +19,7 @@ class CommandeEntity {
 
   final String id;
   final String? clientId;
+  final String? servedByMemberId;
   final String reference;
   final String statusKey;
   final String statusLabel;

@@ -70,4 +70,10 @@ abstract class CommandeRepository {
     required String establishmentId,
     required String commandeId,
   });
+
+  Future<void> assignServedByMember({
+    required String establishmentId,
+    required String commandeId,
+    String? memberId,
+  });
 }

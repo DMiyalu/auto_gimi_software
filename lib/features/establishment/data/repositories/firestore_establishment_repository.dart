@@ -304,17 +304,54 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
 
     final phoneLookup = await _phoneIndex.doc(normalizedPhone).get();
     final existingUid = phoneLookup.data()?['uid'] as String?;
+    final teamDocId = existingUid ?? invitationId;
+    final existingTeamDoc = existingUid == null || existingUid.isEmpty
+        ? null
+        : await _establishments
+              .doc(establishmentId)
+              .collection('team')
+              .doc(existingUid)
+              .get();
+    final teamPayload = {
+      'userId': existingUid ?? invitationId,
+      'roleId': role.firestoreValue,
+      'uid': existingUid ?? invitationId,
+      'establishmentId': establishmentId,
+      'phone': normalizedPhone,
+      'fullName': '',
+      'role': role.firestoreValue,
+      'sourceInvitationId': invitationId,
+      'phoneVerified': false,
+      'joinedAt': FieldValue.serverTimestamp(),
+    };
+    final batch = _firestore.batch();
+    if (existingTeamDoc?.exists != true) {
+      batch.set(
+        _establishments.doc(establishmentId).collection('team').doc(teamDocId),
+        teamPayload,
+        SetOptions(merge: true),
+      );
+      batch.set(
+        _establishments
+            .doc(establishmentId)
+            .collection('members')
+            .doc(teamDocId),
+        teamPayload,
+        SetOptions(merge: true),
+      );
+    }
 
     if (existingUid != null && existingUid.isNotEmpty) {
-      await _users
-          .doc(existingUid)
-          .collection('invitations')
-          .doc(invitationId)
-          .set(payload);
+      batch.set(
+        _users.doc(existingUid).collection('invitations').doc(invitationId),
+        payload,
+      );
+      await batch.commit();
       return;
     }
 
-    await _pendingInvitations.doc(invitationId).set(payload);
+    batch.set(_pendingInvitations.doc(invitationId), payload);
+    await batch.commit();
   }
 
   @override
@@ -332,6 +369,12 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
     final invitationRef = userRef.collection('invitations').doc(invitation.id);
     final teamRef = establishmentRef.collection('team').doc(uid);
     final membersRef = establishmentRef.collection('members').doc(uid);
+    final pendingTeamRef = establishmentRef
+        .collection('team')
+        .doc(invitation.id);
+    final pendingMembersRef = establishmentRef
+        .collection('members')
+        .doc(invitation.id);
 
     final teamPayload = {
       'userId': uid,
@@ -348,6 +391,8 @@ class FirestoreEstablishmentRepository implements EstablishmentRepository {
 
     batch.set(teamRef, teamPayload, SetOptions(merge: true));
     batch.set(membersRef, teamPayload, SetOptions(merge: true));
+    batch.delete(pendingTeamRef);
+    batch.delete(pendingMembersRef);
 
     batch.set(userRef, {
       'phone': normalizedPhone,

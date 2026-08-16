@@ -4,6 +4,7 @@ class Commandes extends Table {
   TextColumn get id => text()();
   TextColumn get establishmentId => text().withDefault(const Constant(''))();
   TextColumn get clientId => text().nullable()();
+  TextColumn get servedByMemberId => text().nullable()();
   TextColumn get reference => text()();
   TextColumn get statut => text().withDefault(const Constant('en_cours'))();
   TextColumn get contexte => text().nullable()();

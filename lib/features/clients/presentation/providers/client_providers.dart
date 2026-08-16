@@ -52,7 +52,7 @@ class ClientController extends AsyncNotifier<void> {
   @override
   Future<void> build() async {}
 
-  Future<void> createClient({
+  Future<ClientEntity> createClient({
     required String name,
     required String whatsappPhone,
     String? email,
@@ -66,8 +66,9 @@ class ClientController extends AsyncNotifier<void> {
     }
 
     state = const AsyncLoading();
+    ClientEntity? client;
     state = await AsyncValue.guard(() async {
-      await ref
+      client = await ref
           .read(clientRepositoryProvider)
           .createClient(
             establishmentId: establishment.id,
@@ -80,6 +81,8 @@ class ClientController extends AsyncNotifier<void> {
           );
       ref.read(autoSyncCoordinatorProvider).schedulePush();
     });
+    if (state.hasError) throw state.error!;
+    return client!;
   }
 
   Future<void> updateClient({

@@ -112,6 +112,23 @@ void main() {
     expect(commande.statusLabel, 'En cours');
   });
 
+  test('associe une commande a un membre de l equipe', () async {
+    final commande = await commandeRepository.createCommande(
+      establishmentId: 'est-1',
+    );
+
+    await commandeRepository.assignServedByMember(
+      establishmentId: 'est-1',
+      commandeId: commande.id,
+      memberId: 'member-1',
+    );
+
+    final updated = await commandeRepository
+        .watchCommande(establishmentId: 'est-1', id: commande.id)
+        .first;
+    expect(updated!.servedByMemberId, 'member-1');
+  });
+
   test(
     'imprimer la facture (markAwaitingPayment) fait passer en_cours -> a_payer',
     () async {

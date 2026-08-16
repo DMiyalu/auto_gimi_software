@@ -76,6 +76,7 @@ void main() {
       expect(docs.keys, ['cmd1']);
       expect(docs['cmd1'], {
         'clientId': null,
+        'servedByMemberId': null,
         'reference': 'CMD-1',
         'statut': 'a_payer',
         'context': 'Table 4',

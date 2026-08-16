@@ -173,59 +173,30 @@ class BusinessHeader extends ConsumerWidget {
         ? [?establishment]
         : establishments;
 
-    showDialog<void>(
+    showModalBottomSheet<void>(
       context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: const Text('Établissements'),
-          content: SizedBox(
-            width: 320,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                for (final item in items)
-                  ListTile(
-                    leading: CircleAvatar(child: Icon(item.category.icon)),
-                    title: Text(item.name),
-                    subtitle: Text(
-                      '${item.category.label(l10n)} • '
-                      '${_roleFor(item.id, memberships, profile).label}',
-                    ),
-                    trailing: item.id == activeId
-                        ? Icon(
-                            Icons.check_circle,
-                            color: Theme.of(dialogContext).colorScheme.primary,
-                          )
-                        : null,
-                    onTap: item.id == activeId || controllerState.isLoading
-                        ? null
-                        : () {
-                            Navigator.of(dialogContext).pop();
-                            ref
-                                .read(establishmentControllerProvider.notifier)
-                                .switchEstablishment(item.id);
-                          },
-                  ),
-                const Divider(),
-                ListTile(
-                  leading: const Icon(Icons.add_business_outlined),
-                  title: const Text('Ajouter un établissement'),
-                  onTap: () {
-                    Navigator.of(dialogContext).pop();
-                    context.push(Routes.establishmentNew);
-                  },
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
-              child: Text(l10n.cancel),
-            ),
-          ],
-        );
-      },
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: 0.22),
+      isScrollControlled: true,
+      builder: (sheetContext) => _EstablishmentsSheet(
+        items: items,
+        activeId: activeId,
+        memberships: memberships,
+        profile: profile,
+        isLoading: controllerState.isLoading,
+        roleFor: _roleFor,
+        onSelected: (item) {
+          Navigator.of(sheetContext).pop();
+          ref
+              .read(establishmentControllerProvider.notifier)
+              .switchEstablishment(item.id);
+        },
+        onCreate: () {
+          Navigator.of(sheetContext).pop();
+          context.push(Routes.establishmentNew);
+        },
+        l10n: l10n,
+      ),
     );
   }
 
@@ -240,6 +211,267 @@ class BusinessHeader extends ConsumerWidget {
       }
     }
     return EstablishmentRole.fromFirestore(profile?.roleFor(establishmentId));
+  }
+}
+
+class _EstablishmentsSheet extends StatelessWidget {
+  const _EstablishmentsSheet({
+    required this.items,
+    required this.activeId,
+    required this.memberships,
+    required this.profile,
+    required this.isLoading,
+    required this.roleFor,
+    required this.onSelected,
+    required this.onCreate,
+    required this.l10n,
+  });
+
+  final List<Establishment> items;
+  final String? activeId;
+  final List<EstablishmentMember> memberships;
+  final UserProfile? profile;
+  final bool isLoading;
+  final EstablishmentRole Function(
+    String establishmentId,
+    List<EstablishmentMember> memberships,
+    UserProfile? profile,
+  )
+  roleFor;
+  final ValueChanged<Establishment> onSelected;
+  final VoidCallback onCreate;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      top: false,
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0, end: 1),
+        duration: const Duration(milliseconds: 260),
+        curve: Curves.easeOutCubic,
+        builder: (context, value, child) {
+          return Opacity(
+            opacity: value,
+            child: Transform.translate(
+              offset: Offset(0, (1 - value) * 22),
+              child: child,
+            ),
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(28),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.16),
+                  blurRadius: 30,
+                  offset: const Offset(0, 18),
+                ),
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(18, 12, 18, 18),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 44,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE6E8EF),
+                      borderRadius: BorderRadius.circular(100),
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  Row(
+                    children: [
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: AppColors.violetPrincipal.withValues(
+                            alpha: 0.10,
+                          ),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.add_business_outlined,
+                          color: AppColors.violetPrincipal,
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      const Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Établissements',
+                              style: TextStyle(
+                                color: Color(0xFF101529),
+                                fontSize: 20,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              'Choisissez la session de travail.',
+                              style: TextStyle(
+                                color: Color(0xFF707792),
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 18),
+                  Container(
+                    constraints: const BoxConstraints(maxHeight: 320),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF8F9FC),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: const Color(0xFFE6E8EF)),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: ListView.separated(
+                        padding: const EdgeInsets.all(8),
+                        shrinkWrap: true,
+                        physics: const BouncingScrollPhysics(),
+                        itemCount: items.length,
+                        separatorBuilder: (_, _) => const SizedBox(height: 6),
+                        itemBuilder: (context, index) {
+                          final item = items[index];
+                          return _EstablishmentOptionTile(
+                            establishment: item,
+                            selected: item.id == activeId,
+                            subtitle:
+                                '${item.category.label(l10n)} • '
+                                '${roleFor(item.id, memberships, profile).label}',
+                            index: index,
+                            enabled: !isLoading,
+                            onTap: () => onSelected(item),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      onPressed: onCreate,
+                      icon: const Icon(Icons.add_rounded),
+                      label: const Text('Créer un établissement'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _EstablishmentOptionTile extends StatelessWidget {
+  const _EstablishmentOptionTile({
+    required this.establishment,
+    required this.selected,
+    required this.subtitle,
+    required this.index,
+    required this.enabled,
+    required this.onTap,
+  });
+
+  final Establishment establishment;
+  final bool selected;
+  final String subtitle;
+  final int index;
+  final bool enabled;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: Duration(milliseconds: 180 + (index.clamp(0, 5) * 34)),
+      curve: Curves.easeOutCubic,
+      builder: (context, value, child) {
+        return Opacity(
+          opacity: value,
+          child: Transform.translate(
+            offset: Offset(0, (1 - value) * 10),
+            child: child,
+          ),
+        );
+      },
+      child: Material(
+        color: selected ? AppColors.violetPrincipal : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: selected || !enabled ? null : onTap,
+          child: SizedBox(
+            height: 64,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              child: Row(
+                children: [
+                  Icon(
+                    establishment.category.icon,
+                    color: selected ? Colors.white : AppColors.violetPrincipal,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          establishment.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: selected
+                                ? Colors.white
+                                : const Color(0xFF101529),
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          selected ? '$subtitle • En cours' : subtitle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: selected
+                                ? Colors.white.withValues(alpha: 0.78)
+                                : const Color(0xFF707792),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (selected)
+                    const Icon(Icons.check_circle_rounded, color: Colors.white),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 

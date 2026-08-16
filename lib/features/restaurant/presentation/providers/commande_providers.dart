@@ -226,4 +226,24 @@ class CommandeController extends AsyncNotifier<void> {
       ref.read(autoSyncCoordinatorProvider).schedulePush();
     });
   }
+
+  Future<void> assignServedByMember({
+    required String commandeId,
+    String? memberId,
+  }) async {
+    final establishmentId = _requireEstablishmentId();
+
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      _ensureCanCreateActivities();
+      await ref
+          .read(commandeRepositoryProvider)
+          .assignServedByMember(
+            establishmentId: establishmentId,
+            commandeId: commandeId,
+            memberId: memberId,
+          );
+      ref.read(autoSyncCoordinatorProvider).schedulePush();
+    });
+  }
 }

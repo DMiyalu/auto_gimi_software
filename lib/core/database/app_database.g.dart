@@ -4018,6 +4018,17 @@ class $CommandesTable extends Commandes
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _servedByMemberIdMeta = const VerificationMeta(
+    'servedByMemberId',
+  );
+  @override
+  late final GeneratedColumn<String> servedByMemberId = GeneratedColumn<String>(
+    'served_by_member_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _referenceMeta = const VerificationMeta(
     'reference',
   );
@@ -4130,6 +4141,7 @@ class $CommandesTable extends Commandes
     id,
     establishmentId,
     clientId,
+    servedByMemberId,
     reference,
     statut,
     contexte,
@@ -4170,6 +4182,15 @@ class $CommandesTable extends Commandes
       context.handle(
         _clientIdMeta,
         clientId.isAcceptableOrUnknown(data['client_id']!, _clientIdMeta),
+      );
+    }
+    if (data.containsKey('served_by_member_id')) {
+      context.handle(
+        _servedByMemberIdMeta,
+        servedByMemberId.isAcceptableOrUnknown(
+          data['served_by_member_id']!,
+          _servedByMemberIdMeta,
+        ),
       );
     }
     if (data.containsKey('reference')) {
@@ -4259,6 +4280,10 @@ class $CommandesTable extends Commandes
         DriftSqlType.string,
         data['${effectivePrefix}client_id'],
       ),
+      servedByMemberId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}served_by_member_id'],
+      ),
       reference: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}reference'],
@@ -4308,6 +4333,7 @@ class Commande extends DataClass implements Insertable<Commande> {
   final String id;
   final String establishmentId;
   final String? clientId;
+  final String? servedByMemberId;
   final String reference;
   final String statut;
   final String? contexte;
@@ -4321,6 +4347,7 @@ class Commande extends DataClass implements Insertable<Commande> {
     required this.id,
     required this.establishmentId,
     this.clientId,
+    this.servedByMemberId,
     required this.reference,
     required this.statut,
     this.contexte,
@@ -4338,6 +4365,9 @@ class Commande extends DataClass implements Insertable<Commande> {
     map['establishment_id'] = Variable<String>(establishmentId);
     if (!nullToAbsent || clientId != null) {
       map['client_id'] = Variable<String>(clientId);
+    }
+    if (!nullToAbsent || servedByMemberId != null) {
+      map['served_by_member_id'] = Variable<String>(servedByMemberId);
     }
     map['reference'] = Variable<String>(reference);
     map['statut'] = Variable<String>(statut);
@@ -4362,6 +4392,9 @@ class Commande extends DataClass implements Insertable<Commande> {
       clientId: clientId == null && nullToAbsent
           ? const Value.absent()
           : Value(clientId),
+      servedByMemberId: servedByMemberId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(servedByMemberId),
       reference: Value(reference),
       statut: Value(statut),
       contexte: contexte == null && nullToAbsent
@@ -4387,6 +4420,7 @@ class Commande extends DataClass implements Insertable<Commande> {
       id: serializer.fromJson<String>(json['id']),
       establishmentId: serializer.fromJson<String>(json['establishmentId']),
       clientId: serializer.fromJson<String?>(json['clientId']),
+      servedByMemberId: serializer.fromJson<String?>(json['servedByMemberId']),
       reference: serializer.fromJson<String>(json['reference']),
       statut: serializer.fromJson<String>(json['statut']),
       contexte: serializer.fromJson<String?>(json['contexte']),
@@ -4405,6 +4439,7 @@ class Commande extends DataClass implements Insertable<Commande> {
       'id': serializer.toJson<String>(id),
       'establishmentId': serializer.toJson<String>(establishmentId),
       'clientId': serializer.toJson<String?>(clientId),
+      'servedByMemberId': serializer.toJson<String?>(servedByMemberId),
       'reference': serializer.toJson<String>(reference),
       'statut': serializer.toJson<String>(statut),
       'contexte': serializer.toJson<String?>(contexte),
@@ -4421,6 +4456,7 @@ class Commande extends DataClass implements Insertable<Commande> {
     String? id,
     String? establishmentId,
     Value<String?> clientId = const Value.absent(),
+    Value<String?> servedByMemberId = const Value.absent(),
     String? reference,
     String? statut,
     Value<String?> contexte = const Value.absent(),
@@ -4434,6 +4470,9 @@ class Commande extends DataClass implements Insertable<Commande> {
     id: id ?? this.id,
     establishmentId: establishmentId ?? this.establishmentId,
     clientId: clientId.present ? clientId.value : this.clientId,
+    servedByMemberId: servedByMemberId.present
+        ? servedByMemberId.value
+        : this.servedByMemberId,
     reference: reference ?? this.reference,
     statut: statut ?? this.statut,
     contexte: contexte.present ? contexte.value : this.contexte,
@@ -4453,6 +4492,9 @@ class Commande extends DataClass implements Insertable<Commande> {
           ? data.establishmentId.value
           : this.establishmentId,
       clientId: data.clientId.present ? data.clientId.value : this.clientId,
+      servedByMemberId: data.servedByMemberId.present
+          ? data.servedByMemberId.value
+          : this.servedByMemberId,
       reference: data.reference.present ? data.reference.value : this.reference,
       statut: data.statut.present ? data.statut.value : this.statut,
       contexte: data.contexte.present ? data.contexte.value : this.contexte,
@@ -4475,6 +4517,7 @@ class Commande extends DataClass implements Insertable<Commande> {
           ..write('id: $id, ')
           ..write('establishmentId: $establishmentId, ')
           ..write('clientId: $clientId, ')
+          ..write('servedByMemberId: $servedByMemberId, ')
           ..write('reference: $reference, ')
           ..write('statut: $statut, ')
           ..write('contexte: $contexte, ')
@@ -4493,6 +4536,7 @@ class Commande extends DataClass implements Insertable<Commande> {
     id,
     establishmentId,
     clientId,
+    servedByMemberId,
     reference,
     statut,
     contexte,
@@ -4510,6 +4554,7 @@ class Commande extends DataClass implements Insertable<Commande> {
           other.id == this.id &&
           other.establishmentId == this.establishmentId &&
           other.clientId == this.clientId &&
+          other.servedByMemberId == this.servedByMemberId &&
           other.reference == this.reference &&
           other.statut == this.statut &&
           other.contexte == this.contexte &&
@@ -4525,6 +4570,7 @@ class CommandesCompanion extends UpdateCompanion<Commande> {
   final Value<String> id;
   final Value<String> establishmentId;
   final Value<String?> clientId;
+  final Value<String?> servedByMemberId;
   final Value<String> reference;
   final Value<String> statut;
   final Value<String?> contexte;
@@ -4539,6 +4585,7 @@ class CommandesCompanion extends UpdateCompanion<Commande> {
     this.id = const Value.absent(),
     this.establishmentId = const Value.absent(),
     this.clientId = const Value.absent(),
+    this.servedByMemberId = const Value.absent(),
     this.reference = const Value.absent(),
     this.statut = const Value.absent(),
     this.contexte = const Value.absent(),
@@ -4554,6 +4601,7 @@ class CommandesCompanion extends UpdateCompanion<Commande> {
     required String id,
     this.establishmentId = const Value.absent(),
     this.clientId = const Value.absent(),
+    this.servedByMemberId = const Value.absent(),
     required String reference,
     this.statut = const Value.absent(),
     this.contexte = const Value.absent(),
@@ -4572,6 +4620,7 @@ class CommandesCompanion extends UpdateCompanion<Commande> {
     Expression<String>? id,
     Expression<String>? establishmentId,
     Expression<String>? clientId,
+    Expression<String>? servedByMemberId,
     Expression<String>? reference,
     Expression<String>? statut,
     Expression<String>? contexte,
@@ -4587,6 +4636,7 @@ class CommandesCompanion extends UpdateCompanion<Commande> {
       if (id != null) 'id': id,
       if (establishmentId != null) 'establishment_id': establishmentId,
       if (clientId != null) 'client_id': clientId,
+      if (servedByMemberId != null) 'served_by_member_id': servedByMemberId,
       if (reference != null) 'reference': reference,
       if (statut != null) 'statut': statut,
       if (contexte != null) 'contexte': contexte,
@@ -4604,6 +4654,7 @@ class CommandesCompanion extends UpdateCompanion<Commande> {
     Value<String>? id,
     Value<String>? establishmentId,
     Value<String?>? clientId,
+    Value<String?>? servedByMemberId,
     Value<String>? reference,
     Value<String>? statut,
     Value<String?>? contexte,
@@ -4619,6 +4670,7 @@ class CommandesCompanion extends UpdateCompanion<Commande> {
       id: id ?? this.id,
       establishmentId: establishmentId ?? this.establishmentId,
       clientId: clientId ?? this.clientId,
+      servedByMemberId: servedByMemberId ?? this.servedByMemberId,
       reference: reference ?? this.reference,
       statut: statut ?? this.statut,
       contexte: contexte ?? this.contexte,
@@ -4643,6 +4695,9 @@ class CommandesCompanion extends UpdateCompanion<Commande> {
     }
     if (clientId.present) {
       map['client_id'] = Variable<String>(clientId.value);
+    }
+    if (servedByMemberId.present) {
+      map['served_by_member_id'] = Variable<String>(servedByMemberId.value);
     }
     if (reference.present) {
       map['reference'] = Variable<String>(reference.value);
@@ -4683,6 +4738,7 @@ class CommandesCompanion extends UpdateCompanion<Commande> {
           ..write('id: $id, ')
           ..write('establishmentId: $establishmentId, ')
           ..write('clientId: $clientId, ')
+          ..write('servedByMemberId: $servedByMemberId, ')
           ..write('reference: $reference, ')
           ..write('statut: $statut, ')
           ..write('contexte: $contexte, ')
@@ -15945,6 +16001,7 @@ typedef $$CommandesTableCreateCompanionBuilder =
       required String id,
       Value<String> establishmentId,
       Value<String?> clientId,
+      Value<String?> servedByMemberId,
       required String reference,
       Value<String> statut,
       Value<String?> contexte,
@@ -15961,6 +16018,7 @@ typedef $$CommandesTableUpdateCompanionBuilder =
       Value<String> id,
       Value<String> establishmentId,
       Value<String?> clientId,
+      Value<String?> servedByMemberId,
       Value<String> reference,
       Value<String> statut,
       Value<String?> contexte,
@@ -16020,6 +16078,11 @@ class $$CommandesTableFilterComposer
 
   ColumnFilters<String> get clientId => $composableBuilder(
     column: $table.clientId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get servedByMemberId => $composableBuilder(
+    column: $table.servedByMemberId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -16118,6 +16181,11 @@ class $$CommandesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get servedByMemberId => $composableBuilder(
+    column: $table.servedByMemberId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get reference => $composableBuilder(
     column: $table.reference,
     builder: (column) => ColumnOrderings(column),
@@ -16183,6 +16251,11 @@ class $$CommandesTableAnnotationComposer
 
   GeneratedColumn<String> get clientId =>
       $composableBuilder(column: $table.clientId, builder: (column) => column);
+
+  GeneratedColumn<String> get servedByMemberId => $composableBuilder(
+    column: $table.servedByMemberId,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get reference =>
       $composableBuilder(column: $table.reference, builder: (column) => column);
@@ -16272,6 +16345,7 @@ class $$CommandesTableTableManager
                 Value<String> id = const Value.absent(),
                 Value<String> establishmentId = const Value.absent(),
                 Value<String?> clientId = const Value.absent(),
+                Value<String?> servedByMemberId = const Value.absent(),
                 Value<String> reference = const Value.absent(),
                 Value<String> statut = const Value.absent(),
                 Value<String?> contexte = const Value.absent(),
@@ -16286,6 +16360,7 @@ class $$CommandesTableTableManager
                 id: id,
                 establishmentId: establishmentId,
                 clientId: clientId,
+                servedByMemberId: servedByMemberId,
                 reference: reference,
                 statut: statut,
                 contexte: contexte,
@@ -16302,6 +16377,7 @@ class $$CommandesTableTableManager
                 required String id,
                 Value<String> establishmentId = const Value.absent(),
                 Value<String?> clientId = const Value.absent(),
+                Value<String?> servedByMemberId = const Value.absent(),
                 required String reference,
                 Value<String> statut = const Value.absent(),
                 Value<String?> contexte = const Value.absent(),
@@ -16316,6 +16392,7 @@ class $$CommandesTableTableManager
                 id: id,
                 establishmentId: establishmentId,
                 clientId: clientId,
+                servedByMemberId: servedByMemberId,
                 reference: reference,
                 statut: statut,
                 contexte: contexte,

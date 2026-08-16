@@ -20,6 +20,7 @@ import '../../../billing/presentation/providers/billing_providers.dart';
 import '../../../clients/domain/entities/client_entity.dart';
 import '../../../clients/presentation/providers/client_providers.dart';
 import '../../../clients/presentation/widgets/client_avatar.dart';
+import '../../../establishment/domain/models/establishment_member.dart';
 import '../../../establishment/presentation/providers/establishment_providers.dart';
 import '../../../billing/domain/entities/facture_entity.dart';
 import '../../../printing/domain/entities/invoice_ticket_data.dart';
@@ -1340,10 +1341,13 @@ class _DetailsTabState extends ConsumerState<_DetailsTab> {
 
   late CountryDialCode _country = _defaultCountry;
   final _localController = TextEditingController();
+  final _clientNameController = TextEditingController();
+  bool _showNewClientForm = false;
 
   @override
   void dispose() {
     _localController.dispose();
+    _clientNameController.dispose();
     super.dispose();
   }
 
@@ -1357,6 +1361,54 @@ class _DetailsTabState extends ConsumerState<_DetailsTab> {
     }
   }
 
+  Future<void> _createAndSelectClient() async {
+    final phone = _fullPhone;
+    final name = _clientNameController.text.trim();
+    if (!PhoneAuthMapper.isValidFullNumber(phone) || name.isEmpty) return;
+
+    final client = await ref
+        .read(clientControllerProvider.notifier)
+        .createClient(name: name, whatsappPhone: phone);
+    if (!mounted) return;
+    if (ref.read(clientControllerProvider).hasError) return;
+
+    await _selectClient(client);
+    if (!mounted) return;
+    setState(() {
+      _showNewClientForm = false;
+      _clientNameController.clear();
+    });
+  }
+
+  String get _fullPhone => PhoneAuthMapper.combine(
+    dialCode: _country.dialCode,
+    localNumber: _localController.text,
+  );
+
+  void _showServedByPicker(List<EstablishmentMember> members) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: 0.22),
+      isScrollControlled: true,
+      builder: (sheetContext) {
+        return _TeamMemberPickerSheet(
+          selectedMemberId: widget.commande.servedByMemberId,
+          members: members,
+          onSelected: (memberId) {
+            Navigator.of(sheetContext).pop();
+            ref
+                .read(commandeControllerProvider.notifier)
+                .assignServedByMember(
+                  commandeId: widget.commande.id,
+                  memberId: memberId,
+                );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final clientId = widget.commande.clientId;
@@ -1364,12 +1416,20 @@ class _DetailsTabState extends ConsumerState<_DetailsTab> {
         ? null
         : ref.watch(clientByIdProvider(clientId));
     final enabled = !widget.isCanceled;
-    final digits = PhoneAuthMapper.normalize(_localController.text);
-    final suggestions = digits.isEmpty
+    final fullPhone = _fullPhone;
+    final hasPhoneInput = PhoneAuthMapper.normalize(
+      _localController.text,
+    ).isNotEmpty;
+    final suggestions = !hasPhoneInput
         ? const <ClientEntity>[]
         : (ref.watch(clientsProvider).valueOrNull ?? const <ClientEntity>[])
-              .where((client) => client.whatsappPhone.contains(digits))
+              .where((client) => client.whatsappPhone.contains(fullPhone))
               .toList();
+    final members = ref.watch(establishmentMembersProvider).valueOrNull ?? [];
+    final selectedMember = _findMember(
+      members,
+      widget.commande.servedByMemberId,
+    );
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(18, 30, 18, 230),
@@ -1388,13 +1448,21 @@ class _DetailsTabState extends ConsumerState<_DetailsTab> {
           controller: _localController,
           enabled: enabled,
           onCountryChanged: (country) => setState(() => _country = country),
-          onChanged: (_) => setState(() {}),
+          onChanged: (_) => setState(() => _showNewClientForm = false),
         ),
-        if (enabled && digits.isNotEmpty) ...[
+        if (enabled && hasPhoneInput) ...[
           const SizedBox(height: 10),
           _ClientSuggestionsPanel(
             clients: suggestions,
             onSelect: _selectClient,
+            showNewClientForm: _showNewClientForm,
+            nameController: _clientNameController,
+            canCreate: PhoneAuthMapper.isValidFullNumber(fullPhone),
+            isLoading: ref.watch(clientControllerProvider).isLoading,
+            onShowNewClientForm: () =>
+                setState(() => _showNewClientForm = true),
+            onNameChanged: (_) => setState(() {}),
+            onCreateClient: _createAndSelectClient,
           ),
         ],
         if (clientAsync != null) ...[
@@ -1414,6 +1482,21 @@ class _DetailsTabState extends ConsumerState<_DetailsTab> {
             error: (_, _) => const SizedBox.shrink(),
           ),
         ],
+        const SizedBox(height: 24),
+        Text(
+          'Servi par (membre de l’équipe)',
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            color: AppColors.zuriNavy,
+            fontSize: 20,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+        const SizedBox(height: 14),
+        _TeamMemberSelectorField(
+          member: selectedMember,
+          enabled: enabled && members.isNotEmpty,
+          onTap: () => _showServedByPicker(members),
+        ),
         const SizedBox(height: 32),
         Row(
           children: [
@@ -1474,6 +1557,17 @@ class _DetailsTabState extends ConsumerState<_DetailsTab> {
         ],
       ],
     );
+  }
+
+  EstablishmentMember? _findMember(
+    List<EstablishmentMember> members,
+    String? memberId,
+  ) {
+    if (memberId == null || memberId.isEmpty) return null;
+    for (final member in members) {
+      if (member.uid == memberId) return member;
+    }
+    return null;
   }
 }
 
@@ -1591,10 +1685,24 @@ class _ClientSuggestionsPanel extends StatelessWidget {
   const _ClientSuggestionsPanel({
     required this.clients,
     required this.onSelect,
+    required this.showNewClientForm,
+    required this.nameController,
+    required this.canCreate,
+    required this.isLoading,
+    required this.onShowNewClientForm,
+    required this.onNameChanged,
+    required this.onCreateClient,
   });
 
   final List<ClientEntity> clients;
   final ValueChanged<ClientEntity> onSelect;
+  final bool showNewClientForm;
+  final TextEditingController nameController;
+  final bool canCreate;
+  final bool isLoading;
+  final VoidCallback onShowNewClientForm;
+  final ValueChanged<String> onNameChanged;
+  final VoidCallback onCreateClient;
 
   @override
   Widget build(BuildContext context) {
@@ -1606,17 +1714,14 @@ class _ClientSuggestionsPanel extends StatelessWidget {
         border: Border.all(color: AppColors.borderSubtle),
       ),
       child: clients.isEmpty
-          ? const Padding(
-              padding: EdgeInsets.symmetric(vertical: 22, horizontal: 16),
-              child: Text(
-                'Aucun client trouvé avec ce numéro.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Color(0xFF8A90A5),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+          ? _NewClientPrompt(
+              showForm: showNewClientForm,
+              nameController: nameController,
+              canCreate: canCreate,
+              isLoading: isLoading,
+              onShowForm: onShowNewClientForm,
+              onNameChanged: onNameChanged,
+              onCreate: onCreateClient,
             )
           : ClipRRect(
               borderRadius: BorderRadius.circular(20),
@@ -1636,6 +1741,103 @@ class _ClientSuggestionsPanel extends StatelessWidget {
                 },
               ),
             ),
+    );
+  }
+}
+
+class _NewClientPrompt extends StatelessWidget {
+  const _NewClientPrompt({
+    required this.showForm,
+    required this.nameController,
+    required this.canCreate,
+    required this.isLoading,
+    required this.onShowForm,
+    required this.onNameChanged,
+    required this.onCreate,
+  });
+
+  final bool showForm;
+  final TextEditingController nameController;
+  final bool canCreate;
+  final bool isLoading;
+  final VoidCallback onShowForm;
+  final ValueChanged<String> onNameChanged;
+  final VoidCallback onCreate;
+
+  @override
+  Widget build(BuildContext context) {
+    final canSubmit =
+        canCreate && nameController.text.trim().isNotEmpty && !isLoading;
+
+    return Padding(
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+            child: Text(
+              'Aucun client trouvé avec ce numéro.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Color(0xFF8A90A5),
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          TextButton.icon(
+            onPressed: showForm ? null : onShowForm,
+            icon: const Icon(Icons.person_add_alt_1_outlined),
+            label: const Text('Enregistrer comme nouveau client'),
+          ),
+          if (showForm) ...[
+            const SizedBox(height: 8),
+            TextField(
+              controller: nameController,
+              enabled: !isLoading,
+              textInputAction: TextInputAction.done,
+              onChanged: onNameChanged,
+              onSubmitted: (_) {
+                if (canSubmit) onCreate();
+              },
+              decoration: InputDecoration(
+                labelText: 'Nom complet',
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: const BorderSide(color: AppColors.borderSubtle),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: const BorderSide(color: AppColors.borderSubtle),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: const BorderSide(
+                    color: AppColors.zuriRed,
+                    width: 1.3,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            FilledButton.icon(
+              onPressed: canSubmit ? onCreate : null,
+              icon: isLoading
+                  ? const SizedBox(
+                      height: 18,
+                      width: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.check_rounded),
+              label: const Text('Créer le client'),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }
@@ -1796,6 +1998,347 @@ class _SelectedClientCard extends StatelessWidget {
       ),
     );
   }
+}
+
+class _TeamMemberSelectorField extends StatelessWidget {
+  const _TeamMemberSelectorField({
+    required this.member,
+    required this.enabled,
+    required this.onTap,
+  });
+
+  final EstablishmentMember? member;
+  final bool enabled;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = member == null
+        ? 'Aucun membre sélectionné'
+        : _memberName(member!);
+    final subtitle = member == null
+        ? 'Sélectionner la personne qui a reçu la commande'
+        : '${member!.role.label}${member!.phoneVerified ? '' : ' • Invitation en attente'}';
+
+    return AnimatedOpacity(
+      duration: const Duration(milliseconds: 180),
+      opacity: enabled ? 1 : 0.55,
+      child: Material(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: enabled ? onTap : null,
+          child: Container(
+            constraints: const BoxConstraints(minHeight: 64),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: AppColors.borderSubtle),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: AppColors.zuriRed.withValues(alpha: 0.10),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.badge_outlined,
+                    color: AppColors.zuriRed,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: AppColors.zuriNavy,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        subtitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Color(0xFF8A90A5),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 10),
+                const Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  color: AppColors.zuriNavy,
+                  size: 28,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TeamMemberPickerSheet extends StatelessWidget {
+  const _TeamMemberPickerSheet({
+    required this.selectedMemberId,
+    required this.members,
+    required this.onSelected,
+  });
+
+  final String? selectedMemberId;
+  final List<EstablishmentMember> members;
+  final ValueChanged<String?> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final options = <EstablishmentMember?>[null, ...members];
+
+    return SafeArea(
+      top: false,
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0, end: 1),
+        duration: const Duration(milliseconds: 260),
+        curve: Curves.easeOutCubic,
+        builder: (context, value, child) {
+          return Opacity(
+            opacity: value,
+            child: Transform.translate(
+              offset: Offset(0, (1 - value) * 22),
+              child: child,
+            ),
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(28),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.16),
+                  blurRadius: 30,
+                  offset: const Offset(0, 18),
+                ),
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(18, 12, 18, 18),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 44,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE6E8EF),
+                      borderRadius: BorderRadius.circular(100),
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  Row(
+                    children: [
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: AppColors.violetPrincipal.withValues(
+                            alpha: 0.10,
+                          ),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.badge_outlined,
+                          color: AppColors.violetPrincipal,
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      const Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Servi par',
+                              style: TextStyle(
+                                color: Color(0xFF101529),
+                                fontSize: 20,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              'Associez cette commande à un membre.',
+                              style: TextStyle(
+                                color: Color(0xFF707792),
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 18),
+                  Container(
+                    constraints: const BoxConstraints(maxHeight: 320),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF8F9FC),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: AppColors.borderSubtle),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: ListView.separated(
+                        padding: const EdgeInsets.all(8),
+                        shrinkWrap: true,
+                        physics: const BouncingScrollPhysics(),
+                        itemCount: options.length,
+                        separatorBuilder: (_, _) => const SizedBox(height: 6),
+                        itemBuilder: (context, index) {
+                          final member = options[index];
+                          final selected = member == null
+                              ? selectedMemberId == null
+                              : member.uid == selectedMemberId;
+                          return _TeamMemberOptionTile(
+                            member: member,
+                            selected: selected,
+                            index: index,
+                            onTap: () => onSelected(member?.uid),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TeamMemberOptionTile extends StatelessWidget {
+  const _TeamMemberOptionTile({
+    required this.member,
+    required this.selected,
+    required this.index,
+    required this.onTap,
+  });
+
+  final EstablishmentMember? member;
+  final bool selected;
+  final int index;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = member == null ? 'Aucun membre' : _memberName(member!);
+    final subtitle = member == null
+        ? 'Ne pas associer cette commande'
+        : '${member!.role.label}${member!.phoneVerified ? '' : ' • Invitation en attente'}';
+
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: Duration(milliseconds: 180 + (index.clamp(0, 5) * 34)),
+      curve: Curves.easeOutCubic,
+      builder: (context, value, child) {
+        return Opacity(
+          opacity: value,
+          child: Transform.translate(
+            offset: Offset(0, (1 - value) * 10),
+            child: child,
+          ),
+        );
+      },
+      child: Material(
+        color: selected ? AppColors.violetPrincipal : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: onTap,
+          child: SizedBox(
+            height: 58,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              child: Row(
+                children: [
+                  Icon(
+                    member == null
+                        ? Icons.person_off_outlined
+                        : Icons.badge_outlined,
+                    color: selected ? Colors.white : AppColors.violetPrincipal,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: selected
+                                ? Colors.white
+                                : const Color(0xFF101529),
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          subtitle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: selected
+                                ? Colors.white.withValues(alpha: 0.78)
+                                : const Color(0xFF707792),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (selected)
+                    const Icon(Icons.check_circle_rounded, color: Colors.white),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+String _memberName(EstablishmentMember member) {
+  final name = member.fullName.trim();
+  if (name.isNotEmpty) return name;
+  return member.phone.trim().isEmpty ? 'Membre' : member.phone;
 }
 
 class _ArticlesSummaryCard extends StatelessWidget {

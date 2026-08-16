@@ -848,6 +848,7 @@ class CommandeSyncAdapter implements SyncAdapter {
       for (final row in rows)
         row.id: {
           'clientId': row.clientId,
+          'servedByMemberId': row.servedByMemberId,
           'reference': row.reference,
           'statut': row.statut,
           'context': row.contexte,
@@ -902,6 +903,7 @@ class CommandeSyncAdapter implements SyncAdapter {
                 id: Value(doc.id),
                 establishmentId: Value(establishmentId),
                 clientId: Value(data['clientId'] as String?),
+                servedByMemberId: Value(data['servedByMemberId'] as String?),
                 reference: Value(data['reference'] as String? ?? ''),
                 statut: Value(data['statut'] as String? ?? 'en_cours'),
                 contexte: Value(data['context'] as String?),

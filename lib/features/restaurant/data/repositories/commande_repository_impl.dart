@@ -92,6 +92,7 @@ class CommandeRepositoryImpl implements CommandeRepository {
     return CommandeEntity(
       id: id,
       clientId: clientId,
+      servedByMemberId: null,
       reference: reference,
       statusKey: CommandeStatus.enCours,
       statusLabel: commandeStatusLabel(CommandeStatus.enCours),
@@ -497,6 +498,28 @@ class CommandeRepositoryImpl implements CommandeRepository {
         );
   }
 
+  @override
+  Future<void> assignServedByMember({
+    required String establishmentId,
+    required String commandeId,
+    String? memberId,
+  }) async {
+    await _requireEditableCommande(establishmentId, commandeId);
+    final now = DateTime.now();
+    await (_database.update(_database.commandes)..where(
+          (c) =>
+              c.establishmentId.equals(establishmentId) &
+              c.id.equals(commandeId),
+        ))
+        .write(
+          CommandesCompanion(
+            servedByMemberId: Value(_blankToNull(memberId)),
+            updatedAt: Value(now),
+            isDirty: const Value(true),
+          ),
+        );
+  }
+
   Future<Commande> _requireExistingCommande(
     String establishmentId,
     String commandeId,
@@ -595,6 +618,7 @@ class CommandeRepositoryImpl implements CommandeRepository {
     return CommandeEntity(
       id: row.id,
       clientId: row.clientId,
+      servedByMemberId: row.servedByMemberId,
       reference: row.reference,
       statusKey: row.statut,
       statusLabel: commandeStatusLabel(row.statut),
